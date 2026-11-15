@@ -316,18 +316,19 @@
     a.style.boxSizing = 'border-box';
     a.style.textDecoration = 'none';
     var box = document.createElement('div');
-    box.style.cssText = 'position:relative;width:100%;height:100%;text-align:center;font-family:inherit';
+    // 15 nov 2026: sotto c'e' la fascia «Spazio da acquistare» (32 px)
+    box.style.cssText = 'position:relative;width:100%;height:calc(100% - 32px);text-align:center;font-family:inherit';
     var top = document.createElement('div');
     top.textContent = 'Imprese di ' + CITTA;
     top.style.cssText = 'position:absolute;top:8px;left:10px;font-size:' + ft + ';font-weight:700;color:#ff8800';
     var lg = document.createElement('div');
-    lg.style.cssText = 'position:absolute;left:0;right:0;top:14%;height:50%;display:flex;align-items:center;justify-content:center';
+    lg.style.cssText = 'position:absolute;left:0;right:0;top:17%;height:45%;display:flex;align-items:center;justify-content:center';
     var im = document.createElement('img');
     im.loading = 'lazy'; im.alt = o.nome || 'Impresa'; im.src = o.logo_url;
     im.style.cssText = 'height:100%;max-width:80%;object-fit:contain';
     lg.appendChild(im);
     var tx = document.createElement('div');
-    tx.style.cssText = 'position:absolute;left:8px;right:8px;top:69%';
+    tx.style.cssText = 'position:absolute;left:8px;right:8px;top:66%';
     var nm = document.createElement('div');
     nm.textContent = o.nome || 'Impresa';
     nm.style.cssText = 'font-weight:800;color:#0a2a4d;font-size:' + fn + ';line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
@@ -575,6 +576,7 @@
       // 4 nov 2026: posto libero + prova dei loghi -> il logo di un'impresa
       if (!ann && OSPITI.length) {
         vestiOspite(a, OSPITI.shift());
+        bandaVendita(a, v.spazio);   // 15 nov (Alex): anche i loghi in prova dicono che lo spazio si compra
         frecciaSu(a);
         document.body.appendChild(a);
         return;

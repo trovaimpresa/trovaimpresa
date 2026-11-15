@@ -26,13 +26,16 @@
 
   var MARCHI = [
     { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023', lato: 'sx', dopo: 0 },
-    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 0 },
-    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 1 },
-    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 1 },
+    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 1 },
+    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 3 },
+    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 3 },
     { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 },
-    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 2 },
-    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 3 }
+    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 6 },
+    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 6 }
   ];
+  // 15 nov 2026 (Alex: «qui e' tutto vuoto e sopra e' tutto pieno, distribuire
+  // meglio»): i marchi si alternano destra/sinistra e scendono fino in fondo,
+  // non piu' tutti nei primi tre buchi.
   // «dopo»: sotto quale cartello del suo lato va (0 = il primo dall'alto).
   // 12 nov 2026 (Alex): «metterli in basso e' brutto» e poi «non c'e' bisogno
   // di metterli ammucchiati in cima»: vanno IN MEZZO agli spazi delle imprese.
@@ -41,7 +44,7 @@
   // si alternano cartello, marchio, cartello, marchio. Vevor per primo.
   var AWIN_ME = '3137864';
   var TELEFONO = '(max-width:1100px)';
-  var STACCO = 65;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato; 15 nov Alex: ancora troppo vicino: 65, e carte un po' piu' basse per restare in mezzo agli spazi)
+  var STACCO = 90;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato; 15 nov Alex: piu' distanza ancora: 90, e carte un po' piu' basse per restare in mezzo agli spazi)
   var BORDO = 20;       // distanza dal bordo dello schermo, se il lato e' vuoto
   var MAX_L = 380;      // larghezza massima della carta
   var MIN_L = 220;      // sotto questa non si mostra
@@ -65,14 +68,14 @@
     '.tml-card:hover{transform:scale(1.03);box-shadow:0 18px 40px rgba(255,136,0,.35)}' +
     '.tml-sopra{display:block;width:100%;background:#ff8800;color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;' +
       'text-transform:uppercase;padding:6px 8px}' +
-    '.tml-top{display:flex;align-items:center;justify-content:center;width:100%;padding:16px 20px;' +
+    '.tml-top{display:flex;align-items:center;justify-content:center;width:100%;padding:10px 20px;' +
       'background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);' +
       'background-size:28px 28px;border-bottom:6px solid var(--c,#ff8800)}' +
-    '.tml-logo{display:flex;align-items:center;justify-content:center;width:100%;height:90px;background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.3)}' +
-    '.tml-logo img{width:78%;max-height:90px;height:auto;object-fit:contain;margin:0;border:0}' +
-    '.tml-nome{display:block;font-weight:900;font-size:24px;margin:12px 12px 4px;line-height:1.15;color:#0a2a4d}' +
-    '.tml-cosa{display:block;font-size:17px;color:#3d4b5f;margin:0 12px 10px;line-height:1.3}' +
-    '.tml-btn{display:block;margin:0 16px 14px;align-self:stretch;background:#ff8800;color:#fff;font-weight:900;font-size:18px;padding:13px 8px;border-radius:12px}' +
+    '.tml-logo{display:flex;align-items:center;justify-content:center;width:100%;height:72px;background:#fff;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.3)}' +
+    '.tml-logo img{width:78%;max-height:62px;height:auto;object-fit:contain;margin:0;border:0}' +
+    '.tml-nome{display:block;font-weight:900;font-size:21px;margin:9px 12px 2px;line-height:1.15;color:#0a2a4d}' +
+    '.tml-cosa{display:block;font-size:15px;color:#3d4b5f;margin:0 12px 8px;line-height:1.3}' +
+    '.tml-btn{display:block;margin:0 16px 14px;align-self:stretch;background:#ff8800;color:#fff;font-weight:900;font-size:17px;padding:10px 8px;border-radius:12px}' +
     '.tml-card:hover .tml-btn{background:#e06a00}';
 
   var stile = document.createElement('style');
