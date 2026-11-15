@@ -2851,6 +2851,28 @@ riga (a 1440 e a 1920). C'era già prima di oggi.
 **Pulizia.** Persona eliminata per sempre. Contato dal database: persone, clienti, lavori, preventivi
 «PROVA CONTROLLORE» = →0←. Email mandate: →0←.
 
+## 15 nov 2026 (11) — le due cose «trovate e non toccate»: Squadra dopo le ore, e chi ha scritto il rapportino
+Chieste da Alex alle 18:47 («chiudi quello che pensi sia necessario e poi credo che il gestionale è pronto»).
+Niente che cambia l'aspetto: nessuna foto.
+- [x] **Dopo aver aggiunto (o tolto) ore in un lavoro, la Squadra e l'Assistente si rileggono.** `_oreSalvaTotale`
+  (`js/gest-ore-spese.js`) chiama `rinfresca("squadra","riepilogo")`: di lì passano aggiungi, togli e rapportino nel cestino.
+- [x] **Rapportini, «Scritto da …».** La voce del diario diceva che «chi non è più in squadra» usava la squadra in
+  memoria: letto il codice, per le ORE era già a posto dal 13 nov (i nomi che mancano si rileggono dal database).
+  Mancava solo chi ha SCRITTO il rapportino quando su quel rapportino non ha ore: adesso si rilegge anche lui.
+Banco `tools/banco-quinto-giro.js`: 2 prove nuove «S6 fine». Sulla versione di prima →4← rossi, adesso →232← verdi.
+Banco del gestionale (App): zero difetti. Soldi 36, preventivo 38, gruppo4 59, gruppo5 34, email-pdf 62: verdi.
+`controllo-push`: «tutto a posto».
+
+### 15 nov 2026 (19:45) — provate sul sito vero (commit →b3a4f21←)
+Netlify: pubblicato (`gest-ore-spese.js?v=15nov10` caricato dalla pagina). Account info@, reparto «ferramenta»,
+nome «PROVA CONTROLLORE».
+- [x] Persona scritta nel database senza passare dalla squadra in memoria, e un rapportino suo senza ore: aperto il
+  lavoro, il rapportino dice «Scritto da PROVA CONTROLLORE Altro Telefono».
+- [x] Nello stesso lavoro, 2 ore a «PROVA CONTROLLORE Uno»; chiuso il lavoro e aperta la Squadra senza ricaricare:
+  «PROVA CONTROLLORE Uno · 1 giorno a novembre · 1 cantiere».
+**Pulizia.** Ore, rapportino, lavoro, 2 persone eliminati per sempre. Contato dal database: persone, lavori, rapportini,
+clienti «PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
+
 ## DOVE SIAMO ALLA FINE DEL 15 NOV 2026 (per la sessione dopo)
 Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e online.
 **Restano da decidere con Alex, una per volta:**
@@ -2858,8 +2880,9 @@ Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e o
 - MANCA 4: FATTA (capitolo 9). Resta solo il file per lo SdI di un cliente estero: serve la conferma del commercialista.
 **Trovato oggi e NON toccato (da proporre):**
 - Noleggio sul computer: «Altre N voci» col numerino rosso va su una seconda riga;
-- nei rapportini «chi non è più in squadra» usa ancora la squadra in memoria (stessa cura della DIFFICILE 6);
-- dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola;
+- (chiuse col capitolo 11: i rapportini e la Squadra che non si aggiornava.)
 - (chiusa col capitolo 9: adesso il CAP è al massimo 5 caratteri per l'Italia e 12 per l'estero, in tutti e due.)
-Numeri: `tools/banco-quinto-giro.js` →228← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
+**Deciso con Alex il 15 nov (18:47): il gestionale è pronto. Basta giri di controllo: si tocca quando un'impresa vera
+si blocca su qualcosa.**
+Numeri: `tools/banco-quinto-giro.js` →232← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
 `node tools/banco-gestionale.js app` e poi `node tools/banco-gestionale.js noleggio` (tutto insieme supera i 10 minuti).
