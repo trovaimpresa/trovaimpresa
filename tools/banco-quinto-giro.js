@@ -204,6 +204,14 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     /* (S6 d) il costo orario NEGATIVO: si ferma come «abc», e lo dice sulla casella */
     const neg = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)); const c = q("#or-chi-costo"); if (!c) return { manca: true }; q("#or-chi-nuovo").value = "Marta Nuova"; q("#or-ore").value = "2"; c.value = "-5"; await oreAdd(); await W(700); return { dice: (q("#or-chi-costo-box") || {}).innerText.replace(/\s+/g, " ") }; });
     prova(!neg.manca && stato.persone.length === 0 && stato.aggiunte.length === 1 && /non può essere negativo/.test(neg.dice || ""), "(S6 d) un costo orario negativo («-5») ferma tutto: niente persona, niente ore, e lo dice sulla casella", { persone: stato.persone.length, ore: stato.aggiunte.length, dice: neg.dice });
+    /* S6 D7 (15 nov 2026) — costo orario troppo alto nelle ore: «1.000» prima CHIEDE; detto No non nasce nessuno */
+    const nPd7 = stato.persone.length, nOd7 = stato.aggiunte.length;
+    await page.evaluate(() => { const q = s => document.querySelector(s); q("#or-chi-nuovo").value = "Marta Nuova"; q("#or-ore").value = "2"; q("#or-chi-costo").value = "1.000"; window.__d7o = oreAdd(); }); await B.aspetta(page, 900);
+    const d7o = await domanda(page);
+    await foto(page, "D7-domanda-ore");
+    await rispondi(page, false); await B.aspetta(page, 800);
+    prova(/1\.000,00/.test(d7o) && /l'ora/.test(d7o) && /È giusto\?/.test(d7o), "(S6 D7) ore: un costo orario di «1.000» prima chiede («Hai scritto 1.000,00 € l'ora… È giusto?»)", d7o);
+    prova(stato.persone.length === nPd7 && stato.aggiunte.length === nOd7, "(S6 D7) …detto No: niente persona e niente ore", { persone: stato.persone.length - nPd7, ore: stato.aggiunte.length - nOd7 });
     const co2 = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)); const c = q("#or-chi-costo"); if (!c) return {}; c.value = "18,50"; c.dispatchEvent(new Event("input", { bubbles: true })); q("#or-ore").value = "2"; await oreAdd(); await W(1800); return { m: q("#margine-box").innerText.replace(/\s+/g, " "), vuota: q("#or-chi-costo") ? q("#or-chi-costo").value : null }; });
     const marta = stato.persone[0] || {};
     prova(stato.persone.length === 1 && marta.nome === "Marta Nuova" && marta.costo_orario === 18.5, "(MANCA 3) la persona nasce col suo costo orario (18,50)", marta);
@@ -273,6 +281,26 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     await clic(page, "sq-edit", { id: id(202) }); await B.aspetta(page, 1500);
     dq = await domanda(page); qui = await dove();
     prova(!dq && /Luca Senzacosto/.test(qui.persona), "(S6 1) fuori dal lavoro la scheda si apre subito, senza domanda", { dq, qui });
+    /* S6 D7 — nella scheda della persona: «1.000» chiede; No = niente salvato; «18,555» si salva 18,56 senza domande */
+    const nScrD7 = stato.scritte.length, opD7 = () => stato.scritte.slice(nScrD7).filter(x => x.tab === "gest_operatori");
+    await page.evaluate((i) => { document.querySelector("#d-costo").value = "1.000"; window.__d7 = squadraSave(i); }, id(202)); await B.aspetta(page, 900);
+    const d7q = await domanda(page);
+    await foto(page, "D7-domanda-scheda");
+    prova(/1\.000,00/.test(d7q) && /È giusto\?/.test(d7q), "(S6 D7) scheda: un costo orario di «1.000» prima chiede", d7q);
+    await rispondi(page, false); await B.aspetta(page, 800);
+    const d7no = await page.evaluate(() => ({ aperta: !!document.querySelector("#sheet #d-costo"), v: (document.querySelector("#d-costo") || {}).value }));
+    prova(d7no.aperta && opD7().length === 0, "(S6 D7) …detto No: la scheda resta aperta e non si salva niente", { d7no, scritte: opD7().length });
+    await page.evaluate((i) => { document.querySelector("#d-costo").value = "200"; window.__d7 = squadraSave(i); }, id(202)); await B.aspetta(page, 1500);
+    const d7q200 = await domanda(page);
+    prova(!d7q200 && opD7().length === 1 && opD7()[0].corpo.costo_orario === 200, "(S6 D7) 200 € l'ora giusti non fanno domande e si salvano", { d7q200, corpo: opD7()[0] && opD7()[0].corpo.costo_orario });
+    await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);
+    await clic(page, "sq-edit", { id: id(202) }); await B.aspetta(page, 1500);
+    await page.evaluate(async (i) => { document.querySelector("#d-costo").value = "18,555"; await squadraSave(i); }, id(202)); await B.aspetta(page, 1500);
+    const d7t = opD7().pop() || {};
+    prova(!(await domanda(page)) && d7t.corpo && d7t.corpo.costo_orario === 18.56, "(S6 D7) «18,555» si salva 18,56 (due decimali), senza domande", d7t.corpo && d7t.corpo.costo_orario);
+    /* Luca torna senza costo: le prove dopo contano su questo */
+    await page.evaluate(async (i) => { try { closeSheet(); } catch (e) {} await sb.from("gest_operatori").update({ costo_orario: null }).eq("id", i); try { await renderDip(); } catch (e) {} }, id(202)); await B.aspetta(page, 800);
+    await clic(page, "sq-edit", { id: id(202) }); await B.aspetta(page, 1500);
     await page.evaluate(() => { const b = document.querySelector('#sheet [data-action="close"]'); if (b) b.click(); }); await B.aspetta(page, 1500);
     qui = await dove();
     prova(!qui.aperta, "(S6 1) …e chiusa lì non riapre nessun lavoro", qui);

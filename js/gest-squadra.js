@@ -414,6 +414,21 @@
     if(n<0)return "Il costo orario non può essere negativo";
     return "";
   }
+  /* 15 nov 2026 (sesto giro, DIFFICILE 7) — il costo orario: due decimali e una
+     domanda quando e' troppo alto. «18,555» restava con tre decimali; «1.000»
+     (un «1,000» col punto, o un dito scivolato) diventava 1.000 EUR l'ora senza
+     dire niente e gonfiava la manodopera di ogni lavoro. La soglia e la domanda
+     stanno qui, una volta sola: le usano la scheda della persona e le ore. */
+  const COSTO_ORARIO_ALTO=200;
+  function costoOrarioTondo(n){
+    if(n==null||n==="")return null;
+    return (typeof _cent2==="function")?_cent2(n):Math.round((+n)*100)/100;
+  }
+  async function costoOrarioSicuro(n){
+    if(n==null||!(+n>COSTO_ORARIO_ALTO))return true;
+    const t=new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n);
+    return await tiChiedi("Hai scritto "+t+" l'ora di costo orario. È giusto?",{si:"Sì, è giusto",no:"No, lo correggo"});
+  }
   function dipCampiExtra(){
     const v=function(id){const e=$(id);return e?String(e.value||"").trim():"";};
     /* la vecchia n() e' stata tolta: era una terza copia della regola dei
@@ -430,7 +445,7 @@
          VUOTA. Se invece dentro c'e' scritto qualcosa che non e' un numero, il
          null e' un refuso: lo intercetta dipCampiOk, qui sotto, se no si
          cancellava il costo con il messaggio "Aggiornato ✔". */
-      costo_orario:_numIt("#d-costo"),
+      costo_orario:costoOrarioTondo(_numIt("#d-costo")),
       visita_medica_scadenza:o(v("#d-visita")),
       formazione_scadenza:o(v("#d-formazione")),
       /* 11 ott 2026 — attestati e corsi non passano da qui: hanno la loro tabella */
@@ -734,6 +749,8 @@ ${vecchi?`
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
+    /* DIFFICILE 7: sopra i 200 EUR l'ora prima si chiede */
+    if(!(await costoOrarioSicuro(costoOrarioTondo(_numIt("#d-costo"))))){ const _ec=$("#d-costo"); if(_ec){ try{_ec.focus();_ec.select();}catch(_){} } return; }
     if(docNonSalvato()){toast("Hai scritto un attestato ma non l'hai salvato: premi Salva sotto la tabella, oppure Annulla.");return;}
     const extra=dipCampiExtra();
     /* ⚠️ I DOPPIONI QUANDO L'INVITO NON PARTE — 14 agosto 2026.
@@ -778,6 +795,8 @@ ${vecchi?`
     const ruolo=($("#d-ruolo")&&$("#d-ruolo").value)?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
+    /* DIFFICILE 7: sopra i 200 EUR l'ora prima si chiede */
+    if(!(await costoOrarioSicuro(costoOrarioTondo(_numIt("#d-costo"))))){ const _ec=$("#d-costo"); if(_ec){ try{_ec.focus();_ec.select();}catch(_){} } return; }
     if(docNonSalvato()){toast("Hai scritto un attestato ma non l'hai salvato: premi Salva sotto la tabella, oppure Annulla.");return;}
     const extra=dipCampiExtra();
     const {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");

@@ -2726,3 +2726,24 @@ Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE».
 - [-] Persona nel Cestino dal vivo: non provata (solo banco).
 **Pulizia.** Ore, lavoro, persona eliminati per sempre (1 riga l'una). Contato dal database: lavori, persone, clienti
 «PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
+
+### 15 nov 2026 (11:55) — le tre cose «non provate dal vivo», provate (chieste da Alex: «perché non lo fai?»)
+Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE». Regola da qui in poi: si prova tutto dal vivo, creando e
+cancellando; «non provato» solo dove non si può (fatture emesse, voce dal telefono).
+- [x] App, cliente col CAP VUOTO: si salva (riletto dal database: CAP vuoto).
+- [x] Persona nel Cestino con 3 ore su un lavoro: «3 ore di una persona che non è più in squadra non entrano nel margine»,
+  senza pulsante.
+- [x] Noleggio, casella del CAP aperta: «CH-6900» e «0210» non si salvano, sotto «Il CAP è di 5 cifre. Cliente estero?
+  Lascialo vuoto.», scritta a 15 px. Nota: nel Noleggio la casella accetta al massimo 5 caratteri.
+**Pulizia.** Cliente, lavoro, persona, ore eliminati per sempre. Contato dal database: clienti, lavori, persone
+«PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
+
+## 15 nov 2026 (7) — lista «DIFFICILE» del sesto giro: n. 7, costo orario
+Scelta con Alex («si» alle 11:30).
+- [x] Due decimali: «18,555» si salva 18,56 (`costoOrarioTondo`, in `js/gest-squadra.js`; lo usano la scheda della
+  persona e le ore).
+- [x] Sopra i 200 € l'ora prima chiede: «Hai scritto 1.000,00 € l'ora di costo orario. È giusto?» — «Sì, è giusto» /
+  «No, lo correggo» (`costoOrarioSicuro`, soglia `COSTO_ORARIO_ALTO`). No: non si salva niente e il cursore torna
+  nella casella. Vale nella scheda (nuova persona e modifica) e in «＋ Un'altra persona…» delle ore.
+Banco `tools/banco-quinto-giro.js`: 6 prove nuove «S6 D7». Sulla versione di prima →14← rossi, adesso →186← verdi.
+Banco del gestionale (App): zero difetti. Gli altri banchi verdi. `controllo-push`: «tutto a posto».

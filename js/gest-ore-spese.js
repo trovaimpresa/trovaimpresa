@@ -979,6 +979,7 @@
         costo=_numIt("#or-chi-costo");
         if(costo==null){ campoManca("#or-chi-costo","Non ho capito il costo orario: scrivilo come 22,50."); return {stop:true}; }
         if(costo<0){ campoManca("#or-chi-costo","Il costo orario non può essere negativo."); return {stop:true}; }
+        if(typeof costoOrarioTondo==="function") costo=costoOrarioTondo(costo);   /* DIFFICILE 7: due decimali */
       }
     }else{
       try{ if(typeof giorLeggiTitolare==="function") nome=await giorLeggiTitolare(); }catch(_){}
@@ -999,6 +1000,8 @@
       }
       return {id:gia.id};
     }
+    /* DIFFICILE 7: sopra i 200 EUR l'ora prima si chiede (solo se la persona nasce adesso) */
+    if(costo!=null&&typeof costoOrarioSicuro==="function"&&!(await costoOrarioSicuro(costo))){ const _ec=$("#or-chi-costo"); if(_ec){ try{_ec.focus();_ec.select();}catch(_){} } return {stop:true}; }
     const {data,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id:curMestiere(),nome:nome.slice(0,60)},costo!=null?{costo_orario:costo}:{})).select("id,nome");
     if(error||!data||!data.length){ toast("Non riesco ad aggiungere "+nome+" alla squadra: "+((error&&error.message)||"nessuna riga")); return {stop:true}; }
     if(Array.isArray(dipCache)) dipCache.push({id:data[0].id,nome:data[0].nome,costo_orario:costo,ruolo:"operaio",permessi:{},docs:[]});
