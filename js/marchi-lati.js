@@ -41,7 +41,7 @@
   // si alternano cartello, marchio, cartello, marchio. Vevor per primo.
   var AWIN_ME = '3137864';
   var TELEFONO = '(max-width:1100px)';
-  var STACCO = 40;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato)
+  var STACCO = 65;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato; 15 nov Alex: ancora troppo vicino: 65, e carte un po' piu' basse per restare in mezzo agli spazi)
   var BORDO = 20;       // distanza dal bordo dello schermo, se il lato e' vuoto
   var MAX_L = 380;      // larghezza massima della carta
   var MIN_L = 220;      // sotto questa non si mostra
@@ -65,14 +65,14 @@
     '.tml-card:hover{transform:scale(1.03);box-shadow:0 18px 40px rgba(255,136,0,.35)}' +
     '.tml-sopra{display:block;width:100%;background:#ff8800;color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;' +
       'text-transform:uppercase;padding:6px 8px}' +
-    '.tml-top{display:flex;align-items:center;justify-content:center;width:100%;padding:24px 20px;' +
+    '.tml-top{display:flex;align-items:center;justify-content:center;width:100%;padding:16px 20px;' +
       'background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);' +
       'background-size:28px 28px;border-bottom:6px solid var(--c,#ff8800)}' +
-    '.tml-logo{display:flex;align-items:center;justify-content:center;width:100%;height:110px;background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.3)}' +
+    '.tml-logo{display:flex;align-items:center;justify-content:center;width:100%;height:90px;background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.3)}' +
     '.tml-logo img{width:78%;max-height:90px;height:auto;object-fit:contain;margin:0;border:0}' +
-    '.tml-nome{display:block;font-weight:900;font-size:24px;margin:16px 12px 4px;line-height:1.15;color:#0a2a4d}' +
-    '.tml-cosa{display:block;font-size:17px;color:#3d4b5f;margin:0 12px 16px;line-height:1.3}' +
-    '.tml-btn{display:block;margin:0 16px 18px;align-self:stretch;background:#ff8800;color:#fff;font-weight:900;font-size:18px;padding:13px 8px;border-radius:12px}' +
+    '.tml-nome{display:block;font-weight:900;font-size:24px;margin:12px 12px 4px;line-height:1.15;color:#0a2a4d}' +
+    '.tml-cosa{display:block;font-size:17px;color:#3d4b5f;margin:0 12px 10px;line-height:1.3}' +
+    '.tml-btn{display:block;margin:0 16px 14px;align-self:stretch;background:#ff8800;color:#fff;font-weight:900;font-size:18px;padding:13px 8px;border-radius:12px}' +
     '.tml-card:hover .tml-btn{background:#e06a00}';
 
   var stile = document.createElement('style');
