@@ -107,6 +107,62 @@
     if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', payload);
   };
 
+  /* 15 nov 2026 — IL MESSAGGIO COOKIE LO FA GOOGLE (sulle pagine pubbliche).
+     Per mostrare gli annunci AdSense in Italia serve un messaggio cookie
+     certificato da Google: e' acceso in AdSense → Privacy e messaggi.
+     Due banner uno sopra l'altro non vanno bene, quindi sulle pagine
+     pubbliche il nostro banner non si mostra piu': parla Google, e la sua
+     risposta si copia qui sotto (Analytics, Meta e la memoria di sempre,
+     cookie_consent = 'all' o 'essential').
+     Le pagine private (gestionale, pannelli, admin, login) non hanno
+     pubblicita': li' resta il nostro banner di prima. */
+  var privataCmp = /^\/(admin|pannello-|login-|gestionale-(app|negozio|noleggio|operatore|config|invito))/i.test(location.pathname || '/');
+  if (!privataCmp) {
+    try {
+      if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
+        var ads = document.createElement('script');
+        ads.async = true;
+        ads.crossOrigin = 'anonymous';
+        ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3621975687116775';
+        (document.head || document.documentElement).appendChild(ads);
+      }
+    } catch (e) {}
+
+    // «Gestisci i cookie» in fondo alla pagina: riapre il messaggio di Google
+    window.riapriBannerCookie = function () {
+      try {
+        window.googlefc = window.googlefc || {};
+        if (typeof window.googlefc.showRevocationMessage === 'function') {
+          window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+          window.googlefc.callbackQueue.push(window.googlefc.showRevocationMessage);
+          return;
+        }
+      } catch (e) {}
+      try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(STORAGE_DATE_KEY); } catch (e) {}
+      location.reload();
+    };
+
+    var tentativi = 0;
+    (function aspettaGoogle() {
+      if (typeof window.__tcfapi !== 'function') {
+        if (++tentativi < 60) setTimeout(aspettaGoogle, 500);   // fino a 30 secondi
+        return;
+      }
+      window.__tcfapi('addEventListener', 2, function (tc, ok) {
+        if (!ok || !tc) return;
+        if (tc.eventStatus !== 'tcloaded' && tc.eventStatus !== 'useractioncomplete') return;
+        var tutto = tc.gdprApplies === false ||
+          !!(tc.purpose && tc.purpose.consents && tc.purpose.consents[1]);
+        try {
+          localStorage.setItem(STORAGE_KEY, tutto ? 'all' : 'essential');
+          localStorage.setItem(STORAGE_DATE_KEY, String(Date.now()));
+        } catch (e) {}
+        if (tutto) { sbloccaAnalytics(); caricaPixel(); }
+      });
+    })();
+    return;
+  }
+
   // Se l'utente ha già espresso una scelta, controlla se è scaduta
   try {
     var savedConsent = localStorage.getItem(STORAGE_KEY);
