@@ -2629,3 +2629,18 @@ soldi 36, preventivo 38, noleggio 31, gruppo4 59, gruppo5 34, correttore, copia-
   Il banco adesso prova il Cestino anche sul computer (prima solo la fattura, solo sul telefono).
 
 **NON provato col banco:** l'email vera con la parcella e col nome lungo; tutto quello che chiede il sito vero.
+
+### 15 nov 2026 (06:30–06:40) — le prove sul sito vero, dopo la pubblicazione (commit →05650a8←)
+Netlify: pubblicato (i →9← file nuovi letti online). Account info@, reparto «ferramenta», tutto col nome «PROVA CONTROLLORE».
+- [x] **1 Costo orario.** Importo cambiato 1.000 → 7.777, premuto il pulsante: esce la domanda. No: resto nel lavoro, 7.777
+  c'è ancora. Sì: si apre la scheda della persona. Annulla: torno NEL LAVORO (riletto dal database: 1.000).
+- [x] **2 Nome lungo.** «PROVA CONTROLLORE Alessandro Mastrogiovanni» a 375: la scritta va a capo dentro il pulsante
+  (scritta 290 = pulsante 290, dentro il riquadro, alto 72). A 1440: su una riga, alto 44.
+- [x] **3 e 4 Email.** Con «Sei anche un professionista?» acceso (poi rimesso spento): finestra «Allegato:
+  parcella-1-prova-controllore-niccolo-d-amico-societa-s-r-l.pdf»; arrivata (letta da Resend) con oggetto «Parcella n. 1 — …»
+  e lo STESSO nome di allegato, application/pdf. Email di prova mandate: →1←, a info@trovaimpresa.com.
+- [x] **6 «1 ora».** «1 ora di … non entra nel margine: non ha il costo orario.»
+- [-] **5 accenti, 6 foto nel Cestino:** dal vivo no (servono lo studio, l'operaio e una foto): file online, il resto banco.
+**Pulizia (06:41, con l'ok di Alex).** Cliente, lavoro, persona, ore, preventivo (con riga e link), riga del registro email:
+eliminati. Contato dal database: clienti, lavori, persone, ore, spese, rapportini, preventivi, righe, link, registro email,
+file dell'email, fatture del reparto = →0←. «Sei anche un professionista?» è spento com'era.
