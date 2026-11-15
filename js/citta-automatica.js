@@ -115,6 +115,7 @@
     var nav = document.querySelector('nav, header');
     if (!nav || document.querySelector('.ti-qui')) return;
     stile();
+    var nz = document.querySelector('.ti-dove-naz'); if (nz) nz.parentNode.removeChild(nz);
     var d = document.createElement('div');
     d.className = 'ti-qui';
     var in_ = document.createElement('div'); in_.className = 'in';
@@ -127,6 +128,21 @@
     in_.appendChild(t); in_.appendChild(va); in_.appendChild(ca);
     d.appendChild(in_);
     nav.insertAdjacentElement('afterend', d);
+  }
+
+  // 15 nov 2026 (Alex): anche sulla pagina NAZIONALE in cima c'e' la fascia
+  // arancione, cosi' chi vuole la sua citta' la sceglie subito.
+  function barraNazionale() {
+    stile();
+    var nav = document.querySelector('nav.navbar, nav, header');
+    if (!nav || document.querySelector('.ti-dove')) return;
+    var f = document.createElement('div'); f.className = 'ti-dove ti-dove-naz';
+    var inn = document.createElement('div'); inn.className = 'in'; inn.innerHTML = PIN;
+    var tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = 'Stai guardando tutta Italia';
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Scegli la tua città';
+    b.addEventListener('click', scegliCitta);
+    inn.appendChild(tx); inn.appendChild(b); f.appendChild(inn);
+    nav.insertAdjacentElement('beforebegin', f);
   }
 
   function cercaPosizione() {
@@ -149,6 +165,7 @@
   pronta(function () {
     if (citta) { paginaCitta(); return; }
     if (p.get('scegli') === '1') { scegliCitta(); return; }
+    if (home) barraNazionale();
     if (home && !bot && !p.has('nazionale')) cercaPosizione();
   });
 })();
