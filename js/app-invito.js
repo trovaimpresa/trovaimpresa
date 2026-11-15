@@ -1,7 +1,7 @@
 /* 15 nov 2026 — L'INVITO A METTERE L'APP SUL TELEFONO
    Una striscia in basso, SOLO sul telefono:
    - sul sito: «Metti TrovaImpresa sul telefono» (icona con la i)
-   - nel gestionale: «Metti il Gestionale sul telefono» (icona coi petali)
+   - nel gestionale e nelle sue pagine: «Metti il Gestionale sul telefono» (icona coi petali)
    Non compare: sul computer, dentro l'app gia' installata, a chi l'ha chiusa
    con la X (non torna piu'), dentro i browser di Facebook/Instagram/WhatsApp
    (li' non si puo' installare niente).
@@ -11,7 +11,9 @@
    Per vederla sul computer, per prova: aggiungere ?prova-app=1 all'indirizzo. */
 (function () {
   var prova = /[?&]prova-app=1/.test(location.search);
-  var gest = /^\/gestionale-(app|noleggio)(\.html)?$/.test(location.pathname);
+  // Gestionale o sito? Lo decide l'app che la pagina fa installare (il manifest):
+  // cosi' le pagine che presentano il Gestionale invitano al Gestionale.
+  var gest = !!document.querySelector('link[rel=manifest][href="/manifest.json"],link[rel=manifest][href="/manifest-noleggio.json"]');
   var CHIAVE = gest ? 'ti-app-invito-gestionale' : 'ti-app-invito-sito';
   var ua = navigator.userAgent || '';
   var iphone = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
