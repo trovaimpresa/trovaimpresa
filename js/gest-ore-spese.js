@@ -807,7 +807,9 @@
     /* 13 nov 2026 (lista «MANCA», n. 6) — i nomi anche di chi non e' nella
        squadra di questo reparto: servono a dire se la firma vale ancora */
     const _nomi={};(dipCache||[]).forEach(d=>{_nomi[d.id]=d.nome;});
-    const _ignoti=[...new Set(ore.map(o=>o.operatore_id).filter(i=>i&&!_nomi[i]))];
+    /* 15 nov 2026 — anche chi ha SCRITTO il rapportino: una persona aggiunta da un
+       altro telefono non e' nella squadra in memoria, e «Scritto da …» spariva */
+    const _ignoti=[...new Set(ore.map(o=>o.operatore_id).concat(raps.map(r=>r.creato_da)).filter(i=>i&&!_nomi[i]))];
     if(_ignoti.length){ try{ const ro=await sb.from("gest_operatori").select("id,nome").in("id",_ignoti); ((ro&&ro.data)||[]).forEach(o=>{_nomi[o.id]=o.nome;}); }catch(_){} }
     const nomeDi=id=>_nomi[id]||"";
     const oreDelGiorno=d=>{ const per={}; ore.forEach(o=>{ if(String(o.data)!==String(d))return; const n=nomeDi(o.operatore_id)||"Senza nome"; per[n]=(per[n]||0)+(+o.ore||0); });
@@ -1065,6 +1067,10 @@
   /* il totale finisce anche in gest_lavori.ore: è li' che lo cercano il
      Report e le esportazioni, che di gest_ore non sanno niente */
   async function _oreSalvaTotale(){
+    /* 15 nov 2026 — le ore sono cambiate: la Squadra («3 giorni questo mese») e
+       l'Assistente («Il tuo mese») vanno riletti. Prima restavano quelli di quando
+       avevi aperto la pagina. Di qui passano aggiungi, togli e rapportino nel cestino. */
+    try{ if(typeof rinfresca==="function") rinfresca("squadra","riepilogo"); }catch(e){}
     if(!sbUid||!oreLavoroId)return;
     const campo=$("#j-ore");
     if(!campo)return;                       /* modulo chiuso: non tocco niente */

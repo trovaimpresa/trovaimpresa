@@ -55,6 +55,9 @@ D.gest_foto = (D.gest_foto || []).concat([
   Object.assign(base(372, 3), { mestiere_id: REP, lavoro_id: id(302), nome_file: "Contratto firmato.pdf", tipo: "documento", storage_path: UID + "/prova/contratto.pdf", eliminato_il: NEL_CESTINO })
 ]);
 
+// (S6 fine) un rapportino scritto da Alessandro, che su quel rapportino non ha ore
+D.gest_rapportini.push(Object.assign(base(383, 3), { mestiere_id: REP, lavoro_id: id(303), data: g(-3), note: "Rapportino di chi non ha ore", materiali: "", creato_da: id(203), firma_cliente: null }));
+
 let rossi = 0, verdi = 0;
 const prova = (ok, cosa, visto) => { if (ok) { verdi++; console.log("  ✔ " + cosa); } else { rossi++; console.log("  ✘ " + cosa + (visto !== undefined ? " — visto: " + JSON.stringify(visto).slice(0, 300) : "")); } };
 const clic = (page, azione, dati) => page.evaluate(([a, d]) => { const b = document.createElement("button"); b.dataset.action = a; Object.keys(d || {}).forEach(k => b.dataset[k] = d[k]); document.body.appendChild(b); b.click(); b.remove(); }, [azione, dati || {}]);
@@ -253,6 +256,15 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     prova(altroTel.pulsante && altroTel.tornata, "(S6 D6) …c'è il pulsante «Scrivi il costo orario di …» e la persona è tornata nella squadra in memoria", altroTel);
     const manodD6 = await page.evaluate(() => (document.querySelector("#margine-box").innerText.match(/Manodopera: [^M]*/) || [""])[0].replace(/\s+/g, " ").trim());
     prova(manodD6 === ((altroTel.dice.match(/Manodopera: [^M]*/) || [""])[0].replace(/\s+/g, " ").trim()), "(S6 D6) …e la manodopera è la stessa di prima (il conto non cambia)", manodD6);
+    /* S6 fine (15 nov 2026) — aggiunte ore in un lavoro: Squadra e Assistente vanno riletti (prima restavano vecchi) */
+    { const sp = await page.evaluate(async (lav) => { const W = ms => new Promise(r => setTimeout(r, ms)); try { _tabSporchi.delete("squadra"); _tabSporchi.delete("riepilogo"); } catch (e) { return { errore: String(e) }; }
+        const q = s => document.querySelector(s); if (!q("#or-ore")) return { manca: true }; q("#or-ore").value = "2"; const sel = q("#or-chi"); const op = [...sel.options].find(o => /Luca/.test(o.textContent)); if (op) sel.value = op.value; sel.dispatchEvent(new Event("change", { bubbles: true }));
+        await oreAdd(); await W(900); return { squadra: _tabSporchi.has("squadra"), riepilogo: _tabSporchi.has("riepilogo") }; }, id(305));
+      prova(sp.squadra === true && sp.riepilogo === true, "(S6 fine) aggiunte ore in un lavoro: la Squadra e l'Assistente si rileggono (non restano quelli di prima)", sp); }
+    /* S6 fine — rapportino scritto da una persona che in memoria non c'è (altro telefono): «Scritto da …» resta */
+    await clic(page, "edit-job", { id: id(303) }); await B.aspetta(page, 2200);
+    { const rp = await page.evaluate(async (lav) => { const W = ms => new Promise(r => setTimeout(r, ms)); const prima = dipCache.length; dipCache = dipCache.filter(d => !/Mastrogiovanni/.test(d.nome || "")); const tolta = dipCache.length < prima; await renderRapportiniBlock(lav); await W(700); const l = document.querySelector("#rap-list"); const o = { tolta, dice: l ? l.innerText.replace(/\s+/g, " ").slice(0, 400) : "" }; try { await renderDip(); } catch (e) {} return o; }, id(303));
+      prova(rp.tolta && /Scritto da Alessandro Mastrogiovanni/.test(rp.dice), "(S6 fine) rapportino di una persona aggiunta da un altro telefono: «Scritto da …» col suo nome", rp); }
     if (lungo) prova(lungo.scritta <= lungo.pulsante + 1 && lungo.sx >= lungo.contSx - 1 && lungo.dx <= lungo.contDx + 1 && lungo.dx <= lungo.schermo && lungo.px >= 14 && (W > 800 || lungo.alto >= 44), "(S6 f) nome lungo: la scritta sta DENTRO il pulsante (va a capo) e il pulsante dentro il riquadro", lungo);
     if (lungo) prova(/1 ora di Alessandro Mastrogiovanni/.test(lungo.riga) && /la conto al costo medio/.test(lungo.riga) && !/le conto/.test(lungo.riga), "(S6 6) con una sola ora dice «la conto», non «le conto»", lungo.riga);
     /* (S6 1) il pulsante di Luca: prima CHIEDE, poi apre la scheda, e chiusa la scheda si torna nel lavoro */
