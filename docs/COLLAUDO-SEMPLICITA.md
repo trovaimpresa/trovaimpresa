@@ -2747,3 +2747,15 @@ Scelta con Alex («si» alle 11:30).
   nella casella. Vale nella scheda (nuova persona e modifica) e in «＋ Un'altra persona…» delle ore.
 Banco `tools/banco-quinto-giro.js`: 6 prove nuove «S6 D7». Sulla versione di prima →14← rossi, adesso →186← verdi.
 Banco del gestionale (App): zero difetti. Gli altri banchi verdi. `controllo-push`: «tutto a posto».
+
+### 15 nov 2026 (12:20) — DIFFICILE 7 provata sul sito vero (commit →45aeabb←)
+Netlify: pubblicato (stato «ready», `gest-squadra.js?v=15nov6` e `gest-ore-spese.js?v=15nov6` caricati dalla pagina).
+Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE».
+- [x] Scheda della persona, costo «1.000», Salva: esce «Hai scritto 1.000,00 € l'ora di costo orario. È giusto?».
+  No: scheda aperta, nel database il costo resta vuoto. Sì: nel database 1.000.
+- [x] Scheda, «18,555»: nessuna domanda, nel database 18,56.
+- [x] Ore di un lavoro, «＋ Un'altra persona…» con costo «1.000»: stessa domanda. No: niente persona, niente ore.
+  Con «18,555»: nasce la persona con 18,56 e la riga di ore.
+**Pulizia.** Lavoro, ore, 2 persone eliminati per sempre. Contato dal database: lavori, persone, clienti
+«PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
+**Restano da decidere con Alex:** DIFFICILE 8; MANCA 3 e 4.
