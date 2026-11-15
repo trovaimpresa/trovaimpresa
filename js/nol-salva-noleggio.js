@@ -187,7 +187,7 @@
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
     const {data,error:_eCl}=await sb.from("gest_clienti")
-      .select("id,nome,telefono,email,indirizzo,cap,citta,prov,piva,cod_fiscale,note").eq("user_id",sbUid).order("nome");
+      .select("id,nome,telefono,email,indirizzo,cap,citta,prov,paese,piva,cod_fiscale,note").eq("user_id",sbUid).order("nome");
     const c=data||[], box=$("#clienti-nol-body");
     if(!box) return;
     if(_eCl){nolNonLetto(box,"i clienti",loadClientiNol);return;}

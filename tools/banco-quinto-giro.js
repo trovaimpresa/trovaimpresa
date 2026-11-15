@@ -375,6 +375,7 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
       const fsM = require("fs"), pM = require("path"), rd = n => { try { return fsM.readFileSync(pM.join(RADICE, n), "utf8"); } catch (e) { return ""; } };
       const nolS = rd("js/nol-schede.js"), nolX = rd("js/nol-sdi.js"), nolH = rd("gestionale-noleggio.html"), appH = rd("gestionale-app.html");
       prova(/paeseTendina\("ncl-paese"/.test(nolS) && /paese:estero\|\|null/.test(nolS), "(S6 M4) Noleggio: la stessa tendina nella scheda cliente, e il paese si salva", null);
+      prova(/paeseCoda\(a\)/.test(rd("js/nol-base.js")) && /cap,citta,prov,paese/.test(rd("js/nol-salva-noleggio.js")), "(S6 M4) Noleggio: il paese esce anche nell'elenco dei clienti e nei suoi fogli (nolAzIndirizzo)", null);
       prova(/paeseEsteroSdi\(cli\)/.test(nolX), "(S6 M4) Noleggio: anche lì il file per lo SdI si ferma per un cliente estero", null);
       prova(/\/js\/gest-paese\.js/.test(nolH) && /\/js\/gest-paese\.js/.test(appH), "(S6 M4) …il pezzo del paese è uno solo, caricato dall'App e dal Noleggio", null);
     }

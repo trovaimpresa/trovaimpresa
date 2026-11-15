@@ -2801,6 +2801,26 @@ Misure a 375 e 1440: tendina a 18-21 px, alta 62 o più, niente fuori dallo sche
 [-] NON fatto apposta: il paese dentro il file per lo SdI (aspetta il commercialista); il paese nella fotografia della
 fattura (`gest_fatture.cli_*`): il PDF lo legge dalla scheda del cliente.
 
+### 15 nov 2026 (18:40) — MANCA 4 provata sul sito vero (commit →c851280←), e un pezzo trovato provando
+Netlify: pubblicato (`gest-paese.js?v=15nov7` letto online nelle due pagine). Account info@, reparto «ferramenta»,
+nome «PROVA CONTROLLORE».
+- [x] App, cliente nuovo con «Italia» e CAP «CH-6900»: non si salva, sotto la casella «Il CAP è di 5 cifre. Cliente
+  estero? Scegli il suo paese qui sotto.». Scelta «Svizzera»: la frase sparisce, la Provincia sparisce, si salva.
+  Riletto dal database: CAP «CH-6900», paese «CH», provincia vuota. Riaperta: Svizzera, CAP fino a 12 caratteri.
+- [x] App, elenco clienti e indirizzo: «Via Cantonale 12, CH-6900 Lugano, Svizzera».
+- [x] App, PDF del preventivo fatto davvero (preventivo di prova n. 9901): nel foglio la riga «Via Cantonale 12, CH-6900
+  Lugano, Svizzera».
+- [x] App, controllo del file per lo SdI con quel cliente: una riga sola, «Il cliente è estero (Svizzera): il file per
+  lo SdI di questa fattura fallo fare al commercialista.» (fattura NON emessa: chiamato il controllo su una fattura finta).
+- [x] Noleggio a 375: la scheda dello stesso cliente si apre con «Svizzera»; tendina a 20 px, alta 74, dentro lo schermo.
+  Rimesso «Italia»: torna la Provincia e il CAP estero non si salva (stessa frase). Scelta «Francia», CAP «75001»: si
+  salva. Riletto dal database: paese «FR».
+- [-] Noleggio, file per lo SdI di un cliente estero: dal vivo no (serve una fattura emessa). Solo banco.
+**Trovato provando e sistemato subito:** nell'elenco clienti del Noleggio il paese non usciva. Adesso `nolAzIndirizzo`
+(`js/nol-base.js`) mette il paese in coda per un cliente estero (elenco, contratto, fattura, rapportino del Noleggio);
+per l'azienda non cambia niente. Una prova in più nel banco: →217← verdi. Banco del Noleggio 31, banco lungo del
+Noleggio zero difetti, `controllo-push` «tutto a posto».
+
 ## DOVE SIAMO ALLA FINE DEL 15 NOV 2026 (per la sessione dopo)
 Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e online.
 **Restano da decidere con Alex, una per volta:**
@@ -2810,5 +2830,5 @@ Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e o
 - nei rapportini «chi non è più in squadra» usa ancora la squadra in memoria (stessa cura della DIFFICILE 6);
 - dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola;
 - (chiusa col capitolo 9: adesso il CAP è al massimo 5 caratteri per l'Italia e 12 per l'estero, in tutti e due.)
-Numeri: `tools/banco-quinto-giro.js` →215← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
+Numeri: `tools/banco-quinto-giro.js` →217← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
 `node tools/banco-gestionale.js app` e poi `node tools/banco-gestionale.js noleggio` (tutto insieme supera i 10 minuti).

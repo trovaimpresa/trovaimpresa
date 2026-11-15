@@ -228,7 +228,7 @@
     const {data:lav}=await sb.from("gest_lavori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
-    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,cap,citta,prov,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
+    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,cap,citta,prov,paese,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
     let numFatt=lav.num_fatt;
     if(!numFatt){
       numFatt=az.num_fatt||1;

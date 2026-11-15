@@ -48,8 +48,11 @@
     const via=String(a.indirizzo||"").trim();
     const coda=[String(a.cap||"").trim(),String(a.citta||"").trim()].filter(Boolean).join(" ");
     const pr=String(a.prov||"").trim();
-    if(!coda&&!pr)return via;
-    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
+    /* 15 nov 2026 (MANCA 4) — per un CLIENTE estero in coda il paese («, Svizzera»),
+       come cliIndirizzo() dell'App. L'azienda non ha il paese: per lei non cambia niente. */
+    const pa=window.paeseCoda?window.paeseCoda(a):"";
+    if(!coda&&!pr)return via+(via?pa:"");
+    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ")+pa;
   }
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
