@@ -2715,3 +2715,14 @@ Banco del gestionale (App): zero difetti. Gli altri banchi verdi. `controllo-pus
 [-] NON fatto: nei rapportini la stessa frase («chi non è più in squadra») usa ancora la squadra in memoria.
 [-] Trovato e NON toccato: dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola.
 **Restano da decidere con Alex:** DIFFICILE 7, 8; MANCA 3 e 4.
+
+### 15 nov 2026 (11:35) — DIFFICILE 6 provata sul sito vero (commit →0b37137←)
+Prima del push un'altra sessione aveva pubblicato («Pagine mestiere aggiornate da sole»): fetch, rebase, di nuovo
+`controllo-push`, poi push. Netlify: pubblicato (stato «ready», `gest-ore-spese.js?v=15nov5` letto online).
+Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE».
+- [x] Persona scritta nel database SENZA passare dalla squadra in memoria (come da un altro telefono), 2 ore su un lavoro:
+  aperto il lavoro, il margine dice «2 ore di PROVA CONTROLLORE Altro Telefono non entrano nel margine: non ha il costo
+  orario.» col pulsante «Scrivi il costo orario di …». Prima di aprire in memoria non c'era, dopo sì.
+- [-] Persona nel Cestino dal vivo: non provata (solo banco).
+**Pulizia.** Ore, lavoro, persona eliminati per sempre (1 riga l'una). Contato dal database: lavori, persone, clienti
+«PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
