@@ -2695,3 +2695,11 @@ gestionali). Sulla versione di prima →6← rossi, adesso →168← verdi. Gli 
 [~] NON provato col banco: la casella del Noleggio nel browser (lì il banco confronta solo il testo nel file).
 [-] Il paese del cliente (MANCA 4) non è stato fatto: un CAP estero continua a non potersi scrivere.
 **Restano da decidere con Alex:** DIFFICILE 6, 7, 8; MANCA 3 e 4.
+
+### 15 nov 2026 (10:50) — CAP estero provato sul sito vero (commit →c4c9bba←)
+Netlify: pubblicato (stato «ready», i due file nuovi letti online con la frase dentro). Account info@, reparto «ferramenta».
+- [x] App: cliente «PROVA CONTROLLORE» con CAP «CH-6900» e poi «SW1A 1AA»: non si salva, sotto la casella «Il CAP è di 5
+  cifre. Cliente estero? Lascialo vuoto.», scritta a 14 px. Modulo chiuso senza salvare.
+- [~] Noleggio: dal vivo solo letto il file online (frase dentro, versione `15nov4` nella pagina). La casella non è stata aperta.
+- [-] Cliente salvato col CAP vuoto: non provato dal vivo (per non creare righe); lo prova il banco.
+**Pulizia.** Niente creato. Contato dal database: clienti «PROVA CONTROLLORE» = →0←. Email mandate: →0←.
