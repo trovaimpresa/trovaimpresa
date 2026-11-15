@@ -2662,3 +2662,13 @@ Scelta con Alex («si» alle 07:07).
   Con le letture a posto la riga non esce. Nel giro di prova non esce.
 Banco `tools/banco-quinto-giro.js`: sulla versione di prima →2← rossi, adesso →152← verdi. Banco del gestionale: zero
 difetti. Gli altri banchi verdi. `controllo-push`: «tutto a posto».
+
+### 15 nov 2026 (07:40) — le due voci «DIFFICILE» provate sul sito vero (commit →85e6740←)
+Netlify: pubblicato (file nuovi letti online). Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE».
+- [x] n. 1: persona nata senza costo, poi riscritta in minuscolo con costo 25: esce «PROVA CONTROLLORE Operaio c'è già in
+  squadra… Il costo orario si scrive nella sua scheda.»; le 2 righe di ore sono sue, la scheda non è toccata (costo vuoto),
+  nessun doppione, caselle vuote e nascoste; cambiando persona l'avviso sparisce.
+- [~] n. 2: con le letture a posto la riga «Non riesco a controllare…» non esce (visto). La riga vera dal vivo no (servirebbe
+  rompere la lettura): solo banco.
+**Pulizia.** Lavoro, ore, persona eliminati. Contato dal database: clienti, lavori, persone, ore, spese, rapportini,
+preventivi, fatture del reparto = →0←. Email mandate: →0←.
