@@ -2680,3 +2680,8 @@ Scelta con Alex («si» alle 07:39).
   commercialista» (`buchiRighe`, `.fatt-avviso-riga`, in `js/gest-fatture.js`). Con buchi tutti dello stesso tipo la
   frase resta quella di prima.
 Banco `tools/banco-quinto-giro.js`: sulla versione di prima →4← rossi, adesso →162← verdi.
+Foto a 1440 e 375 approvate da Alex alle 07:51, «pubblica» alle 07:54. Banco del gestionale: zero difetti.
+[~] Dal vivo NON provata: per far uscire l'avviso misto servono fatture EMESSE con numeri mancanti (non si emettono
+fatture di prova). Solo banco; dopo il push si controlla che i file nuovi siano online.
+**Restano da decidere con Alex:** DIFFICILE 4 (CAP estero: proposta «Il CAP è di 5 cifre. Cliente estero? Lascialo
+vuoto.», in attesa del suo sì), 6, 7, 8; MANCA 3 e 4.
