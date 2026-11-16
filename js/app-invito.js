@@ -35,6 +35,10 @@
     + 'background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);'
     + 'background-size:40px 40px;color:#fff;border-radius:18px;padding:14px;border:2px solid #ff8800;box-shadow:0 8px 28px rgba(0,0,0,.45);'
     + 'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;max-width:520px;margin:0 auto;box-sizing:border-box}'
+    /* 16 nov 2026 — con un modulo aperto l'invito copriva «Annulla» e «Salva»
+       (computo, e le schede del Noleggio a 360 px): finche' c'e' una finestra
+       aperta l'invito si fa da parte, e torna quando la chiudi. */
+    + 'body:has(.overlay.open) #ti-app-invito,body:has(.tif-ov) #ti-app-invito{display:none}'
     + '#ti-app-invito .r{display:flex;align-items:center;gap:12px}'
     + '#ti-app-invito img.ic{width:56px;height:56px;border-radius:13px;flex:none;border:1px solid rgba(255,255,255,.25)}'
     + '#ti-app-invito .t{flex:1;min-width:0}'

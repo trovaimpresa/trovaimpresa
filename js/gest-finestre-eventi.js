@@ -996,7 +996,16 @@
       if(!(await gconfirm("Apro il modulo del cliente al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       return cliForm(null);
     }
-    if(a==="close")return closeSheet();
+    if(a==="close"){
+      /* 16 nov 2026 — dentro una LAVORAZIONE o un SAL «Indietro» torna al
+         computo: prima chiudeva tutto e ci si ritrovava nell'elenco dei
+         computi, a riaprire il computo per ogni lavorazione guardata. */
+      try{
+        if(document.querySelector("#sheet #cv-desc")&&typeof compVociCompId!=="undefined"&&compVociCompId)return compTornaAlComputo();
+        if(document.querySelector("#sheet #sal-voci")&&typeof salTorna==="function")return salTorna();
+      }catch(_e){}
+      return closeSheet();
+    }
   });
 
   /* ---- la barra in basso (solo telefono): preme la voce vera del menu ---- */
