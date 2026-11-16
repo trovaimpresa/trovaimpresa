@@ -130,6 +130,106 @@
     };
     f.click();
   }
+  /* ⛔ 16 nov 2026 — L'EXCEL ESPORTATO DA PRIMUS. Non ha una riga «Descrizione /
+     Quantità / Prezzo»: ha il foglio della stampa — «Num.Ord. TARIFFA»,
+     «DESIGNAZIONE DEI LAVORI», le misure riga per riga, e la quantita' sta
+     sulla riga «SOMMANO m²» in fondo a ogni lavorazione. Prima rispondeva
+     «manca la riga di intestazione».
+     Torna null se il foglio NON e' fatto cosi' (e si va avanti come sempre).
+     Le misure pezzo per pezzo non entrano: entra la quantita' del SOMMANO.
+     Pura: righe = celle come testo, crude = le stesse coi numeri veri. */
+  function _compPrimusExcel(righe,crude){
+    const cel=function(r,c){ return String(r&&r[c]!=null?r[c]:"").replace(/\s+/g," ").trim(); };
+    let iH=-1, cDes=-1;
+    for(let i=0;i<Math.min(righe.length,40)&&iH<0;i++){
+      const k=(righe[i]||[]).findIndex(function(c){ return /designazione\s+dei\s+lavori/i.test(String(c||"")); });
+      if(k>=0){ iH=i; cDes=k; }
+    }
+    if(iH<0)return null;
+    /* le altre colonne stanno sulla riga dell'intestazione o su quella sotto */
+    let cQta=-1, cUni=-1, cNum=-1;
+    [righe[iH]||[], righe[iH+1]||[]].forEach(function(r){
+      r.forEach(function(c,i){
+        const x=String(c||"").replace(/\s+/g," ").trim().toLowerCase();
+        if(cQta<0&&i>cDes&&/^quantit/.test(x))cQta=i;
+        if(cUni<0&&i>cDes&&/^unitario/.test(x))cUni=i;
+        if(cNum<0&&i<cDes&&/num\.?\s*ord|tariffa/.test(x))cNum=i;
+      });
+    });
+    if(cNum<0)cNum=Math.max(0,cDes-1);
+    /* un numero scritto come testo puo' avere l'apice delle migliaia di PriMus («2´000,00») */
+    const numC=function(i,c){ const t=(righe[i]||[])[c]; const v=(crude&&crude[i])?crude[i][c]:null;
+      if(typeof v==="number"&&isFinite(v))return v; const a=_cpNum(t); return a!=null?a:_pzNum(t); };
+    const num=function(i,c){ return c<0?null:numC(i,c); };
+    const SALTA=/^(r\s*i\s*p\s*o\s*r\s*t\s*o|a\s+r\s*i\s*p\s*o\s*r\s*t\s*a\s*r\s*e|t\s*o\s*t\s*a\s*l\s*e|committente|parziale|riepilogo|designazione\s+dei\s+lavori|data\s*,|il\s+tecnico)/i;
+    const voci=[], capitoli=[], perse=[];
+    let corr=null, capAttesa="", capCorr=-1, senzaPrezzo=0;
+    const nuova=function(n){ return {numero:n, tariffa:[], desc:[], misure:false}; };
+    for(let i=iH+1;i<righe.length&&voci.length<COMP_IMP_MAX;i++){
+      const r=righe[i]||[];
+      const des=cel(r,cDes), sin=cel(r,cNum);
+      if(!des&&!sin)continue;
+      if(SALTA.test(des))continue;
+      if(/^par\.?\s*ug/i.test(cel(r,cDes+1)))continue;          /* la seconda riga dell'intestazione, ripetuta a ogni pagina */
+
+      /* 17 nov 2026 — nelle stampe vere di PriMus, prima del SOMMANO ci possono
+         essere «Sommano positivi mq» e «Sommano negativi mq» (le misure col
+         meno): sono parziali, non la quantita' della lavorazione */
+      if(/^sommano\s+(positiv|negativ)/i.test(des)){ if(corr)corr.misure=true; continue; }
+      const mS=des.match(/^sommano\b[\s.:…]*(.*)$/i);
+      if(mS){
+        if(!corr)continue;                                       /* un «Sommano» senza lavorazione sopra: e' un totale di capitolo */
+        let q=num(i,cQta), pz=num(i,cUni);
+        if(q==null||!isFinite(q)){
+          /* colonne non riconosciute: i numeri a destra sono quantita', prezzo, totale */
+          const nn=[]; for(let c=cDes+1;c<r.length;c++){ const v=numC(i,c); if(v!=null&&isFinite(v)&&String(r[c]).trim()!=="")nn.push(v); }
+          q=nn.length?nn[0]:null; if(pz==null&&nn.length>=2)pz=nn[1];
+        }
+        const unita=String(mS[1]||"").replace(/[.:…]+$/,"").replace(/\s+/g," ").trim();
+        if(q!=null&&isFinite(q)){
+          if(capAttesa){
+            capCorr=capitoli.findIndex(function(t){return _compStessoTitolo(t,capAttesa);});
+            if(capCorr<0){ capitoli.push(capAttesa); capCorr=capitoli.length-1; }
+            capAttesa="";
+          }
+          if(!pz)senzaPrezzo++;
+          voci.push({_cap:capCorr, codice:corr.tariffa.join("").trim()||null,
+            descrizione:corr.desc.join(" ").replace(/\s+/g," ").trim(),
+            unita:unita||null, quantita_manuale:true, quantita:q, prezzo_unitario:pz||0});
+        }else if(corr.numero!=null)perse.push(corr.numero);
+        corr=null;
+        continue;
+      }
+
+      /* «1», «1 / 493», «12 / 7 A.01.020»: comincia una lavorazione */
+      const mN=sin.match(/^(\d{1,5})(?:\s*\/\s*\d{1,5})?(?:\s+(.*))?$/);
+      if(mN&&des){
+        if(corr&&corr.numero!=null)perse.push(corr.numero);
+        corr=nuova(+mN[1]);
+        String(mN[2]||"").split(/\s+/).forEach(function(w){ const q=_cpPezzoTariffa(w); if(q)corr.tariffa.push(q); });
+        corr.desc.push(des);
+        continue;
+      }
+      if(!corr){
+        /* fuori da una lavorazione: il titolo di un capitolo si tiene da parte */
+        const tc=_cpTitoloPrimus(des)||_compTitoloCapitolo(des);
+        if(tc)capAttesa=tc;
+        continue;
+      }
+      /* il codice di tariffa sta sotto il numero, nella colonna stretta */
+      if(sin&&!corr.misure){ sin.split(/\s+/).forEach(function(w){ const q=_cpPezzoTariffa(w); if(q)corr.tariffa.push(q); }); }
+      if(!des)continue;
+      /* una riga con un numero nelle colonne delle misure e' una misura: da li'
+         in poi la descrizione e' finita */
+      let haNumero=false;
+      for(let c=cDes+1;c<r.length;c++){ if(String(r[c]==null?"":r[c]).trim()!==""&&numC(i,c)!=null){haNumero=true;break;} }
+      if(haNumero){ corr.misure=true; continue; }
+      if(!corr.misure)corr.desc.push(des);
+    }
+    if(corr&&corr.numero!=null)perse.push(corr.numero);
+    return {voci:voci, capitoli:capitoli, perse:perse, senzaPrezzo:senzaPrezzo};
+  }
+
   async function compImporta(file){
     if(!sbUid){toast("Devi essere loggato");return;}
     const cid=compVociCompId;
@@ -160,6 +260,25 @@
       return;
     }
     if(!righe||!righe.length){toast("Il file è vuoto.");return;}
+
+    /* 16 nov 2026 — l'Excel di PriMus ha un'altra forma: lo legge il suo lettore */
+    const pm=_compPrimusExcel(righe,crude);
+    if(pm){
+      if(!pm.voci.length){toast("Ho riconosciuto un computo di PriMus, ma non ho trovato nessuna lavorazione con la sua riga «SOMMANO». Prova a caricare il PDF dello stesso computo.");return;}
+      const avv=[];
+      if(pm.perse.length) avv.push(pm.perse.length+(pm.perse.length===1?" lavorazione non letta (la n. ":" lavorazioni non lette (le n. ")+pm.perse.slice(0,12).join(", ")+(pm.perse.length>12?"…":"")+"): non ho trovato la riga «SOMMANO»");
+      if(pm.senzaPrezzo) avv.push(pm.senzaPrezzo+" senza prezzo");
+      if(!(await gconfirm("È un computo di PriMus: ho letto "+pm.voci.length+(pm.voci.length===1?" lavorazione":" lavorazioni")+".\n\n"
+        +"Entrano con la quantità della riga «SOMMANO» (le misure pezzo per pezzo non ci sono).\n"
+        +_compCapitoliFrase(pm.capitoli)
+        +(avv.length?("\n⚠ "+avv.join("\n⚠ ")+"\n"):"")
+        +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?"))) { toast("Importazione annullata"); return; }
+      const messeP=await _compScriviVoci(cid,pm.voci,pm.capitoli);
+      if(messeP==null)return;
+      toast(messeP+(messeP===1?" lavorazione importata ✔":" lavorazioni importate ✔")
+            +(pm.senzaPrezzo?("  ·  "+pm.senzaPrezzo+" senza prezzo: scrivilo tu"):""));
+      return;
+    }
 
     let iInt=-1;
     for(let i=0;i<Math.min(righe.length,30);i++){

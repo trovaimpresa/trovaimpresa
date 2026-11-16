@@ -418,11 +418,20 @@
       if(!!p.cestinato!==c){p.cestinato=c;segnati=true;}
     });
     const morti=state.panels.filter(p=>p.mestiere_id&&!vivi.has(String(p.mestiere_id)));
+    /* 16 nov 2026 — la memoria dell'ultimo reparto non deve puntare a un
+       reparto che nel browser non c'e' piu' (resta li' per sempre, muta) */
+    const _dimentica=function(){ try{ const u=localStorage.getItem(GEST_ULTIMO); if(u&&!(state.panels||[]).some(p=>p.id===u))localStorage.removeItem(GEST_ULTIMO); }catch(e){} };
     if(!morti.length){
+      _dimentica();
       if(segnati){await save();if(!cur)renderLanding();}
       return;
     }
     const nomeAperto=(morti.find(p=>p.id===cur)||{}).nome||null;
+    /* 16 nov 2026 — se l'auth arriva PRIMA del rientro, il reparto sparito
+       viene tolto prima che ci si entri: si finiva sui reparti senza una
+       parola, e il browser continuava a ricordare un reparto che non c'e'. */
+    let ricordato=null; try{ricordato=localStorage.getItem(GEST_ULTIMO);}catch(e){}
+    const mortoRicordato=nomeAperto?null:(morti.find(p=>p.id===ricordato)||null);
     state.panels=state.panels.filter(p=>morti.indexOf(p)<0);
     morti.forEach(p=>{delete state[p.id];});
     await save();
@@ -430,7 +439,14 @@
       try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
       toast("Il reparto «"+nomeAperto+"» non esiste più: scegli un altro reparto");
       goHome();
-    }else if(!cur)renderLanding();
+    }else{
+      if(mortoRicordato){
+        try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
+        toast("Il reparto «"+mortoRicordato.nome+"» non esiste più: scegli un altro reparto");
+      }
+      _dimentica();
+      if(!cur)renderLanding();
+    }
   }
 
   /* SUPABASE — solo per il tab Squadra (riusa gestionale-config.html) */
