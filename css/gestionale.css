@@ -6236,3 +6236,23 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .fc-cifra b{font-size:30px}
   .fc-dett{flex-direction:column;gap:4px}
 }
+
+/* 16 nov 2026 — computo: spostare piu' lavorazioni insieme in un capitolo */
+.comp-sel-barra{ position:sticky; top:62px; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+  background:#FFF4EC; border:2px solid #E2551F; border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+.comp-sel-barra b{ flex:1 1 220px; font-size:16px; color:#7C2D12; }
+.comp-sel-barra select{ flex:1 1 240px; min-height:46px; font-size:16px; border-radius:10px; padding:0 10px; }
+.comp-sel-barra button{ min-height:46px; font-size:16px; padding:0 20px; }
+.comp-sel-box{ flex:0 0 auto; width:28px; height:28px; border:2px solid var(--bordo-forte,#94a3b8); border-radius:7px;
+  background:#fff; color:transparent; font-size:19px; line-height:24px; text-align:center; font-weight:700;
+  position:absolute; left:14px; top:14px; }
+.sheet .spesa-row.comp-sel-riga{ position:relative; padding-left:56px; }
+.comp-sel-riga.on{ background:#FFF4EC; }
+.comp-sel-riga.on .comp-sel-box{ background:#E2551F; border-color:#E2551F; color:#fff; }
+/* sul telefono la barra resta in alto ma bassa: la tendina sopra, sotto il conto e i due pulsanti */
+@media (max-width:560px){
+  .comp-sel-barra{ top:6px; padding:8px 10px; gap:8px; }
+  .comp-sel-barra select{ order:1; flex:1 1 100%; min-height:44px; }
+  .comp-sel-barra b{ order:2; flex:1 1 0; font-size:15px; line-height:1.2; }
+  .comp-sel-barra button{ order:3; flex:0 0 auto; min-height:44px; padding:0 14px; }
+}

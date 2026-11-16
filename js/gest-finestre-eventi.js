@@ -175,6 +175,10 @@
     if(a==="comp-cap-salva")return compCapSalva();
     if(a==="comp-cap-del")return compCapDel(id);
     if(a==="comp-voce-new")return compVoceForm(null);
+    if(a==="comp-sel-apri"){compSelModo=true;compSel.clear();compCapNuovo=false;compCapEdit=null;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-sel-annulla"){compSelModo=false;compSel.clear();renderCompVoci(compVociCompId);return;}
+    if(a==="comp-sel")return compSelTocca(id);
+    if(a==="comp-sel-sposta")return compSelSposta();
     if(a==="comp-voce")return compVoceForm(id);
     if(a==="comp-voce-del")return compVoceDel(id);
     if(a==="comp-voce-su")return compVoceSposta(id,-1);

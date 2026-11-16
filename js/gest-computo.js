@@ -710,7 +710,7 @@
       const box=$("#co-prz-mio");
       if(box)box.style.display=(_ps.value==="__mio__")?"":"none";
     };
-    compCapNuovo=false;compCapEdit=null;
+    compCapNuovo=false;compCapEdit=null;compSelModo=false;compSel.clear();
     /* la pagina di partenza si accende da qui e NON dall'html: una pagina e'
        fatta di piu' blocchi (la 4 ne ha tre, la 3 ne ha due) e scrivere " on"
        a mano nel primo blocco lasciava spenti gli altri. Un posto solo. */
@@ -743,6 +743,45 @@
   let compVociCompId=null, compCapCache=[], compVociCache=[], compMisCache=[], compVoceId=null, compCapNuovo=false;
   /* quale capitolo si sta rinominando in questo momento (null = nessuno) */
   let compCapEdit=null;
+  /* 16 nov 2026 — SPOSTARE PIU' LAVORAZIONI INSIEME IN UN CAPITOLO.
+     Prima si apriva una lavorazione alla volta e si sceglieva il capitolo dalla
+     tendina: su un computo importato da ottanta righe era un pomeriggio.
+     «Sposta più lavorazioni» accende le caselle: tocchi le righe, scegli il
+     capitolo, «Sposta». Le frecce e la × in quel momento non ci sono: cosi' un
+     tocco sbagliato non cancella e non riordina niente. */
+  let compSelModo=false;
+  const compSel=new Set();
+  function compSelConta(){
+    const n=compSel.size, c=$("#comp-sel-n"), b=$("#comp-sel-vai");
+    if(c)c.textContent=n===0?"Tocca le lavorazioni da spostare":(n===1?"1 lavorazione scelta":n+" lavorazioni scelte");
+    if(b)b.disabled=!n;
+  }
+  function compSelTocca(id){
+    id=String(id); if(compSel.has(id))compSel.delete(id); else compSel.add(id);
+    $$("#co-voci .comp-sel-riga").forEach(function(r){ r.classList.toggle("on",compSel.has(String(r.dataset.id))); });
+    compSelConta();
+  }
+  async function compSelSposta(){
+    if(!sb||!sbUid||!compVociCompId||!compSel.size)return;
+    const sel=$("#comp-sel-cap"); if(!sel)return;
+    if(sel.value===""){ toast("Scegli prima il capitolo"); sel.focus(); return; }
+    const capId=sel.value==="_nessuno"?null:sel.value;
+    /* in fondo al capitolo, nell'ordine che avevano: «ordine» e' dell'intero computo */
+    const scelte=compVociCache.filter(v=>compSel.has(String(v.id))&&String(v.capitolo_id||"")!==String(capId||""))
+      .slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
+    if(!scelte.length){ toast("Sono già in quel capitolo"); return; }
+    const max=compVociCache.reduce((m,v)=>Math.max(m,+v.ordine||0),0);
+    const b=$("#comp-sel-vai"); if(b)b.disabled=true;
+    const esiti=await Promise.all(scelte.map((v,k)=>
+      sb.from("gest_computo_voci").update({capitolo_id:capId,ordine:max+1+k}).eq("id",v.id).eq("user_id",sbUid).select("id")));
+    const guaio=esiti.find(e=>e.error);
+    const ferme=esiti.filter(e=>e.error||!e.data||!e.data.length).length;
+    if(ferme){ toast((scelte.length-ferme)+" spostate, "+ferme+" no"+(guaio?": "+guaio.error.message:". Riprova.")); }
+    else toast(scelte.length===1?"Lavorazione spostata ✔":scelte.length+" lavorazioni spostate ✔");
+    compSelModo=false; compSel.clear();
+    await renderCompVoci(compVociCompId);
+    try{ rinfresca("computi"); }catch(_){}
+  }
 
   /* ===== 11 agosto 2026 — COME SI LEGGE UN NUMERO SCRITTO A MANO =====
      Prima qui c'era una riga sola: cambia la virgola in punto e leggi. Con
@@ -2104,15 +2143,17 @@
         +'font-size:16px;line-height:1;flex:0 0 auto;'+(spenta?frecciaSpenta:frecciaViva)+'">'
         +(verso<0?"↑":"↓")+'</button>';
     };
-    const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
+    const rigaVoce=(v,i,tot)=>(compSelModo
+        ? '<div class="spesa-row comp-sel-riga'+(compSel.has(String(v.id))?' on':'')+'" data-action="comp-sel" data-id="'+esc(String(v.id))+'" role="checkbox" style="cursor:pointer;align-items:flex-start"><span class="comp-sel-box" aria-hidden="true">✓</span>'
+        : '<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">')
       +'<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(_umSchermo(v.unita)):"")
       +    ' × '+_przLetto(v.prezzo_unitario)
       +    (v.quantita_manuale?(_cvModo(v)==="corpo"?' · a corpo':' · quantità scritta'):(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
       +'<b>'+eur2(v.importo)+'</b>'
-      +(tot>1?bottoneFreccia(v,-1,i===0,i===tot-1)+bottoneFreccia(v,1,i===0,i===tot-1):"")
-      +'<button type="button" class="rdel" data-action="comp-voce-del" data-id="'+esc(String(v.id))+'" title="Elimina la lavorazione" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
+      +(compSelModo?'</div>':(tot>1?bottoneFreccia(v,-1,i===0,i===tot-1)+bottoneFreccia(v,1,i===0,i===tot-1):"")
+      +'<button type="button" class="rdel" data-action="comp-voce-del" data-id="'+esc(String(v.id))+'" title="Elimina la lavorazione" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>');
 
     let h="";
     gruppi.forEach(g=>{
@@ -2237,8 +2278,19 @@
         +'<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai-prezzi">Metti i prezzi con l\'AI</button>'
       : '';
 
+    /* 16 nov 2026 — serve almeno un capitolo e due lavorazioni, se no non c'e' niente da spostare */
+    const _btnSel=(!compSelModo&&compCapCache.length&&compVociCache.length>1)
+      ? '<button type="button" class="btn-ghost quick-add" data-action="comp-sel-apri">☑ Sposta più lavorazioni</button>' : '';
+    const _barraSel=compSelModo
+      ? '<div class="comp-sel-barra"><b id="comp-sel-n">Tocca le lavorazioni da spostare</b>'
+        +'<select id="comp-sel-cap" aria-label="Capitolo dove spostarle"><option value="">Spostale in…</option>'
+        +compCapCache.map(c=>'<option value="'+esc(String(c.id))+'">'+(c.numero?esc(c.numero)+" — ":"")+esc(c.titolo||"(capitolo senza titolo)")+'</option>').join("")
+        +'<option value="_nessuno">Senza capitolo</option></select>'
+        +'<button type="button" class="btn-primary" id="comp-sel-vai" data-action="comp-sel-sposta" disabled>Sposta</button>'
+        +'<button type="button" class="btn-ghost" data-action="comp-sel-annulla">Annulla</button></div>' : '';
     box.innerHTML=(_niente ? _cassetta : (
-      (_btnPrezzi?'<div class="comp-azioni comp-azioni--su">'+_btnPrezzi+'</div>':'')
+      _barraSel
+      +((_btnPrezzi||_btnSel)&&!compSelModo?'<div class="comp-azioni comp-azioni--su">'+_btnPrezzi+_btnSel+'</div>':'')
       +h+piede
       +'<div class="comp-azioni">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
