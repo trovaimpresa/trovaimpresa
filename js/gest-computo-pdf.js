@@ -257,7 +257,17 @@
     const n=String(numero==null?"":numero).replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
     return tipo+"-"+(n?n+"-":"");
   }
-  const COMP_NON_CAPITOLO=/(^|[^a-zà-ù])(totale|totali|sommano|somma|ribasso|oneri|importo|importi|iva|imponibile|riporto|riportare|netto|complessivo|complessiva|computo|metrico|committente|descrizione|designazione|quantit[aà]|prezzo|tariffa|pagina|pag)([^a-zà-ù]|$)/i;
+  const COMP_NON_CAPITOLO=/(^|[^a-zà-ù])(totale|totali|sommano|somma|ribasso|oneri|importo|importi|iva|imponibile|riporto|riportare|netto|complessivo|complessiva|computo|metrico|committente|data|impresa|oggetto|tecnico|descrizione|designazione|quantit[aà]|prezzo|tariffa|pagina|pag)([^a-zà-ù]|$)/i;
+  /* 16 nov 2026 — PriMus scrive i titoli cosi': «INTERVENTO 39 (Cat 39)»,
+     «Demolizioni - Rimozioni - Ponteggi (SbCat 1)». Con quella sigla in fondo
+     e' un titolo anche se non e' in maiuscolo. «Parziale … (SbCat 1) euro …»
+     e' il totale del gruppo, non un titolo. */
+  function _cpTitoloPrimus(t){
+    const m=String(t==null?"":t).replace(/\s+/g," ").trim().match(/^(.{3,90}?)\s*\((?:SpCat|SbCat|Cat)\s*\d+\)\s*$/i);
+    if(!m)return "";
+    if(/^parziale\b/i.test(m[1]))return "";
+    return m[1].trim();
+  }
   function _compTitoloCapitolo(t){
     const s=String(t==null?"":t).replace(/\([^)]*\)/g," ").replace(/\s+/g," ").replace(/[\s:.\-–]+$/,"").trim();
     if(s.length<3||s.length>80)return "";
@@ -500,10 +510,17 @@
     const dopo=P.slice(i+1).map(p=>p.t).filter(t=>t!=="€"&&t!=="");
     if(!dopo.length)return null;
     if(!_cpUnita(dopo[0]))return null;
-    const q=_cpNum(dopo[1]);
+    /* 16 nov 2026 — «SOMMANO a corpo 1,00 2´000,00»: l'unita' di DUE parole.
+       Su un computo vero di PriMus (501 lavorazioni) le due «a corpo» non
+       venivano chiuse e sparivano senza dire niente. */
+    let k=1, unita=dopo[0].replace(/[.…]+$/,"");
+    if(_cpNum(dopo[1])===null && /^a$/i.test(dopo[0]) && /^corpo$/i.test(String(dopo[1]||"").replace(/[.…]+$/,"")) && _cpNum(dopo[2])!==null){
+      unita="a corpo"; k=2;
+    }
+    const q=_cpNum(dopo[k]);
     if(q===null)return null;
-    return {unita:dopo[0].replace(/[.…]+$/,""), quantita:q,
-            prezzo:dopo.length>2?_cpNum(dopo[2]):null, originale:r.testo};
+    return {unita:unita, quantita:q,
+            prezzo:dopo.length>k+1?_cpNum(dopo[k+1]):null, originale:r.testo};
   }
 
   /* la riga delle misure — «tramezzo cucina 2 3,20 2,70 17,280» — non e'
@@ -554,6 +571,25 @@
   }
   /* le parole di descrizione di una riga: solo quelle dentro la colonna, e
      mai una riga fatta della sola unita' di misura («mq», «cad») */
+  /* 16 nov 2026 — su un foglio vero (non PriMus) la misura stava DENTRO la
+     colonna della descrizione: «SUPERFICIE IN PIANTA        125,00». Non la
+     si riconosce da dove sta, ma da COME sta: l'ultima cosa della riga e' un
+     numero con la virgola, staccato dal testo da un salto largo (e' andato
+     in colonna). «…fatturazione minima di mq. 1,00» ha lo spazio normale e
+     resta descrizione. */
+  function _cpMisuraInColonna(r){
+    const P=r.parole;
+    /* una riga di SOLI numeri («78,60» da solo, a destra) e' una misura */
+    if(P.length&&P.every(function(p){return _cpNum(p.t)!==null;})&&P.some(function(p){return _cpEDec(p.t);}))return true;
+    if(P.length<2)return false;
+    const u=P[P.length-1], pen=P[P.length-2];
+    if(!_cpEDec(u.t))return false;
+    return (u.x-(pen.x+(pen.w||0)))>14;
+  }
+  /* un codice di tariffa scritto per intero: 01.A02.A80.020, E16.03a */
+  function _cpECodice(t){
+    return /^[0-9A-Za-z]{1,8}([.\-\/][0-9A-Za-z]{1,8}){2,}$/.test(String(t||"").trim())&&/\d/.test(t);
+  }
   function _cpTestoDesc(des,xFine){
     const dentro=des.filter(function(p){return p.x<=xFine;});
     if(!dentro.length)return "";
@@ -579,6 +615,7 @@
        capitolo: vale per tutte le lavorazioni che vengono dopo, fino al
        prossimo titolo. Diventa capitolo solo se sotto c'e' una lavorazione. */
     let capAttesa="", capCorr="";
+    const perse=[];
     const nuova=()=>({numero:null,tariffa:[],desc:[],originali:[]});
 
     /* ⚠️ COME SI RICONOSCE IL NUMERO DELLA LAVORAZIONE. «Il primo intero nella
@@ -619,7 +656,7 @@
         const v=corr||nuova();
         /* il codice PUO' FINIRE SULLA RIGA DEL «SOMMANO»: la colonna e'
            stretta e i codici lunghi ci vanno a capo */
-        sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)v.tariffa.push(q);});
+        if(!v.chiusa)sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)v.tariffa.push(q);});
         chiudi(v,som,r.testo);
         corr=null;
         return;
@@ -643,9 +680,26 @@
          scartati perche' «non salivano». */
       const numLav=sin.find(p=>eNumLav(p.t));
       if(numLav&&des.length){
+        /* una lavorazione rimasta APERTA (senza la sua riga «Sommano») non
+           sparisce zitta: si conta, e la schermata di conferma lo dice */
+        if(corr){
+          /* prima della PRIMA lavorazione una riga cosi' e' carta intestata
+             («21 maggio 2024»), non una lavorazione persa */
+          if(corr.numero!=null&&voci.length)perse.push(corr.numero);
+          /* e dentro puo' esserci finito il titolo del capitolo: lo si ripesca */
+          corr.originali.forEach(function(t){ const tc=_cpTitoloPrimus(t)||(String(t).split(/\s+/).length<=8?_compTitoloCapitolo(t):""); if(tc)capAttesa=tc; });
+        }
         corr=nuova(); corr.numero=+numLav.t;
-        sin.forEach(p=>{ if(p===numLav)return; const q=_cpPezzoTariffa(p.t); if(q)corr.tariffa.push(q); });
-        if(!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine))corr.desc.push(_cpTestoDesc(des,xFine));
+        /* 16 nov 2026 — PriMus scrive «1 / 493»: numero d'ordine / numero
+           nell'elenco prezzi. Il «/ 493» non e' codice (usciva «/493EP.006»). */
+        const iN=sin.indexOf(numLav);
+        const salta=(sin[iN+1]&&sin[iN+1].t==="/"&&sin[iN+2]&&/^\d{1,4}$/.test(sin[iN+2].t))?[sin[iN+1],sin[iN+2]]:[];
+        sin.forEach(p=>{ if(p===numLav||salta.indexOf(p)>=0)return; const q=_cpPezzoTariffa(p.t); if(q)corr.tariffa.push(q); });
+        if(des.length===1&&!corr.tariffa.length&&_cpECodice(des[0].t)){
+          /* «Nr. 1   01.A02.A80.020»: il codice sta nella colonna della
+             descrizione, da solo sulla riga del numero: e' il codice */
+          corr.tariffa.push(des[0].t); corr.chiusa=true;
+        }else if(!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine)&&!_cpMisuraInColonna(r))corr.desc.push(_cpTestoDesc(des,xFine));
         corr.originali.push(r.testo);
         return;
       }
@@ -654,16 +708,30 @@
          righe di riporto restano fuori. Il titolo di un capitolo si tiene
          da parte (vedi sopra). */
       if(!corr){
-        const tc=_compTitoloCapitolo(r.testo);
-        if(tc&&r.parole.length<=8)capAttesa=tc;
+        const tp=_cpTitoloPrimus(r.testo);
+        const tc=tp||_compTitoloCapitolo(r.testo);
+        if(tc&&(tp||r.parole.length<=8))capAttesa=tc;
         return;
       }
 
-      sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)corr.tariffa.push(q);});
-      if(des.length&&!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine))corr.desc.push(_cpTestoDesc(des,xFine));
+      /* una riga della colonna stretta che comincia con una PAROLA («ARIAP
+         3.2.1.6.6», «SIIT. 16.27», «RP. E16.03a») e' il prezzario da cui viene la voce, non
+         la coda del codice: se il codice c'e' gia', non ci si attacca */
+      const etichetta=sin.length&&corr.tariffa.length&&/^[A-Za-z]{2,}\.?$/.test(sin[0].t);
+      /* e una riga che comincia con LETTERA+cifre («E16.03a») quando il codice
+         di prima e' gia' chiuso (non finisce con punto o trattino) e' un
+         SECONDO codice — quello del prezzario regionale sotto il numero
+         dell'elenco prezzi — non la coda del primo: usciva «EP.026E16.03a» */
+      const ult=corr.tariffa.length?corr.tariffa[corr.tariffa.length-1]:"";
+      const secondo=sin.length&&ult&&!/[.\-\/]$/.test(ult)&&/^[A-Za-z]/.test(sin[0].t)&&/\d/.test(sin[0].t);
+      /* e da li' in poi il codice e' CHIUSO: le righe sotto sono ancora del
+         secondo codice («DEI» poi «ARCH.035061a», «3.2.12.3+» poi «12.4») */
+      if(etichetta||secondo)corr.chiusa=true;
+      if(!corr.chiusa)sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)corr.tariffa.push(q);});
+      if(des.length&&!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine)&&!_cpMisuraInColonna(r))corr.desc.push(_cpTestoDesc(des,xFine));
       corr.originali.push(r.testo);
     });
-    return {voci:voci, xDesc:xDesc};
+    return {voci:voci, xDesc:xDesc, perse:perse};
   }
 
   /* --- le parole di un PDF, pagina per pagina --- */
@@ -726,7 +794,7 @@
       toast("Nel PDF non ho trovato nessuna riga «Sommano»: è quella che chiude una lavorazione e porta la quantità. Se il foglio è fatto in un altro modo, mandami il file e lo faccio leggere.");
       return;
     }
-    cpLette={cid:cid, nome:file.name, voci:r.voci, pagine:letto.quante};
+    cpLette={cid:cid, nome:file.name, voci:r.voci, pagine:letto.quante, perse:r.perse||[]};
     compPdfConferma();
   }
 
@@ -741,6 +809,8 @@
     const avvisi=[];
     if(senzaPrezzo)avvisi.push("<b>"+senzaPrezzo+"</b> "+(senzaPrezzo===1?"riga è senza prezzo":"righe sono senza prezzo")+": sul foglio del geometra è normale, i prezzi ce li metti tu dopo col pulsante «Prendi i prezzi dal prezzario».");
     if(senzaTar)avvisi.push("<b>"+senzaTar+"</b> "+(senzaTar===1?"riga è senza codice":"righe sono senza codice")+" di tariffa: quelle il prezzario non le può cercare.");
+    const perse=cpLette.perse||[];
+    if(perse.length)avvisi.push("<b>"+perse.length+"</b> "+(perse.length===1?"lavorazione non l'ho capita":"lavorazioni non le ho capite")+" e non "+(perse.length===1?"è":"sono")+" in questo elenco: n. "+esc(perse.slice(0,12).join(", "))+(perse.length>12?"…":"")+". Guardal"+(perse.length===1?"a":"e")+" sul foglio e scrivil"+(perse.length===1?"a":"e")+" a mano.");
     if(qtaZero)avvisi.push("<b>"+qtaZero+"</b> "+(qtaZero===1?"riga ha quantità zero":"righe hanno quantità zero")+": controllale, o toglile.");
 
     const _przCasella=function(x){ const n=+x; return (isFinite(n)&&n)?n.toFixed(2).replace(".",","):""; };
