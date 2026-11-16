@@ -26,6 +26,19 @@ Ultimo aggiornamento: 16 novembre 2026 — riassunto di ottobre e inizio novembr
 6. Prezzi con l'AI, dopo la pubblicazione (877435e): 27 proposti su 36, 9 vuote tutte con la piu' vicina, 20 s e 15 s. Da sistemare: le «piu' vicine» lontane che si possono prendere (tramezzatura → muratura faccia a vista; quadro elettrico → quadro luminoso): farle solo leggere. Guaina liquida: sceglie la pedonabile (50,60) e c'e' anche la non pedonabile (13,23).
 7. `banco-tre-ruoli.js` (17 rosse) e `banco-computo-ribasso-reparti.js` (8 rosse) scaduti: da aggiornare.
 
+## 🆕 16 NOVEMBRE 2026 (sera) — «COMPUTO DA PREZZARE» PER IMPRESA E ARTIGIANO
+
+### ✅ FATTO E ONLINE (→10f49d1←, provato dal vivo da impresa e da studio)
+- Difetti 1–5: capitoli del geometra da Excel e PDF, calendario che avvisa, PDF pulito, «1.210,50 m²», piccoli.
+- Punti 6–10: computo corto (Lavorazioni, Prezzi, Totale), scheda della lavorazione semplice, parole semplici, nome «Computo da prezzare», pulsanti dei prezzi senza doppioni.
+
+### 🔴 DA FARE
+1. Provare con un file VERO di un geometra (Excel e PDF).
+2. Provare da artigiano dal vivo e dal telefono vero.
+3. Dentro la sezione «Acconti a lavoro fatto» si legge ancora «SAL»; nella pagina «Cosa è cambiato» ancora «variante»: da decidere con Alex.
+4. Dopo aver caricato un PDF il computo si chiude: farlo restare aperto sulle lavorazioni (proposto, non chiesto).
+5. Rilanciare `node tools/banco-gestionale.js app` (erano 34 rosse per la striscia «Installa»).
+
 ## 🆕 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV (lista di Alex, 21 punti)
 
 ### ✅ FATTO E ONLINE
