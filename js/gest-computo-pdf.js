@@ -1432,7 +1432,13 @@
         }else if(!righeM.length){
           doc.setTextColor(110);doc.text("nessuna misura",X[2]+4,y+2.6);doc.setTextColor(0);y+=3.3;
         }
+        /* 16 nov 2026 (2) — UNA MISURA SOLA, SENZA NOME E SENZA MISURE (solo la
+           quantita') lasciava una riga quasi vuota: a destra lo stesso numero
+           che la riga «Sommano» ripete subito sotto. Quella riga non si scrive. */
+        const _soloNumero=function(m){return !String(m.descrizione||"").trim()&&!m.detrai&&!_pu(m.parti)&&m.lunghezza==null&&m.larghezza==null&&m.altezza==null;};
+        const _saltaUnica=righeM.length===1&&_soloNumero(righeM[0]);
         righeM.forEach(m=>{
+          if(_saltaUnica)return;
           if(y+4>FONDO){nuovaPagina();}
           doc.setFont("helvetica","normal");doc.setFontSize(7.1);
           /* 16 nov 2026: una misura senza nome sul foglio non scrive piu' «(senza nome)» */

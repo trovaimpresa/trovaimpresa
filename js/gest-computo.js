@@ -682,6 +682,27 @@
     /* 18 settembre 2026 \u2014 e insieme al quadro economico si riscrive il conto
        qui sotto al ribasso: sono due letture dello stesso numero. */
     if(_rb)_rb.addEventListener("input",compRibConto);
+    /* 16 nov 2026 — IL RIBASSO SI SALVA DA SOLO. Si salvava soltanto col
+       «Salva» in fondo: scrivevi 10, vedevi il conto giusto qui sotto, premevi
+       «PDF» o «Crea il preventivo» e usciva il totale SENZA ribasso, perche'
+       quelli leggono il numero salvato. Adesso, quando esci dalla casella, il
+       numero va nel database (solo lui, e solo se il computo esiste gia').
+       Un numero fuori scala non si salva: lo ferma il «Salva», come prima. */
+    if(_rb&&c&&c.id)_rb.addEventListener("change",async function(){
+      try{
+        const t=String(_rb.value||"").trim();
+        const n=t===""?null:_numeroIt(t);
+        if(t!==""&&(n==null||!isFinite(n)||n<0||n>100))return;
+        const prima=(c.ribasso_perc==null||c.ribasso_perc==="")?null:+c.ribasso_perc;
+        if(prima===n)return;
+        const r=await sb.from("gest_computi").update({ribasso_perc:n}).eq("id",c.id).eq("user_id",sbUid).select("id");
+        if(r.error||!r.data||!r.data.length){toast("Il ribasso non si è salvato: premi «Salva» in fondo.");return;}
+        c.ribasso_perc=n;
+        const cc=compCache.find(function(x){return String(x.id)===String(c.id);});
+        if(cc)cc.ribasso_perc=n;
+        toast("Ribasso salvato \u2714");
+      }catch(e){}
+    });
     qeAggiorna();
     compRibConto();
     const _ps=$("#co-prz-sel");
