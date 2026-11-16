@@ -75,7 +75,7 @@
 
     let h="";
     if(!salCache.length){
-      h+='<div class="lm-vuoto">Nessuno stato di avanzamento. Quando hai fatto un pezzo di lavoro e vuoi chiedere un acconto, creane uno.</div>';
+      h+='<div class="lm-vuoto">'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Nessuno stato di avanzamento. Quando una parte dei lavori è stata eseguita e va certificata, creane uno.":"Nessuno stato di avanzamento. Quando hai fatto un pezzo di lavoro e vuoi chiedere un acconto, creane uno.")+'</div>';
     } else {
       salCache.forEach(s=>{
         const k=salConti(salTot[String(s.id)],comp);

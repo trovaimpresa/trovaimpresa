@@ -524,7 +524,7 @@
       +  '<div class="lav-media" id="co-sal">'+(isNew
           ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti gli stati di avanzamento.</div>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
-      +  '<div class="sh-nota">Serve per farsi pagare a pezzi mentre il lavoro va avanti: conti quello che hai fatto e chiedi un acconto.</div>'
+      +  '<div class="sh-nota">'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Serve per certificare i lavori fatti fin qui: conti quello che è stato eseguito e l'impresa può chiedere l'acconto.":"Serve per farsi pagare a pezzi mentre il lavoro va avanti: conti quello che hai fatto e chiedi un acconto.")+'</div>'
       +'</div>'
 
       +'</div>'   /* <- fine pagina 5 */
@@ -2086,7 +2086,7 @@
     const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(_umSchermo(v.unita)):"")
-      +    ' × '+eur2(v.prezzo_unitario)
+      +    ' × '+_przLetto(v.prezzo_unitario)
       +    (v.quantita_manuale?(_cvModo(v)==="corpo"?' · a corpo':' · quantità scritta'):(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
       +'<b>'+eur2(v.importo)+'</b>'
@@ -2445,11 +2445,21 @@
     scritta:"Sai già quanto è? Scrivila e basta. Se poi vuoi le misure pezzo per pezzo, scegli «Dalle misure».",
     corpo:"Quando non c'è niente da misurare: una voce a forfait, le spese generali."
   };
+  /* 16 nov 2026 — collaudo dal vivo: un prezzo di 15,333 € usciva «15,33», e
+     «7 × 15,33 = 107,33» a chi rifa' il conto non torna (fa 107,31). Il prezzo
+     unitario si scrive con i decimali che ha (fino a 4); gli importi restano a 2. */
+  function _przLetto(p){
+    return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:4,useGrouping:true}).format(+p||0);
+  }
   function _cvConta(){
     const m=segVal("cv-conta")||"misure";
     const manuale=(m!=="misure");
     const box=$("#cv-qta-box"); if(box)box.style.display=manuale?"":"none";
     const mis=$("#cv-misure");  if(mis)mis.style.opacity=manuale?"0.45":"1";
+    /* 16 nov 2026 — appena scelto «Scrivo la quantità» sotto restava scritto
+       «Nessuna misura: la quantità è zero», che dice il contrario. */
+    const _vuota=mis&&mis.querySelector(".fatt-empty");
+    if(_vuota&&/^Nessuna misura/.test(_vuota.textContent))_vuota.textContent=manuale?"Nessuna misura: vale la quantità che hai scritto tu.":"Nessuna misura: la quantità è zero.";
     const n=$("#cv-conta-nota"); if(n)n.textContent=CV_NOTE[m]||"";
     _cvConto();
   }
@@ -2463,7 +2473,7 @@
     /* stesso conto della vista gest_computo_voci_calc: quantita' a tre
        decimali per il prezzo, arrotondato al centesimo */
     const imp=_cent2(Math.round(q*1000)/1000*p);
-    out.innerHTML=esc(_misLetta(q)+(uS?" "+uS:""))+" × "+esc(eur2(p))+" = <b>"+esc(eur2(imp))+"</b>";
+    out.innerHTML=esc(_misLetta(q)+(uS?" "+uS:""))+" × "+esc(_przLetto(p))+" = <b>"+esc(eur2(imp))+"</b>";
   }
   async function _cvSalvaEPoi(dove){
     const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();

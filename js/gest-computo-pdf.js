@@ -1424,7 +1424,8 @@
         righeM.forEach(m=>{
           if(y+4>FONDO){nuovaPagina();}
           doc.setFont("helvetica","normal");doc.setFontSize(7.1);
-          doc.text((m.detrai?"- ":"")+(m.descrizione||"(senza nome)"),X[2]+4,y+2.6,{maxWidth:X[3]-X[2]-6});
+          /* 16 nov 2026: una misura senza nome sul foglio non scrive piu' «(senza nome)» */
+          doc.text((m.detrai?"- ":"")+(m.descrizione||(m.detrai?"a detrarre":"")),X[2]+4,y+2.6,{maxWidth:X[3]-X[2]-6});
           const pu=_pu(m.parti);
           if(pu)doc.text(pu,X[4]-1.5,y+2.6,{align:"right"});
           if(m.lunghezza!=null)doc.text(_d2(m.lunghezza),X[5]-1.5,y+2.6,{align:"right"});
@@ -1438,7 +1439,9 @@
         doc.setFont("helvetica","bold");doc.setFontSize(7.3);
         doc.text("Sommano",X[7]-1.5,y+3.6,{align:"right"});
         doc.text((v.unita?_um(v.unita)+"  ":"")+_q3(v.quantita),X[8]-1.5,y+3.6,{align:"right"});
-        doc.text(_eur(v.prezzo_unitario),X[9]-1.5,y+3.6,{align:"right"});
+        /* 16 nov 2026: il prezzo unitario coi decimali che ha (15,333), se no
+           quantita' × prezzo sul foglio non da' l'importo scritto accanto */
+        doc.text("€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:4,useGrouping:true}).format(+v.prezzo_unitario||0),X[9]-1.5,y+3.6,{align:"right"});
         doc.text(_eur(v.importo),R-1.5,y+3.6,{align:"right"});
         y+=5;
         if(pubblico&&(v.incidenza_manodopera||v.oneri_sicurezza)){
@@ -1452,23 +1455,30 @@
       });
       subTot=Math.round(subTot*100)/100;
       sub.push({t:g.cap?((g.cap.numero?g.cap.numero+" - ":"")+(g.cap.titolo||"Capitolo")):"Senza capitolo",v:subTot});
+      /* 16 nov 2026 — un computo SENZA capitoli non parla di capitoli: via la
+         riga «Sommano le lavorazioni senza capitolo» e, sotto, il «Riepilogo dei
+         capitoli» con la sola riga «Senza capitolo». Il totale c'e' gia' nel riquadro. */
+      if(capitoli.length){
       spazio(9);
       doc.setFillColor(246,248,249);doc.rect(M,y,R-M,5.6,"F");
       doc.setFont("helvetica","bold");doc.setFontSize(8);
       doc.text(g.cap?"Sommano il capitolo":"Sommano le lavorazioni senza capitolo",X[2]+1.5,y+3.9);
       doc.text(_eur(subTot),R-1.5,y+3.9,{align:"right"});
       y+=5.6;doc.setDrawColor(110);doc.line(M,y,R,y);y+=1.2;
+      }
     });
     y-=1.2;   /* l'ultima riga aveva lasciato una striscia vuota sotto */
     chiudiCorpo();
     y+=9;
 
     /* ---- riepilogo dei capitoli e totale ---- */
+    if(capitoli.length){
     spazioFuoriTabella(24+sub.length*5);
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Riepilogo dei capitoli",M,y);y+=5.5;
     doc.setFont("helvetica","normal");doc.setFontSize(8.5);
     sub.forEach(s=>{spazioFuoriTabella(8);doc.text(s.t,M+2,y,{maxWidth:120});doc.text(_eur(s.v),R-1.5,y,{align:"right"});y+=4.8;});
     y+=3;
+    }
 
     /* ⚠️ IL RIQUADRO DEVE TORNARE CON LA CALCOLATRICE — 11 agosto 2026.
        Prima usciva così:
