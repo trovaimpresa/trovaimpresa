@@ -793,7 +793,12 @@ function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate, parole) {
        indicatore di chiamata, da incasso» si poteva ancora prendere. Le prime DUE
        parole piene della riga (quelle che dicono che cosa e') devono stare nella voce. */
     const prime = a.split(' ').filter(function (w) { return w.length >= 5; }).slice(0, 2).map(formaParola).filter(Boolean);
-    return !prime.every(function (f) { return f.js.test(d); });
+    /* 16 nov 2026 (8) — con la descrizione VERA la regola (7) non bastava: «elettrico»
+       combaciava con «a cancellazione elettrica», che sta in fondo alla voce. Le due
+       parole devono stare nell'INIZIO della voce (i primi 90 caratteri), dove la
+       Tariffa dice che cosa e'. */
+    const testa = d.slice(0, 90);
+    return !prime.every(function (f) { return f.js.test(testa); });
   };
   if (mostrate && mostrate.length) return fa(mostrate[0], lontana(mostrate[0]) ? 'lontana' : '');
   const t = (trovate || []).filter(function (x) { return +x.prezzo_unitario > 0; });
