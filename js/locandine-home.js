@@ -55,11 +55,10 @@
     { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'moulinex' },
     { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'kasanova' }, // 16 nov: accanto a Moulinex
     { sez: '.why-section',      lato: 'sx', passo: 4, google: true },
-    { sez: '.why-section',      lato: 'dx', passo: 4, google: true },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, google: true },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, google: true },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 0, google: true },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 1, google: true }
+    { sez: '.why-section',      lato: 'dx', passo: 4, google: true }
+    // 16 nov 2026 (Alex, «la pubblicita di google e tutta uguale»): tolti i 4 spazi
+    // Google accanto alle recensioni. Con 6 spazi uno sotto l'altro AdSense
+    // mostrava lo stesso annuncio ovunque. Restano i 2 qui sopra + quello al centro.
   ];
 
   var CSS = '.tlm{display:flex;flex-direction:column;width:100%;height:100%;background:#fff;border:2px solid #ff8800;' +
