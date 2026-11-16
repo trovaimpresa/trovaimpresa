@@ -2901,7 +2901,11 @@
        e' giusto ma qui sotto diceva «la quantità è zero»: non e' vero, vale
        quella scritta a mano. */
     const _vv=(compVociCache||[]).find(x=>String(x.id)===String(voceId));
-    const _vMan=!!(_vv&&_vv.quantita_manuale);
+    /* 16 nov 2026 — collaudo dal vivo: su una lavorazione APPENA creata la
+       memoria delle voci non la conosce ancora e la frase tornava «è zero».
+       Se il modulo e' aperto vale la scelta che si vede a schermo. */
+    let _vMan=!!(_vv&&_vv.quantita_manuale);
+    try{ if(document.getElementById("cv-qta-box")&&typeof segVal==="function"){const _sc=segVal("cv-conta"); if(_sc)_vMan=(_sc!=="misure");} }catch(_e){}
     const tot=compMisCache.reduce((s,m)=>s+(+m.quantita||0),0);
     const pezzo=(v,lab)=>v==null?"":(" "+lab+" "+_misTesto(v));
     const righe=compMisCache.length?compMisCache.map(m=>
@@ -2934,7 +2938,7 @@
        _partiTesto esisteva apposta dal 10 agosto: qui non veniva usata. */
     const _vp=(x)=>x==null?"":esc(_partiTesto(x));
     box.innerHTML=righe
-      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misLetta(tot)+'</b><span></span></div>'
+      +((_vMan&&!compMisCache.length)?'':'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misLetta(tot)+'</b><span></span></div>')
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
       +  (inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «'+esc(inCorr.descrizione||"(senza nome)")+'»</div>':'')
       +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' value="'+(inCorr?esc(inCorr.descrizione||""):"")+'" placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
