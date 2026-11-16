@@ -595,7 +595,7 @@ function radice(w) {
 }
 function paroleDi(testo, quante) {
   return String(testo || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/)
-    .filter(function (w) { return w.length >= 3; }).slice(0, quante || 3);
+    .filter(function (w) { return w.length >= 3 || CORTE_BUONE.indexOf(w) >= 0; }).slice(0, quante || 3);
 }
 /* i tentativi, dal piu' stretto al piu' largo: mai due volte lo stesso */
 function tentativiRicerca(parole) {
@@ -606,28 +606,155 @@ function tentativiRicerca(parole) {
   });
   return out;
 }
-async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi) {
-  const tent = tentativiRicerca(parole);
-  for (let i = 0; i < tent.length; i++) {
-    const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: campi, filtri: { user_id: uid },
-      contieneTutte: { campo: 'descrizione', valori: tent[i] }, senzaCestino: true, ordine: 'usata_volte', limite: quante || 300, soloConta: false });
-    if (r.errore) return r;
-    /* la prima parola deve stare nell'INIZIO della voce (i primi 90 caratteri):
-       per «radiatore alluminio» usciva un «Ripartitore elettronico…» che i
-       radiatori li nomina in fondo, e l'AI lo prendeva per buono */
-    const p0 = tent[i][0];
-    const buone = (r.righe || []).filter(function (x) {
-      if (!(+x.prezzo_unitario > 0)) return false;
-      const d = String(x.descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
-      return d.slice(0, 90).indexOf(p0) >= 0;
-    });
-    /* 17 nov 2026 — il registro delle ricerche (solo per il fondatore): per ogni
-       tentativo, quante voci ha dato il prezzario e quante sono rimaste */
-    if (passi) passi.push({ parole: tent[i].join(' '), trovate: (r.righe || []).length, buone: buone.length });
-    if (buone.length) return { righe: ordinaPerVicinanza(buone, tent[i]), largo: i > 0 };
-  }
-  return { righe: [] };
+/* >>> RICERCA-PREZZARIO
+   ⛔ 16 nov 2026 (3) — IL REGISTRO DELLE RICERCHE HA DETTO TRE COSE (prova dal
+   vivo su 16 righe, 3 prezzi trovati):
+   1. si cercava un PEZZO di parola: «porta» trovava «lampada PORTAtile» e
+      «bagno chimico PORTAtile»; «quadr» trovava «QUADRettatura».
+      -> adesso la parola deve COMINCIARE cosi' (`\m` di Postgres), e una
+         parola corta deve essere proprio quella («porta», «porte»).
+   2. il prezzario usa ALTRE PAROLE: la finestra in PVC si chiama «Serramento
+      realizzato con profili estrusi di pvc». -> SINONIMI da cantiere.
+   3. tutte le parole dovevano esserci: «intonaco civile interni» non trovava
+      «Intonaco civile su murature…» (che «interni» non lo dice), e al suo
+      posto uscivano «Rasatura…» e «Ripresa…». -> si leggono ANCHE le voci
+      che COMINCIANO con la prima parola, e si mettono in fila per quante
+      parole della riga hanno dentro.
+   Funzioni pure tranne `cercaNelPrezzario`. */
+const CORTE_BUONE = ['tv', 'wc', 'pp', 'pe'];
+const LETT = 'a-z0-9àèéìòù';
+/* ogni gruppo: modi diversi di dire la stessa cosa. Una voce che finisce con
+   `$` e' la parola INTERA, le altre sono l'inizio della parola. */
+const SINONIMI = [
+  ['finestr', 'serrament', 'infiss'],
+  ['tramezz', 'divisor', 'muratur'],
+  ['tub[oi]$', 'tubazion', 'tubatur'],
+  ['radiator', 'termosifon', 'scaldant'],
+  ['paviment'],
+  ['rivestiment'],
+  ['piastrell', 'mattonell'],
+  ['gr[eè]s$'],
+  ['tv$', 'televisiv', 'antenn'],
+  ['quadr[oi]$', 'centralin[oi]$'],
+  ['guain[ae]$', 'membran'],
+  ['rimozion', 'smontagg', 'smantellament'],
+  ['cartongess', 'cartonat'],
+  ['polipropilen', 'pp$'],
+  ['polietilen', 'pe$', 'pead$'],
+  ['pvc$', 'polivinil'],
+  ['wc$', 'vas[oi]$'],
+  ['tinteggiat', 'pittur', 'idropittur'],
+  ['massett', 'sottofond'],
+  ['battiscop', 'zoccol'],
+  ['caldai', 'generator'],
+  ['condizionator', 'climatizzator'],
+  ['demolizion', 'rimozion'],
+  ['impermeabilizz'],
+  ['controsoffitt'],
+  ['intonac'],
+  ['pulizi', 'pulitur']
+];
+function normaTesto(t) {
+  return String(t || '').toLowerCase().replace(/[’']/g, ' ').replace(new RegExp('[^' + LETT + ' ]', 'g'), ' ').replace(/\s+/g, ' ').trim();
 }
+/* una parola -> come la si cerca: { pg: regex per Postgres, js: la stessa per qui } */
+function formaParola(w) {
+  const t = normaTesto(w).split(' ')[0] || '';
+  if (!t) return null;
+  let alt = null;
+  for (let g = 0; g < SINONIMI.length && !alt; g++) {
+    if (SINONIMI[g].some(function (k) { return new RegExp('^' + k).test(t); })) alt = SINONIMI[g];
+  }
+  if (!alt) {
+    if (/^\d+$/.test(t)) alt = [t + '$'];
+    else if (t.length <= 5) alt = [(t.length >= 4 && /[aeio]$/.test(t)) ? t.slice(0, -1) + '[aeio]$' : t + '$'];
+    else alt = [radice(t)];
+  }
+  const pg = '\\m(' + alt.map(function (k) { return k.replace(/\$$/, '\\M'); }).join('|') + ')';
+  const corpo = '(' + alt.map(function (k) { return k.replace(/\$$/, '(?![' + LETT + '])'); }).join('|') + ')';
+  return { parola: t, pg: pg, js: new RegExp('(^|[^' + LETT + '])' + corpo), inizio: new RegExp('^' + corpo), pgInizio: '^\\W*(' + alt.map(function (k) { return k.replace(/\$$/, '\\M'); }).join('|') + ')' };
+}
+const PAROLE_VUOTE = ['con', 'per', 'del', 'dei', 'della', 'delle', 'dello', 'degli', 'nel', 'nella', 'sul', 'sulla', 'una', 'uno', 'due', 'tre', 'compreso', 'compresa', 'compresi', 'comprese', 'tipo', 'opera', 'fornitura', 'posa', 'posato', 'posata', 'qualsiasi', 'ogni', 'altro', 'ecc', 'fino', 'oltre', 'tra', 'fra', 'che', 'non', 'piu', 'più', 'come', 'mediante', 'incluso', 'esclusa', 'escluso'];
+/* le altre parole della riga del computo (non quelle gia' chieste) */
+function formeDellaRiga(rigaDesc, gia) {
+  const viste = {};
+  (gia || []).forEach(function (f) { if (f) viste[f.pg] = 1; });
+  const out = [];
+  normaTesto(rigaDesc).split(' ').forEach(function (w) {
+    if (out.length >= 8 || PAROLE_VUOTE.indexOf(w) >= 0) return;
+    if (w.length < 3 && CORTE_BUONE.indexOf(w) < 0) return;
+    const f = formaParola(w);
+    if (f && !viste[f.pg]) { viste[f.pg] = 1; out.push(f); }
+  });
+  return out;
+}
+/* quanto una voce del prezzario e' vicina a quello che si cerca */
+function puntiVoce(descrizione, forme, formeRiga) {
+  const d = normaTesto(descrizione), testa = d.slice(0, 90);
+  if (!d || !forme.length) return { p: 0, trovate: 0 };
+  let p = 0, trovate = 0;
+  if (forme[0].inizio.test(d)) p += 300; else if (forme[0].js.test(testa)) p += 120;
+  forme.forEach(function (f) {
+    if (f.js.test(d)) { trovate++; p += 80; if (f.js.test(testa)) p += 40; }
+  });
+  (formeRiga || []).forEach(function (f) { if (f.js.test(d)) p += 25; });
+  return { p: p, trovate: trovate };
+}
+async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDesc) {
+  const forme = (parole || []).map(formaParola).filter(Boolean);
+  if (!forme.length) return { righe: [] };
+  const formeRiga = formeDellaRiga(rigaDesc, forme);
+  const leggi = function (regex, quanteQui) {
+    return esegui(dati, { tabella: 'gest_prezzi_propri', campi: campi + (campi.indexOf('codice') < 0 ? ',codice' : ''), filtri: { user_id: uid },
+      regex: { campo: 'descrizione', valori: regex }, senzaCestino: true, ordine: 'codice', crescente: true, limite: quanteQui, soloConta: false });
+  };
+  /* le letture, tutte insieme: A) tutte le parole; B) le prime due; C) la voce
+     COMINCIA con la prima parola e ha una delle altre; D) comincia con la
+     prima e basta. ⚠️ D da sola non basta: le voci che cominciano con «Tubo»
+     sono piu' di 300, e quella in polipropilene restava fuori dal taglio. */
+  const grande = quante || 300, piccola = Math.min(grande, 80);
+  const giri = [{ come: 'tutte', regex: forme.map(function (f) { return f.pg; }), q: Math.min(grande, 200) }];
+  if (forme.length > 2) giri.push({ come: 'prime due', regex: [forme[0].pg, forme[1].pg], q: piccola });
+  forme.slice(1).forEach(function (f, i) { giri.push({ come: 'comincia + parola ' + (i + 2), regex: [forme[0].pgInizio, f.pg], q: piccola }); });
+  giri.push({ come: 'comincia con la prima', regex: [forme[0].pgInizio], q: piccola });
+  const esiti = await Promise.all(giri.map(function (g) { return leggi(g.regex, g.q); }));
+  const visti = {}, tutte = [];
+  for (let i = 0; i < esiti.length; i++) {
+    if (esiti[i].errore) return esiti[i];
+    let buone = 0;
+    (esiti[i].righe || []).forEach(function (x) {
+      if (!(+x.prezzo_unitario > 0)) return;
+      const k = (x.codice || '') + '|' + String(x.descrizione || '').slice(0, 80) + '|' + x.prezzo_unitario;
+      /* la prima parola deve stare nell'INIZIO della voce (i primi 90
+         caratteri): per «radiatore alluminio» usciva un «Ripartitore
+         elettronico…» che i radiatori li nomina in fondo */
+      if (!forme[0].js.test(normaTesto(x.descrizione).slice(0, 90))) return;
+      buone++;
+      if (visti[k]) return;
+      visti[k] = 1; tutte.push(x);
+    });
+    if (passi) passi.push({ come: giri[i].come, parole: giri[i].regex.join(' + '), trovate: (esiti[i].righe || []).length, buone: buone });
+  }
+  const conVoto = tutte.map(function (x, i) { const v = puntiVoce(x.descrizione, forme, formeRiga); return { x: x, p: v.p, t: v.trovate, i: i }; })
+    .sort(function (a, b) { return (b.p - a.p) || (a.i - b.i); });
+  return { righe: conVoto.map(function (o) { return o.x; }), largo: !!conVoto.length && conVoto[0].t < forme.length };
+}
+
+/* ⛔ 16 nov 2026 (3) — IL MATERIALE. Per «Finestra in PVC» la chat ha proposto
+   «Finestra a 2 ante, a battente» a 1.263,69 €/m²: un'altra finestra (quella
+   in PVC nel prezzario sta fra 490 e 790). Se la riga del computo dice un
+   materiale, la voce lo deve dire anche lei: se no NON si propone. Meglio la
+   riga vuota che un prezzo sbagliato con l'aria giusta. */
+const MATERIALI = [
+  /(^| )(pvc|polivinil)/, /(^| )legn/, /(^| )allumin/, /(^| )(acciai|inox)/, /(^| )ferr[oi]( |$)/, /(^| )(ceramic|porcellan|vetrochina|fire ?clay)/,
+  /(^| )gr[eè]s( |$)/, /(^| )rame( |$)/, /(^| )ghisa( |$)/, /(^| )multistrat/, /(^| )(polietilen|pead|pe)( |$)|(^| )polietilen/, /(^| )(polipropilen|pp( |$))/,
+  /(^| )(cartongess|cartonat|gesso rivestit|lastr[ae] (di|in) gesso)/, /(^| )(lateriz|matton|forat)/, /(^| )marm[oi]( |$)/, /(^| )(calcestruzz|cls( |$))/, /(^| )vetroresin/, /(^| )ottone( |$)/
+];
+function stessoMateriale(rigaDesc, candDesc) {
+  const a = normaTesto(rigaDesc), b = normaTesto(candDesc);
+  return !MATERIALI.some(function (re) { return re.test(a) && !re.test(b); });
+}
+/* <<< RICERCA-PREZZARIO */
 function vicinanza(descrizione, parole) {
   const d = String(descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
   const p = (parole || []).map(function (w) { return String(w || '').toLowerCase(); }).filter(Boolean);
@@ -797,6 +924,8 @@ async function esegui(clientDati, q) {
   /* tutte le parole devono esserci (10 nov 2026: con una parola sola «scavo»
      tornavano le 5 voci piu' usate, e quella giusta non c'era) */
   if (q.contieneTutte) q.contieneTutte.valori.forEach(function (w) { sel = sel.ilike(q.contieneTutte.campo, '%' + w + '%'); });
+  /* 16 nov 2026 (3) — `regex`: la parola deve COMINCIARE cosi' (vedi formaParola) */
+  if (q.regex) q.regex.valori.forEach(function (re) { sel = sel.filter(q.regex.campo, 'imatch', re); });
   if (q.oppure) sel = sel.or(q.oppure);
   if (q.stato) sel = sel.eq('stato', q.stato);
   /* ⚠️ `neq` da solo butta via anche le righe con lo stato VUOTO (in SQL
@@ -1100,7 +1229,7 @@ const STRUMENTI = [
   {
     // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
     name: 'cerca_prezzi',
-    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): devono esserci TUTTE nella voce. Se la riga ha `variante` (quello che c\'è dopo l\'ultimo «:», per esempio «doccia» o «spessore 4 cm»), una delle parole è quella («adduzione collettore doccia»). Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
+    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): la PRIMA parola è la cosa («porta», «intonaco», «finestra», «tubazione»), poi il tipo o il materiale («tamburata», «civile», «pvc», «multistrato»). Se la riga ha `variante` (quello che c\'è dopo l\'ultimo «:», per esempio «doccia» o «spessore 4 cm»), una delle parole è quella («adduzione collettore doccia»). Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1945,21 +2074,33 @@ export default async function (req) {
               const parole = paroleDi(c && c.parola, 3);
               if (!memoC.righe[n] || !parole.length) { if (conDiario) diario.push({ cosa: 'cerca', n: n, chiesto: String((c && c.parola) || '').slice(0, 60), esito: !memoC.righe[n] ? 'riga sconosciuta' : 'nessuna parola buona' }); return { n: n, voci: [] }; }
               const passi = conDiario ? [] : null;
-              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300, passi);
+              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300, passi, memoC.righe[n].desc);
               /* prima la STESSA variante (coda uguale), poi la stessa unita';
                  le varianti sicuramente sbagliate (supplemento al posto della
                  lavorazione, misura diversa) non si fanno nemmeno vedere */
               const rd = memoC.righe[n].desc;
-              const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0 && stessaVariante(rd, x.descrizione) !== 'no'; });
-              const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0); };
+              /* 16 nov 2026 (3): non si fa vedere nemmeno quello che `prezzi_computo`
+                 scarterebbe comunque (altra unita' di misura, altro materiale):
+                 occupava i 5 posti e la voce buona restava sesta */
+              const ru = memoC.righe[n].unita;
+              let tolteU = 0, tolteM = 0;
+              const tutte = (r.righe || []).filter(function (x) {
+                if (!(+x.prezzo_unitario > 0) || stessaVariante(rd, x.descrizione) === 'no') return false;
+                if (ru && !stessaUnita(x.unita, ru)) { tolteU++; return false; }
+                if (!stessoMateriale(rd, x.descrizione)) { tolteM++; return false; }
+                return true;
+              });
+              /* 16 nov 2026 (3): una voce di un altro materiale va in fondo (e se la
+                 sceglie, `prezzi_computo` la scarta) */
+              const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0) + (stessoMateriale(rd, x.descrizione) ? 0 : -4); };
               /* 16 nov 2026: a parita' di variante e unita' vince la voce piu' VICINA
                  alle parole cercate (vedi vicinanza) */
-              const radici = parole.map(radice);
-              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), w: vicinanza(x.descrizione, radici), i: i }; })
-                .sort(function (a, b) { return (b.v - a.v) || (b.w - a.w) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
+              /* `r.righe` arriva gia' in fila per vicinanza (puntiVoce) */
+              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), i: i }; })
+                .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
               if (conDiario) diario.push({ cosa: 'cerca', n: n, riga: String(rd || '').slice(0, 70), unita: memoC.righe[n].unita || '',
                 chiesto: String((c && c.parola) || '').slice(0, 60), passi: passi, errore: r.errore || undefined,
-                dopo_variante: tutte.length, tolte_variante: (r.righe || []).length - tutte.length,
+                rimaste: tutte.length, tolte_unita: tolteU, tolte_materiale: tolteM, tolte_variante: (r.righe || []).length - tutte.length - tolteU - tolteM, largo: r.largo || undefined,
                 mostrate: scelte.map(function (x) { return String(x.descrizione || '').slice(0, 70) + ' | ' + (x.unita || '') + ' | ' + x.prezzo_unitario; }) });
               memoC.candidati[n] = {};
               return { n: n, voci: scelte.map(function (x, i) {
@@ -1999,6 +2140,7 @@ export default async function (req) {
                  che un prezzo sbagliato con l'aria giusta. */
               const sv = stessaVariante(riga.desc, cand.descrizione);
               if (sv === 'no') { scartate++; if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'variante diversa' }); return; }
+              if (!stessoMateriale(riga.desc, cand.descrizione)) { scartate++; if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'materiale diverso' }); return; }
               if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'presa', prezzo: cand.prezzo });
               const sorelle = sv === 'si' ? 0 : Object.keys(memoC.candidati[n]).filter(function (kk) {
                 const o = memoC.candidati[n][kk];
@@ -2232,5 +2374,6 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
+export { formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante };
 export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
