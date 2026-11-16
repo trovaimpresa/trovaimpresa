@@ -1272,8 +1272,15 @@
       const mappaCap={};
       if(capitoli.length){
         const {data:nc,error:e2}=await sb.from("gest_computo_capitoli").insert(
-          capitoli.map(k=>({user_id:sbUid,computo_id:nid,ordine:k.ordine,
-                            numero:k.numero,titolo:k.titolo,note:k.note}))
+          /* 16 nov 2026 — la copia perdeva il segno «costi della sicurezza»
+             del capitolo (e i giorni del cronoprogramma): nella copia quei
+             costi tornavano ribassabili e il totale cambiava senza dirlo.
+             Si nominano solo se la riga di partenza le ha. */
+          capitoli.map(k=>Object.assign({user_id:sbUid,computo_id:nid,ordine:k.ordine,
+                            numero:k.numero,titolo:k.titolo,note:k.note},
+            ("sicurezza" in k)?{sicurezza:!!k.sicurezza}:{},
+            ("giorni" in k)?{giorni:k.giorni}:{},
+            ("insieme" in k)?{insieme:!!k.insieme}:{}))
         ).select("id,ordine,titolo");
         if(e2)throw e2;
         /* si riappaiano per ordine+titolo: l'insert di piu' righe restituisce

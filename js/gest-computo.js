@@ -1145,10 +1145,18 @@
     const box=$("#co-rib-conto"); if(!box)return;
     let r=null; try{ r=qeBaseA(); }catch(e){ r=null; }
     if(!r){ box.innerHTML=""; return; }
+    /* 16 nov 2026 \u2014 nei lavori pubblici i costi della sicurezza non si
+       ribassano: qui si leggeva \u00abTotale 4.096,03 \u00b7 Ribasso 10% \u2212 374,60\u00bb e
+       con la calcolatrice il 10% non tornava (350 \u20ac erano sicurezza). Adesso
+       le righe sono le stesse del fondo delle Lavorazioni: i lavori, la
+       sicurezza che non si ribassa, lo sconto sui soli lavori, il totale. */
+    const _s=r.sicurezza||0, _l=Math.round((r.lordo-_s)*100)/100;
     box.innerHTML='<div class="qe-a">'
-      +'<div class="qe-r"><span>Totale dei lavori</span><b>'+eur2(r.lordo)+'</b></div>'
-      +(r.perc?'<div class="qe-r"><span>Ribasso '+esc(_numTesto(r.perc))+'%</span><b>\u2212 '+eur2(r.ribasso)+'</b></div>':'')
+      +'<div class="qe-r"><span>Totale dei lavori</span><b>'+eur2(_s?_l:r.lordo)+'</b></div>'
+      +(_s?'<div class="qe-r"><span>Costi della sicurezza, non soggetti a ribasso</span><b>'+eur2(_s)+'</b></div>':'')
+      +(r.perc?'<div class="qe-r"><span>Ribasso '+esc(_numTesto(r.perc))+'%'+(_s?' (solo sui lavori)':'')+'</span><b>\u2212 '+eur2(r.ribasso)+'</b></div>':'')
       +'<div class="qe-r qe-r--tot"><span>Totale del computo</span><b>'+eur2(r.netto)+'</b></div>'
+      +(r.manodopera?'<div class="qe-r qe-r--dicui"><span>di cui costo del personale</span><b>'+eur2(r.manodopera)+'</b></div>':'')
       +'</div>';
   }
 

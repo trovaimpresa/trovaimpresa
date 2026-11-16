@@ -25,7 +25,7 @@
      Le tabelle e le viste stanno in sql/gest-sal.sql.
      ============================================================ */
   let salCache=[], salTot={}, salVociCache=[], salRigheCache={}, salPrec={},
-      salComputoId=null, salApertoId=null, salApertoDati=null, salDaElenco=false;
+      salComputoId=null, salApertoId=null, salApertoDati=null, salDaElenco=false, salPrecTot=null;
 
   function _salManca(err){
     const m=(err&&(err.message||err.details||""))||"";
@@ -348,6 +348,9 @@
   async function salTorna(){
     if(salDaElenco){ closeSheet(); await renderSalTutti(); window.scrollTo(0,0); return; }
     await compTornaAlComputo();
+    /* 16 nov 2026 — si torna DOVE si era: alla pagina «Acconti (SAL)», non
+       alle lavorazioni (bisognava ritrovare la pagina ogni volta) */
+    try{ compPag(5); }catch(e){}
   }
 
   /* ---- la scheda di un SAL ---- */
@@ -393,9 +396,18 @@
       (rr.data||[]).forEach(r=>{salRigheCache[String(r.voce_id)]=+r.quantita_eseguita||0;});
     }
     const precedente=salCache.filter(x=>(+x.numero||0)<(+s.numero||0)).sort((a,b)=>(+b.numero||0)-(+a.numero||0))[0];
+    /* ⛔ 16 nov 2026 — «GIA' CHIESTO COI SAL PRIMA» ERA ZERO SU OGNI SAL NUOVO.
+       Il conto a schermo prendeva il precedente dall'elenco letto PRIMA di
+       creare il SAL: su un SAL nuovo (e su uno appena creato) la riga non
+       c'era e il secondo acconto usciva intero — 2.995,93 da chiedere invece
+       di 1.468,87 — finche' non si usciva e si rientrava. Adesso il precedente
+       si legge qui, fresco, dal SAL di prima. */
+    salPrecTot=null;
     if(precedente){
       const rp=await sb.from("gest_sal_righe").select("voce_id,quantita_eseguita").eq("user_id",sbUid).eq("sal_id",precedente.id);
       (rp.data||[]).forEach(r=>{salPrec[String(r.voce_id)]=+r.quantita_eseguita||0;});
+      const rt=await sb.from("gest_sal_totali").select("maturato,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid).eq("sal_id",precedente.id).maybeSingle();
+      if(rt&&rt.data)salPrecTot=rt.data;
     }
 
     const rigaVoce=v=>{
@@ -509,15 +521,25 @@
       if(male)oltre++;
     });
     /* il precedente lo sa il database: qui si usa quello gia' letto */
-    const t=salTot[String(salApertoId||"")]||{};
+    const t=salPrecTot
+      ? {maturato_precedente:salPrecTot.maturato, oneri_sicurezza_precedenti:salPrecTot.oneri_sicurezza, manodopera_precedente:salPrecTot.importo_manodopera}
+      : (salTot[String(salApertoId||"")]||{});
     const k=salConti({ maturato:lordo, oneri_sicurezza:sic, importo_manodopera:mano,
                        maturato_precedente:t.maturato_precedente,
                        oneri_sicurezza_precedenti:t.oneri_sicurezza_precedenti,
                        manodopera_precedente:t.manodopera_precedente,
                        ritenuta_perc:_numDa(($("#sal-rit")&&$("#sal-rit").value)||"0") }, comp);
 
+    /* 16 nov 2026 — col ribasso le righe qui sopra non davano «Fatto
+       dall'inizio» (1.685,81 di righe, 1.534,73 di conto: in mezzo c'era il
+       ribasso del computo, e non stava scritto). Adesso si legge in fila. */
+    const _og=compRiepilogoDa(lordo,sic,mano,comp);
     box.innerHTML=
-       '<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
+       (_og.ribasso
+         ? '<div class="qe-r"><span>Lavori fatti, ai prezzi del computo</span><b>'+eur2(_og.lordo)+'</b></div>'
+          +'<div class="qe-r"><span>Ribasso del computo '+String(_og.perc).replace(".",",")+'%'+(_og.sicurezza?' (non sui costi della sicurezza)':'')+'</span><b>−'+eur2(_og.ribasso)+'</b></div>'
+         : '')
+      +'<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
       +'<div class="qe-r"><span>Già chiesto coi SAL prima</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
       +'<div class="qe-r"><span>Questo stato di avanzamento</span><b>'+eur2(k.lordo)+'</b></div>'
       +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>−'+eur2(k.ritenuta)+'</b></div>':'')
@@ -1248,6 +1270,29 @@
     if(typeof v==="number")return isFinite(v)?v:null;
     return _numeroIt(v);
   }
+  /* ⛔ 16 nov 2026 — LE CELLE NUMERICHE DI UN EXCEL VERO SI LEGGONO «CRUDE».
+     Il file si legge come TESTO (cosi' i codici restano «1.10» e non 1,1), ma
+     una cella che in Excel e' un NUMERO arriva scritta all'inglese: 12,345 m²
+     diventa il testo «12.345», che la regola italiana legge dodicimila. Una
+     quantita' o un prezzo con tre decimali entrava mille volte piu' grande
+     (provato: 12,345 m² → 12.345; 22,125 € → 22.125 €).
+     Per i file Excel veri (.xlsx/.xls, non i CSV: li' il numero «crudo» lo
+     indovina la libreria e sbaglia la virgola) si rilegge il foglio coi
+     valori veri, e per quantita', prezzo e manodopera si prende quello. */
+  function _pzCrude(ws,u8){
+    const eExcel=u8&&((u8[0]===0x50&&u8[1]===0x4B)||(u8[0]===0xD0&&u8[1]===0xCF));
+    if(!eExcel)return null;
+    try{ return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""}); }catch(e){ return null; }
+  }
+  function _pzNumCella(crude,i,c,testo){
+    const v=(crude&&crude[i])?crude[i][c]:null;
+    if(typeof v==="number"&&isFinite(v)){
+      /* una percentuale («23,46%») in Excel vale 0,2346: si riporta a 23,46 */
+      if(String(testo==null?"":testo).indexOf("%")>=0)return Math.round(v*100*1e6)/1e6;
+      return v;
+    }
+    return _pzNum(testo);
+  }
   /* 11 agosto 2026 — L'ORDINE DI QUESTI CONTROLLI CONTA, ED ERA SBAGLIATO.
      L'unita' di misura veniva cercata PRIMA del prezzo, e cercava la parola
      "unit": cosi' la colonna «Prezzo unitario» finiva presa per la colonna
@@ -1316,12 +1361,14 @@
     pzPend=null;
     _pzEsito("Sto leggendo <b>"+esc(file.name)+"</b>…");
     if(!(await caricaXLSX())){_pzEsito("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova.","err");return;}
-    let righe;
+    let righe, crude=null;
     try{
       const buf=await file.arrayBuffer();
-      const wb=XLSX.read(new Uint8Array(buf),{type:"array"});
+      const u8=new Uint8Array(buf);
+      const wb=XLSX.read(u8,{type:"array"});
       const sh=wb.Sheets[wb.SheetNames[0]];
       righe=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,defval:""});
+      crude=_pzCrude(sh,u8);
     }catch(e){
       _pzEsito("Non riesco ad aprire il file: "+esc((e&&e.message)||String(e))+"<br>Se è un CSV, prova a riaprirlo con Excel e salvarlo come .xlsx.","err");
       return;
@@ -1352,19 +1399,20 @@
         return;
       }
     }
-    const dati=righe.slice(iInt>=0?iInt+1:0);
+    const _da=(iInt>=0?iInt+1:0);
+    const dati=righe.slice(_da);
 
     const voci=[];let saltate=0;
-    dati.slice(0,PZ_IMP_MAX).forEach(r=>{
+    dati.slice(0,PZ_IMP_MAX).forEach((r,k)=>{
       const desc=String((r[C.descrizione]!=null?r[C.descrizione]:"")).replace(/\s+/g," ").trim();
       if(!desc||desc.length<3){saltate++;return;}
       voci.push({
         codice:(C.codice!=null?String(r[C.codice]||"").trim():"")||null,
         descrizione:desc,
         unita:(C.unita!=null?String(r[C.unita]||"").trim():"")||null,
-        prezzo_unitario:((C.prezzo!=null)?_pzNum(r[C.prezzo]):null)||0,
+        prezzo_unitario:((C.prezzo!=null)?_pzNumCella(crude,_da+k,C.prezzo,r[C.prezzo]):null)||0,
         categoria:(C.categoria!=null?String(r[C.categoria]||"").trim():"")||null,
-        incidenza_manodopera:(C.mano!=null?_pzNum(r[C.mano]):null)
+        incidenza_manodopera:(C.mano!=null?_pzNumCella(crude,_da+k,C.mano,r[C.mano]):null)
       });
     });
     if(!voci.length){_pzEsito("Nel file non ho trovato nessuna voce con una descrizione. Righe lette: "+dati.length+".","err");return;}

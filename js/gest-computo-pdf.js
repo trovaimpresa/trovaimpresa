@@ -136,7 +136,7 @@
     if(!cid){toast("Salva prima il computo, poi importa le lavorazioni");return;}
     toast("Sto leggendo "+file.name+"…");
     if(!(await caricaXLSX())){toast("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova");return;}
-    let righe;
+    let righe, crude=null;
     try{
       const buf=await file.arrayBuffer();
       const u8=new Uint8Array(buf);
@@ -152,6 +152,9 @@
       }
       if(!wb)wb=XLSX.read(u8,{type:"array"});
       righe=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""});
+      /* 16 nov 2026 — le celle numeriche di un Excel vero si leggono crude:
+         12,345 m² entrava come 12.345 (vedi _pzCrude in gest-sal-prezzario.js) */
+      crude=_pzCrude(wb.Sheets[wb.SheetNames[0]],u8);
     }catch(e){
       toast("Non riesco ad aprire il file: "+((e&&e.message)||e)+". Se è un CSV, riaprilo con Excel e salvalo come .xlsx.");
       return;
@@ -184,11 +187,11 @@
        ⛔ Diventa capitolo solo quando DOPO arriva una lavorazione: un titolo
           in fondo al foglio con niente sotto resta una riga saltata. */
     const capitoli=[]; let capAttesa="", capCorr=-1, capVuoti=0;
-    dati.slice(0,COMP_IMP_MAX).forEach(function(r){
+    dati.slice(0,COMP_IMP_MAX).forEach(function(r,k){
       const desc=String(r[C.descrizione]!=null?r[C.descrizione]:"").replace(/\s+/g," ").trim();
       if(!desc||desc.length<3){saltate++;return;}
-      const q=_pzNum(r[C.quantita]);
-      const p=(C.prezzo!=null)?_pzNum(r[C.prezzo]):null;
+      const q=_pzNumCella(crude,iInt+1+k,C.quantita,r[C.quantita]);
+      const p=(C.prezzo!=null)?_pzNumCella(crude,iInt+1+k,C.prezzo,r[C.prezzo]):null;
       /* ⚠️ 18 agosto 2026 — UNA RIGA SENZA QUANTITA' NON E' UNA LAVORAZIONE.
          In fondo a un file ci sono quasi sempre «TOTALE», «Ribasso %»,
          «Oneri di sicurezza»: hanno la descrizione e basta. Prima entravano
@@ -1307,7 +1310,15 @@
         totale+=imp;
         const desc=doc.splitTextToSize(String(v.descrizione||"(senza descrizione)"),X[2]-X[1]-3);
         const cod=doc.splitTextToSize(String(v.codice||""),X[1]-X[0]-3);
-        const lettere=doc.splitTextToSize(prezzoInLettere(pu),X[6]-X[5]-3);
+        /* 16 nov 2026 — il prezzo in lettere si misura col carattere con cui si
+           SCRIVE (6,4): misurato col 7,4 andava a capo prima del dovuto e in
+           mezzo alla parola senza trattino («trecentocinquan / ta/00»). Adesso
+           chi va a capo dentro una parola prende il trattino. E una riga senza
+           prezzo NON scrive «zero/00»: resta vuota, da riempire a penna. */
+        doc.setFontSize(6.4);
+        let lettere=pu?doc.splitTextToSize(prezzoInLettere(pu),X[6]-X[5]-4):[];
+        lettere=lettere.map(function(r,i){ return (i<lettere.length-1&&!/[\/ -]$/.test(r))?r+"-":r; });
+        doc.setFontSize(7.4);
         const righe=Math.max(desc.length,cod.length+1,lettere.length,1);
         const H=righe*3.5+3.4;
         spazio(H+4);
