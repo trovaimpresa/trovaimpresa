@@ -701,6 +701,11 @@ function puntiVoce(descrizione, forme, formeRiga) {
     if (f.js.test(d)) { trovate++; p += 80; if (f.js.test(testa)) p += 40; }
   });
   (formeRiga || []).forEach(function (f) { if (f.js.test(d)) p += 25; });
+  /* 16 nov 2026 (9) — «rasatura stuccatura»: la voce «Stuccatura e rasatura di
+     intonaci…» (le ha tutte e due) stava SOTTO «Rasatura … a gesso» solo perche'
+     quella comincia con la prima parola. Chi ha TUTTE le parole cercate
+     nell'inizio della voce passa davanti. */
+  if (forme.length >= 2 && forme.every(function (f) { return f.js.test(testa); })) p += 150;
   return { p: p, trovate: trovate };
 }
 async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDesc) {
@@ -807,6 +812,30 @@ function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate, parole) {
   const x = stessaU[0] || t[0];
   const perche = !stessaU.length ? 'unita' : (!stessoMateriale(rigaDesc, x.descrizione) ? 'materiale' : 'variante');
   return fa(x, perche);
+}
+/* ⛔ 16 nov 2026 (9) — QUELLO CHE LA VOCE DICE IN PIU'. Dal vivo: per
+   «Preparazione delle superfici con rasatura e stuccatura» l'AI ha preso la
+   rasatura A GESSO (11,68) e non quella per pitturare (6,32); per
+   «Impermeabilizzazione con guaina liquida» quella PEDONABILE autolivellante
+   (50,60) e non quella semplice (13,23). Se la riga non lo dice, la voce che
+   aggiunge una cosa sua (gesso, pedonabile, autolivellante…) va DOPO quella
+   che non aggiunge niente, e all'AI lo si scrive accanto (`in_piu`).
+   «non pedonabile» e «(non autolivellante)» non contano: dicono che NON lo e'. */
+const IN_PIU = [
+  ['pedonabile', /(^| )pedonabil/], ['autolivellante', /(^| )autolivellant/], ['gesso', /(^| )(gesso|scagliola)( |$)/],
+  ['idrofuga', /(^| )idrofug/], ['termoisolante', /(^| )termoisolant/], ['fonoassorbente', /(^| )fonoassorbent/],
+  ['cartongesso', /(^| )(cartongess|cartonat)/], ['rapida essiccazione', /(^| )rapida essiccazion/]
+];
+function inPiu(rigaDesc, candDesc) {
+  const a = normaTesto(rigaDesc), b = normaTesto(candDesc).replace(/(^| )non [a-zàèéìòù]+/g, ' ').slice(0, 130);
+  return IN_PIU.filter(function (c) { return c[1].test(b) && !c[1].test(a); }).map(function (c) { return c[0]; });
+}
+/* le voci buone per una riga, in fila: prima la stessa variante e la stessa
+   unita', poi quelle che non aggiungono niente, poi com'erano (per vicinanza). Pura. */
+function mettiInFila(rigaDesc, rigaUnita, tutte) {
+  const voto = function (x) { return (stessaVariante(rigaDesc, x.descrizione) === 'si' ? 4 : 0) + (stessaUnita(x.unita, rigaUnita) ? 2 : 0) + (stessoMateriale(rigaDesc, x.descrizione) ? 0 : -8) + (inPiu(rigaDesc, x.descrizione).length ? 0 : 1); };
+  return (tutte || []).map(function (x, i) { return { x: x, v: voto(x), i: i }; })
+    .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; });
 }
 function stessoMateriale(rigaDesc, candDesc) {
   const a = normaTesto(rigaDesc), b = normaTesto(candDesc);
@@ -1301,7 +1330,7 @@ const STRUMENTI = [
   {
     // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
     name: 'cerca_prezzi',
-    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): la PRIMA parola è la cosa («porta», «intonaco», «finestra», «tubazione»), poi il tipo o il materiale («tamburata», «civile», «pvc», «multistrato»). Se la riga ha `variante` (quello che c\'è dopo l\'ultimo «:», per esempio «doccia» o «spessore 4 cm»), una delle parole è quella («adduzione collettore doccia»). Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
+    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): la PRIMA parola è la cosa («porta», «intonaco», «finestra», «tubazione»), poi il tipo o il materiale («tamburata», «civile», «pvc», «multistrato»). Se la riga ha `variante` (quello che c\'è dopo l\'ultimo «:», per esempio «doccia» o «spessore 4 cm»), una delle parole è quella («adduzione collettore doccia»). Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Se una candidata ha `in_piu` (per esempio «gesso», «pedonabile», «autolivellante») vuol dire che la voce dice una cosa che la riga NON dice: se c\'è un\'altra candidata buona senza `in_piu`, scegli quella. Poi scegli con `prezzi_computo`.',
     input_schema: {
       type: 'object',
       properties: {
@@ -2198,12 +2227,10 @@ export default async function (req) {
               });
               /* 16 nov 2026 (3): una voce di un altro materiale va in fondo (e se la
                  sceglie, `prezzi_computo` la scarta) */
-              const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0) + (stessoMateriale(rd, x.descrizione) ? 0 : -4); };
-              /* 16 nov 2026: a parita' di variante e unita' vince la voce piu' VICINA
-                 alle parole cercate (vedi vicinanza) */
-              /* `r.righe` arriva gia' in fila per vicinanza (puntiVoce) */
-              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), i: i }; })
-                .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
+              /* 16 nov 2026 (9): la fila la fa `mettiInFila` (variante, unita', poi
+                 chi non aggiunge niente che la riga non dice, poi la vicinanza:
+                 `r.righe` arriva gia' in fila per `puntiVoce`) */
+              const scelte = mettiInFila(rd, memoC.righe[n].unita, tutte).slice(0, 5);
               if (conDiario) diario.push({ cosa: 'cerca', n: n, riga: String(rd || '').slice(0, 70), unita: memoC.righe[n].unita || '',
                 chiesto: String((c && c.parola) || '').slice(0, 60), passi: passi, errore: r.errore || undefined,
                 rimaste: tutte.length, tolte_unita: tolteU, tolte_materiale: tolteM, tolte_variante: (r.righe || []).length - tutte.length - tolteU - tolteM, largo: r.largo || undefined,
@@ -2213,7 +2240,8 @@ export default async function (req) {
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
                 memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
-                return { k: k, d: mostraVoce(x.descrizione, 260), u: x.unita || undefined, p: x.prezzo_unitario };
+                const piu = inPiu(rd, x.descrizione);
+                return { k: k, d: mostraVoce(x.descrizione, 260), u: x.unita || undefined, p: x.prezzo_unitario, in_piu: piu.length ? piu.join(', ') : undefined };
               }), ricerca_larga: r.largo ? 'trovate con meno parole: scegli SOLO se e\' la stessa lavorazione, se no lascia la riga fuori' : undefined };
             }));
             if (conDiario) diario.push({ cosa: 'tempo', ricerche_ms: Date.now() - t0c, righe: lista.length });
@@ -2489,6 +2517,6 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante, vicinaDi };
+export { inPiu, mettiInFila, formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante, vicinaDi };
 export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
