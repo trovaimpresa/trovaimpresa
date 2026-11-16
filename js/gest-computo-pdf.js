@@ -139,7 +139,18 @@
     let righe;
     try{
       const buf=await file.arrayBuffer();
-      const wb=XLSX.read(new Uint8Array(buf),{type:"array"});
+      const u8=new Uint8Array(buf);
+      /* 16 nov 2026 — un CSV salvato da Google Fogli e' in UTF-8 senza segno
+         in testa: letto «a byte» le unita' uscivano «mÂ²» e gli accenti storti,
+         e con l'unita' storta nessun prezzo del prezzario combaciava piu'.
+         Se NON e' un Excel vero (che comincia con PK o con D0 CF) e si legge
+         pulito come UTF-8, lo si passa come testo. */
+      let wb=null;
+      const eExcel=(u8[0]===0x50&&u8[1]===0x4B)||(u8[0]===0xD0&&u8[1]===0xCF);
+      if(!eExcel){
+        try{ const txt=new TextDecoder("utf-8",{fatal:true}).decode(u8); wb=XLSX.read(txt.replace(/^\uFEFF/,""),{type:"string"}); }catch(_e){ wb=null; }
+      }
+      if(!wb)wb=XLSX.read(u8,{type:"array"});
       righe=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""});
     }catch(e){
       toast("Non riesco ad aprire il file: "+((e&&e.message)||e)+". Se è un CSV, riaprilo con Excel e salvalo come .xlsx.");

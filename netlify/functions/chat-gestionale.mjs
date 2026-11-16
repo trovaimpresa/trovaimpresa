@@ -582,6 +582,49 @@ function pulisciVoci(lista, conFonte) {
    voci che COMINCIANO con le parole cercate, poi quelle che le hanno
    attaccate, poi le altre; a parita', dove la prima parola compare prima.
    Funzione pura: l'ordine di arrivo (usata_volte) resta a parita' di voto. */
+/* 16 nov 2026 (2) — prova su un computo vero di 36 righe: 18 non trovate. La
+   ricerca voleva le parole IDENTICHE: «tramezzi» non trovava «tramezzatura»,
+   «pavimento» non trovava «pavimentazione». Adesso si cerca per RADICE (la
+   parola senza la coda), e se con tutte le parole non esce niente si riprova
+   con le prime due, poi con la prima (vedi cercaNelPrezzario). */
+function radice(w) {
+  const t = String(w || '').toLowerCase();
+  if (t.length >= 8) return t.slice(0, t.length - 2);
+  if (t.length >= 6) return t.slice(0, t.length - 1);
+  return t;
+}
+function paroleDi(testo, quante) {
+  return String(testo || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/)
+    .filter(function (w) { return w.length >= 3; }).slice(0, quante || 3);
+}
+/* i tentativi, dal piu' stretto al piu' largo: mai due volte lo stesso */
+function tentativiRicerca(parole) {
+  const r = (parole || []).map(radice).filter(Boolean), out = [], visti = {};
+  [r, r.slice(0, 2), r.slice(0, 1)].forEach(function (t) {
+    const k = t.join(' ');
+    if (t.length && !visti[k]) { visti[k] = 1; out.push(t); }
+  });
+  return out;
+}
+async function cercaNelPrezzario(dati, uid, parole, campi, quante) {
+  const tent = tentativiRicerca(parole);
+  for (let i = 0; i < tent.length; i++) {
+    const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: campi, filtri: { user_id: uid },
+      contieneTutte: { campo: 'descrizione', valori: tent[i] }, senzaCestino: true, ordine: 'usata_volte', limite: quante || 300, soloConta: false });
+    if (r.errore) return r;
+    /* la prima parola deve stare nell'INIZIO della voce (i primi 90 caratteri):
+       per «radiatore alluminio» usciva un «Ripartitore elettronico…» che i
+       radiatori li nomina in fondo, e l'AI lo prendeva per buono */
+    const p0 = tent[i][0];
+    const buone = (r.righe || []).filter(function (x) {
+      if (!(+x.prezzo_unitario > 0)) return false;
+      const d = String(x.descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
+      return d.slice(0, 90).indexOf(p0) >= 0;
+    });
+    if (buone.length) return { righe: ordinaPerVicinanza(buone, tent[i]), largo: i > 0 };
+  }
+  return { righe: [] };
+}
 function vicinanza(descrizione, parole) {
   const d = String(descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
   const p = (parole || []).map(function (w) { return String(w || '').toLowerCase(); }).filter(Boolean);
@@ -591,6 +634,11 @@ function vicinanza(descrizione, parole) {
   if (d.indexOf(frase) === 0) v = 300;
   else if (d.indexOf(p[0]) === 0) v = 200;
   else if (d.indexOf(frase) >= 0) v = 100;
+  /* quante delle parole stanno nell'INIZIO della voce (i primi 90 caratteri):
+     «Radiatore in alluminio» deve battere una voce che nomina i radiatori
+     alla terza riga */
+  const testa = d.slice(0, 90);
+  p.forEach(function (w) { if (testa.indexOf(w) >= 0) v += 40; });
   const dove = d.indexOf(p[0]);
   return v + (dove < 0 ? 0 : Math.max(0, 60 - Math.min(60, dove)));
 }
@@ -1027,7 +1075,7 @@ const STRUMENTI = [
   {
     // ⛔ 10 nov 2026 — i prezzi sulle righe che ci sono gia': non scrive niente
     name: 'prezzi_computo',
-    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che è la STESSA lavorazione (leggi tutta la descrizione: profondità, spessore, tipo di terreno, altezza; la `variante` della riga e la parte dopo «…:» della candidata devono essere la STESSA cosa — «per ogni cm in più» è un supplemento e non va mai su una lavorazione, e viceversa). ⛔ Una voce di un\'ALTRA lavorazione (scavo aperto per uno scavo obbligato, alberi per una siepe) NON si propone: la riga resta fuori. Se due candidate sono varianti della stessa voce e non sai quale, scegli la più vicina: lui la vede SENZA spunta e decide. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. La spunta ce l\'hanno solo le righe trovate per codice di tariffa, che aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
+    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che è la STESSA lavorazione (leggi tutta la descrizione: profondità, spessore, tipo di terreno, altezza; la `variante` della riga e la parte dopo «…:» della candidata devono essere la STESSA cosa — «per ogni cm in più» è un supplemento e non va mai su una lavorazione, e viceversa). ⛔ Una voce di un\'ALTRA lavorazione (scavo aperto per uno scavo obbligato, alberi per una siepe) NON si propone: la riga resta fuori. ⛔ Una RIPRESA o riparazione non è la lavorazione nuova (ripresa di intonaco ≠ intonaco), un accessorio non è l\'apparecchio (ripartitore ≠ radiatore), e se la riga ha una parola che la distingue (TV, telefonica, dati, a condensazione) e la voce non ce l\'ha, la riga resta fuori. Se due candidate sono varianti della stessa voce e non sai quale, scegli la più vicina: lui la vede SENZA spunta e decide. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. La spunta ce l\'hanno solo le righe trovate per codice di tariffa, che aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1801,13 +1849,15 @@ export default async function (req) {
           /* 16 nov 2026 — con una parola si leggono piu' voci e si tengono le 25
              piu' VICINE (su una tariffa da 12.000 voci le prime 25 a caso non
              bastano). Piu' parole: devono esserci tutte, non per forza attaccate. */
-          const paroleP = String(inp.parola || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 4);
-          if (paroleP.length) { qp.contieneTutte = { campo: 'descrizione', valori: paroleP }; qp.limite = 300; }
-          else if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
-          esito = uid ? await esegui(dati, qp) : { errore: 'manca chi sta chiedendo' };
-          if (paroleP.length && esito && esito.righe) {
-            esito.righe = ordinaPerVicinanza(esito.righe, paroleP).slice(0, RIGHE_MAX)
-              .map(function (x) { return Object.assign({}, x, { descrizione: String(x.descrizione || '').slice(0, 320) }); });
+          const paroleP = paroleDi(inp.parola, 4);
+          if (!uid) esito = { errore: 'manca chi sta chiedendo' };
+          else if (paroleP.length) {
+            const rm = await cercaNelPrezzario(dati, uid, paroleP, 'descrizione,unita,prezzo_unitario,categoria', 300);
+            esito = rm.errore ? { errore: rm.errore } : { righe: (rm.righe || []).slice(0, RIGHE_MAX)
+              .map(function (x) { return Object.assign({}, x, { descrizione: String(x.descrizione || '').slice(0, 320) }); }) };
+          } else {
+            if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
+            esito = await esegui(dati, qp);
           }
         } else if (t.name === 'righe_senza_prezzo') {
           /* ⛔ PRIMA il computo, coi due filtri di sempre (utente e reparto):
@@ -1821,7 +1871,13 @@ export default async function (req) {
             if (!suo) {
               esito = { errore: 'quel computo non e\' in questo reparto, oppure non esiste' };
             } else {
-              const salta = Math.min(Math.max(parseInt(inp.salta, 10) || 0, 0), 5000);
+              /* 16 nov 2026 (2) — LE RIGHE GIA' PROVATE FACEVANO DA TAPPO: ogni giro
+                 rileggeva le prime 20 a zero, e quando erano tutte righe che non
+                 si trovano non arrivava piu' in fondo. Quante saltarne lo dice la
+                 PAGINA nella frase («Salta le prime N righe a zero»), e qui si
+                 legge dalla frase: non dipende da cosa passa il modello. */
+              const _sf = /salta le prime (\d{1,4}) righe a zero/i.exec(String(domanda || ''));
+              const salta = Math.min(Math.max(_sf ? parseInt(_sf[1], 10) : (parseInt(inp.salta, 10) || 0), 0), 5000);
               const base0 = { tabella: 'gest_computo_voci_calc', filtri: { user_id: uid, computo_id: String(inp.id) },
                               oppure: 'prezzo_unitario.is.null,prezzo_unitario.eq.0' };
               const [rr, rq] = await Promise.all([
@@ -1877,10 +1933,9 @@ export default async function (req) {
               const n = parseInt(c && c.n, 10);
               /* solo lettere e numeri: una virgola o un % dentro la parola
                  cambierebbero la ricerca */
-              const parole = String((c && c.parola) || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 3);
+              const parole = paroleDi(c && c.parola, 3);
               if (!memoC.righe[n] || !parole.length) return { n: n, voci: [] };
-              const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
-                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 300, soloConta: false });
+              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300);
               /* prima la STESSA variante (coda uguale), poi la stessa unita';
                  le varianti sicuramente sbagliate (supplemento al posto della
                  lavorazione, misura diversa) non si fanno nemmeno vedere */
@@ -1889,14 +1944,15 @@ export default async function (req) {
               const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0); };
               /* 16 nov 2026: a parita' di variante e unita' vince la voce piu' VICINA
                  alle parole cercate (vedi vicinanza) */
-              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), w: vicinanza(x.descrizione, parole), i: i }; })
+              const radici = parole.map(radice);
+              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), w: vicinanza(x.descrizione, radici), i: i }; })
                 .sort(function (a, b) { return (b.v - a.v) || (b.w - a.w) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
               memoC.candidati[n] = {};
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
                 memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
                 return { k: k, d: mostraVoce(x.descrizione, 260), u: x.unita || undefined, p: x.prezzo_unitario };
-              }) };
+              }), ricerca_larga: r.largo ? 'trovate con meno parole: scegli SOLO se e\' la stessa lavorazione, se no lascia la riga fuori' : undefined };
             }));
             esito = { risultati: fatti };
           }
@@ -2160,5 +2216,5 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

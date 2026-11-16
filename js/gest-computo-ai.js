@@ -44,6 +44,11 @@
     if(n==null||n===""||!isFinite(+n))return "";
     return String(Math.round((+n)*1000)/1000).replace(".",",");
   }
+  /* 16 nov 2026: un prezzo si scrive «11,70», non «11,7» */
+  function caiPrezzo(n){
+    if(n==null||n===""||!isFinite(+n))return "";
+    return new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:4,useGrouping:false}).format(+n);
+  }
   function caiVaiAlComputo(){
     const b=document.querySelector('nav.tabs button[data-tab="computi"]');
     if(b&&!b.classList.contains("active"))b.click();
@@ -176,7 +181,7 @@
         +'<div class="cai-desc">'+esc(r.v.descrizione||"")+'</div>'
         +'<div class="cp-campi cai-campi cai-campi--due">'
         +  '<div class="field"><label>Quantità</label><div class="cai-fisso">'+esc(caiTesto(q))+(r.v.unita?(' '+esc(r.v.unita)):'')+'</div></div>'
-        +  '<div class="field"><label>Prezzo unitario</label><input class="cai-prz" inputmode="decimal" value="'+esc(caiTesto(r.prezzo))+'" autocomplete="off"></div>'
+        +  '<div class="field"><label>Prezzo unitario</label><input class="cai-prz" inputmode="decimal" value="'+esc(caiPrezzo(r.prezzo))+'" autocomplete="off"></div>'
         +'</div>'
         +'<div class="cp-orig">Preso dal tuo prezzario'+(r.da?(': «'+esc(r.da)+'»'):'')+'</div>'
         +(r.sicuro?'':'<div class="cp-orig cai-manca">'+(r.varianti
@@ -264,6 +269,24 @@
       if(Date.now()<fine)setTimeout(prova,150);
     })();
   }
+  /* 16 nov 2026 — le righe che l'AI ha gia' provato e non ha trovato restavano
+     in testa e facevano da tappo: ogni giro rileggeva le stesse 20. La pagina
+     si ricorda (per questa visita) quali righe ha gia' fatto provare, e nella
+     frase dice quante saltarne. Finito il giro di tutte, si ricomincia da capo. */
+  function caiSaltaFrase(){
+    try{
+      const cid=String(compVociCompId||""); if(!cid)return "";
+      const zero=(compVociCache||[]).filter(function(v){return !(+v.prezzo_unitario>0);})
+        .sort(function(a,b){return (+a.ordine||0)-(+b.ordine||0);}).map(function(v){return String(v.id);});
+      const K="ti_cai_provate_"+cid;
+      let fatte=[]; try{fatte=JSON.parse(sessionStorage.getItem(K)||"[]");}catch(_e){}
+      let n=0; while(n<zero.length&&fatte.indexOf(zero[n])>=0)n++;
+      if(n>=zero.length){fatte=[];n=0;}
+      zero.slice(n,n+20).forEach(function(id){if(fatte.indexOf(id)<0)fatte.push(id);});
+      try{sessionStorage.setItem(K,JSON.stringify(fatte.slice(-3000)));}catch(_e){}
+      return n>0?(" Salta le prime "+n+" righe a zero: le hai già provate."):"";
+    }catch(e){return "";}
+  }
   function caiTitoloAperto(){
     const c=(compCache||[]).find(function(x){return String(x.id)===String(compVociCompId);});
     return c?String(c.titolo||"").trim():"";
@@ -282,7 +305,7 @@
     if(a==="comp-ai-prezzi"){
       const tit=caiTitoloAperto();
       if(!tit){toast("Dai prima un titolo al computo e salvalo");return;}
-      return caiAllaChat("Nel computo «"+tit+"» metti i prezzi alle lavorazioni che sono a zero, presi dal mio prezzario.",true);
+      return caiAllaChat("Nel computo «"+tit+"» metti i prezzi alle lavorazioni che sono a zero, presi dal mio prezzario."+caiSaltaFrase(),true);
     }
   });
   document.addEventListener("input",function(e){
