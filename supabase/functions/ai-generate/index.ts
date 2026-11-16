@@ -21,6 +21,18 @@ const MODEL = "claude-haiku-4-5-20251001";
 const PREZZO_INPUT_EUR_PER_MTOK  = 0.92;
 const PREZZO_OUTPUT_EUR_PER_MTOK = 4.60;
 
+// ⛔ 16 nov 2026 — IL CONTROLLO AI USA UN MODELLO PIU' BRAVO.
+// Con Haiku il controllo segnalava come «doppi» piatto doccia e box doccia
+// anche con la regola scritta che dice il contrario, e leggeva male le
+// quantita'. Il controllo e' corto (un preventivo intero costa circa un
+// centesimo con Sonnet), quindi si paga volentieri. Il preventivo resta su
+// Haiku: con i prezzi di riferimento scritti nel prompt va bene.
+// E il controllo PENSA prima di rispondere (thinking): senza, anche Sonnet
+// segnalava prezzi dentro la forbice e voci «mancanti» che c'erano gia'.
+const MODEL_FORTE = "claude-sonnet-4-5";
+const PREZZO_FORTE_INPUT_EUR_PER_MTOK  = 2.76;
+const PREZZO_FORTE_OUTPUT_EUR_PER_MTOK = 13.80;
+
 // Che giorno e' in Italia, adesso. Sempre AAAA-MM-GG.
 // Se il fuso non fosse disponibile (non dovrebbe mai succedere) si ricade
 // sull'ora del server invece di rompere la chiamata: una data imprecisa e'
@@ -118,6 +130,7 @@ const FEATURES: Record<string, {
   costo: number;
   maxTokens: number;
   system: string;
+  forte?: boolean;
 }> = {
 
   // costo 0 = usa la quota gratuita separata (consume_help_credit)
@@ -161,7 +174,9 @@ COME RISPONDERE:
   // -------------------------------------------------------------------
   preventivo: {
     costo: 1,
-    maxTokens: 4000,
+    // 6000: una ristrutturazione intera con i capitoli ne usa gia' ~3.200;
+    // se la risposta si tronca il JSON non si legge e il credito e' perso.
+    maxTokens: 6000,
     system: `Sei un capocantiere italiano con trent'anni di mestiere che scrive preventivi per imprese edili e artigiani.
 Dato un lavoro descritto dall'utente, genera il preventivo in JSON con questa struttura:
 {"titolo":"...","iva":10,"voci":[{"capitolo":"Demolizioni e smaltimenti","descrizione":"...","unita":"mq|ml|mc|cad|corpo|h|kg","quantita":0,"prezzo_unitario":0}],"note":"..."}
@@ -171,9 +186,9 @@ I PREZZI — e' la parte che sbagliavi: erano troppo BASSI.
 - Manodopera tutto compreso: manovale 25 €/h, muratore specializzato 33 €/h.
 - Riferimenti (fornitura e posa, finiture medie). Stai DENTRO queste forbici, verso il centro:
   demolizione pavimenti/rivestimenti con carico macerie 12-18 €/mq; demolizione tramezzo 8-12 cm, chiavi in mano 40-50 €/mq;
-  trasporto e conferimento macerie in discarica: A CORPO (appartamento intero 1.200-2.500 €) oppure a mc, MAI a mq;
+  trasporto e conferimento macerie in discarica: A CORPO (un bagno o una stanza 300-600 €, appartamento intero 1.200-2.500 €) oppure a mc, MAI a mq;
   parete in cartongesso posata e stuccata 60-85 €/mq; massetto 18-25 €/mq; pavimento in gres posato 45-70 €/mq (grande formato 60-90);
-  rivestimento bagno posato 50-70 €/mq; battiscopa 8-12 €/ml;
+  rivestimento bagno posato 50-70 €/mq; battiscopa 8-12 €/ml (non dove le pareti sono gia' rivestite di piastrelle, come nei bagni);
   impianto elettrico completo a norma con quadro e dichiarazione di conformita': 70-100 €/mq della casa, oppure 80-150 € a punto (presa, punto luce, comando) — UNO dei due metodi, MAI tutti e due insieme;
   impianto idraulico: bagno completo 900-1.300 €, cucina 800-900 €, a punto acqua 75-150 €;
   sanitari sospesi con cassetta a incasso, posati: 1.000-1.600 € a bagno; rubinetteria a bagno 300-600 €; piatto doccia 150-300 € + box 300-550 €; vasca con posa 600-1.200 €;
@@ -187,6 +202,7 @@ I PREZZI — e' la parte che sbagliavi: erano troppo BASSI.
 LE VOCI CHE SI DIMENTICANO (mettile quando il lavoro le richiede):
 allestimento cantiere e protezioni; smontaggio di sanitari, caldaia, radiatori, infissi e porte vecchi; tracce e chiusura tracce / assistenze murarie agli impianti; tubazioni del riscaldamento quando ci sono caldaia e termosifoni nuovi; scarico fumi della caldaia; piatto doccia (il box da solo non basta); rubinetteria; impermeabilizzazione della doccia; battiscopa; soglie e davanzali se cambiano gli infissi; dichiarazioni di conformita' degli impianti; pulizia finale di cantiere.
 Ogni lavorazione UNA volta sola: se la metti a corpo non la ripeti a pezzi.
+I sanitari si scrivono UNA voce per bagno (vaso, bidet e lavabo), con quantita' 1 a corpo ciascuna: mai due bagni dentro una voce sola. Il rivestimento della cucina va con pavimenti e rivestimenti, non coi bagni.
 
 I CAPITOLI
 - Se le voci sono piu' di 8, raggruppale con "capitolo" (stesso nome per tutte le voci dello stesso gruppo, gruppi uno dopo l'altro). Esempi: "Opere preliminari e demolizioni", "Opere murarie", "Impianto elettrico", "Impianto idraulico e riscaldamento", "Pavimenti e rivestimenti", "Bagni", "Serramenti e porte", "Pitture e finiture", "Pratiche e oneri tecnici".
@@ -362,7 +378,8 @@ Vai dritto al punto, cita sempre i numeri. Formato markdown, massimo 300 parole.
   // -------------------------------------------------------------------
   controllo_documento: {
     costo: 1,
-    maxTokens: 1200,
+    maxTokens: 5000,
+    forte: true,
     system: `Sei un capocantiere italiano con trent'anni di mestiere. Rileggi un
 documento (preventivo, fattura o computo metrico) PRIMA che parta al cliente e
 segnali solo quello che salta all'occhio a un occhio esperto.
@@ -392,8 +409,18 @@ GUARDA QUESTE SEI COSE:
    esempio caldaia e termosifoni nuovi senza tubazioni, box doccia senza
    piatto, impianti nuovi senza assistenze murarie, infissi nuovi senza
    smontaggio dei vecchi). Al massimo due segnalazioni di questo tipo.
+   PRIMA di dire che una cosa manca, rileggi TUTTE le voci: se una voce la
+   copre, anche con altre parole o dentro una voce piu' grande (es. la
+   demolizione dei rivestimenti sta in "demolizione pavimenti e
+   rivestimenti"), NON manca.
 
-MISURE CHE SONO GIUSTE, NON SEGNALARLE:
+PRIMA DI GIUDICARE UN PREZZO leggi la quantita': il totale di una voce e'
+quantita' x prezzo (2 bagni a 1.100 € l'uno sono 2.200 €, non 1.100). Un
+prezzo che sta DENTRO la forbice non si segnala, nemmeno se e' vicino al bordo.
+
+COSE GIUSTE, NON SEGNALARLE:
+- piatto doccia e box doccia sono due pezzi diversi e servono tutti e due:
+  non sono una voce doppia;
 - pareti piu' soffitti da tinteggiare pari a circa 3-3,5 volte la superficie
   della casa (90 mq di casa -> 270-320 mq da dipingere) e' normale;
 - il rivestimento di un bagno a 2 m di altezza e' circa 3-4 volte i mq del
@@ -412,7 +439,8 @@ Rispondi SOLO con questo JSON, senza testo attorno:
   "Voce 3: opere murarie", "Note".
 - "problema": cos'e' che non va e perche', in italiano semplice, massimo 25
   parole. Niente termini tecnici, niente emoji.
-- Al massimo 6 segnalazioni, le piu' importanti.
+- Al massimo 6 segnalazioni, le piu' importanti. Meglio 2 vere che 6 dubbie:
+  ogni segnalazione sbagliata fa perdere fiducia nelle altre.
 - Se non c'e' niente da segnalare: {"segnalazioni":[]}. E' una risposta
   giusta, non un fallimento: non inventare un problema pur di riempire.`,
   },
@@ -514,8 +542,9 @@ Deno.serve(async (req) => {
           "content-type":      "application/json",
         },
         body: JSON.stringify({
-          model:      MODEL,
+          model:      conf.forte ? MODEL_FORTE : MODEL,
           max_tokens: conf.maxTokens,
+          ...(conf.forte ? { thinking: { type: "enabled", budget_tokens: 3000 } } : {}),
           // {{OGGI}} serve alle feature che devono interpretare date
           // relative ("giovedi prossimo"): il modello non sa che giorno e'.
           //
@@ -537,7 +566,8 @@ Deno.serve(async (req) => {
       }
 
       const aiData = await aiRes.json();
-      let testo = aiData.content?.[0]?.text ?? "";
+      // col thinking il primo pezzo e' il ragionamento: si prende il testo
+      let testo = (aiData.content ?? []).find((b: { type?: string }) => b.type === "text")?.text ?? "";
 
       if (!testo) throw new Error("Risposta AI vuota");
 
@@ -549,11 +579,20 @@ Deno.serve(async (req) => {
         .replace(/\n?```\s*$/i, "")
         .trim();
 
+      // 16 nov 2026: Sonnet a volte scrive una frase prima del JSON
+      // («Ecco le segnalazioni: {...}») e il gestionale non lo legge piu'.
+      // Per le funzioni che rispondono in JSON si tiene solo il pezzo fra la
+      // prima { e l'ultima }.
+      if (conf.system.includes("JSON") && !testo.startsWith("{")) {
+        const i = testo.indexOf("{"), j = testo.lastIndexOf("}");
+        if (i >= 0 && j > i) testo = testo.slice(i, j + 1);
+      }
+
       // Costo reale, per la vista margini
       const inTok  = aiData.usage?.input_tokens  ?? 0;
       const outTok = aiData.usage?.output_tokens ?? 0;
-      const costo  = (inTok  / 1_000_000) * PREZZO_INPUT_EUR_PER_MTOK
-                   + (outTok / 1_000_000) * PREZZO_OUTPUT_EUR_PER_MTOK;
+      const costo  = (inTok  / 1_000_000) * (conf.forte ? PREZZO_FORTE_INPUT_EUR_PER_MTOK  : PREZZO_INPUT_EUR_PER_MTOK)
+                   + (outTok / 1_000_000) * (conf.forte ? PREZZO_FORTE_OUTPUT_EUR_PER_MTOK : PREZZO_OUTPUT_EUR_PER_MTOK);
 
       if (logId) {
         await admin.rpc("settle_ai_usage", {

@@ -804,6 +804,7 @@
       (Array.isArray(voci)?voci:[]).forEach(v=>{
         let desc=String((v&&v.descrizione)||"").trim();
         if(!desc)return;
+        if(+v.quantita===0&&!(+v.prezzo_unitario))return;   /* voce «che non serve» */
         const cap=String((v&&v.capitolo)||"").trim();
         if(cap&&cap!==capPrima)righe.push({user_id:sbUid, descrizione:cap, qta:0, prezzo:0, unita:null, sezione:true, ordine:righe.length});
         capPrima=cap;

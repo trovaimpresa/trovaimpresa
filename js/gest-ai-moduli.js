@@ -484,6 +484,9 @@
       voci.forEach(function(v){
         let desc=String((v&&v.descrizione)||"").trim();
         if(!desc) return;
+        /* 16 nov 2026: l'AI a volte scrive voci «che non servono» con
+           quantita' 0 e prezzo 0 (battiscopa in un bagno rivestito): via. */
+        if(+v.quantita===0&&!(+v.prezzo_unitario)) return;
         const cap=String((v&&v.capitolo)||"").trim();
         if(cap&&cap!==capPrima){
           box.insertAdjacentHTML("beforeend",prevRigaHtml({sezione:true,descrizione:cap}));
@@ -1800,7 +1803,7 @@
     const tasto=document.querySelector('.ctr-tasto-ai[data-ctr="'+tipo+'"]');
     if(tasto){ tasto.disabled=true; tasto.textContent="Sto leggendo…"; }
     const box=ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI sta rileggendo il documento…</div>'
-      +'<div class="ctr-ai-sub">Ci mette una decina di secondi.</div>');
+      +'<div class="ctr-ai-sub">Ci mette fino a un minuto: rilegge con calma.</div>');
     if(box&&box.scrollIntoView)box.scrollIntoView({block:"center",behavior:"smooth"});
     try{
       const out=await window.AI.dati("controllo_documento",d.testo);
