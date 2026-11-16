@@ -606,7 +606,7 @@ function tentativiRicerca(parole) {
   });
   return out;
 }
-async function cercaNelPrezzario(dati, uid, parole, campi, quante) {
+async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi) {
   const tent = tentativiRicerca(parole);
   for (let i = 0; i < tent.length; i++) {
     const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: campi, filtri: { user_id: uid },
@@ -621,6 +621,9 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante) {
       const d = String(x.descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
       return d.slice(0, 90).indexOf(p0) >= 0;
     });
+    /* 17 nov 2026 — il registro delle ricerche (solo per il fondatore): per ogni
+       tentativo, quante voci ha dato il prezzario e quante sono rimaste */
+    if (passi) passi.push({ parole: tent[i].join(' '), trovate: (r.righe || []).length, buone: buone.length });
     if (buone.length) return { righe: ordinaPerVicinanza(buone, tent[i]), largo: i > 0 };
   }
   return { righe: [] };
@@ -1530,12 +1533,18 @@ export default async function (req) {
   const server = createClient(SUPABASE_URL, SERVICE_KEY);
 
   // ---- 1. CHI STA CHIAMANDO (dal gettone, mai dal messaggio) ---------
-  let uid = null;
+  let uid = null, emailChi = '';
+  /* 17 nov 2026 — IL REGISTRO DELLE RICERCHE. Si riempie solo per il fondatore
+     e viaggia nell'ultima riga della risposta (`diario`): a schermo non cambia
+     niente, nel database non si scrive niente. Serve a capire PERCHE' una riga
+     del computo resta senza prezzo. */
+  const diario = [];
   try {
     const { data: chi, error: err } = await conTempo(server.auth.getUser(token), TEMPO_ACCESSO, 'getUser');
-    if (!err && chi && chi.user && chi.user.id) uid = chi.user.id;
+    if (!err && chi && chi.user && chi.user.id) { uid = chi.user.id; emailChi = String(chi.user.email || '').toLowerCase(); }
   } catch (e) { console.error('[chat] accesso non verificato:', e && e.message); }
   if (!uid) return rispondi(401, { error: 'Sessione non valida. Rientra e riprova.' });
+  const conDiario = ['pintoalessio@icloud.com', 'info@trovaimpresa.com'].indexOf(emailChi) >= 0;
 
   // ---- 2. il client dei DATI: col gettone suo, RLS accesa ------------
   // ⛔ vedi la regola 3 in cima: i dati NON si leggono col service role.
@@ -1934,8 +1943,9 @@ export default async function (req) {
               /* solo lettere e numeri: una virgola o un % dentro la parola
                  cambierebbero la ricerca */
               const parole = paroleDi(c && c.parola, 3);
-              if (!memoC.righe[n] || !parole.length) return { n: n, voci: [] };
-              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300);
+              if (!memoC.righe[n] || !parole.length) { if (conDiario) diario.push({ cosa: 'cerca', n: n, chiesto: String((c && c.parola) || '').slice(0, 60), esito: !memoC.righe[n] ? 'riga sconosciuta' : 'nessuna parola buona' }); return { n: n, voci: [] }; }
+              const passi = conDiario ? [] : null;
+              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300, passi);
               /* prima la STESSA variante (coda uguale), poi la stessa unita';
                  le varianti sicuramente sbagliate (supplemento al posto della
                  lavorazione, misura diversa) non si fanno nemmeno vedere */
@@ -1947,6 +1957,10 @@ export default async function (req) {
               const radici = parole.map(radice);
               const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), w: vicinanza(x.descrizione, radici), i: i }; })
                 .sort(function (a, b) { return (b.v - a.v) || (b.w - a.w) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
+              if (conDiario) diario.push({ cosa: 'cerca', n: n, riga: String(rd || '').slice(0, 70), unita: memoC.righe[n].unita || '',
+                chiesto: String((c && c.parola) || '').slice(0, 60), passi: passi, errore: r.errore || undefined,
+                dopo_variante: tutte.length, tolte_variante: (r.righe || []).length - tutte.length,
+                mostrate: scelte.map(function (x) { return String(x.descrizione || '').slice(0, 70) + ' | ' + (x.unita || '') + ' | ' + x.prezzo_unitario; }) });
               memoC.candidati[n] = {};
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
@@ -1970,7 +1984,7 @@ export default async function (req) {
             (Array.isArray(inp.scelte) ? inp.scelte : []).slice(0, RIGHE_ZERO_MAX).forEach(function (sc) {
               const n = parseInt(sc && sc.n, 10), k = String((sc && sc.k) || '').trim().toLowerCase();
               const riga = memoC.righe[n], cand = memoC.candidati[n] && memoC.candidati[n][k];
-              if (!riga || !cand) { scartate++; return; }
+              if (!riga || !cand) { scartate++; if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: !riga ? 'riga sconosciuta' : 'lettera che non esiste' }); return; }
               if (prezzi.some(function (p) { return p.voce_id === riga.id; })) return;
               /* ⛔ 10 nov 2026, dal collaudo dal vivo: su 19 prezzi scelti «per
                  parola» e dati per sicuri, 16 erano la VARIANTE sbagliata della
@@ -1978,13 +1992,14 @@ export default async function (req) {
                  diverso). Quindi una scelta per parola NON ha mai la spunta: la
                  spunta ce l'ha solo il codice di tariffa. La mette lui, guardando.
                  E una voce con un'altra unita' di misura non si propone proprio. */
-              if (!stessaUnita(cand.unita, riga.unita)) { scartate++; return; }
+              if (!stessaUnita(cand.unita, riga.unita)) { scartate++; if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'unita diversa: ' + cand.unita + ' / ' + riga.unita }); return; }
               /* ⛔ 10 nov 2026 (sera): «per ogni cm in piu'» preso al prezzo della
                  voce da 3 cm, quattro sanitari diversi tutti a 162,8. Una
                  variante che non combacia NON si propone: meglio la riga vuota
                  che un prezzo sbagliato con l'aria giusta. */
               const sv = stessaVariante(riga.desc, cand.descrizione);
-              if (sv === 'no') { scartate++; return; }
+              if (sv === 'no') { scartate++; if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'variante diversa' }); return; }
+              if (conDiario) diario.push({ cosa: 'scelta', n: n, k: k, esito: 'presa', prezzo: cand.prezzo });
               const sorelle = sv === 'si' ? 0 : Object.keys(memoC.candidati[n]).filter(function (kk) {
                 const o = memoC.candidati[n][kk];
                 return kk !== k && o.prezzo !== cand.prezzo && stessaUnita(o.unita, cand.unita)
@@ -2190,6 +2205,7 @@ export default async function (req) {
         fine: true,
         errore: (errore && (!risposta || tempoScaduto)) ? errore : null,
         modulo: modulo,
+        diario: (conDiario && diario.length) ? diario.slice(0, 200) : undefined,
         come_pagato: comePagato,
         /* ⚠️ 14 set 2026: si toglie 1 in tutti e due i casi. `restanti`
            comprende sia i compresi sia i messaggi comprati, e questo
