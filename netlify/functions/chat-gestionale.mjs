@@ -788,7 +788,12 @@ function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate, parole) {
   const lontana = function (x) {
     const d = normaTesto(x.descrizione), a = normaTesto(rigaDesc);
     if (forme.length && !forme.every(function (f) { return f.js.test(d); })) return true;
-    return DISTINTIVE.some(function (re) { return re.test(d.slice(0, 90)) && !re.test(a); });
+    if (DISTINTIVE.some(function (re) { return re.test(d.slice(0, 90)) && !re.test(a); })) return true;
+    /* 16 nov 2026 (7) — dal vivo: «Quadro elettrico da incasso» → «Quadro luminoso
+       indicatore di chiamata, da incasso» si poteva ancora prendere. Le prime DUE
+       parole piene della riga (quelle che dicono che cosa e') devono stare nella voce. */
+    const prime = a.split(' ').filter(function (w) { return w.length >= 5; }).slice(0, 2).map(formaParola).filter(Boolean);
+    return !prime.every(function (f) { return f.js.test(d); });
   };
   if (mostrate && mostrate.length) return fa(mostrate[0], lontana(mostrate[0]) ? 'lontana' : '');
   const t = (trovate || []).filter(function (x) { return +x.prezzo_unitario > 0; });
