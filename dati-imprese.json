@@ -1,6 +1,6 @@
 {
   "_cosa_e": "Fotografia delle imprese per citta (e per regione), usata da genera-mestiere-citta.js quando la shell non arriva su internet. Presa da imprese_pubbliche con l MCP Supabase.",
-  "fotografia_del": "2026-11-09",
+  "fotografia_del": "2026-11-16",
   "citta": {
     "Roma": [
       {
@@ -11,7 +11,7 @@
           "Giardinaggio / Esterni",
           "Altro"
         ],
-        "tipo": null,
+        "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
@@ -49,7 +49,7 @@
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": "Tappezziere 40 anni di esperienza rifacimenti imbottiti e tendaggi Roma sud risposta in 48 ore"
+        "descrizione": "Tappezzeria ricoperture divani poltrone letti imbottiti esperienza 40ennale tende classiche da interno e tende tevniche da ufficio"
       },
       {
         "id": 75,
@@ -253,6 +253,19 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Studio di Ristrutturazioni e Servizi Tecnici\nSiamo una realtà specializzata nel settore delle ristrutturazioni e delle lavorazioni edili e metalmeccaniche, composta da una squadra di operai qualificati e professionisti con competenze specifiche nei diversi settori di intervento.\n\nDisponiamo di un'esp"
+      },
+      {
+        "id": 340,
+        "nome": "Ele Costruzioni srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Milano": [
@@ -281,7 +294,7 @@
         "citta": "Milano",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       },
@@ -298,7 +311,7 @@
         "citta": "Milano",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Giardinaggio, abbattimenti e potature,manutenzione ordinaria e straordinaria, realizzo giardino e parchi impianti d irrigazione automatica, prato sintetico e prato a rotoli, agronomo.milano,pavia,brescia,monza,lodi"
       },
@@ -489,6 +502,65 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 329,
+        "nome": "BLEDI EDIL ALB",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Cesano Boscone",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 330,
+        "nome": "Impresa édile Ziba srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 342,
+        "nome": "baza srl",
+        "mestiere": "Muratura e strutture",
+        "mestieri": [
+          "Edilizia commerciale"
+        ],
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "### BAZA SRL – La tua casa, il nostro lavoro!\n\nStai cercando un'impresa edile seria e affidabile per ristrutturare la tua casa?\n\n**BAZA SRL è al tuo servizio!**\n\nSiamo un'impresa edile con sede a Sant'Angelo Lodigiano (LO), con una squadra operativa flessibile e oltre 10 anni di esperienza nel settor"
+      },
+      {
+        "id": 344,
+        "nome": "Nuova Edilizia di Nitu Dumitru",
+        "mestiere": "Edilizia / Muratura",
+        "mestieri": [
+          "Edilizia / Muratura",
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "NITU EDILIZIA – Impresa edile e ristrutturazioni**\n\nNitu Edilizia offre servizi professionali nel settore dell'edilizia, occupandosi di manutenzioni, ristrutturazioni e lavori di finitura per abitazioni e locali commerciali.\n\nI nostri servizi comprendono:\n- Imbiancatura e tinteggiatura interna ed est"
       }
     ],
     "Torino": [
@@ -564,7 +636,7 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Operatore impianti elettrici PAS PAV PEI da 4 anni si occupa di installazione impianti in Torino"
       },
@@ -577,7 +649,7 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ci occupiamo di ogni tipo di lavoro edile voi abbiate bisogno. Dai piccoli lavori alle ristrutturazioni chiavi in mano. Siamo specializzati in isolamenti termici ed acustici, tetti, piastrelle, cartongesso, pavimentazioni e rivestimenti in resina, giardini, verande, barbecue e piscine. Eseguiamo sopr"
       },
@@ -680,6 +752,22 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 350,
+        "nome": "Maurobros",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica",
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Torino",
+        "regione": "Piemonte",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Idraulico con esperienza trentennale esegue ristrutturazioni per imparazioni sostituzione boiler e sopra luoghi per certificati gas e apertura contatori gas"
       }
     ],
     "Napoli": [
@@ -707,7 +795,7 @@
         "citta": "Napoli",
         "regione": "Campania",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Siamo un impresa che opera nel settore del edilizia civile con una vasta esperienza ed un team di professionisti sempre pronti ad accontentare ogni vostra esigenza"
       },
@@ -720,7 +808,7 @@
         "citta": "Napoli",
         "regione": "Campania",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Siamo impresa edile che opera da oltre 20 anni, lavori visibili su www.aedificacostruzioni@eu"
       },
@@ -754,6 +842,37 @@
         "piano": "premium",
         "verificata": false,
         "descrizione": "Siamo una società nata nel 2025, ma  con  anni di esperienza lavorativa alle spalle \nCi occupiamo di tutto quello che riguarda l’elettricità"
+      },
+      {
+        "id": 335,
+        "nome": "LA BOTTEGA DEL COLORE",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Marano di Napoli",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 339,
+        "nome": "Edilart di Cella Giovanni",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "San Gennaro Vesuviano",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "EDILE ART – Lavori edili e finiture in tutta la Campania\n\nEDILE ART è un’attività con sede a San Gennaro Vesuviano, in provincia di Napoli, specializzata in lavori di cartongesso, tinteggiatura e piccole manutenzioni edili.\n\nCi occupiamo di migliorare e valorizzare gli ambienti, offrendo soluzioni cu"
       }
     ],
     "Rieti": [
@@ -989,6 +1108,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Imbianchino con esperienza, disponibili per lavori su Bologna e provincia.\nCi occupiamo di:\nImbiancatura Pareti su Bologna e provincia\nMontaggio Cartongesso Bologna\nRasature pareti Bologna\nLavori di facciate: applicazione di isolamento a pannelli, guaina, tegole\nFalegnameria: montaggio di porte inter"
+      },
+      {
+        "id": 332,
+        "nome": "Tabellini infissi",
+        "mestiere": "Serramenti / Infissi",
+        "mestieri": [
+          "Serramenti / Infissi"
+        ],
+        "tipo": "artigiano",
+        "citta": "Medicina",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Specialista nella Posa in Opera e Montaggio di Serramenti, Infissi, Porte e Zanzariere.\nOpero con professionalità, precisione e massima cura dei dettagli offrendo servizi specializzati di posa in opera e montaggio per show-room, rivenditori, imprese edili e clienti privati.\nInstallazioni eseguite a r"
       }
     ],
     "Firenze": [
@@ -1081,6 +1215,36 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 333,
+        "nome": "Edil crea group di paganelli andrea",
+        "mestiere": "Facciate e cappotto termico",
+        "mestieri": [
+          "Facciate e cappotto termico"
+        ],
+        "tipo": "impresa",
+        "citta": "Corato",
+        "regione": "Puglia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Specializzati in edilizia e rifiniture d'interni ed esterni con sede a Corato e operativi in tutta la Puglia. Eseguiamo a regola d'arte cappotti termici, posa di cartongesso, intonaci, pitturazioni e lavori di rifinitura.\nGarantiamo massima serietà, puntualità e sopralluoghi con preventivo gratuito i"
+      },
+      {
+        "id": 348,
+        "nome": "Italedilizia",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bari",
+        "regione": "Puglia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Catania": [
@@ -1154,7 +1318,7 @@
         "citta": "Venezia",
         "regione": "Veneto",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       },
@@ -1190,9 +1354,9 @@
         "citta": "Messina",
         "regione": "Sicilia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
-        "descrizione": null
+        "descrizione": "Scuderi Service SRLS è un'azienda specializzata nella progettazione, installazione e manutenzione di impianti tecnologici. Ci occupiamo di impianti fotovoltaici, solare termico, climatizzazione, impianti idrici ed elettrici, offrendo soluzioni innovative ed efficienti per privati e aziende. Professio"
       },
       {
         "id": 306,
@@ -1224,7 +1388,7 @@
         "citta": "Villa Estense",
         "regione": "Veneto",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ciao e grazie per la tua visita! \nLa ditta BIS-MAS si occupa di fornitura e posa di serramenti in ALLUMINIO e PVC. Offriamo la massima ASSISTENZA e manutenzione anche nei prodotti non forniti da noi!\nIl nostro punto di forza è il PASSAPAROLA perché la nostra  conoscenza e COMPETENZA in materia fa di "
       }
@@ -1381,7 +1545,7 @@
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": "Impresa HENRICH G, specializzata in lavori di pavimentazione, rivestimenti, tinteggiatura"
+        "descrizione": "Impresa edile HENRICH G a vostra disposizione per lavori di pavimentazione, rivestimento, tinteggiatura interni ed esterni nelle provincie di Bergamo e Milano"
       },
       {
         "id": 251,
@@ -1417,7 +1581,23 @@
         "descrizione": "impresa edile esegue ogni tipo di lavoro ; restauro appartamenti , bagni tinteggiature , guaine , etc"
       }
     ],
-    "Caltanissetta": [],
+    "Caltanissetta": [
+      {
+        "id": 347,
+        "nome": "IMPREPAN SRLS UNIPERSONALE",
+        "mestiere": "Cappotti termici / Isolamento",
+        "mestieri": [
+          "Cappotti termici / Isolamento"
+        ],
+        "tipo": "artigiano",
+        "citta": "Caltanissetta",
+        "regione": "Sicilia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      }
+    ],
     "Campobasso": [],
     "Caserta": [],
     "Catanzaro": [],
@@ -1434,7 +1614,7 @@
         "citta": "Chieti",
         "regione": "Abruzzo",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Serramenti tapparelle zanzariere da oltre 30 anni"
       }
@@ -1546,7 +1726,7 @@
         "citta": "Cuneo",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ristrutturazione"
       }
@@ -1584,7 +1764,7 @@
         "citta": "Forlì",
         "regione": "Emilia-Romagna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -1597,7 +1777,7 @@
         "citta": "Forlì",
         "regione": "Emilia-Romagna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       }
@@ -1764,7 +1944,38 @@
         "descrizione": "Impresa edile da tre generazioni specializzata in Ristrutturazione completa - rifacimento tetti - manutenzioni condominiali ecc. - Sopralluoghi e preventivi gratuiti! Zona Lodi - Pavia - Piacenza - Mi"
       }
     ],
-    "Lucca": [],
+    "Lucca": [
+      {
+        "id": 336,
+        "nome": "Gentile Impresa edile",
+        "mestiere": "Coperture e tetti",
+        "mestieri": [
+          "Coperture e tetti"
+        ],
+        "tipo": "impresa",
+        "citta": "Viareggio",
+        "regione": "Toscana",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "La nostra impresa opera nel settore dell’edilizia da oltre 30 anni, maturando una solida esperienza e professionalità nel campo delle costruzioni e delle ristrutturazioni.\n\nSiamo specializzati nel montaggio di impalcature e ponteggi, nel rifacimento di coperture e facciate, nonché nella manutenzione "
+      },
+      {
+        "id": 349,
+        "nome": "Costruzioni edifici residenziali e non residenziali di nicola ieda",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Viareggio",
+        "regione": "Toscana",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "sono Nicola di Costruzioni Generali di Ieda' Nicola. Mi occupo di ristrutturazioni complete di bagni e appartamenti, demolizioni, impianti, pavimentazioni, rivestimenti e finiture. Eseguo inoltre lavori in quota, manutenzioni condominiali, ripristini, pulizia di canalette e potature. Opero in tutta l"
+      }
+    ],
     "Macerata": [
       {
         "id": 66,
@@ -1862,7 +2073,7 @@
         "citta": "Monza",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -1934,6 +2145,19 @@
     "Nuoro": [],
     "Oristano": [],
     "Pavia": [
+      {
+        "id": 55,
+        "nome": "R-one di ELOKLH Osama",
+        "mestiere": null,
+        "mestieri": null,
+        "tipo": null,
+        "citta": "Borgo San Siro",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
       {
         "id": 100,
         "nome": "SN EDILIZIA DI SANDU NICUSOR",
@@ -2028,9 +2252,51 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 331,
+        "nome": "REDIR SRL",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Peccioli",
+        "regione": "Toscana",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Ci occupiamo di efficientamento energetico innovativo, con prodotti come il riscaldamento ad infrarossi adatto per scaldare qualsiasi ambiente con interventi poco invasivi e con costi ridotti, sistema per la produzione di acqua calda sanitaria, impianti fotovoltaici con accumulo sia collegati al cont"
+      },
+      {
+        "id": 337,
+        "nome": "Diseko Group Srls",
+        "mestiere": "Altro",
+        "mestieri": [],
+        "tipo": "impresa",
+        "citta": "Pisa",
+        "regione": "Toscana",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "DISEKO è un'azienda specializzata nella disinfestazione e nel trattamento degli infestanti del legno, come tarli, termiti, acari del tarlo, Sclerodermus domesticus e formiche carpentiere, che trattiamo sia con dispositivi dispensatori di microonde, completamente ecologici e di ultima generazione, sia"
       }
     ],
-    "Pistoia": [],
+    "Pistoia": [
+      {
+        "id": 341,
+        "nome": "Blue Bird Srl",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Montecatini-Terme",
+        "regione": "Toscana",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      }
+    ],
     "Pordenone": [
       {
         "id": 78,
@@ -2076,7 +2342,7 @@
         "citta": "Prato",
         "regione": "Toscana",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Esperienza decennale in sostituzione e riparazione di;\nSerrature, avvolgibili, zanzariere, fornitura e montaggio di ringhiere e cancelli per esterno, opere di carpenteria metallica in genere"
       }
@@ -2158,7 +2424,7 @@
         "citta": "Rimini",
         "regione": "Emilia-Romagna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "EDILMUSA RISTRUTTURAZIONI\nRistrutturare casa non significa solo fare lavori. Significa trasformare uno spazio in qualcosa che senti davvero tuo.\nEdilmusa realizza ristrutturazioni complete di interni, occupandosi direttamente delle diverse fasi del lavoro per offrirti un unico referente, meno pensier"
       },
@@ -2223,7 +2489,7 @@
         "citta": "Salerno",
         "regione": "Campania",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -2296,7 +2562,7 @@
         "citta": "Sassari",
         "regione": "Sardegna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -2326,7 +2592,7 @@
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": "Diamo forma ai tuoi progetti più importanti.\nDalla creazione di nuove abitazioni agli ampliamenti strutturali, lavoriamo con precisione ingegneristica e passione artigiana. Strutture solide, impianti all'avanguardia (idrici, termoidraulici ed elettrici) e una gestione del cantiere che non lascia null"
+        "descrizione": "Romangia Costruzioni di A. Pinna (con sede a Sorso, in provincia di Sassari) è un'impresa generale di costruzioni forte di anni di esperienza nel settore, specializzata in edilizia residenziale, commerciale e industriale.  \n​La ditta mette al primo posto il bene e la soddisfazione del cliente, distin"
       }
     ],
     "Savona": [
@@ -2376,7 +2642,7 @@
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": "Si svolgono lavori di tinteggiatura cartongesso pittura decorativa e cornici in gesso"
+        "descrizione": "Pitturazione e cartongesso messa in opera di cornici pittura decorativa pitturazione interni ed esterni"
       }
     ],
     "Sondrio": [],
@@ -2657,7 +2923,7 @@
           "Giardinaggio / Esterni",
           "Altro"
         ],
-        "tipo": null,
+        "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
         "piano": "free"
@@ -2808,7 +3074,7 @@
         "tipo": "impresa",
         "citta": "",
         "regione": "Lazio",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 255,
@@ -2883,6 +3149,16 @@
         "citta": "Roma",
         "regione": "Lazio",
         "piano": "free"
+      },
+      {
+        "id": 340,
+        "nome": "Ele Costruzioni srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "piano": "free"
       }
     ],
     "Lombardia": [
@@ -2896,6 +3172,16 @@
         ],
         "tipo": "artigiano",
         "citta": "Milano",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 55,
+        "nome": "R-one di ELOKLH Osama",
+        "mestiere": null,
+        "mestieri": null,
+        "tipo": null,
+        "citta": "Borgo San Siro",
         "regione": "Lombardia",
         "piano": "free"
       },
@@ -2981,7 +3267,7 @@
         "tipo": "impresa",
         "citta": "Milano",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 113,
@@ -2995,7 +3281,7 @@
         "tipo": "artigiano",
         "citta": "Monza",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 115,
@@ -3009,7 +3295,7 @@
         "tipo": "artigiano",
         "citta": "Milano",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 143,
@@ -3397,6 +3683,53 @@
         "citta": "Villanuova sul Clisi",
         "regione": "Lombardia",
         "piano": "free"
+      },
+      {
+        "id": 329,
+        "nome": "BLEDI EDIL ALB",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Cesano Boscone",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 330,
+        "nome": "Impresa édile Ziba srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 342,
+        "nome": "baza srl",
+        "mestiere": "Muratura e strutture",
+        "mestieri": [
+          "Edilizia commerciale"
+        ],
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 344,
+        "nome": "Nuova Edilizia di Nitu Dumitru",
+        "mestiere": "Edilizia / Muratura",
+        "mestieri": [
+          "Edilizia / Muratura",
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "piano": "free"
       }
     ],
     "Liguria": [
@@ -3542,7 +3875,7 @@
         "tipo": "artigiano",
         "citta": "Torino",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 118,
@@ -3552,7 +3885,7 @@
         "tipo": "impresa",
         "citta": "Torino",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 123,
@@ -3564,7 +3897,7 @@
         "tipo": "impresa",
         "citta": "Cuneo",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 146,
@@ -3705,6 +4038,19 @@
         "citta": "Pinerolo",
         "regione": "Piemonte",
         "piano": "free"
+      },
+      {
+        "id": 350,
+        "nome": "Maurobros",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica",
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Torino",
+        "regione": "Piemonte",
+        "piano": "free"
       }
     ],
     "Sardegna": [
@@ -3740,7 +4086,7 @@
         "tipo": "artigiano",
         "citta": "Sassari",
         "regione": "Sardegna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 135,
@@ -3870,6 +4216,30 @@
         "citta": "Noci",
         "regione": "Puglia",
         "piano": "free"
+      },
+      {
+        "id": 333,
+        "nome": "Edil crea group di paganelli andrea",
+        "mestiere": "Facciate e cappotto termico",
+        "mestieri": [
+          "Facciate e cappotto termico"
+        ],
+        "tipo": "impresa",
+        "citta": "Corato",
+        "regione": "Puglia",
+        "piano": "free"
+      },
+      {
+        "id": 348,
+        "nome": "Italedilizia",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bari",
+        "regione": "Puglia",
+        "piano": "free"
       }
     ],
     "Marche": [
@@ -3921,7 +4291,7 @@
         "tipo": "artigiano",
         "citta": "Prato",
         "regione": "Toscana",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 131,
@@ -3997,6 +4367,62 @@
         "citta": "Firenze",
         "regione": "Toscana",
         "piano": "free"
+      },
+      {
+        "id": 331,
+        "nome": "REDIR SRL",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Peccioli",
+        "regione": "Toscana",
+        "piano": "free"
+      },
+      {
+        "id": 336,
+        "nome": "Gentile Impresa edile",
+        "mestiere": "Coperture e tetti",
+        "mestieri": [
+          "Coperture e tetti"
+        ],
+        "tipo": "impresa",
+        "citta": "Viareggio",
+        "regione": "Toscana",
+        "piano": "free"
+      },
+      {
+        "id": 337,
+        "nome": "Diseko Group Srls",
+        "mestiere": "Altro",
+        "mestieri": [],
+        "tipo": "impresa",
+        "citta": "Pisa",
+        "regione": "Toscana",
+        "piano": "free"
+      },
+      {
+        "id": 341,
+        "nome": "Blue Bird Srl",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Montecatini-Terme",
+        "regione": "Toscana",
+        "piano": "free"
+      },
+      {
+        "id": 349,
+        "nome": "Costruzioni edifici residenziali e non residenziali di nicola ieda",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Viareggio",
+        "regione": "Toscana",
+        "piano": "free"
       }
     ],
     "Sicilia": [
@@ -4048,7 +4474,7 @@
         "tipo": "artigiano",
         "citta": "Messina",
         "regione": "Sicilia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 141,
@@ -4130,6 +4556,18 @@
         "citta": "Noto",
         "regione": "Sicilia",
         "piano": "free"
+      },
+      {
+        "id": 347,
+        "nome": "IMPREPAN SRLS UNIPERSONALE",
+        "mestiere": "Cappotti termici / Isolamento",
+        "mestieri": [
+          "Cappotti termici / Isolamento"
+        ],
+        "tipo": "artigiano",
+        "citta": "Caltanissetta",
+        "regione": "Sicilia",
+        "piano": "free"
       }
     ],
     "Campania": [
@@ -4167,7 +4605,7 @@
         "tipo": "impresa",
         "citta": "Napoli",
         "regione": "Campania",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 121,
@@ -4181,7 +4619,7 @@
         "tipo": "artigiano",
         "citta": "Salerno",
         "regione": "Campania",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 127,
@@ -4191,7 +4629,7 @@
         "tipo": "impresa",
         "citta": "Napoli",
         "regione": "Campania",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 155,
@@ -4239,6 +4677,31 @@
         "citta": "Giffoni Valle Piana",
         "regione": "Campania",
         "piano": "premium"
+      },
+      {
+        "id": 335,
+        "nome": "LA BOTTEGA DEL COLORE",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Marano di Napoli",
+        "regione": "Campania",
+        "piano": "free"
+      },
+      {
+        "id": 339,
+        "nome": "Edilart di Cella Giovanni",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "San Gennaro Vesuviano",
+        "regione": "Campania",
+        "piano": "free"
       }
     ],
     "Veneto": [
@@ -4276,7 +4739,7 @@
         "tipo": "artigiano",
         "citta": "Villa Estense",
         "regione": "Veneto",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 117,
@@ -4289,7 +4752,7 @@
         "tipo": "artigiano",
         "citta": "Venezia",
         "regione": "Veneto",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 133,
@@ -4432,7 +4895,7 @@
         "tipo": "artigiano",
         "citta": "Forlì",
         "regione": "Emilia-Romagna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 122,
@@ -4442,7 +4905,7 @@
         "tipo": "impresa",
         "citta": "Forlì",
         "regione": "Emilia-Romagna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 124,
@@ -4456,7 +4919,7 @@
         "tipo": "artigiano",
         "citta": "Rimini",
         "regione": "Emilia-Romagna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 150,
@@ -4587,6 +5050,18 @@
         "citta": "Bologna",
         "regione": "Emilia-Romagna",
         "piano": "free"
+      },
+      {
+        "id": 332,
+        "nome": "Tabellini infissi",
+        "mestiere": "Serramenti / Infissi",
+        "mestieri": [
+          "Serramenti / Infissi"
+        ],
+        "tipo": "artigiano",
+        "citta": "Medicina",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
       }
     ],
     "Abruzzo": [
@@ -4601,7 +5076,7 @@
         "tipo": "artigiano",
         "citta": "Chieti",
         "regione": "Abruzzo",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 163,
@@ -4683,6 +5158,42 @@
         "tipo": "impresa",
         "citta": "Cotronei",
         "regione": "Calabria",
+        "piano": "free"
+      }
+    ],
+    "": [
+      {
+        "id": 312,
+        "nome": "Alessio Alecu",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "",
+        "regione": "",
+        "piano": "free"
+      },
+      {
+        "id": 324,
+        "nome": "Renovation gold di rausi giuseppe",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "",
+        "regione": "",
+        "piano": "free"
+      },
+      {
+        "id": 325,
+        "nome": "Jomaa naoufel",
+        "mestiere": "Altro",
+        "mestieri": [],
+        "tipo": "impresa",
+        "citta": "",
+        "regione": "",
         "piano": "free"
       }
     ]

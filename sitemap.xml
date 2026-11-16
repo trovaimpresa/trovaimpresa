@@ -566,4 +566,19 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://trovaimpresa.com/imprese-caltanissetta</loc>
+    <lastmod>2026-11-16</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/imprese-lucca</loc>
+    <lastmod>2026-11-16</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/imprese-pistoia</loc>
+    <lastmod>2026-11-16</lastmod>
+    <priority>0.8</priority>
+  </url>
 </urlset>

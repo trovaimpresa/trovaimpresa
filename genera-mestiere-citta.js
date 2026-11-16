@@ -1345,6 +1345,13 @@ ${JSON.stringify(schemaBc, null, 2)}
 <meta property="og:image" content="${BASE}/logo.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<!-- App sul telefono (15 nov 2026) -->
+<link rel="manifest" href="/manifest-sito.json">
+<link rel="apple-touch-icon" href="/img/app/trovaimpresa-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TrovaImpresa">
 </head>
 <body>
 <nav>
@@ -1449,6 +1456,7 @@ ${bloccoGestionale(m)}
 <script src="/js/conta-clic-guide.js" defer></script>
 <script src="/js/pagine-citta.js?v=1" defer></script>
 <script src="/js/avvisi-clienti.js" defer></script>
+<script src="/js/app-invito.js" defer></script>
 </body>
 </html>`;
 }

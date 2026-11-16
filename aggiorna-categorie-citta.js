@@ -124,7 +124,9 @@ for (const c of citta) {
   const fine = html.indexOf('<h2>Perch', dopoTitolo);
   if (fine === -1) { saltate.push(c.slug + ' (non trovo la fine del riquadro)'); continue; }
 
-  html = html.slice(0, dopoTitolo) + '\n' + griglie(c) + '\n\n  ' + html.slice(fine);
+  /* 16 nov 2026: l'annuncio AdSense (.ti-ads) sta fra la griglia e «Perche'»: si tiene */
+  const ads = (html.slice(dopoTitolo, fine).match(/<div class="ti-ads">[\s\S]*?<\/script><\/div>/) || [''])[0];
+  html = html.slice(0, dopoTitolo) + '\n' + griglie(c) + '\n\n' + (ads ? ads + '\n' : '') + '  ' + html.slice(fine);
 
   if (html === prima) { gia++; continue; }
   const quanti = (griglie(c).match(/cat-card/g) || []).length;
