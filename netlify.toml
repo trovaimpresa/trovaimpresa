@@ -2,15 +2,13 @@
   publish = "."
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
-  # ===== 16 novembre 2026 — IL CANCELLO DEI CREDITI =====
-  # Ogni pubblicazione costa 15 crediti. La regola «un push solo» c'era dal
-  # 13 settembre ma veniva rotta (204 commit in 7 giorni, 3 ricariche da 10$).
-  # Ora Netlify pubblica SOLO se il messaggio dell'ultimo commit contiene
-  # #pubblica (o e' il «Giro del lunedi'» automatico). Tutti gli altri push salvano il lavoro su GitHub e basta
-  # (build "skipped", 0 crediti). Quando arriva un push con #pubblica, va
-  # online TUTTO quello che si e' accumulato prima.
-  # Per toglierlo: rimettere la riga vecchia, cioe' solo la parte git diff.
-  ignore = "! (git log -1 --format=%B | grep -qE '#pubblica|Giro del luned') || git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ':!*.md' ':!docs/' ':!.gitignore' ':!*.sql'"
+  # ===== 16 novembre 2026 — IL CANCELLO DEI CREDITI: TOLTO LO STESSO GIORNO =====
+  # La mattina era stato messo un cancello: Netlify pubblicava solo i push col
+  # segno «#pubblica» nel messaggio. Alex l'ha fatto togliere («mi da fastidio»).
+  # Adesso OGNI push pubblica, come prima (15 crediti a pubblicazione).
+  # Resta solo la riga vecchia: un push che tocca soltanto .md, docs/, .sql
+  # non pubblica niente.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ':!*.md' ':!docs/' ':!.gitignore' ':!*.sql'"
   # ===== 16 agosto 2026 — IL CONTROLLO PRIMA DI PUBBLICARE =====
   # Gira a ogni push, PRIMA che il sito vada online. Se trova un link che
   # porta nel vuoto, uno <script> con un errore di sintassi, uno schema per

@@ -712,8 +712,8 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDe
      COMINCIA con la prima parola e ha una delle altre; D) comincia con la
      prima e basta. ⚠️ D da sola non basta: le voci che cominciano con «Tubo»
      sono piu' di 300, e quella in polipropilene restava fuori dal taglio. */
-  const grande = quante || 300, piccola = Math.min(grande, 80);
-  const giri = [{ come: 'tutte', regex: forme.map(function (f) { return f.pg; }), q: Math.min(grande, 200) }];
+  const grande = quante || 300, piccola = Math.min(grande, 60);
+  const giri = [{ come: 'tutte', regex: forme.map(function (f) { return f.pg; }), q: Math.min(grande, 120) }];
   if (forme.length > 2) giri.push({ come: 'prime due', regex: [forme[0].pg, forme[1].pg], q: piccola });
   forme.slice(1).forEach(function (f, i) { giri.push({ come: 'comincia + parola ' + (i + 2), regex: [forme[0].pgInizio, f.pg], q: piccola }); });
   giri.push({ come: 'comincia con la prima', regex: [forme[0].pgInizio], q: piccola });
@@ -750,9 +750,18 @@ const MATERIALI = [
   /(^| )gr[eè]s( |$)/, /(^| )rame( |$)/, /(^| )ghisa( |$)/, /(^| )multistrat/, /(^| )(polietilen|pead|pe)( |$)|(^| )polietilen/, /(^| )(polipropilen|pp( |$))/,
   /(^| )(cartongess|cartonat|gesso rivestit|lastr[ae] (di|in) gesso)/, /(^| )(lateriz|matton|forat)/, /(^| )marm[oi]( |$)/, /(^| )(calcestruzz|cls( |$))/, /(^| )vetroresin/, /(^| )ottone( |$)/
 ];
+/* 16 nov 2026 (4) — A COSA SERVE. Prova dal vivo: per «Tubazione di SCARICO in
+   polipropilene» proposto un tubo per l'acqua sanitaria (95,82 €), per «guaina
+   LIQUIDA» un'impermeabilizzazione a polveri, per «presa TV» una presa
+   qualsiasi. Sono parole che cambiano la lavorazione: se la riga le dice, la
+   voce le deve dire anche lei. */
+const DISTINTIVE = [
+  /(^| )scaric/, /(^| )adduzion/, /(^| )liquid/, /(^| )(tv( |$)|televisiv|antenn)/, /(^| )telefon/, /(^| )condensazion/,
+  /(^| )antincend/, /(^| )blindat/, /(^| )scorrevol/, /(^| )coibentat/, /(^| )tamburat/, /(^| )faccia a vista/
+];
 function stessoMateriale(rigaDesc, candDesc) {
   const a = normaTesto(rigaDesc), b = normaTesto(candDesc);
-  return !MATERIALI.some(function (re) { return re.test(a) && !re.test(b); });
+  return !MATERIALI.concat(DISTINTIVE).some(function (re) { return re.test(a) && !re.test(b); });
 }
 /* <<< RICERCA-PREZZARIO */
 function vicinanza(descrizione, parole) {
@@ -2067,6 +2076,7 @@ export default async function (req) {
           else if (!lista.length) esito = { errore: 'manca cosa cercare' };
           else {
             const LETTERE = 'abcde';
+            const t0c = Date.now();
             const fatti = await Promise.all(lista.map(async function (c) {
               const n = parseInt(c && c.n, 10);
               /* solo lettere e numeri: una virgola o un % dentro la parola
@@ -2074,7 +2084,17 @@ export default async function (req) {
               const parole = paroleDi(c && c.parola, 3);
               if (!memoC.righe[n] || !parole.length) { if (conDiario) diario.push({ cosa: 'cerca', n: n, chiesto: String((c && c.parola) || '').slice(0, 60), esito: !memoC.righe[n] ? 'riga sconosciuta' : 'nessuna parola buona' }); return { n: n, voci: [] }; }
               const passi = conDiario ? [] : null;
-              const r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300, passi, memoC.righe[n].desc);
+              const rd0 = memoC.righe[n].desc, ru0 = memoC.righe[n].unita;
+              const buona = function (x) { return +x.prezzo_unitario > 0 && stessaVariante(rd0, x.descrizione) !== 'no' && (!ru0 || stessaUnita(x.unita, ru0)) && stessoMateriale(rd0, x.descrizione); };
+              let r = await cercaNelPrezzario(dati, uid, parole, 'descrizione,unita,prezzo_unitario', 300, passi, rd0);
+              /* 16 nov 2026 (4): «punto presa TV» non trovava «Presa TV coassiale…»
+                 perche' la voce non comincia con «punto». Se non resta niente di
+                 buono, si riprova SENZA la prima parola. */
+              if (!r.errore && parole.length >= 2 && !(r.righe || []).some(buona)) {
+                if (passi) passi.push({ come: '— senza la prima parola —' });
+                const r2 = await cercaNelPrezzario(dati, uid, parole.slice(1), 'descrizione,unita,prezzo_unitario', 300, passi, rd0);
+                if (!r2.errore && (r2.righe || []).some(buona)) r = { righe: r2.righe, largo: true };
+              }
               /* prima la STESSA variante (coda uguale), poi la stessa unita';
                  le varianti sicuramente sbagliate (supplemento al posto della
                  lavorazione, misura diversa) non si fanno nemmeno vedere */
@@ -2109,6 +2129,7 @@ export default async function (req) {
                 return { k: k, d: mostraVoce(x.descrizione, 260), u: x.unita || undefined, p: x.prezzo_unitario };
               }), ricerca_larga: r.largo ? 'trovate con meno parole: scegli SOLO se e\' la stessa lavorazione, se no lascia la riga fuori' : undefined };
             }));
+            if (conDiario) diario.push({ cosa: 'tempo', ricerche_ms: Date.now() - t0c, righe: lista.length });
             esito = { risultati: fatti };
           }
         } else if (t.name === 'prezzi_computo') {
@@ -2347,7 +2368,7 @@ export default async function (req) {
         fine: true,
         errore: (errore && (!risposta || tempoScaduto)) ? errore : null,
         modulo: modulo,
-        diario: (conDiario && diario.length) ? diario.slice(0, 200) : undefined,
+        diario: (conDiario && diario.length) ? diario.concat([{ cosa: 'tempo', totale_ms: Date.now() - T0 }]).slice(0, 200) : undefined,
         come_pagato: comePagato,
         /* ⚠️ 14 set 2026: si toglie 1 in tutti e due i casi. `restanti`
            comprende sia i compresi sia i messaggi comprati, e questo

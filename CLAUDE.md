@@ -51,14 +51,11 @@
   cambiato, si guardano i file. Se il lucchetto si ripresenta, l'unico che può
   toglierlo è Alex: `rm -f .git/index.lock` da Git Bash.
 - Quindi: dopo aver modificato i file, dare **subito** ad Alex il blocco pronto da incollare (`git add ... / git commit -m "..." / git push`), senza tentativi a vuoto. Ad Alex di norma non serve `rm -f .git/index.lock`.
-- Deploy: ⛔ **dal 16 novembre 2026 Netlify pubblica SOLO i push il cui ultimo
-  commit contiene `#pubblica` nel messaggio** (cancello in `netlify.toml`, riga
-  `ignore`; passa anche il commit automatico «Giro del lunedì»). Gli altri
-  push salvano su GitHub e costano →0← crediti.
-  Si lavora, si committa quanto serve, e **UNA volta a fine lavoro** l'ultimo
-  commit porta `#pubblica` (es. `git commit --allow-empty -m "Pubblico #pubblica"`).
-  Massimo →3← pubblicazioni al giorno. Il collaudo sul sito vero si fa dopo
-  quella. Una correzione urgente può avere `#pubblica` subito.
+- Deploy: **ogni push su `main` pubblica** (→15← crediti Netlify l'uno). Il
+  cancello `#pubblica` messo la mattina del 16 novembre 2026 è stato TOLTO lo
+  stesso giorno su richiesta di Alex («mi da fastidio»): non rimetterlo senza
+  che lo chieda lui. Resta la regola di buon senso: lavori raggruppati, un push
+  a fine lavoro, e si pubblica quando Alex dice «pubblica».
 
 ### ⛔ REGOLA FISSA: PRIMA DI COSTRUIRE, CHIEDERE SE SERVE (15/8/2026)
 
