@@ -798,12 +798,19 @@
       if(!sbUid) return {ok:false, error:"Non sei loggato"};
       titolo=(titolo||"").trim();
       if(!titolo) return {ok:false, error:"Titolo mancante"};
-      const righe=(Array.isArray(voci)?voci:[]).map((v,i)=>{
-        let desc=(v.descrizione||"").trim();
+      /* 16 nov 2026 — i capitoli dell'AI («capitolo» sulle voci) diventano
+         righe di capitolo, come quelle di «+ Aggiungi capitolo» */
+      const righe=[]; let capPrima="";
+      (Array.isArray(voci)?voci:[]).forEach(v=>{
+        let desc=String((v&&v.descrizione)||"").trim();
+        if(!desc)return;
+        const cap=String((v&&v.capitolo)||"").trim();
+        if(cap&&cap!==capPrima)righe.push({user_id:sbUid, descrizione:cap, qta:0, prezzo:0, unita:null, sezione:true, ordine:righe.length});
+        capPrima=cap;
         /* 13 nov 2026 — l'unita' ha la sua colonna: non va piu' in coda alla descrizione */
-        return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, unita:v.unita?prevUnita(v.unita):null, sezione:false, ordine:i};
-      }).filter(r=>r.descrizione);
-      if(!righe.length) return {ok:false, error:"Nessuna voce valida"};
+        righe.push({user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, unita:v.unita?prevUnita(v.unita):null, sezione:false, ordine:righe.length});
+      });
+      if(!righe.filter(r=>!r.sezione).length) return {ok:false, error:"Nessuna voce valida"};
       /* ===== 13 agosto 2026 — IL NUMERO NON GUARDAVA NE' L'ANNO NE' IL REPARTO
          Era un contatore unico che cresceva e basta: a gennaio non ripartiva da
          1, e due reparti si passavano la stessa serie (il giardiniere faceva il

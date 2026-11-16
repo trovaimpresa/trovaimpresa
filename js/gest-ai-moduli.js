@@ -477,9 +477,19 @@
         if(!desc||!desc.value.trim()) r.remove();
       });
       let messe=0;
+      /* ⛔ 16 nov 2026 — I CAPITOLI. L'AI mette «capitolo» sulle voci di un
+         lavoro grande: quando cambia, prima delle voci si scrive la riga di
+         capitolo (la stessa di «+ Aggiungi capitolo»). */
+      let capPrima="";
       voci.forEach(function(v){
         let desc=String((v&&v.descrizione)||"").trim();
         if(!desc) return;
+        const cap=String((v&&v.capitolo)||"").trim();
+        if(cap&&cap!==capPrima){
+          box.insertAdjacentHTML("beforeend",prevRigaHtml({sezione:true,descrizione:cap}));
+          _aiIllumina(box.lastElementChild);
+        }
+        capPrima=cap;
         /* 13 nov 2026 — l'unita' di misura adesso ha la sua casella (.pr-um):
            non va piu' in coda alla descrizione. */
         /* ⚠️ il prezzo che l'AI NON sa resta una casella VUOTA, non «0,00».
@@ -503,6 +513,17 @@
         if(ruoloUtente==='professionista') aggiornaRiepilogoParcella();
         else aggiornaRiepilogoIvaImpresa();
         messi.push(messe===1?"1 voce di costo":messe+" voci di costo");
+      }
+    }
+    /* ---------- l'IVA: solo se la tendina e' ancora su «non indicata» ---------- */
+    const selIva=$("#pv-iva-imp");
+    if(selIva&&selIva.value===""&&d&&d.iva!=null&&d.iva!==""){
+      const v=String(+d.iva);
+      if([].some.call(selIva.options,function(o){return o.value===v;})){
+        selIva.value=v;
+        _aiIllumina(selIva);
+        aggiornaRiepilogoIvaImpresa();
+        messi.push("IVA "+v+"%");
       }
     }
     /* ---------- le note che finiscono sul PDF ---------- */
@@ -1720,9 +1741,13 @@
     if(tipo==="preventivo"){
       const t=_ctrVal("#pv-tit"); if(t)r.push("Titolo: "+t);
       r.push("Voci:");
+      /* 16 nov 2026: anche unita' e prezzo (il controllo adesso guarda i
+         prezzi fuori mercato) e i capitoli, che non sono voci */
       $$("#prev-righe [data-riga]").forEach(function(d){
         const desc=_ctrVal(".pr-desc",d); if(!desc)return;
-        metti(voci+1,desc,"quantità "+(_ctrVal(".pr-qta",d)||"—"));
+        if(d.hasAttribute("data-sezione")){ r.push("Capitolo: "+desc); return; }
+        const um=_ctrVal(".pr-um",d), pz=_ctrVal(".pr-prezzo",d);
+        metti(voci+1,desc,"quantità "+(_ctrVal(".pr-qta",d)||"—")+(um?" "+(um==="corpo"?"a corpo":um):"")+(pz?", prezzo "+pz+" €":""));
       });
       const note=[];
       $$("#pv-note-lista .nt-txt").forEach(function(n){ const v=_ctrPul(n.value); if(v)note.push(v); });

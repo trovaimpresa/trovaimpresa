@@ -457,12 +457,17 @@
     const voci = Array.isArray(p.voci) ? p.voci : [];
     let totale = 0;
 
+    let capPrima = '';
     const righe = voci.map(v => {
+      /* 16 nov 2026 — i capitoli: una riga di titolo quando cambia */
+      const cap = String(v.capitolo || '').trim();
+      const testa = (cap && cap !== capPrima) ? `<tr><td colspan="5"><strong>${cap}</strong></td></tr>` : '';
+      capPrima = cap;
       const q  = Number(v.quantita) || 0;
       const pu = Number(v.prezzo_unitario) || 0;
       const st = q * pu;
       totale += st;
-      return `<tr>
+      return testa + `<tr>
         <td>${v.descrizione || ''}</td>
         <td class="n">${q}</td>
         <td class="n">${v.unita || ''}</td>
