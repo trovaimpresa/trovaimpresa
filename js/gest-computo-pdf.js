@@ -1540,6 +1540,13 @@
     doc.setFont("helvetica","bold");doc.setFontSize(11);
     doc.text("TOTALE",R-90,ry+4);doc.text(_eur(rp.netto),R-2,ry+4,{align:"right"});
     y+=hBox+7;
+    /* 16 nov 2026 — computo privato: il totale e' senza IVA e il foglio lo deve
+       dire. L'IVA (4, 10 o 22%) si decide nel preventivo, non qui. */
+    if(!pubblico){
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+      doc.text("Importi IVA esclusa",R-2,y-2.6,{align:"right"});
+      doc.setTextColor(0);y+=2.5;
+    }
 
     if(pubblico&&(rp.manodopera||rp.sicurezza)){
       spazioFuoriTabella(14);
