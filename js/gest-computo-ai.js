@@ -179,7 +179,7 @@
       if(righe.some(function(x){return String(x.v.id)===String(v.id);}))return;
       if(vuote.some(function(x){return String(x.v.id)===String(v.id);}))return;
       const k=(u.vicina&&+u.vicina.prezzo>0)?u.vicina:null;
-      vuote.push({v:v,vicina:k,prendibile:!!k&&k.perche!=="unita"&&k.perche!=="materiale"});
+      vuote.push({v:v,vicina:k,prendibile:!!k&&(k.perche===""||k.perche==="variante"||k.perche==null)});
     });
     if(!righe.length&&!vuote.length){
       toast(giaPiene?"Quelle lavorazioni hanno già il loro prezzo: non ho toccato niente.":"Non ho trovato righe a zero a cui proporre un prezzo.");
@@ -206,7 +206,9 @@
               ?'Ha un\'altra unità di misura ('+esc(k.unita||"")+' invece di '+esc(u.v.unita||"")+'): il prezzo mettilo tu.'
               :k.perche==="materiale"
               ?'È un altro materiale o un altro tipo: il prezzo mettilo tu.'
-              :'Non è la stessa lavorazione: se ti va bene lo stesso, metti la spunta.')+'</div>'
+              :k.perche==="lontana"
+              ?'Somiglia soltanto, non è la stessa lavorazione: il prezzo mettilo tu.'
+              :'L\'AI non l\'ha scelta: guardala tu, e se va bene metti la spunta.')+'</div>'
           :'<div class="cp-orig cai-manca">Nel tuo prezzario non c\'è niente di simile: il prezzo mettilo tu.</div>')
         +'</div>';
     };

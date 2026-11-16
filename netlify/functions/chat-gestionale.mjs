@@ -776,9 +776,21 @@ const DISTINTIVE = [
 /* LA VOCE PIU' VICINA per una riga rimasta senza prezzo: la prima delle
    mostrate; se non ce n'e', la prima trovata (meglio se con la stessa unita')
    col motivo per cui non e' stata proposta. Pura. */
-function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate) {
+function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate, parole) {
   const fa = function (x, perche) { return { descrizione: String(x.descrizione || '').slice(0, 160), unita: x.unita || '', prezzo: +x.prezzo_unitario, perche: perche }; };
-  if (mostrate && mostrate.length) return fa(mostrate[0], '');
+  /* 16 nov 2026 (6) — dal vivo: per la «tramezzatura in mattoni forati» la piu'
+     vicina era una «muratura faccia a vista» (341 €/m²), per il «quadro elettrico»
+     un «quadro luminoso di chiamata», e si potevano prendere con una spunta.
+     Si puo' prendere SOLO una voce che ha dentro TUTTE le parole cercate e che
+     non dice all'inizio un uso che la riga non dice; se no e' «lontana»: si
+     legge e basta. */
+  const forme = (parole || []).map(formaParola).filter(Boolean);
+  const lontana = function (x) {
+    const d = normaTesto(x.descrizione), a = normaTesto(rigaDesc);
+    if (forme.length && !forme.every(function (f) { return f.js.test(d); })) return true;
+    return DISTINTIVE.some(function (re) { return re.test(d.slice(0, 90)) && !re.test(a); });
+  };
+  if (mostrate && mostrate.length) return fa(mostrate[0], lontana(mostrate[0]) ? 'lontana' : '');
   const t = (trovate || []).filter(function (x) { return +x.prezzo_unitario > 0; });
   if (!t.length) return null;
   const stessaU = t.filter(function (x) { return !rigaUnita || stessaUnita(x.unita, rigaUnita); });
@@ -862,7 +874,7 @@ function costruisciComputo(modo, dati, idVero, titoloVero) {
       const pv = v ? Number(v.prezzo) : NaN;
       if (v && isFinite(pv) && pv > 0 && pv < 10000000 && String(v.descrizione || '').trim()) {
         o.vicina = { descrizione: String(v.descrizione).trim().slice(0, 160), unita: String(v.unita || '').slice(0, 20), prezzo: pv,
-                     perche: ['unita', 'materiale', 'variante'].indexOf(v.perche) >= 0 ? v.perche : '' };
+                     perche: ['unita', 'materiale', 'variante', 'lontana'].indexOf(v.perche) >= 0 ? v.perche : '' };
       }
       vuote.push(o);
     });
@@ -2187,7 +2199,7 @@ export default async function (req) {
                 rimaste: tutte.length, tolte_unita: tolteU, tolte_materiale: tolteM, tolte_variante: (r.righe || []).length - tutte.length - tolteU - tolteM, largo: r.largo || undefined,
                 mostrate: scelte.map(function (x) { return String(x.descrizione || '').slice(0, 70) + ' | ' + (x.unita || '') + ' | ' + x.prezzo_unitario; }) });
               memoC.candidati[n] = {};
-              memoC.vicine[n] = vicinaDi(rd, ru, scelte, r.righe);
+              memoC.vicine[n] = vicinaDi(rd, ru, scelte, r.righe, parole);
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
                 memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
