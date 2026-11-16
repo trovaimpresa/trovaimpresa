@@ -8,7 +8,11 @@
   # Adesso OGNI push pubblica, come prima (15 crediti a pubblicazione).
   # Resta solo la riga vecchia: un push che tocca soltanto .md, docs/, .sql
   # non pubblica niente.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ':!*.md' ':!docs/' ':!.gitignore' ':!*.sql'"
+  # 16 nov 2026, sera: quando Netlify perde la sua memoria (cache) mette
+  # CACHED_COMMIT_REF uguale a COMMIT_REF, il confronto risulta vuoto e la
+  # pubblicazione viene annullata («no content change»). Da quel momento non
+  # si pubblicava piu' niente. Ora, se i due sono uguali, si pubblica sempre.
+  ignore = "[ \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" ] && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ':!*.md' ':!docs/' ':!.gitignore' ':!*.sql'"
   # ===== 16 agosto 2026 — IL CONTROLLO PRIMA DI PUBBLICARE =====
   # Gira a ogni push, PRIMA che il sito vada online. Se trova un link che
   # porta nel vuoto, uno <script> con un errore di sintassi, uno schema per
