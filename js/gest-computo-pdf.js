@@ -1372,7 +1372,8 @@
     doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
     let hy=y+4.8;
-    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+    /* 16 nov 2026 — anche qui l'albo e il numero del tecnico (azAlbo: solo studio) */
+    [(typeof azAlbo==="function"?azAlbo(az):""),az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
       .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
     doc.setTextColor(0);
     doc.setFont("helvetica","bold");doc.setFontSize(13);
@@ -1633,6 +1634,40 @@
         doc.text(riga,M,y);y+=3.9;
       });
       doc.setTextColor(0);
+    }
+
+    /* ===== 16 nov 2026 — LA FIRMA IN FONDO AL COMPUTO =====
+       Il foglio finiva col totale (o con le note): un computo cosi' un tecnico
+       non lo consegna. In fondo: luogo e data a sinistra; a destra chi firma
+       («IL TECNICO» per lo studio, con albo e numero; «L'IMPRESA» per gli
+       altri), il nome, e la riga per timbro e firma. Sta tutto insieme: se
+       non entra nella pagina si va a quella dopo. */
+    {
+      const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+      const _albo=(typeof azAlbo==="function")?azAlbo(az):"";
+      const _cx=R-42;
+      y+=8; spazioFuoriTabella(_albo?44:40);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(0);
+      doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(c.data||todayStr()),M,y);
+      y+=8;
+      doc.setFont("helvetica","bold");doc.setFontSize(9);
+      doc.text(_pro?"IL TECNICO":"L'IMPRESA",_cx,y,{align:"center"});y+=4.6;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+      /* per lo studio: il nome del tecnico scritto nei Dati azienda, se c'e' */
+      const _nm=doc.splitTextToSize(String((_pro&&String(az.tecnico_firma||"").trim())||az.nome||""),78);
+      doc.text(_nm,_cx,y,{align:"center"});y+=_nm.length*4;
+      if(_albo){
+        doc.setFontSize(7.5);doc.setTextColor(90);
+        const _al=doc.splitTextToSize(_albo,78);
+        doc.text(_al,_cx,y,{align:"center"});y+=_al.length*3.6;
+        doc.setTextColor(0);
+      }
+      y+=14;
+      doc.setDrawColor(110);doc.line(_cx-36,y,_cx+36,y);
+      doc.setFontSize(7.5);doc.setTextColor(120);
+      doc.text("(timbro e firma)",_cx,y+4,{align:"center"});
+      doc.setTextColor(0);
+      y+=8;
     }
 
     const np=doc.getNumberOfPages();

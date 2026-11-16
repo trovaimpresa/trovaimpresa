@@ -209,6 +209,8 @@ const avHtml=`
         <div class="field"><label>Albo o Ordine</label><input id="a-albo" value="${esc(a.albo_nome||"")}" placeholder="Es. Ordine degli Ingegneri di Rieti"></div>
         <div class="field"><label>Numero di iscrizione</label><input id="a-albo-n" value="${esc(a.albo_numero||"")}" placeholder="Es. A1234" style="max-width:220px"></div>
         <div class="sh-nota">Esce sotto il tuo nome nella parcella, nella lettera d'incarico, nella fattura e nella scheda della pratica.</div>
+        <div class="field"><label>Nome del tecnico che firma</label><input id="a-tecnico" value="${esc(a.tecnico_firma||"")}" placeholder="Es. Geom. Mario Rossi"></div>
+        <div class="sh-nota">Esce in fondo al computo metrico, sopra la riga della firma. Se lo lasci vuoto esce il nome dello studio.</div>
       </div>
       <div class="sh-b">
         <div class="sh-tit">Polizza professionale</div>
@@ -314,6 +316,8 @@ const avHtml=`
       row.albo_nome   = v("#a-albo")||null;
       row.albo_numero = v("#a-albo-n")||null;
     }
+    /* 16 nov 2026 — chi firma il computo (solo studio) */
+    if($("#a-tecnico"))row.tecnico_firma = v("#a-tecnico")||null;
     /* riepilogo del lunedì: la casella c'e' per tutti i ruoli, quindi qui non
        serve la precauzione della patente e della polizza */
     if($("#a-rieplun"))row.riepilogo_lunedi=!!$("#a-rieplun").checked;
@@ -337,7 +341,7 @@ const avHtml=`
                "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec",
                "pol_compagnia","pol_numero","pol_massimale","pol_scadenza",
                "riepilogo_lunedi","avvisi_esclusi","avvisi_solo_lunedi","tariffa_oraria",
-               "albo_nome","albo_numero"];
+               "albo_nome","albo_numero","tecnico_firma"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
