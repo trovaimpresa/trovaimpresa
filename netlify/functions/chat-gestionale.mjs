@@ -667,13 +667,16 @@ function formaParola(w) {
   }
   if (!alt) {
     if (/^\d+$/.test(t)) alt = [t + '$'];
-    else if (t.length <= 5) alt = [(t.length >= 4 && /[aeio]$/.test(t)) ? t.slice(0, -1) + '[aeio]$' : t + '$'];
+    /* solo singolare e plurale: «punto» non deve trovare «punta» */
+    else if (t.length <= 5) alt = [(t.length >= 4 && /[aeio]$/.test(t)) ? t.slice(0, -1) + ({ o: '[oi]', a: '[ae]', e: '[ei]', i: '[oei]' })[t.slice(-1)] + '$' : t + '$'];
     else alt = [radice(t)];
   }
   const pg = '\\m(' + alt.map(function (k) { return k.replace(/\$$/, '\\M'); }).join('|') + ')';
   const corpo = '(' + alt.map(function (k) { return k.replace(/\$$/, '(?![' + LETT + '])'); }).join('|') + ')';
   return { parola: t, pg: pg, js: new RegExp('(^|[^' + LETT + '])' + corpo), inizio: new RegExp('^' + corpo), pgInizio: '^\\W*(' + alt.map(function (k) { return k.replace(/\$$/, '\\M'); }).join('|') + ')' };
 }
+/* parole che aprono tante voci e non dicono la lavorazione */
+const PRIME_GENERICHE = ['punto', 'punti', 'fornitura', 'posa', 'realizzazione', 'formazione', 'esecuzione', 'installazione', 'montaggio', 'impianto', 'opere', 'lavori'];
 const PAROLE_VUOTE = ['con', 'per', 'del', 'dei', 'della', 'delle', 'dello', 'degli', 'nel', 'nella', 'sul', 'sulla', 'una', 'uno', 'due', 'tre', 'compreso', 'compresa', 'compresi', 'comprese', 'tipo', 'opera', 'fornitura', 'posa', 'posato', 'posata', 'qualsiasi', 'ogni', 'altro', 'ecc', 'fino', 'oltre', 'tra', 'fra', 'che', 'non', 'piu', 'più', 'come', 'mediante', 'incluso', 'esclusa', 'escluso'];
 /* le altre parole della riga del computo (non quelle gia' chieste) */
 function formeDellaRiga(rigaDesc, gia) {
@@ -704,20 +707,23 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDe
   const forme = (parole || []).map(formaParola).filter(Boolean);
   if (!forme.length) return { righe: [] };
   const formeRiga = formeDellaRiga(rigaDesc, forme);
-  const leggi = function (regex, quanteQui) {
-    return esegui(dati, { tabella: 'gest_prezzi_propri', campi: campi + (campi.indexOf('codice') < 0 ? ',codice' : ''), filtri: { user_id: uid },
-      regex: { campo: 'descrizione', valori: regex }, senzaCestino: true, ordine: 'codice', crescente: true, limite: quanteQui, soloConta: false });
-  };
-  /* le letture, tutte insieme: A) tutte le parole; B) le prime due; C) la voce
-     COMINCIA con la prima parola e ha una delle altre; D) comincia con la
-     prima e basta. ⚠️ D da sola non basta: le voci che cominciano con «Tubo»
-     sono piu' di 300, e quella in polipropilene restava fuori dal taglio. */
-  const grande = quante || 300, piccola = Math.min(grande, 60);
-  const giri = [{ come: 'tutte', regex: forme.map(function (f) { return f.pg; }), q: Math.min(grande, 120) }];
-  if (forme.length > 2) giri.push({ come: 'prime due', regex: [forme[0].pg, forme[1].pg], q: piccola });
-  forme.slice(1).forEach(function (f, i) { giri.push({ come: 'comincia + parola ' + (i + 2), regex: [forme[0].pgInizio, f.pg], q: piccola }); });
-  giri.push({ come: 'comincia con la prima', regex: [forme[0].pgInizio], q: piccola });
-  const esiti = await Promise.all(giri.map(function (g) { return leggi(g.regex, g.q); }));
+  /* ⛔ 16 nov 2026 (4) — DUE LETTURE PER RIGA, NON CINQUE. Con cinque letture
+     per riga (80 insieme su 16 righe) le ricerche duravano 11 secondi e la
+     risposta 27: Netlify taglia a 30. Adesso:
+     1) UNA lettura con dentro: tutte le parole · le prime due · la voce
+        COMINCIA con la prima e ha una delle altre;
+     2) la voce comincia con la prima parola e basta (⚠️ da sola non basta:
+        le voci che cominciano con «Tubo» sono piu' di 300). */
+  const tra = function (re) { return 'descrizione.imatch."' + re.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; };
+  const e = function (lista) { return lista.length === 1 ? tra(lista[0]) : 'and(' + lista.map(tra).join(',') + ')'; };
+  const pezzi = [e(forme.map(function (f) { return f.pg; }))];
+  if (forme.length > 2) pezzi.push(e([forme[0].pg, forme[1].pg]));
+  forme.slice(1).forEach(function (f) { pezzi.push(e([forme[0].pgInizio, f.pg])); });
+  const base = { tabella: 'gest_prezzi_propri', campi: campi + (campi.indexOf('codice') < 0 ? ',codice' : ''), filtri: { user_id: uid },
+                 senzaCestino: true, ordine: 'codice', crescente: true, soloConta: false };
+  const giri = [{ come: 'le parole', parole: forme.map(function (f) { return f.parola; }).join(' '), q: Object.assign({}, base, { oppure: pezzi.join(','), limite: Math.min(quante || 300, 150) }) }];
+  if (forme.length > 1) giri.push({ come: 'comincia con la prima', parole: forme[0].parola, q: Object.assign({}, base, { regex: { campo: 'descrizione', valori: [forme[0].pgInizio] }, limite: 60 }) });
+  const esiti = await Promise.all(giri.map(function (g) { return esegui(dati, g.q); }));
   const visti = {}, tutte = [];
   for (let i = 0; i < esiti.length; i++) {
     if (esiti[i].errore) return esiti[i];
@@ -733,7 +739,7 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDe
       if (visti[k]) return;
       visti[k] = 1; tutte.push(x);
     });
-    if (passi) passi.push({ come: giri[i].come, parole: giri[i].regex.join(' + '), trovate: (esiti[i].righe || []).length, buone: buone });
+    if (passi) passi.push({ come: giri[i].come, parole: giri[i].parole, trovate: (esiti[i].righe || []).length, buone: buone });
   }
   const conVoto = tutte.map(function (x, i) { const v = puntiVoce(x.descrizione, forme, formeRiga); return { x: x, p: v.p, t: v.trovate, i: i }; })
     .sort(function (a, b) { return (b.p - a.p) || (a.i - b.i); });
@@ -2090,7 +2096,7 @@ export default async function (req) {
               /* 16 nov 2026 (4): «punto presa TV» non trovava «Presa TV coassiale…»
                  perche' la voce non comincia con «punto». Se non resta niente di
                  buono, si riprova SENZA la prima parola. */
-              if (!r.errore && parole.length >= 2 && !(r.righe || []).some(buona)) {
+              if (!r.errore && parole.length >= 3 && PRIME_GENERICHE.indexOf(parole[0]) >= 0 && !(r.righe || []).some(buona)) {
                 if (passi) passi.push({ come: '— senza la prima parola —' });
                 const r2 = await cercaNelPrezzario(dati, uid, parole.slice(1), 'descrizione,unita,prezzo_unitario', 300, passi, rd0);
                 if (!r2.errore && (r2.righe || []).some(buona)) r = { righe: r2.righe, largo: true };
