@@ -885,7 +885,10 @@
     const messe=await _compScriviVoci(cid,voci,capitoli);
     if(messe==null)return;
     cpLette=null;
-    closeSheet();
+    /* 16 nov 2026 — si resta DENTRO il computo, davanti alle lavorazioni
+       appena entrate: prima si chiudeva tutto e bisognava riaprirlo. */
+    compVociCompId=cid;
+    if(typeof compTornaAlComputo==="function") await compTornaAlComputo(); else closeSheet();
     const senzaPrezzo=voci.filter(v=>!(+v.prezzo_unitario)).length;
     toast(messe+(messe===1?" lavorazione dal PDF ✔":" lavorazioni dal PDF ✔")
           +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: premi «Prendi i prezzi dal prezzario»"):""));

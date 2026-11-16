@@ -1002,6 +1002,9 @@
          computi, a riaprire il computo per ogni lavorazione guardata. */
       try{
         if(document.querySelector("#sheet #cv-desc")&&typeof compVociCompId!=="undefined"&&compVociCompId)return compTornaAlComputo();
+        /* la schermata «Controlla quello che ho letto» (PDF del geometra):
+           «Annulla» e «Indietro» riportano al computo, non lo chiudono */
+        if(document.querySelector("#sheet #cp-lista")&&typeof compVociCompId!=="undefined"&&compVociCompId)return compTornaAlComputo();
         if(document.querySelector("#sheet #sal-voci")&&typeof salTorna==="function")return salTorna();
       }catch(_e){}
       return closeSheet();
