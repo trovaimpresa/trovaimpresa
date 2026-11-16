@@ -358,7 +358,11 @@
     head.appendChild(az);
     const ctr=az.querySelector(".co-menu-ctr");
     const tasti=foot.querySelectorAll(".ctr-tasto,.ctr-tasto-ai");
-    if(tasti.length){ ctr.insertAdjacentHTML("beforeend","<hr>"); tasti.forEach(function(t){ctr.appendChild(t);}); }
+    if(tasti.length){ ctr.insertAdjacentHTML("beforeend","<hr>"); tasti.forEach(function(t){
+      /* 16 nov 2026 — nel menu c'e' posto: la scritta lunga e chiara anche
+         sul telefono, non «Controllo AI · 1 credito». Lo studio resta com'e'. */
+      if(ruoloUtente!=='professionista')t.classList.add("ctr-nel-menu");
+      ctr.appendChild(t);}); }
     else ctr.remove();
   }
   /* il menu «Altro» si apre e si chiude da qui: un clic sul tasto lo apre,
@@ -481,7 +485,7 @@
 
       +'<div class="sh-b"><div class="sh-tit">Per chi</div>'
       +  '<div class="field"><label>Cliente</label><select id="co-cli"><option value="">— nessuno —</option>'+cliOpts+'</select></div>'
-      +  '<div class="field"><label>'+(pro?'Pratica collegata':'Lavoro collegato')+'</label><select id="co-lav"><option value="">— nessuna —</option>'+lavOpts+'</select>'
+      +  '<div class="field"><label>'+(pro?'Pratica collegata':'Lavoro collegato')+'</label><select id="co-lav"><option value="">'+(pro?'— nessuna —':'— nessuno —')+'</option>'+lavOpts+'</select>'
       +    '<div class="sh-nota">Collegarlo serve a ritrovarlo: il computo resta anche se '+(pro?'la pratica':'il lavoro')+' finisce nel cestino.</div></div>'
       +'</div>'
 
@@ -929,7 +933,12 @@
     const n=+v||0;
     let s=n.toFixed(3);
     if(s.charAt(s.length-1)==="0")s=s.slice(0,-1);
-    return s.replace(".",",");
+    /* 16 nov 2026 — col punto delle migliaia: si leggeva «1210,50 m²» accanto
+       a un prezzo scritto «1.210,50 €». Solo qui, che e' una scritta da
+       leggere: nelle caselle (_misTesto) il punto non ci va. */
+    const parti=s.split(".");
+    parti[0]=parti[0].replace(/\B(?=(\d{3})+(?!\d))/g,".");
+    return parti.join(",");
   }
   /* le PARTI UGUALI sono un conteggio, non una misura: "1 parte", non "1,00 parte" */
   function _partiTesto(v){
@@ -1741,6 +1750,39 @@
     return false;
   }
 
+  /* quante lavorazioni del computo non stanno in nessun capitolo */
+  async function cronoSenzaCapitolo(computoId){
+    try{
+      const r=await sb.from("gest_computo_voci").select("id,capitolo_id")
+        .eq("user_id",sbUid).eq("computo_id",computoId);
+      if(r.error||!r.data)return 0;
+      return r.data.filter(function(v){return v.capitolo_id==null||v.capitolo_id==="";}).length;
+    }catch(_e){ return 0; }
+  }
+  /* le mette tutte in un capitolo «Altri lavori» (se c'e' gia', usa quello) */
+  async function cronoFuoriMetti(){
+    const cid=compVociCompId||cronoCapCacheId; if(!cid||!sbUid)return;
+    if(cronoModifiche(cid)){ toast("Prima premi «Salva il cronoprogramma»: hai scritto dei giorni che non sono ancora salvati."); return; }
+    const TIT="Altri lavori";
+    const rc=await sb.from("gest_computo_capitoli").select("id,titolo,ordine").eq("user_id",sbUid).eq("computo_id",cid).order("ordine");
+    if(rc.error){ toast("Non riesco a leggere i capitoli: "+rc.error.message); return; }
+    let cap=(rc.data||[]).find(function(c){return String(c.titolo||"").trim().toLowerCase()===TIT.toLowerCase();});
+    if(!cap){
+      const ord=(rc.data||[]).reduce(function(m,c){return Math.max(m,+c.ordine||0);},0)+1;
+      const ri=await sb.from("gest_computo_capitoli").insert({user_id:sbUid,computo_id:cid,ordine:ord,numero:String(ord),titolo:TIT}).select("id");
+      cap=ri.data&&(Array.isArray(ri.data)?ri.data[0]:ri.data);
+      if(ri.error||!cap||!cap.id){ toast("Non riesco a creare il capitolo: "+((ri.error&&ri.error.message)||"nessuna riga scritta")); return; }
+    }
+    const ru=await sb.from("gest_computo_voci").update({capitolo_id:cap.id})
+      .eq("user_id",sbUid).eq("computo_id",cid).is("capitolo_id",null).select("id");
+    if(ru.error){ toast("Non riesco a spostare le lavorazioni: "+ru.error.message); return; }
+    const n=(ru.data||[]).length;
+    if(!n){ toast("Non salvato: nessuna lavorazione spostata. Ricarica la pagina e riprova."); return; }
+    if(String(compVociCompId||"")===String(cid))await renderCompVoci(cid);
+    await renderCrono(cid);
+    toast(n+(n===1?" lavorazione messa":" lavorazioni messe")+" in «"+TIT+"» ✔");
+  }
+
   async function renderCrono(computoId){
     const box=$("#co-crono"); if(!box)return;
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
@@ -1790,7 +1832,17 @@
        stampato, cosi' le barre non si possono scollare */
     const sc=cronoScala(righe), primo=sc.primo, ultimo=sc.ultimo, arco=sc.arco;
 
-    let h='<div class="cg-righe">';
+    /* 16 nov 2026 — LE LAVORAZIONI SENZA CAPITOLO NON SPARISCONO ZITTE.
+       Il calendario si fa a capitoli: con 4 lavorazioni di cui 3 senza
+       capitolo ne usciva una sola, e delle altre tre non si diceva niente.
+       Adesso lo dice, e con un tocco le mette in un capitolo loro. */
+    const fuori=await cronoSenzaCapitolo(computoId);
+    let h=fuori>0
+      ? '<div class="cg-fuori"><b>'+fuori+(fuori===1?' lavorazione non ha':' lavorazioni non hanno')+' un capitolo</b>: nel calendario qui sotto non '+(fuori===1?'c\'è':'ci sono')+'.'
+        +'<div class="cg-fuori-due"><button type="button" class="btn-primary" data-action="crono-fuori-metti">'+(fuori===1?'Mettila':'Mettile')+' in un capitolo «Altri lavori»</button>'
+        +'<button type="button" class="btn" data-action="co-pag" data-p="1">Le sistemo io nelle lavorazioni</button></div></div>'
+      : '';
+    h+='<div class="cg-righe">';
     righe.forEach(function(r,i){
       const c=r.cap;
       const senza=!(r.giorni>0);

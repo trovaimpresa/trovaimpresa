@@ -177,6 +177,13 @@
 
     const dati=righe.slice(iInt+1);
     const voci=[]; let saltate=0, senzaPrezzo=0, senzaQta=0;
+    /* 16 nov 2026 — I CAPITOLI DEL GEOMETRA. Una riga con la sola descrizione
+       in MAIUSCOLO (DEMOLIZIONI, OPERE MURARIE) messa prima di un gruppo di
+       lavorazioni e' un capitolo, non un totale: prima finiva fra le «righe
+       saltate» e tutto entrava «senza capitolo».
+       ⛔ Diventa capitolo solo quando DOPO arriva una lavorazione: un titolo
+          in fondo al foglio con niente sotto resta una riga saltata. */
+    const capitoli=[]; let capAttesa="", capCorr=-1, capVuoti=0;
     dati.slice(0,COMP_IMP_MAX).forEach(function(r){
       const desc=String(r[C.descrizione]!=null?r[C.descrizione]:"").replace(/\s+/g," ").trim();
       if(!desc||desc.length<3){saltate++;return;}
@@ -188,9 +195,19 @@
          come lavorazioni da zero, e il computo si ritrovava quattro voci
          finte in fondo che il preventivo poi buttava fuori in silenzio.
          Adesso si saltano, e quante se ne saltano si DICE. */
-      if(q==null||!isFinite(q)){ senzaQta++; return; }
+      if(q==null||!isFinite(q)){
+        const tc=p?"":_compTitoloCapitolo(desc);
+        if(tc){ if(capAttesa)capVuoti++; capAttesa=tc; return; }
+        senzaQta++; return;
+      }
+      if(capAttesa){
+        capCorr=capitoli.findIndex(function(t){return _compStessoTitolo(t,capAttesa);});
+        if(capCorr<0){ capitoli.push(capAttesa); capCorr=capitoli.length-1; }
+        capAttesa="";
+      }
       if(!p) senzaPrezzo++;
       voci.push({
+        _cap:capCorr,
         codice:(C.codice!=null?String(r[C.codice]||"").trim():"")||null,
         descrizione:desc,
         unita:(C.unita!=null?String(r[C.unita]||"").trim():"")||null,
@@ -200,6 +217,8 @@
       });
     });
     if(!voci.length){toast("Nel file non ho trovato nessuna lavorazione con una descrizione. Righe lette: "+dati.length+".");return;}
+    if(capAttesa)capVuoti++;
+    senzaQta+=capVuoti;
 
     const avvisi=[];
     if(senzaQta) avvisi.push(senzaQta+(senzaQta===1
@@ -209,10 +228,11 @@
     if(saltate) avvisi.push(saltate+(saltate===1?" riga saltata perché senza descrizione":" righe saltate perché senza descrizione"));
     if(!(await gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
       +"Entrano con la quantità scritta nel file (le misure pezzo per pezzo non ci sono).\n"
+      +_compCapitoliFrase(capitoli)
       +(avvisi.length?("\n⚠ "+avvisi.join("\n⚠ ")+"\n"):"")
       +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?"))) { toast("Importazione annullata"); return; }
 
-    const messe=await _compScriviVoci(cid,voci);
+    const messe=await _compScriviVoci(cid,voci,capitoli);
     if(messe==null)return;
     toast(messe+(messe===1?" lavorazione importata ✔":" lavorazioni importate ✔")
           +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: scrivilo tu"):""));
@@ -224,11 +244,73 @@
      da 200, cosa si dice se il database si ferma a meta') deve restare uno:
      una regola che sta in due posti non si sistema a meta'.
      Torna quante ne ha scritte, oppure null se si e' fermata. */
-  async function _compScriviVoci(cid,voci){
+  /* 16 nov 2026 — un titolo di capitolo scritto dal geometra: la sola
+     descrizione, in MAIUSCOLO, corta, e che non sia un totale.
+     Torna il titolo ripulito, oppure "" se non e' un capitolo.
+     ⚠️ PriMus scrive «DEMOLIZIONI (SpCat 1)»: la parentesi non conta. */
+  /* 16 nov 2026 — il nome del file che si scarica. Senza numero usciva
+     «computo--titolo.pdf», con due trattini. */
+  function _compNomeFile(tipo,numero){
+    const n=String(numero==null?"":numero).replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
+    return tipo+"-"+(n?n+"-":"");
+  }
+  const COMP_NON_CAPITOLO=/(^|[^a-zà-ù])(totale|totali|sommano|somma|ribasso|oneri|importo|importi|iva|imponibile|riporto|riportare|netto|complessivo|complessiva|computo|metrico|committente|descrizione|designazione|quantit[aà]|prezzo|tariffa|pagina|pag)([^a-zà-ù]|$)/i;
+  function _compTitoloCapitolo(t){
+    const s=String(t==null?"":t).replace(/\([^)]*\)/g," ").replace(/\s+/g," ").replace(/[\s:.\-–]+$/,"").trim();
+    if(s.length<3||s.length>80)return "";
+    const lettere=s.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g,"");
+    if(lettere.length<3)return "";
+    if(lettere!==lettere.toUpperCase())return "";     /* c'e' una minuscola */
+    if(/\d[.,]\d/.test(s))return "";                  /* un numero con la virgola: e' un conto */
+    if(COMP_NON_CAPITOLO.test(s))return "";
+    return s;
+  }
+  function _compStessoTitolo(a,b){
+    const p=function(x){return String(x==null?"":x).replace(/\s+/g," ").trim().toLowerCase();};
+    return p(a)===p(b);
+  }
+  function _compCapitoliFrase(capitoli){
+    if(!capitoli||!capitoli.length)return "";
+    return "\nHo trovato "+capitoli.length+(capitoli.length===1?" capitolo":" capitoli")+" ("
+      +capitoli.slice(0,4).join(", ")+(capitoli.length>4?"…":"")+"): le lavorazioni entrano già divise.\n";
+  }
+  /* i capitoli letti dal foglio diventano capitoli veri. Se nel computo ce
+     n'e' gia' uno con lo stesso titolo si usa quello: caricando due volte
+     lo stesso foglio non nascono due «DEMOLIZIONI».
+     Torna la lista degli id (nello stesso ordine), oppure null se si ferma. */
+  async function _compScriviCapitoli(cid,capitoli){
+    const ids=[];
+    let ord=(compCapCache||[]).reduce(function(m,c){return Math.max(m,+c.ordine||0);},0);
+    for(let i=0;i<capitoli.length;i++){
+      const gia=(compCapCache||[]).find(function(c){return _compStessoTitolo(c.titolo,capitoli[i]);});
+      if(gia){ ids.push(gia.id); continue; }
+      ord++;
+      const r=await sb.from("gest_computo_capitoli").insert({
+        user_id:sbUid, computo_id:cid, ordine:ord, numero:String(ord), titolo:capitoli[i]}).select("id");
+      const riga=r.data&&(Array.isArray(r.data)?r.data[0]:r.data);
+      if(r.error||!riga||!riga.id){
+        toast("Non riesco a creare il capitolo «"+capitoli[i]+"»: "+((r.error&&r.error.message)||"nessuna riga scritta")+". Non ho messo dentro niente.");
+        await renderCompVoci(cid);
+        return null;
+      }
+      ids.push(riga.id);
+    }
+    return ids;
+  }
+  async function _compScriviVoci(cid,voci,capitoli){
+    let capIds=[];
+    if(capitoli&&capitoli.length){
+      capIds=await _compScriviCapitoli(cid,capitoli);
+      if(capIds==null)return null;
+    }
     /* si parte dopo l'ultima voce che c'e' gia', se no l'ordine si accavalla */
     let ordine=(compVociCache||[]).reduce(function(m,v){return Math.max(m,+v.ordine||0);},0)+1;
     const righeDb=voci.map(function(v,i){
-      return Object.assign({}, v, {user_id:sbUid, computo_id:cid, ordine:ordine+i});
+      const riga=Object.assign({}, v, {user_id:sbUid, computo_id:cid, ordine:ordine+i});
+      /* «_cap» e' il posto del capitolo nella lista: nel database non esiste */
+      const k=riga._cap; delete riga._cap;
+      if(k!=null&&k>=0&&capIds[k]!=null)riga.capitolo_id=capIds[k];
+      return riga;
     });
     /* a blocchi di 200, come fa l'importazione del prezzario: un pacchetto
        solo da mille righe il database lo rifiuta */
@@ -244,6 +326,8 @@
       messe+=Math.min(200,righeDb.length-i);
     }
     await renderCompVoci(cid);
+    /* capitoli nuovi = fasi nuove nel calendario */
+    if(capIds.length&&typeof cronoRiallinea==="function"){ try{ await cronoRiallinea(); }catch(_e){} }
     return messe;
   }
 
@@ -431,6 +515,49 @@
     return dec.filter(p=>p.x>xDesc+120).length>=2;
   }
 
+  /* 16 nov 2026 — DOVE FINISCE LA COLONNA DELLA DESCRIZIONE.
+     La descrizione usciva sporca: dentro ci finivano «mq» e le righe delle
+     misure con un numero solo («soggiorno 12,50»: _cpMisure ne vuole due).
+     Il foglio pero' lo dice da solo: le righe di SOLO testo che partono dalla
+     colonna della descrizione non vanno mai oltre un certo punto. Quello che
+     sta piu' a destra — unita', misure, quantita' — e' un'altra colonna.
+     ⚠️ Se le righe di solo testo sono poche non si indovina: torna Infinity
+        e tutto resta come prima. */
+  function _cpXFineDesc(righe,xDesc){
+    let fine=-1, quante=0;
+    righe.forEach(function(r){
+      if(r.parole.length<4)return;
+      if(r.parole.some(function(p){return /\d/.test(p.t);}))return;
+      const lunghe=r.parole.filter(function(p){return /[a-zà-ù]{3}/i.test(p.t);});
+      if(lunghe.length<3)return;
+      if(Math.abs(r.parole[0].x-xDesc)>8)return;       /* non parte dalla colonna */
+      quante++;
+      /* la riga finisce al primo SALTO largo: una parola staccata in fondo
+         («mq» nella colonna dell'unita') non e' piu' descrizione */
+      let x=r.parole[0].x+(r.parole[0].w||0);
+      for(let i=1;i<r.parole.length;i++){
+        if(r.parole[i].x-x>14)break;
+        x=r.parole[i].x+(r.parole[i].w||0);
+      }
+      if(x>fine)fine=x;
+    });
+    return quante>=3?fine+6:Infinity;
+  }
+  /* una riga che, tolta la descrizione, ha un numero con la virgola nelle
+     colonne di destra: e' il conto della quantita', non testo */
+  function _cpMisuraDestra(r,xFine){
+    if(!isFinite(xFine))return false;
+    return r.parole.some(function(p){return p.x>xFine&&_cpEDec(p.t);});
+  }
+  /* le parole di descrizione di una riga: solo quelle dentro la colonna, e
+     mai una riga fatta della sola unita' di misura («mq», «cad») */
+  function _cpTestoDesc(des,xFine){
+    const dentro=des.filter(function(p){return p.x<=xFine;});
+    if(!dentro.length)return "";
+    if(dentro.length===1&&_cpUnita(dentro[0].t)&&dentro[0].t.length<=4&&!/[a-zà-ù]{5}/i.test(dentro[0].t))return "";
+    return dentro.map(function(p){return p.t;}).join(" ");
+  }
+
   function _cpLeggi(pagine){
     const teste=_cpTeste(pagine);
     const tutte=[];
@@ -441,8 +568,14 @@
       tutte.push(r);
     }));
     const xDesc=_cpXDesc(tutte), xSin=xDesc-4;
+    const xFine=_cpXFineDesc(tutte,xDesc);
 
     const voci=[]; let corr=null, ultimoN=0;
+    /* 16 nov 2026 — IL CAPITOLO. Fra una lavorazione chiusa e la prossima, una
+       riga di sole MAIUSCOLE (DEMOLIZIONI, OPERE MURARIE) e' il titolo del
+       capitolo: vale per tutte le lavorazioni che vengono dopo, fino al
+       prossimo titolo. Diventa capitolo solo se sotto c'e' una lavorazione. */
+    let capAttesa="", capCorr="";
     const nuova=()=>({numero:null,tariffa:[],desc:[],originali:[]});
 
     /* ⚠️ COME SI RICONOSCE IL NUMERO DELLA LAVORAZIONE. «Il primo intero nella
@@ -466,8 +599,10 @@
     function chiudi(v,som,testo){
       v.originali.push(testo);
       if(v.numero!==null)ultimoN=v.numero;
+      if(capAttesa){ capCorr=capAttesa; capAttesa=""; }
       voci.push({numero:v.numero, tariffa:v.tariffa.join("").trim()||null,
-        descrizione:v.desc.join(" ").replace(/\s+/g," ").trim(),
+        capitolo:capCorr||null,
+        descrizione:v.desc.filter(Boolean).join(" ").replace(/\s+/g," ").trim(),
         unita:som.unita, quantita:som.quantita, prezzo:som.prezzo,
         originali:v.originali.concat()});
     }
@@ -507,17 +642,22 @@
       if(numLav&&des.length){
         corr=nuova(); corr.numero=+numLav.t;
         sin.forEach(p=>{ if(p===numLav)return; const q=_cpPezzoTariffa(p.t); if(q)corr.tariffa.push(q); });
-        if(!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
+        if(!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine))corr.desc.push(_cpTestoDesc(des,xFine));
         corr.originali.push(r.testo);
         return;
       }
 
-      /* fuori da una lavorazione non si raccoglie niente: carta intestata,
-         titoli dei capitoli e righe di riporto restano fuori */
-      if(!corr)return;
+      /* fuori da una lavorazione non si raccoglie niente: carta intestata e
+         righe di riporto restano fuori. Il titolo di un capitolo si tiene
+         da parte (vedi sopra). */
+      if(!corr){
+        const tc=_compTitoloCapitolo(r.testo);
+        if(tc&&r.parole.length<=8)capAttesa=tc;
+        return;
+      }
 
       sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)corr.tariffa.push(q);});
-      if(des.length&&!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
+      if(des.length&&!_cpMisure(r,xDesc)&&!_cpMisuraDestra(r,xFine))corr.desc.push(_cpTestoDesc(des,xFine));
       corr.originali.push(r.testo);
     });
     return {voci:voci, xDesc:xDesc};
@@ -548,7 +688,7 @@
         let acc=0;
         parti.forEach(function(w){
           const q=larg*(w.length/Math.max(t.replace(/\s/g,"").length,1));
-          parole.push({t:w,x:tx[4]+acc,y:tx[5]});
+          parole.push({t:w,x:tx[4]+acc,y:tx[5],w:q});
           acc+=q+larg*0.02;
         });
       });
@@ -600,14 +740,18 @@
     if(senzaTar)avvisi.push("<b>"+senzaTar+"</b> "+(senzaTar===1?"riga è senza codice":"righe sono senza codice")+" di tariffa: quelle il prezzario non le può cercare.");
     if(qtaZero)avvisi.push("<b>"+qtaZero+"</b> "+(qtaZero===1?"riga ha quantità zero":"righe hanno quantità zero")+": controllale, o toglile.");
 
-    const riga=(v,i)=>'<div class="cp-riga" data-i="'+i+'">'
+    const _przCasella=function(x){ const n=+x; return (isFinite(n)&&n)?n.toFixed(2).replace(".",","):""; };
+    const nCap=V.reduce(function(a,v){ if(v.capitolo&&a.indexOf(v.capitolo)<0)a.push(v.capitolo); return a; },[]);
+    if(nCap.length)avvisi.unshift("Ho trovato <b>"+nCap.length+"</b> "+(nCap.length===1?"capitolo":"capitoli")+" ("+esc(nCap.slice(0,4).join(", "))+(nCap.length>4?"…":"")+"): le lavorazioni entrano già divise.");
+    const riga=(v,i)=>((v.capitolo&&(i===0||V[i-1].capitolo!==v.capitolo))?'<div class="cp-cap">Capitolo: <b>'+esc(v.capitolo)+'</b></div>':'')
+      +'<div class="cp-riga" data-i="'+i+'">'
       +'<label class="cp-si"><input type="checkbox" class="cp-ck" checked> <span>la prendo</span></label>'
       +'<div class="cp-num">'+(v.numero!=null?("n. "+esc(String(v.numero))):"—")+'</div>'
       +'<div class="cp-campi">'
       +  '<div class="field"><label>Codice di tariffa</label><input class="cp-tar" value="'+esc(v.tariffa||"")+'"'+_noAuto()+'></div>'
       +  '<div class="field"><label>U.M.</label><input class="cp-um" value="'+esc(v.unita||"")+'"'+_noAuto()+'></div>'
       +  '<div class="field"><label>Quantità</label><input class="cp-qta" inputmode="decimal" value="'+esc(_misTesto(v.quantita))+'"'+_noAuto()+'></div>'
-      +  '<div class="field"><label>Prezzo unitario</label><input class="cp-prz" inputmode="decimal" value="'+(v.prezzo?esc(String(v.prezzo).replace(".",",")):"")+'" placeholder="lo metti tu"'+_noAuto()+'></div>'
+      +  '<div class="field"><label>Prezzo unitario</label><input class="cp-prz" inputmode="decimal" value="'+esc(_przCasella(v.prezzo))+'" placeholder="lo metti tu"'+_noAuto()+'></div>'
       +'</div>'
       +'<div class="cp-desc cm-testo">'+esc(v.descrizione||"(senza descrizione)")+'</div>'
       /* ⚠️ IL PEZZO DI FOGLIO ORIGINALE, sotto ogni riga. E' l'unica cosa che
@@ -620,8 +764,8 @@
        /* «sh-centro»: la finestra e' larga quanto lo schermo, ma queste
           righe si leggono una sotto l'altra e restano al centro. */
        '<div class="sh-b sh-centro"><div class="sh-tit">'+V.length+(V.length===1?" lavorazione letta":" lavorazioni lette")+' da «'+esc(cpLette.nome)+'»</div>'
-      +  '<div class="sh-nota">Il PDF è un foglio <b>stampato</b>: l\'ho letto, non me l\'ha detto nessuno. Guarda le quantità prima di farle entrare — sotto ogni riga c\'è <b>il pezzo di foglio</b> da cui l\'ho presa.<br>Chi non ti convince, togli la spunta e non entra.</div>'
-      +  (avvisi.length?('<div class="sh-nota">⚠ '+avvisi.join("<br>⚠ ")+'</div>'):'')
+      +  '<div class="sh-nota">Queste righe le ho lette da un foglio <b>stampato</b>: una cifra posso averla letta male. Guarda le quantità prima di farle entrare — sotto ogni riga c\'è <b>il pezzo di foglio</b> da cui l\'ho presa.<br>Se una riga non ti convince, togli la spunta e non entra.</div>'
+      +  (avvisi.length?('<div class="sh-nota">'+avvisi.map(function(a){return (/^Ho trovato/.test(a)?"✔ ":"⚠ ")+a;}).join("<br>")+'</div>'):'')
       +  '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">'
       +    '<button type="button" class="btn-ghost quick-add" data-action="cp-tutte">Segna tutte</button>'
       +    '<button type="button" class="btn-ghost quick-add" data-action="cp-nessuna">Togli tutte</button>'
@@ -635,7 +779,7 @@
   async function compPdfMetti(){
     if(!cpLette){toast("Non c'è niente da mettere dentro");return;}
     const cid=cpLette.cid;
-    const voci=[];
+    const voci=[], capitoli=[];
     let tolte=0;
     $$("#cp-lista .cp-riga").forEach(function(r){
       const ck=r.querySelector(".cp-ck");
@@ -643,7 +787,13 @@
       const q=_numDa((r.querySelector(".cp-qta")||{}).value||"");
       const p=_numDa((r.querySelector(".cp-prz")||{}).value||"");
       const d=cpLette.voci[+r.dataset.i]||{};
+      let k=-1;
+      if(d.capitolo){
+        k=capitoli.findIndex(function(t){return _compStessoTitolo(t,d.capitolo);});
+        if(k<0){ capitoli.push(d.capitolo); k=capitoli.length-1; }
+      }
       voci.push({
+        _cap:k,
         codice:String((r.querySelector(".cp-tar")||{}).value||"").trim()||null,
         descrizione:String(d.descrizione||"").trim()||"(senza descrizione)",
         unita:String((r.querySelector(".cp-um")||{}).value||"").trim()||null,
@@ -655,10 +805,11 @@
     if(!voci.length){toast("Non hai segnato nessuna riga: non entra niente.");return;}
     if(!(await gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
       +"Entrano con la quantità scritta nel foglio (le misure pezzo per pezzo non ci sono).\n"
+      +_compCapitoliFrase(capitoli)
       +(tolte?("\n⚠ "+tolte+(tolte===1?" riga l'hai tolta":" righe le hai tolte")+" e non entra"+(tolte===1?"":"no")+".\n"):"")
       +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?"))){toast("Non ho messo dentro niente");return;}
 
-    const messe=await _compScriviVoci(cid,voci);
+    const messe=await _compScriviVoci(cid,voci,capitoli);
     if(messe==null)return;
     cpLette=null;
     closeSheet();
@@ -1222,7 +1373,7 @@
       doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
       doc.setTextColor(0);
     }
-    doc.save("lista-gara-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+    doc.save(_compNomeFile("lista-gara",c.numero)+
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("Lista per la gara scaricata ✅");
   }
@@ -1686,7 +1837,7 @@
       doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
       doc.setTextColor(0);
     }
-    doc.save("computo-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+    doc.save(_compNomeFile("computo",c.numero)+
       (c.titolo||"metrico").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("PDF del computo scaricato ✅");
   }
@@ -1927,7 +2078,7 @@
       doc.text("Pag. "+p+" di "+np,R,203,{align:"right"});
       doc.setTextColor(0);
     }
-    doc.save("cronoprogramma-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+    doc.save(_compNomeFile("cronoprogramma",c.numero)+
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("Cronoprogramma scaricato ✅");
   }
@@ -2224,7 +2375,7 @@
       doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
       doc.setTextColor(0);
     }
-    doc.save("variante-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+    doc.save(_compNomeFile("variante",c.numero)+
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("Computo di variante scaricato ✅");
   }
@@ -2715,7 +2866,7 @@
       doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
       doc.setTextColor(0);
     }
-    doc.save("analisi-prezzi-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+    doc.save(_compNomeFile("analisi-prezzi",c.numero)+
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("Analisi dei prezzi scaricata ✅");
   }

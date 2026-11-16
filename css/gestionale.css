@@ -1544,6 +1544,19 @@
   border:1px solid var(--bordo); border-left:5px solid var(--bordo-forte);
   border-radius:12px; padding:14px 16px; margin-bottom:14px; background:var(--card);
 }
+/* 16 nov 2026 — il titolo del capitolo letto dal foglio, sopra le sue righe */
+.cp-cap{ margin:20px 0 10px; padding:10px 14px; border-radius:10px; background:#EEF4FF;
+  border-left:5px solid var(--blu); font-size:17px; color:var(--ink); }
+.cp-cap:first-child{ margin-top:0; }
+/* 16 nov 2026 — cronoprogramma: le lavorazioni rimaste senza capitolo */
+.cg-fuori{ margin:0 0 16px; padding:14px 16px; border-radius:12px; background:#FFFBEB;
+  border:1px solid #F1D48A; border-left:5px solid #D97706; font-size:16px; line-height:1.5; color:var(--testo); }
+.cg-fuori-due{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.cg-fuori-due .btn, .cg-fuori-due .btn-primary{ min-height:48px; font-size:16px; }
+/* 16 nov 2026 — nel menu «Altro» la scritta dell'AI e' quella lunga */
+.ctr-nel-menu .ctr-ai-lungo{ display:inline !important; }
+.ctr-nel-menu .ctr-ai-corto{ display:none !important; }
+.co-menu .ctr-nel-menu{ white-space:normal !important; line-height:1.3 !important; }
 .cp-riga .cp-si{ display:inline-flex; align-items:center; gap:9px; cursor:pointer;
   font-size:16px; font-weight:600; color:var(--testo); }
 .cp-riga .cp-si input{ width:22px; height:22px; accent-color:var(--blu); cursor:pointer; }
@@ -6255,4 +6268,8 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .comp-sel-barra select{ order:1; flex:1 1 100%; min-height:44px; }
   .comp-sel-barra b{ order:2; flex:1 1 0; font-size:15px; line-height:1.2; }
   .comp-sel-barra button{ order:3; flex:0 0 auto; min-height:44px; padding:0 14px; }
+}
+/* 16 nov 2026 — sul telefono «Metti dentro le lavorazioni segnate» usciva tagliato: va su due righe */
+@media(max-width:880px){
+  .sheet--grande .sh-foot [data-action="cp-metti"]{ white-space:normal !important; line-height:1.2 !important; font-size:15px !important; padding:6px 10px !important; overflow:visible !important; }
 }

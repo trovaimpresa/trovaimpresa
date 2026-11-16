@@ -129,6 +129,7 @@
     if(a==="comp-analisi")return analisiPdf(id);
     if(a==="co-pag")return compPag(+t.dataset.p);
     if(a==="crono-salva")return cronoSalva();
+    if(a==="crono-fuori-metti")return cronoFuoriMetti();
     /* i due pulsanti stanno DENTRO la scheda del computo aperto: l'id e'
        quello, non serve leggerlo dal pulsante */
     if(a==="crono-pdf")return cronoPdf(ctrComputoId);
