@@ -22,7 +22,9 @@ Ultimo aggiornamento: 16 novembre 2026 — riassunto di ottobre e inizio novembr
 2. «Preparazione con rasatura e stuccatura» prende la rasatura a gesso (A12.01.008) invece di quella per pitturare (A20.01.009): da guardare.
 3. `banco-attrezzi.mjs` (5 rosse) e `banco-moduli.mjs` (6 rosse) scaduti dal 7 nov: da aggiornare.
 4. `tools/banco-gestionale.js`: 4 rosse nel Noleggio a 360 px («Salva» coperto da «Installa» in movimenti, cauzioni, rendimento, documenti). Non toccato oggi.
-5. Computo del professionista, visto e non sistemato: nel PDF una riga vuota al posto di «(senza nome)»; il totale privato senza IVA ne' quadro economico; mancano firma e albo del tecnico sul PDF; non si spostano piu' lavorazioni insieme in un capitolo; il ribasso si salva solo con «Salva». Non provati: importazione da Excel, lavori pubblici, SAL con dati, Duplica/Variante, telefono dal vivo.
+5. Computo del professionista — FATTI e online (a8e8d38): ribasso che si salva da solo, riga quasi vuota tolta dal PDF, albo + firma + «Nome del tecnico che firma». RESTANO: spostare piu' lavorazioni insieme in un capitolo; IVA e quadro economico nel computo privato (prima capire con Alex cosa vuole vedere: di solito l'IVA sta nel preventivo). Non provati: importazione da Excel, lavori pubblici, SAL con dati, Duplica/Variante, telefono dal vivo.
+6. Prezzi con l'AI, dopo la pubblicazione (877435e): 27 proposti su 36, 9 vuote tutte con la piu' vicina, 20 s e 15 s. Da sistemare: le «piu' vicine» lontane che si possono prendere (tramezzatura → muratura faccia a vista; quadro elettrico → quadro luminoso): farle solo leggere. Guaina liquida: sceglie la pedonabile (50,60) e c'e' anche la non pedonabile (13,23).
+7. `banco-tre-ruoli.js` (17 rosse) e `banco-computo-ribasso-reparti.js` (8 rosse) scaduti: da aggiornare.
 
 ## 🆕 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV (lista di Alex, 21 punti)
 

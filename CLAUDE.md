@@ -3225,3 +3225,11 @@ Tutto in `netlify/functions/chat-gestionale.mjs` (blocco fra `>>> RICERCA-PREZZA
 - Alla fine si cancella computo, voci e righe di `gest_chat_messaggi` della prova e si riconta: 5 computi e 91 messaggi per quell'utente.
 - **Banco a secco**: `prove-claude/banchi-fissi/assistenza-ai/banco-prezzario.mjs` (28 prove, prezzario finto, niente rete), dentro `gira-assistenza-ai.sh`.
 - ⚠️ `banco-attrezzi.mjs` (5 rosse) e `banco-moduli.mjs` (6 rosse) sono SCADUTI dal 7 novembre (attrezzi e moduli nuovi): rosse uguali prima e dopo il lavoro di oggi. Da aggiornare.
+
+## 16 nov 2026 (sera) — IL COMPUTO DEL PROFESSIONISTA: RIBASSO, FIRMA, TECNICO (online, a8e8d38)
+- **Il ribasso si salva da solo** quando si esce dalla casella `#co-rib` (ascoltatore `change` in `computoForm`, solo se il computo esiste gia'): PDF e «Crea il preventivo» leggono il numero SALVATO, e prima uscivano senza ribasso. Fuori scala (<0 o >100) non si salva: lo ferma il «Salva».
+- **PDF del computo** (`computoPdf` in `js/gest-computo-pdf.js`): in alto `azAlbo(az)`; in fondo luogo e data, «IL TECNICO» (studio) o «L'IMPRESA» (gli altri), nome, albo, riga «(timbro e firma)». Una misura sola senza nome e senza misure non lascia piu' una riga quasi vuota sopra «Sommano».
+- **`gest_azienda.tecnico_firma`** (`sql/2026-11-16-tecnico-firma.sql`, gia' eseguito, riga in PROVE): casella «Nome del tecnico che firma» nei Dati azienda dello studio. Vuota = esce il nome dello studio.
+- Provato dal vivo (`?vedi=professionista`, reparto «ferramenta»): casella salvata e riaperta, ribasso 7,5 salvato da solo, PDF col ribasso, il tecnico e l'albo. Pulito tutto.
+- ⚠️ `banco-tre-ruoli.js` (17 rosse) e `banco-computo-ribasso-reparti.js` (8 rosse) sono SCADUTI (menu e reparti cambiati): rosse uguali prima e dopo.
+- Come fotografare un PDF vero: `anteprima.js` + rotta di `jspdf.umd.min.js` su `/home/claude/lib/node_modules/jspdf`, `API.save` sostituita che restituisce `output('datauristring')`, poi `pdftoppm`.
