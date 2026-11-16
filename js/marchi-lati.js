@@ -1,4 +1,4 @@
-/* 8 nov 2026 — I MARCHI (Comet, Rowenta, Moulinex, Lampade.it; 12 nov + Vevor e Trotec) AI LATI.
+/* 8 nov 2026 — I MARCHI (Comet, Rowenta, Moulinex, Lampade.it; 12 nov + Vevor e Trotec; 16 nov + Kasanova) AI LATI.
    Prima stavano tutti insieme in una fascia in mezzo alla pagina.
    Scelta di Alex: separati, uno per volta, nei posti vuoti ai lati della
    pagina, SOTTO i cartelli destinati alle imprese, sparsi a riempire.
@@ -31,7 +31,8 @@
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 3 },
     { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 },
     { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 0 },
-    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 1 }
+    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 1 },
+    { id: 17198, nome: 'Kasanova',  logo: 'kasanova.webp',   w: 168, h: 25, cosa: 'Casalinghi e arredo', c: '#ff00a4', lato: 'dx', dopo: 1 }
   ];
   // 15 nov 2026 (Alex: «qui e' tutto vuoto e sopra e' tutto pieno, distribuire
   // meglio»): i marchi si alternano destra/sinistra e scendono fino in fondo,

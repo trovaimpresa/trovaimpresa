@@ -35,7 +35,8 @@
     moulinex:{ id: 9450,   nome: 'Moulinex',   logo: 'moulinex.webp',   cosa: 'Cucina e casa',                     c: '#d0021b' },
     lampade: { id: 10404,  nome: 'Lampade.it', logo: 'lampade-it.webp', cosa: 'Lampade e luci',                    c: '#e5233b' },
     trotec:  { id: 115365, nome: 'Trotec',     logo: 'trotec.webp',     cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' },
-    vonroc:  { id: 126387, nome: 'Vonroc',     logo: 'vonroc.webp',     cosa: 'Elettroutensili per casa e giardino', c: '#35beae' }
+    vonroc:  { id: 126387, nome: 'Vonroc',     logo: 'vonroc.webp',     cosa: 'Elettroutensili per casa e giardino', c: '#35beae' },
+    kasanova:{ id: 17198,  nome: 'Kasanova',   logo: 'kasanova.webp',   cosa: 'Casalinghi e arredo', c: '#ff00a4' }
   };
 
   // Chi sta dove. marchio = carta del negozio, google = annuncio Google.
@@ -52,7 +53,7 @@
     { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'comet' },
     { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'rowenta' },
     { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'moulinex' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, google: true },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'kasanova' }, // 16 nov: accanto a Moulinex
     { sez: '.why-section',      lato: 'sx', passo: 4, google: true },
     { sez: '.why-section',      lato: 'dx', passo: 4, google: true },
     { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, google: true },

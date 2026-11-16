@@ -18,7 +18,8 @@
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa', c: '#d0021b' },
     { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' },
     { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' },
-    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae' }
+    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae' },
+    { id: 17198, nome: 'Kasanova',  logo: 'kasanova.webp',   w: 168, h: 25, cosa: 'Casalinghi e arredo', c: '#ff00a4' }
   ];
   var AWIN_ME = '3137864';
 
