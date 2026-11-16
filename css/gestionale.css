@@ -6273,3 +6273,6 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 @media(max-width:880px){
   .sheet--grande .sh-foot [data-action="cp-metti"]{ white-space:normal !important; line-height:1.2 !important; font-size:15px !important; padding:6px 10px !important; overflow:visible !important; }
 }
+
+/* IL COMPUTO «CORTO»: le pagine dietro «Altro» non stanno nella fila dei passi */
+.conav-v.dietro:not(.on){ display:none !important; }

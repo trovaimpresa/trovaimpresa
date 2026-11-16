@@ -352,6 +352,11 @@
       /* 6 nov 2026 — il capitolato si apre anche da qui, se da questo computo
          e' gia' nato un preventivo (il capitolato vive dentro il preventivo) */
       +  (_capDaComputo(c)?'<hr><button type="button" data-chiudi="1" data-action="prev-capitolato" data-id="'+esc(String(c.preventivo_id))+'">Capitolato del preventivo</button>':'')
+      +  ((ruoloUtente!=='professionista')?('<hr>'
+           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="4">La scheda (titolo, cliente, dove)</button>'
+           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="5">Acconti (SAL)</button>'
+           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="6">Cronoprogramma</button>'
+           +(c.variante_di?'<button type="button" data-chiudi="1" data-action="co-pag" data-p="7">Cosa è cambiato</button>':'')):'')
       +  '<div class="co-menu-ctr"></div>'
       +  (via.length?'<hr>'+via.map(btn).join(""):'')
       +'</div></div>';
@@ -466,8 +471,14 @@
               prima il computo». */
            const spento=isNew&&v[0]!==4;
            const qui=(isNew?4:1)===v[0];
-           return '<button type="button" class="conav-v'+(qui?" on":"")+(spento?" spento":"")+'" data-action="co-pag" data-p="'+v[0]+'">'
-                + '<span class="conav-n">'+v[0]+'</span>'+v[1]+'</button>';
+           /* IL COMPUTO «CORTO» per impresa e artigiano: in vista
+              Lavorazioni, Prezzi e Totale; le altre pagine stanno dietro
+              «Altro» e la loro voce compare solo mentre ci sei dentro.
+              Lo studio tecnico resta con tutte le voci. */
+           const dietro=!pro&&!isNew&&v[0]>3;
+           const nome=(!pro&&v[0]===3)?"Totale":v[1];
+           return '<button type="button" class="conav-v'+(qui?" on":"")+(spento?" spento":"")+(dietro?" dietro":"")+'" data-action="co-pag" data-p="'+v[0]+'">'
+                + '<span class="conav-n">'+(dietro?"←":v[0])+'</span>'+nome+'</button>';
          }).join("")
       +'</div>'
 
