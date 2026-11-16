@@ -3200,3 +3200,28 @@ Tre push, tutti controllati su Netlify e collaudati sul sito vero:
 - `software-fatturazione-elettronica-edilizia.html`, `software-gestionale-imprese-edili.html` e il generatore `dati-gestionale-problema.js` dicevano «non manda la fattura allo SDI»: falso dal 5 nov. Ora dicono che la manda con un clic.
 - Margine: 50 invii ≈ →6← € (Openapi 0,07 €/invio + Stripe), 200 invii ≈ →14← €.
 - ⛔ Se cambiano i prezzi dei pacchetti, cambiarli in TUTTI questi file e in `js/gest-sdi.js`.
+
+# 16 NOVEMBRE 2026 — L'AI DEI PREZZI NEL COMPUTO: RICERCA RIFATTA, «LA PIU' VICINA», IL BINARIO
+
+Tutto in `netlify/functions/chat-gestionale.mjs` (blocco fra `>>> RICERCA-PREZZARIO` e `<<< RICERCA-PREZZARIO`, attrezzi `righe_senza_prezzo` → `cerca_prezzi` → `prezzi_computo`) e in `js/gest-computo-ai.js` (`caiApriPrezzi`).
+
+- **Il registro delle ricerche (`diario`)**: viaggia nell'ultima riga della risposta (`fine:true`), solo per pintoalessio@icloud.com e info@trovaimpresa.com. Per ogni riga: parole cercate, letture, voci rimaste, tolte per unita'/materiale/variante, le 5 mostrate, le scelte, e i TEMPI (`giro` = ogni chiamata all'AI, `ricerche_ms`, `binario`, `totale_ms`). Non scrive niente nel database.
+- **La ricerca**: parola INTERA (`\m` di Postgres, filtro `imatch`), SINONIMI da cantiere, al massimo 3 letture per riga, voci in fila con `puntiVoce`.
+- **I controlli** (`stessoMateriale`, liste `MATERIALI` e `DISTINTIVE`): se la riga dice un materiale o a cosa serve, la voce lo deve dire anche lei. ⚠️ «grés» nella Tariffa del Lazio ha la e ACUTA (`gr[eèé]s`); il controsoffitto in cartongesso si chiama «pannelli di gesso … rivestiti»; «adduzione» NON e' una parola che distingue (tolta).
+- **«La piu' vicina»** (`vicinaDi`, `memoC.vicine`, `campi.vuote`): le righe del pezzo rimaste senza prezzo arrivano alla schermata «Controlla i prezzi» sotto il titolo «N righe non ci sono nel tuo prezzario», con la voce piu' vicina e il suo prezzo. Stessa unita' e stesso materiale → si puo' prendere (MAI con la spunta gia' messa); altra unita' o altro materiale → si legge e basta; niente di simile → «il prezzo mettilo tu». La schermata si apre anche con sole righe vuote.
+- **Il binario** : la frase del pulsante («Nel computo «X» metti i prezzi alle lavorazioni che sono a zero…») la riconosce il SERVER, che trova il computo (titolo uguale, uno solo) e legge le righe a zero senza chiederlo al modello: il primo giro e' un `tool_use` finto di `righe_senza_prezzo`. Se il titolo non si trova si fa come prima.
+- **Il traduttore dello studio** (`_SKIP_UTENTE` in `js/gest-ingresso.js`) non tocca piu' `.cai-desc` e `.cp-orig`: «Pulizia finale di cantiere» diventava «di pratica».
+- ⛔ Il cancello `#pubblica` in netlify.toml e' stato TOLTO: ogni push su main pubblica. Non rimetterlo.
+
+## I numeri (Tariffa del Lazio, 12.764 voci, computo di prova da 36 righe, reparto «ferramenta»)
+- 16 nov mattina, 16 righe difficili: 3 proposti, 1 sbagliato → dopo la ricerca nuova 7 proposti, 0 sbagliati.
+- 16 nov pomeriggio, 36 righe in due giri (PRIMA di «la piu' vicina» e del binario): 22 proposti (2 per codice), 18 giusti, 1 sbagliato (rasatura a gesso al posto della rasatura per pitturare), 3 da guardare, 14 vuoti; 22 s e 20 s a giro.
+- ⚠️ Il risultato dipende dalle PAROLE che sceglie l'AI in `cerca_prezzi`, e l'AI a volte non sceglie una voce buona che ha davanti (guaina liquida, punto luce deviato): per questo le vuote si fanno vedere con la piu' vicina.
+- Nel prezzario del Lazio NON ci sono: radiatore in alluminio, piatto doccia in ceramica, porta in legno tamburata, tubo di scarico in polipropilene a metro, pulizia finale. Il quadro elettrico da incasso e' a m² (per l'appartamento la voce e' «Centralino»).
+
+## Come si prova dal vivo
+- Reparto «ferramenta» (`mestiere_id` 40edb9f3-04fb-4a87-8790-65ff75ec8c0d, account info@ = utente 1119cf1e…): computo «PROVA CONTROLLORE n» creato con SQL (`gest_computi` + `gest_computo_voci` a prezzo 0). Le 36 righe stanno in `prove-claude/banchi-fissi/assistenza-ai/computo-36-righe.sql`.
+- Dal browser integrato, sul gestionale aperto: `fetch` a `/.netlify/functions/chat-gestionale` col gettone di `window._gc`, la frase del pulsante (secondo giro: + « Salta le prime 20 righe a zero: le hai già provate.»), e si legge `fine.diario`. Ogni giro costa 5 messaggi AI.
+- Alla fine si cancella computo, voci e righe di `gest_chat_messaggi` della prova e si riconta: 5 computi e 91 messaggi per quell'utente.
+- **Banco a secco**: `prove-claude/banchi-fissi/assistenza-ai/banco-prezzario.mjs` (28 prove, prezzario finto, niente rete), dentro `gira-assistenza-ai.sh`.
+- ⚠️ `banco-attrezzi.mjs` (5 rosse) e `banco-moduli.mjs` (6 rosse) sono SCADUTI dal 7 novembre (attrezzi e moduli nuovi): rosse uguali prima e dopo il lavoro di oggi. Da aggiornare.

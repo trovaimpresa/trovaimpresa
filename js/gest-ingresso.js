@@ -69,7 +69,7 @@
      chiusa qui sopra (una parola si cambia solo se e' intera), ma questi due
      restano nell'elenco lo stesso: sono contenuto dell'utente e non vanno
      toccati nemmeno per caso. */
-  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,.cai-desc,.cp-orig,textarea';
   /* ⛔ 21 agosto 2026 — DUE LISTE, NON UNA.
      «textarea» sta in _SKIP_UTENTE per proteggere quello che l'utente SCRIVE
      DENTRO la casella. Ma il suggerimento grigio (`placeholder`) e il `title`

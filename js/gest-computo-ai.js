@@ -168,12 +168,48 @@
       if(righe.some(function(x){return String(x.v.id)===String(v.id);}))return;
       righe.push({v:v,prezzo:+p.prezzo_unitario,da:p.prezzo_da||"",sicuro:p.sicuro!==false,varianti:p.varianti===true});
     });
-    if(!righe.length){
+    /* 16 nov 2026 (5) — LE RIGHE CHE NEL SUO PREZZARIO NON CI SONO: si fanno
+       vedere con la voce più vicina, così sa cosa prezzare a mano. Se la più
+       vicina ha la stessa unità e lo stesso materiale la può prendere lui
+       (MAI con la spunta già messa); se no si legge e basta. */
+    const vuote=[];
+    (campi.vuote||[]).forEach(function(u){
+      const v=perId[String(u.voce_id)];
+      if(!v||+v.prezzo_unitario>0)return;
+      if(righe.some(function(x){return String(x.v.id)===String(v.id);}))return;
+      if(vuote.some(function(x){return String(x.v.id)===String(v.id);}))return;
+      const k=(u.vicina&&+u.vicina.prezzo>0)?u.vicina:null;
+      vuote.push({v:v,vicina:k,prendibile:!!k&&k.perche!=="unita"&&k.perche!=="materiale"});
+    });
+    if(!righe.length&&!vuote.length){
       toast(giaPiene?"Quelle lavorazioni hanno già il loro prezzo: non ho toccato niente.":"Non ho trovato righe a zero a cui proporre un prezzo.");
       return;
     }
+    const proposti=righe.length;
+    vuote.forEach(function(u){ if(u.prendibile){u.i=righe.length;righe.push({v:u.v,prezzo:+u.vicina.prezzo,da:u.vicina.descrizione||"",sicuro:false,varianti:false,vicina:true});} });
     caiStato={modo:"prezzi",id:id,titolo:c.titolo||"",righe:righe};
-    const incerte=righe.filter(function(r){return !r.sicuro;}).length;
+    const incerte=righe.filter(function(r){return !r.sicuro&&!r.vicina;}).length;
+    const rigaVuota=function(u){
+      const k=u.vicina, q=(+u.v.quantita||0);
+      const um=k&&k.unita?(' al '+esc(k.unita)):'';
+      return '<div class="cp-riga cai-vuota'+(u.prendibile?' cai-riga" data-i="'+u.i+'"':'"')+'>'
+        +(u.prendibile?'<label class="cp-si"><input type="checkbox" class="cp-ck"> <span>lo prendo</span></label>':'')
+        +'<div class="cai-desc">'+esc(u.v.descrizione||"")+'</div>'
+        +(u.prendibile
+          ?'<div class="cp-campi cai-campi cai-campi--due">'
+          +  '<div class="field"><label>Quantità</label><div class="cai-fisso">'+esc(caiTesto(q))+(u.v.unita?(' '+esc(u.v.unita)):'')+'</div></div>'
+          +  '<div class="field"><label>Prezzo unitario</label><input class="cai-prz" inputmode="decimal" value="'+esc(caiPrezzo(+k.prezzo))+'" autocomplete="off"></div>'
+          +'</div>':'')
+        +(k
+          ?'<div class="cp-orig">La più vicina nel tuo prezzario: «'+esc(k.descrizione||"")+'» · <b>'+esc(caiPrezzo(+k.prezzo))+' €'+um+'</b></div>'
+          +'<div class="cp-orig cai-manca">'+(k.perche==="unita"
+              ?'Ha un\'altra unità di misura ('+esc(k.unita||"")+' invece di '+esc(u.v.unita||"")+'): il prezzo mettilo tu.'
+              :k.perche==="materiale"
+              ?'È un altro materiale o un altro tipo: il prezzo mettilo tu.'
+              :'Non è la stessa lavorazione: se ti va bene lo stesso, metti la spunta.')+'</div>'
+          :'<div class="cp-orig cai-manca">Nel tuo prezzario non c\'è niente di simile: il prezzo mettilo tu.</div>')
+        +'</div>';
+    };
     const riga=function(r,i){
       const q=(+r.v.quantita||0);
       return '<div class="cp-riga cai-riga" data-i="'+i+'">'
@@ -190,10 +226,12 @@
         +'</div>';
     };
     openSheetGrande("Controlla i prezzi",
-       '<div class="sh-b sh-centro"><div class="sh-tit">'+righe.length+(righe.length===1?" prezzo proposto":" prezzi proposti")+' per «'+esc(c.titolo||"il computo")+'»</div>'
+       '<div class="sh-b sh-centro"><div class="sh-tit">'+proposti+(proposti===1?" prezzo proposto":" prezzi proposti")+' per «'+esc(c.titolo||"il computo")+'»</div>'
       +  '<div class="sh-nota">Solo per le righe che erano a zero. Con la spunta: stesso codice di tariffa del tuo prezzario. Senza spunta: scelti dall\'AI dalla descrizione, guardali tu. Il prezzo lo puoi correggere.'
       +    (incerte?('<br>⚠ <b>'+incerte+'</b> '+(incerte===1?'riga è senza spunta':'righe sono senza spunta')+': quelle guardale una per una.'):'')+'</div>'
-      +  '<div id="cai-lista">'+righe.map(riga).join("")+'</div>'
+      +  '<div id="cai-lista">'+righe.slice(0,proposti).map(riga).join("")
+      +    (vuote.length?('<div class="sh-tit cai-vuote-tit">'+vuote.length+(vuote.length===1?" riga non c'è":" righe non ci sono")+' nel tuo prezzario</div>'+vuote.map(rigaVuota).join("")):'')
+      +  '</div>'
       +'</div>',
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="cai-prezzi-metti">Metti i prezzi</button>');

@@ -5626,6 +5626,11 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 .cai-riga .cai-fisso{ font-size:17px; font-weight:700; color:var(--testo); padding:10px 0; font-variant-numeric:tabular-nums; }
 .cai-riga .cp-orig{ font-size:15px; }
 .cai-riga .cai-manca{ color:#92400E; border-top:0; padding-top:0; margin-top:4px; font-weight:600; }
+/* 16 nov 2026 (5) — le righe che nel suo prezzario non ci sono, con la voce piu' vicina */
+.cai-vuote-tit{ margin-top:28px; }
+.cai-vuota .cai-desc{ font-size:17px; line-height:1.45; font-weight:600; color:var(--testo); margin:8px 0 4px; word-break:break-word; }
+.cai-vuota .cp-orig{ font-size:15px; }
+.cai-vuota .cai-manca{ color:#92400E; border-top:0; padding-top:0; margin-top:4px; font-weight:600; }
 .cai-totale{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
   margin-top:6px; padding:14px 16px; border:1px solid var(--bordo); border-radius:12px;
   font-size:17px; font-weight:600; color:var(--testo); background:var(--card); }

@@ -4,11 +4,25 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 11 novembre 2026 (mattina) — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
+Ultimo aggiornamento: 16 novembre 2026 — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
 
 
 
 
+
+## 🆕 16 NOVEMBRE 2026 — L'AI DEI PREZZI NEL COMPUTO
+
+### ✅ FATTO
+- Ricerca nel prezzario rifatta (parola intera, sinonimi, 3 letture), controllo di materiale e uso, registro delle ricerche per il fondatore. Online, commit 41d5d2d.
+- Prova dal vivo sulle 36 righe: 22 proposti, 18 giusti, 1 sbagliato, 3 da guardare, 14 vuoti; 22 s e 20 s a giro.
+- «La piu' vicina» per le righe vuote, il binario (due giri di AI in meno), grés/cartongesso/adduzione, banco a secco `banco-prezzario.mjs` (28 verdi).
+
+### 🔴 DA FARE
+1. Rifare la prova dal vivo sulle 36 righe DOPO la pubblicazione di «la piu' vicina» e del binario: quanti prezzi, quante vuote con la vicina giusta, quanti secondi.
+2. «Preparazione con rasatura e stuccatura» prende la rasatura a gesso (A12.01.008) invece di quella per pitturare (A20.01.009): da guardare.
+3. `banco-attrezzi.mjs` (5 rosse) e `banco-moduli.mjs` (6 rosse) scaduti dal 7 nov: da aggiornare.
+4. `tools/banco-gestionale.js`: 4 rosse nel Noleggio a 360 px («Salva» coperto da «Installa» in movimenti, cauzioni, rendimento, documenti). Non toccato oggi.
+5. Computo del professionista, visto e non sistemato: nel PDF una riga vuota al posto di «(senza nome)»; il totale privato senza IVA ne' quadro economico; mancano firma e albo del tecnico sul PDF; non si spostano piu' lavorazioni insieme in un capitolo; il ribasso si salva solo con «Salva». Non provati: importazione da Excel, lavori pubblici, SAL con dati, Duplica/Variante, telefono dal vivo.
 
 ## 🆕 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV (lista di Alex, 21 punti)
 

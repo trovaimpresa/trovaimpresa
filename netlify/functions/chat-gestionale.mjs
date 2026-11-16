@@ -633,7 +633,7 @@ const SINONIMI = [
   ['paviment'],
   ['rivestiment'],
   ['piastrell', 'mattonell'],
-  ['gr[eè]s$'],
+  ['gr[eèé]s$'],
   ['tv$', 'televisiv', 'antenn'],
   ['quadr[oi]$', 'centralin[oi]$'],
   ['guain[ae]$', 'membran'],
@@ -755,8 +755,8 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDe
    riga vuota che un prezzo sbagliato con l'aria giusta. */
 const MATERIALI = [
   /(^| )(pvc|polivinil)/, /(^| )legn/, /(^| )allumin/, /(^| )(acciai|inox)/, /(^| )ferr[oi]( |$)/, /(^| )(ceramic|porcellan|vetrochina|fire ?clay)/,
-  /(^| )gr[eè]s( |$)/, /(^| )rame( |$)/, /(^| )ghisa( |$)/, /(^| )multistrat/, /(^| )(polietilen|pead|pe)( |$)|(^| )polietilen/, /(^| )(polipropilen|pp( |$))/,
-  /(^| )(cartongess|cartonat|gesso rivestit|lastr[ae] (di|in) gesso)/, /(^| )(lateriz|matton|forat)/, /(^| )marm[oi]( |$)/, /(^| )(calcestruzz|cls( |$))/, /(^| )vetroresin/, /(^| )ottone( |$)/
+  /(^| )gr[eèé]s( |$)/, /(^| )rame( |$)/, /(^| )ghisa( |$)/, /(^| )multistrat/, /(^| )(polietilen|pead|pe)( |$)|(^| )polietilen/, /(^| )(polipropilen|pp( |$))/,
+  /(^| )(cartongess|cartonat|gesso rivestit|(lastr[ae]|pannell[oi]) (di|in) gesso)/, /(^| )(lateriz|matton|forat)/, /(^| )marm[oi]( |$)/, /(^| )(calcestruzz|cls( |$))/, /(^| )vetroresin/, /(^| )ottone( |$)/
 ];
 /* 16 nov 2026 (4) — A COSA SERVE. Prova dal vivo: per «Tubazione di SCARICO in
    polipropilene» proposto un tubo per l'acqua sanitaria (95,82 €), per «guaina
@@ -764,9 +764,28 @@ const MATERIALI = [
    qualsiasi. Sono parole che cambiano la lavorazione: se la riga le dice, la
    voce le deve dire anche lei. */
 const DISTINTIVE = [
-  /(^| )scaric/, /(^| )adduzion/, /(^| )liquid/, /(^| )(tv( |$)|televisiv|antenn)/, /(^| )telefon/, /(^| )condensazion/,
+  /(^| )scaric/, /(^| )liquid/, /(^| )(tv( |$)|televisiv|antenn)/, /(^| )telefon/, /(^| )condensazion/,
   /(^| )antincend/, /(^| )blindat/, /(^| )scorrevol/, /(^| )coibentat/, /(^| )tamburat/, /(^| )faccia a vista/
 ];
+/* ⛔ 16 nov 2026 (5) — prova dal vivo sulle 36 righe:
+   - «grés» nella Tariffa ha la e ACUTA: «gres» non lo trovava (battiscopa e
+     pavimento in gres restavano vuoti con la voce nel prezzario);
+   - il controsoffitto in cartongesso si chiama «pannelli di gesso … rivestiti»;
+   - «adduzione» NON distingue: il tubo multistrato per adduzione acqua e' il
+     «Tubo multistrato» e basta (tolta da DISTINTIVE). */
+/* LA VOCE PIU' VICINA per una riga rimasta senza prezzo: la prima delle
+   mostrate; se non ce n'e', la prima trovata (meglio se con la stessa unita')
+   col motivo per cui non e' stata proposta. Pura. */
+function vicinaDi(rigaDesc, rigaUnita, mostrate, trovate) {
+  const fa = function (x, perche) { return { descrizione: String(x.descrizione || '').slice(0, 160), unita: x.unita || '', prezzo: +x.prezzo_unitario, perche: perche }; };
+  if (mostrate && mostrate.length) return fa(mostrate[0], '');
+  const t = (trovate || []).filter(function (x) { return +x.prezzo_unitario > 0; });
+  if (!t.length) return null;
+  const stessaU = t.filter(function (x) { return !rigaUnita || stessaUnita(x.unita, rigaUnita); });
+  const x = stessaU[0] || t[0];
+  const perche = !stessaU.length ? 'unita' : (!stessoMateriale(rigaDesc, x.descrizione) ? 'materiale' : 'variante');
+  return fa(x, perche);
+}
 function stessoMateriale(rigaDesc, candDesc) {
   const a = normaTesto(rigaDesc), b = normaTesto(candDesc);
   return !MATERIALI.concat(DISTINTIVE).some(function (re) { return re.test(a) && !re.test(b); });
@@ -835,8 +854,22 @@ function costruisciComputo(modo, dati, idVero, titoloVero) {
       if (da) riga.prezzo_da = da;
       prezzi.push(riga);
     });
-    if (!prezzi.length) return { errore: 'non c\'e\' nessun prezzo da proporre' };
-    return { tipo: 'computo', id: String(idVero), campi: { titolo: String(titoloVero || '').slice(0, 200), prezzi: prezzi } };
+    const vuote = [];
+    (Array.isArray(d.vuote) ? d.vuote : []).slice(0, 60).forEach(function (r) {
+      if (!r || !FORMA_ID.test(String(r.voce_id || ''))) return;
+      if (prezzi.some(function (p) { return p.voce_id === String(r.voce_id); })) return;
+      const o = { voce_id: String(r.voce_id) }, v = r.vicina;
+      const pv = v ? Number(v.prezzo) : NaN;
+      if (v && isFinite(pv) && pv > 0 && pv < 10000000 && String(v.descrizione || '').trim()) {
+        o.vicina = { descrizione: String(v.descrizione).trim().slice(0, 160), unita: String(v.unita || '').slice(0, 20), prezzo: pv,
+                     perche: ['unita', 'materiale', 'variante'].indexOf(v.perche) >= 0 ? v.perche : '' };
+      }
+      vuote.push(o);
+    });
+    if (!prezzi.length && !vuote.length) return { errore: 'non c\'e\' nessun prezzo da proporre' };
+    const campi = { titolo: String(titoloVero || '').slice(0, 200), prezzi: prezzi };
+    if (vuote.length) campi.vuote = vuote;
+    return { tipo: 'computo', id: String(idVero), campi: campi };
   }
   const voci = pulisciVoci(d.voci, true);
   if (!voci.length) return { errore: 'manca almeno una lavorazione' };
@@ -1883,8 +1916,30 @@ export default async function (req) {
       };
 
       try {
+        /* ⛔ 16 nov 2026 (5) — IL BINARIO DEI PREZZI. La frase del pulsante «Metti i
+           prezzi con l'AI» e' sempre la stessa: trovare il computo e leggere le
+           righe a zero lo fa il SERVER, senza chiederlo al modello. Erano due
+           giri di AI (5-8 secondi su 20) per due letture che non hanno niente
+           da decidere. Il modello parte gia' da `cerca_prezzi`. Se il titolo non
+           si trova, o ce n'e' piu' d'uno uguale, si fa come prima. */
+        let binario = null;
+        const _mB = !pezzoAllegato && /^\s*Nel computo «([^»]{1,200})» metti i prezzi alle lavorazioni che sono a zero/i.exec(String(domanda || ''));
+        if (_mB && uid) {
+          try {
+            const qb = costruisciLettura('computi', uid, mestiere_id, { parola: _mB[1], ruolo: ruolo, impresaId: impresaId });
+            if (!qb.errore) {
+              const rb = await esegui(dati, qb), tit = _mB[1].trim().toLowerCase();
+              const uguali = (rb.righe || []).filter(function (x) { return String(x.titolo || '').trim().toLowerCase() === tit; });
+              if (uguali.length === 1 && uguali[0].id) binario = String(uguali[0].id);
+            }
+          } catch (e) { binario = null; }
+          if (conDiario) diario.push({ cosa: 'binario', preso: !!binario, ms: Date.now() - T0 });
+        }
         for (let giro = 0; giro < GIRI_MAX; giro++) {
-          const g = await unGiro({
+          const _tg = Date.now();
+          const g = (giro === 0 && binario) ? { tin: 0, tout: 0, cw: 0, cr: 0, testo: '',
+            blocchi: [{ type: 'tool_use', id: 'toolu_binario_' + _tg, name: 'righe_senza_prezzo', input: { id: binario } }] }
+          : await unGiro({
             model: 'claude-sonnet-4-5',
             // ⛔ 30 agosto 2026 — LA RISPOSTA NON SI TAGLIA PIU' A META'.
             //    Era 1500, cioe' poco piu' di una pagina. Alzare il tetto NON
@@ -1895,6 +1950,7 @@ export default async function (req) {
             messages: messaggi
           }, giroManda(!!risposta));
 
+          if (conDiario) diario.push({ cosa: 'giro', n: giro, ms: Date.now() - _tg, attrezzi: (g.blocchi || []).filter(function (b) { return b.type === 'tool_use'; }).map(function (b) { return b.name; }) });
           tin  += g.tin;
           tout += g.tout;
           cw   += g.cw || 0;
@@ -2052,7 +2108,7 @@ export default async function (req) {
                     dentro: { campo: 'codice', valori: codici }, senzaCestino: true, ordine: 'usata_volte', limite: 300, soloConta: false });
                   (rp.righe || []).forEach(function (r) { const c = String(r.codice || '').trim(); (perCodice[c] = perCodice[c] || []).push(r); });
                 }
-                memoC = { id: String(inp.id), titolo: suo.titolo || '', righe: {}, auto: [], candidati: {} };
+                memoC = { id: String(inp.id), titolo: suo.titolo || '', righe: {}, auto: [], candidati: {}, vicine: {} };
                 const daCercare = [];
                 tutte.forEach(function (v, i) {
                   const n = salta + i + 1;
@@ -2131,6 +2187,7 @@ export default async function (req) {
                 rimaste: tutte.length, tolte_unita: tolteU, tolte_materiale: tolteM, tolte_variante: (r.righe || []).length - tutte.length - tolteU - tolteM, largo: r.largo || undefined,
                 mostrate: scelte.map(function (x) { return String(x.descrizione || '').slice(0, 70) + ' | ' + (x.unita || '') + ' | ' + x.prezzo_unitario; }) });
               memoC.candidati[n] = {};
+              memoC.vicine[n] = vicinaDi(rd, ru, scelte, r.righe);
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
                 memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
@@ -2179,7 +2236,13 @@ export default async function (req) {
               prezzi.push({ voce_id: riga.id, prezzo_unitario: cand.prezzo, prezzo_da: cand.descrizione.slice(0, 160),
                             sicuro: false, varianti: sorelle > 0 });
             });
-            const mc = costruisciComputo('prezzi', { prezzi: prezzi }, memoC.id, memoC.titolo);
+            /* 16 nov 2026 (5) — LE RIGHE RIMASTE VUOTE: «nel tuo prezzario non
+               c'e', la piu' vicina e' questa». Cosi' il geometra sa cosa
+               prezzare a mano. Non hanno MAI la spunta. */
+            const vuote = Object.keys(memoC.righe).filter(function (n) {
+              return !prezzi.some(function (p) { return p.voce_id === memoC.righe[n].id; });
+            }).map(function (n) { return { voce_id: memoC.righe[n].id, vicina: memoC.vicine[n] || null }; });
+            const mc = costruisciComputo('prezzi', { prezzi: prezzi, vuote: vuote }, memoC.id, memoC.titolo);
             if (mc.errore) esito = { errore: 'non ho trovato nessun prezzo adatto nel suo prezzario: diglielo' };
             else {
               modulo = mc; daSistemare = false;
@@ -2188,7 +2251,7 @@ export default async function (req) {
                  rimandare la palla a Claude. Era un giro intero (5-10 secondi)
                  solo per scrivere due righe, ed e' quello che faceva sforare i
                  30 secondi di Netlify. */
-              prezziFatti = { tot: mc.campi.prezzi.length, sicuri: sicuri, restano: memoC.restano || 0 };
+              prezziFatti = { tot: mc.campi.prezzi.length, sicuri: sicuri, restano: memoC.restano || 0, vuote: (mc.campi.vuote || []).length };
               esito = { ok: true, aperto: 'gli ho aperto «Controlla i prezzi»: ' + mc.campi.prezzi.length + ' prezzi proposti (' + memoC.auto.length + ' trovati per codice di tariffa e con la spunta, ' + (mc.campi.prezzi.length - sicuri) + ' scelti per descrizione e SENZA spunta: li deve guardare lui uno per uno)' + (scartate ? '; ' + scartate + ' scelte non valide scartate' : '') + '. Conferma lui.' };
             }
           }
@@ -2280,6 +2343,7 @@ export default async function (req) {
         const dopo = prezziFatti.tot - prezziFatti.sicuri;
         const chiusa = prezziFatti.tot + (prezziFatti.tot === 1 ? ' prezzo proposto' : ' prezzi proposti')
           + ' (' + prezziFatti.sicuri + ' per codice di tariffa, con la spunta; ' + dopo + ' per descrizione, SENZA spunta: guardali uno per uno).'
+          + (prezziFatti.vuote ? '\n' + prezziFatti.vuote + (prezziFatti.vuote === 1 ? ' riga non c\'è' : ' righe non ci sono') + ' nel tuo prezzario: sotto trovi la voce più vicina.' : '')
           + (prezziFatti.restano > 0 ? '\nNe restano ' + prezziFatti.restano + ': conferma questi e premi di nuovo «Metti i prezzi con l\'AI».' : '');
         risposta = risposta ? (risposta + '\n\n' + chiusa) : chiusa;
         try { manda({ pezzo: '\n\n' + chiusa }); } catch (e) {}
@@ -2403,6 +2467,6 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante };
+export { formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante, vicinaDi };
 export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
