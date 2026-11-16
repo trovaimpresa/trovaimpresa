@@ -2263,7 +2263,9 @@
           +'</div></div>'
         : '')
       +(_niente?'':'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>');
-    if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
+    if(compCapNuovo){const i=$("#cc-tit");if(i){i.focus();
+      /* 16 nov 2026 — collaudo dal vivo: scritto il nome e premuto Invio non succedeva niente */
+      i.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();const b=document.querySelector('[data-action="comp-cap-salva"]');if(b)b.click();}});}}
     if(compCapEdit){const i=$("#ce-tit");if(i){i.focus();i.select();}}
     /* le lavorazioni sono appena cambiate, quindi è cambiato il Totale A: il
        quadro economico si rifà i conti da solo. Senza questa riga restava

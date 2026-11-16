@@ -101,7 +101,7 @@ const ATTREZZI = {
   clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta',                                 ordine:'nome',          nome:'i clienti' },
   fornitori:    { tabella:'gest_fornitori',         campi:'id,nome,categoria,telefono',                         ordine:'nome',          nome:'i fornitori' },
   scadenze:     { tabella:'gest_scadenze',          campi:'id,titolo,data_scadenza,stato',                      ordine:'data_scadenza', data:'data_scadenza', nome:'le scadenze' },
-  computi:      { tabella:'gest_computi',           campi:'id,numero,titolo,stato,data',                        ordine:'data',          data:'data',          nome:'i computi' },
+  computi:      { tabella:'gest_computi',           campi:'id,numero,titolo,stato,data,ribasso_perc,tipo',      ordine:'data',          data:'data',          nome:'i computi' },
   sal:          { tabella:'gest_sal',               campi:'id,numero,stato,data',                               ordine:'data',          data:'data',          nome:'gli stati di avanzamento' },
   mezzi:        { tabella:'gest_mezzi',             campi:'id,nome,targa,stato',                                ordine:'nome',          nome:'i mezzi' },
   operatori:    { tabella:'gest_operatori',         campi:'id,nome,mansione',                                   ordine:'nome',          nome:'le persone della squadra' },
@@ -559,6 +559,34 @@ function pulisciVoci(lista, conFonte) {
     voci.push(voce);
   });
   return voci;
+}
+
+/* ⛔ 16 nov 2026 — QUANTO VALE UN COMPUTO. Collaudo dal vivo: la chat ha
+   detto «1.241,05 € (1.018,89 € imponibile)» per un computo che valeva
+   1.116,94 €. Due sbagli: aveva sommato le righe DIMENTICANDO il ribasso
+   (non lo leggeva nemmeno), e si era inventata un imponibile — un computo
+   l'IVA non ce l'ha. Adesso il conto lo fa questa funzione e l'AI lo
+   ripete e basta.
+   Stessa regola di compRiepilogoDa() in js/gest-computo.js: ribasso fra 0
+   e 100, chiuso al centesimo, tolto dal totale dei lavori.
+   ⚠️ Sui «Lavori pubblici» i costi della sicurezza non si ribassano e
+   arrivano da due strade (casella e capitolo): qui NON si rifà quel conto,
+   si dà il totale prima del ribasso e si manda a guardare il computo. */
+function contoComputo(lordo, comp) {
+  const c2 = n => Math.round((+n || 0) * 100) / 100;
+  const L = c2(lordo);
+  let perc = (comp && comp.ribasso_perc != null && comp.ribasso_perc !== '') ? (+comp.ribasso_perc || 0) : 0;
+  if (!isFinite(perc) || perc < 0) perc = 0;
+  if (perc > 100) perc = 100;
+  const base = { totale_dei_lavori: L, ribasso_perc: perc, iva: 'un computo NON ha IVA: non dire mai «imponibile»' };
+  if (comp && comp.tipo === 'pubblico' && perc > 0) {
+    base.nota = 'lavori pubblici: i costi della sicurezza non si ribassano. Di\' il totale dei lavori PRIMA del ribasso e che il totale finale si legge dentro il computo, alla pagina «Ribasso e totale».';
+    return base;
+  }
+  const ribasso = c2(L * perc / 100);
+  base.ribasso = ribasso;
+  base.totale_del_computo = c2(L - ribasso);
+  return base;
 }
 
 /* ⛔ 10 nov 2026 — IL COMPUTO DALLA CHAT. Due lavori, tutti e due SENZA
@@ -1213,6 +1241,7 @@ function istruzioniFisse() {
     'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (20 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
+    'QUANTO VALE UN COMPUTO: non sommare tu le righe. Guarda dentro con `dentro_al_documento` (voci_del_computo) e ripeti `conto_del_computo`: se c\'è un ribasso di\' «totale dei lavori X €, ribasso N% (− Y €), totale del computo Z €»; senza ribasso una cifra sola. ⛔ Un computo NON ha IVA: qui la regola delle due cifre non vale, la parola «imponibile» non si usa. Negli elenchi dei computi `ribasso_perc` è lo sconto e `tipo` dice privato o pubblico.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
     '⛔ NON RACCONTARE COSA STAI FACENDO: niente «Cerco prima i tuoi prezzi…», «Ora guardo il computo…». Usa gli attrezzi in silenzio e scrivi solo la risposta finale.',
     'Sai aprire questi moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo, e la schermata di controllo del computo.',
@@ -1702,14 +1731,27 @@ export default async function (req) {
           } else {
             const qPadre = costruisciLettura(f.padre, uid, mestiere_id, { quanti: 1 });
             let padreOk = false;
+            let padreRiga = null;
             if (!qPadre.errore) {
               qPadre.filtri.id = String(inp.id);
               const rp = await esegui(dati, qPadre);
               padreOk = !rp.errore && rp.righe && rp.righe.length === 1;
+              if (padreOk) padreRiga = rp.righe[0];
             }
             esito = padreOk
               ? await esegui(dati, costruisciLetturaFiglio(inp.cosa, uid, inp.id, { quanti: inp.quanti }))
               : { errore: 'quel documento non e\' in questo reparto, oppure non esiste' };
+            /* 16 nov 2026 — il totale del computo: lo da' la vista dei totali
+               (TUTTE le righe, non le 25 dell'elenco) e il ribasso si toglie
+               in contoComputo(). Si legge col gettone dell'iscritto, come il resto. */
+            if (padreOk && inp.cosa === 'voci_del_computo' && esito && !esito.errore) {
+              const rt = await esegui(dati, { tabella: 'gest_computo_totali', campi: 'computo_id,voci,importo',
+                filtri: { user_id: uid, computo_id: String(inp.id) }, senzaCestino: false, limite: 1, soloConta: false });
+              if (!rt.errore && rt.righe && rt.righe.length === 1) {
+                esito.conto_del_computo = contoComputo(rt.righe[0].importo, padreRiga);
+                esito.conto_del_computo.lavorazioni = rt.righe[0].voci;
+              }
+            }
           }
         } else if (t.name === 'liquidita_30_giorni') {
           /* come soldi_del_reparto: i conti li fa `chat_liquidita` su Supabase,
@@ -2080,5 +2122,5 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

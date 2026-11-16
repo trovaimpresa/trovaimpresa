@@ -1552,6 +1552,16 @@
     if(c.preventivo_id){
       if(!(await gconfirm("Da questo computo hai già creato un preventivo.\n\nNe faccio un altro?")))return;
     }
+    /* 16 nov 2026 — collaudo dal vivo: con una lavorazione ancora senza prezzo
+       il preventivo nasceva lo stesso, zitto, con una riga a 0 €. Adesso lo dice
+       prima. Se la lettura non riesce si va avanti come prima. */
+    try{
+      const _sz=await sb.from("gest_computo_voci").select("id").eq("computo_id",id).or("prezzo_unitario.is.null,prezzo_unitario.eq.0");
+      const _nz=(!_sz.error&&_sz.data)?_sz.data.length:0;
+      if(_nz>0){
+        if(!(await gconfirm((_nz===1?"C'è 1 lavorazione ancora senza prezzo":"Ci sono "+_nz+" lavorazioni ancora senza prezzo")+".\n\nNel preventivo "+(_nz===1?"entra":"entrano")+" a 0 €. Lo creo lo stesso?")))return;
+      }
+    }catch(_e){}
     compPrevInCorso=true;
     const _btPrev=$('[data-action="comp-prev"]');
     if(_btPrev){_btPrev.disabled=true;_btPrev.textContent="Sto creando il preventivo…";}
