@@ -572,6 +572,33 @@ function pulisciVoci(lista, conFonte) {
    ⚠️ Sui «Lavori pubblici» i costi della sicurezza non si ribassano e
    arrivano da due strade (casella e capitolo): qui NON si rifà quel conto,
    si dà il totale prima del ribasso e si manda a guardare il computo. */
+/* ⛔ 16 nov 2026 — LA VOCE GIUSTA C'ERA, MA NON USCIVA. Collaudo dal vivo: nel
+   prezzario di Alex (la Tariffa del Lazio, 12.764 voci) «Punto presa
+   sottotraccia…» c'e', a 25,56 €, e la chat ha risposto «non ho trovato
+   nessun prezzo adatto». Le voci con «punto» e «presa» dentro sono piu' di 90,
+   se ne leggevano 40 nell'ordine di `usata_volte` — che su una tariffa appena
+   caricata e' zero per tutte, cioe' a caso — e quella giusta restava fuori.
+   Adesso se ne leggono di piu' e si mettono in fila per VICINANZA: prima le
+   voci che COMINCIANO con le parole cercate, poi quelle che le hanno
+   attaccate, poi le altre; a parita', dove la prima parola compare prima.
+   Funzione pura: l'ordine di arrivo (usata_volte) resta a parita' di voto. */
+function vicinanza(descrizione, parole) {
+  const d = String(descrizione || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const p = (parole || []).map(function (w) { return String(w || '').toLowerCase(); }).filter(Boolean);
+  if (!p.length || !d) return 0;
+  const frase = p.join(' ');
+  let v = 0;
+  if (d.indexOf(frase) === 0) v = 300;
+  else if (d.indexOf(p[0]) === 0) v = 200;
+  else if (d.indexOf(frase) >= 0) v = 100;
+  const dove = d.indexOf(p[0]);
+  return v + (dove < 0 ? 0 : Math.max(0, 60 - Math.min(60, dove)));
+}
+function ordinaPerVicinanza(righe, parole) {
+  return (righe || []).map(function (x, i) { return { x: x, v: vicinanza(x && x.descrizione, parole), i: i }; })
+    .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; });
+}
+
 function contoComputo(lordo, comp) {
   const c2 = n => Math.round((+n || 0) * 100) / 100;
   const L = c2(lordo);
@@ -1771,8 +1798,17 @@ export default async function (req) {
              non ha `mestiere_id`. Il filtro sull'utente c'e' sempre. */
           const qp = { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario,categoria',
                        filtri: { user_id: uid }, senzaCestino: true, ordine: 'usata_volte', limite: RIGHE_MAX, soloConta: false };
-          if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
+          /* 16 nov 2026 — con una parola si leggono piu' voci e si tengono le 25
+             piu' VICINE (su una tariffa da 12.000 voci le prime 25 a caso non
+             bastano). Piu' parole: devono esserci tutte, non per forza attaccate. */
+          const paroleP = String(inp.parola || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 4);
+          if (paroleP.length) { qp.contieneTutte = { campo: 'descrizione', valori: paroleP }; qp.limite = 300; }
+          else if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
           esito = uid ? await esegui(dati, qp) : { errore: 'manca chi sta chiedendo' };
+          if (paroleP.length && esito && esito.righe) {
+            esito.righe = ordinaPerVicinanza(esito.righe, paroleP).slice(0, RIGHE_MAX)
+              .map(function (x) { return Object.assign({}, x, { descrizione: String(x.descrizione || '').slice(0, 320) }); });
+          }
         } else if (t.name === 'righe_senza_prezzo') {
           /* ⛔ PRIMA il computo, coi due filtri di sempre (utente e reparto):
              se non e' suo o e' di un altro reparto le righe non si toccano. */
@@ -1844,15 +1880,17 @@ export default async function (req) {
               const parole = String((c && c.parola) || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 3);
               if (!memoC.righe[n] || !parole.length) return { n: n, voci: [] };
               const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
-                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 40, soloConta: false });
+                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 300, soloConta: false });
               /* prima la STESSA variante (coda uguale), poi la stessa unita';
                  le varianti sicuramente sbagliate (supplemento al posto della
                  lavorazione, misura diversa) non si fanno nemmeno vedere */
               const rd = memoC.righe[n].desc;
               const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0 && stessaVariante(rd, x.descrizione) !== 'no'; });
               const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0); };
-              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), i: i }; })
-                .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
+              /* 16 nov 2026: a parita' di variante e unita' vince la voce piu' VICINA
+                 alle parole cercate (vedi vicinanza) */
+              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), w: vicinanza(x.descrizione, parole), i: i }; })
+                .sort(function (a, b) { return (b.v - a.v) || (b.w - a.w) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
               memoC.candidati[n] = {};
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
@@ -2122,5 +2160,5 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
