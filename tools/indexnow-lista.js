@@ -142,3 +142,5 @@ try {
   scrivi([], 'non sono riuscito a fare la lista (' + (e && e.message ? e.message.split('\n')[0] : e) + ')');
 }
 process.exit(0);
+
+// 16 nov 2026: prova del cancello dei crediti (questo commit NON deve andare online)
