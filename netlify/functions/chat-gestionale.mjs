@@ -649,7 +649,7 @@ const SINONIMI = [
   ['caldai', 'generator'],
   ['condizionator', 'climatizzator'],
   ['demolizion', 'rimozion'],
-  ['impermeabilizz'],
+  ['impermeabil'],
   ['controsoffitt'],
   ['intonac'],
   ['pulizi', 'pulitur']
@@ -707,21 +707,23 @@ async function cercaNelPrezzario(dati, uid, parole, campi, quante, passi, rigaDe
   const forme = (parole || []).map(formaParola).filter(Boolean);
   if (!forme.length) return { righe: [] };
   const formeRiga = formeDellaRiga(rigaDesc, forme);
-  /* ⛔ 16 nov 2026 (4) — DUE LETTURE PER RIGA, NON CINQUE. Con cinque letture
+  /* ⛔ 16 nov 2026 (4) — AL MASSIMO TRE LETTURE PER RIGA, NON CINQUE. Con cinque letture
      per riga (80 insieme su 16 righe) le ricerche duravano 11 secondi e la
      risposta 27: Netlify taglia a 30. Adesso:
-     1) UNA lettura con dentro: tutte le parole · le prime due · la voce
-        COMINCIA con la prima e ha una delle altre;
-     2) la voce comincia con la prima parola e basta (⚠️ da sola non basta:
+     1) la prima e la seconda parola; 2) la voce COMINCIA con la prima e ha
+        la terza; 3) la voce comincia con la prima parola e basta (⚠️ da sola non basta:
         le voci che cominciano con «Tubo» sono piu' di 300). */
   const tra = function (re) { return 'descrizione.imatch."' + re.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; };
   const e = function (lista) { return lista.length === 1 ? tra(lista[0]) : 'and(' + lista.map(tra).join(',') + ')'; };
-  const pezzi = [e(forme.map(function (f) { return f.pg; }))];
-  if (forme.length > 2) pezzi.push(e([forme[0].pg, forme[1].pg]));
-  forme.slice(1).forEach(function (f) { pezzi.push(e([forme[0].pgInizio, f.pg])); });
+  /* ⚠️ le letture si tagliano in ordine di codice: quella PRECISA (prima e
+     seconda parola) sta da sola, se no «comincia con Tubo + acqua» riempiva
+     i posti e il tubo multistrato restava fuori (visto dal vivo). */
   const base = { tabella: 'gest_prezzi_propri', campi: campi + (campi.indexOf('codice') < 0 ? ',codice' : ''), filtri: { user_id: uid },
                  senzaCestino: true, ordine: 'codice', crescente: true, soloConta: false };
-  const giri = [{ come: 'le parole', parole: forme.map(function (f) { return f.parola; }).join(' '), q: Object.assign({}, base, { oppure: pezzi.join(','), limite: Math.min(quante || 300, 150) }) }];
+  const giri = [{ come: 'prima e seconda parola', parole: forme.slice(0, 2).map(function (f) { return f.parola; }).join(' '),
+                  q: Object.assign({}, base, { oppure: e(forme.slice(0, 2).map(function (f) { return f.pg; })) + (forme.length > 2 ? ',' + e(forme.map(function (f) { return f.pg; })) : ''), limite: Math.min(quante || 300, 120) }) }];
+  if (forme.length > 2) giri.push({ come: 'comincia + terza parola', parole: forme[0].parola + ' ' + forme[2].parola,
+                  q: Object.assign({}, base, { oppure: e([forme[0].pgInizio, forme[2].pg]), limite: 60 }) });
   if (forme.length > 1) giri.push({ come: 'comincia con la prima', parole: forme[0].parola, q: Object.assign({}, base, { regex: { campo: 'descrizione', valori: [forme[0].pgInizio] }, limite: 60 }) });
   const esiti = await Promise.all(giri.map(function (g) { return esegui(dati, g.q); }));
   const visti = {}, tutte = [];
