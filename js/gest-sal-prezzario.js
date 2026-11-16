@@ -410,11 +410,19 @@
       if(rt&&rt.data)salPrecTot=rt.data;
     }
 
+    /* 16 nov 2026 — i costi della sicurezza arrivano anche dal CAPITOLO marcato
+       (gest_computo_capitoli.sicurezza), non solo dalla casella vecchia: il
+       conto a schermo li ribassava. Stessa regola di compRiepilogo. */
+    const capSic={};
+    try{
+      const rk=await sb.from("gest_computo_capitoli").select("id").eq("user_id",sbUid).eq("computo_id",computoId).eq("sicurezza",true);
+      (rk.data||[]).forEach(k=>{capSic[String(k.id)]=true;});
+    }catch(_e){}
     const rigaVoce=v=>{
       const fatto=salRigheCache[String(v.id)];
       const prima=salPrec[String(v.id)];
       return '<div class="sal-riga" data-voce="'+esc(String(v.id))+'" data-prezzo="'+esc(String(v.prezzo_unitario||0))+'"'
-        +' data-sic="'+esc(String(v.oneri_sicurezza||0))+'" data-mano="'+esc(String(v.incidenza_manodopera||0))+'"'
+        +' data-sic="'+esc(String(v.oneri_sicurezza||0))+'"'+((v.capitolo_id&&capSic[String(v.capitolo_id)])?' data-capsic="1"':'')+' data-mano="'+esc(String(v.incidenza_manodopera||0))+'"'
         +' data-qta="'+esc(String(v.quantita||0))+'"'
         +' style="border-bottom:1px solid var(--bordo,#e6e9ee);padding:10px 2px">'
         +'<div class="cm-testo" style="font-size:15px">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")+'</div>'
@@ -510,6 +518,7 @@
       const qc=+r.dataset.qta||0;
       const imp=q*p;
       lordo+=imp;
+      if(r.dataset.capsic==="1")sic+=imp;
       if(qc>0){
         sic += (+r.dataset.sic||0) * (q/qc);
         mano+= imp * (+r.dataset.mano||0)/100;
@@ -536,7 +545,7 @@
     const _og=compRiepilogoDa(lordo,sic,mano,comp);
     box.innerHTML=
        (_og.ribasso
-         ? '<div class="qe-r"><span>Lavori fatti, ai prezzi del computo</span><b>'+eur2(_og.lordo)+'</b></div>'
+         ? '<div class="qe-r"><span>Quello che hai fatto, ai prezzi del computo</span><b>'+eur2(_og.lordo)+'</b></div>'
           +'<div class="qe-r"><span>Ribasso del computo '+String(_og.perc).replace(".",",")+'%'+(_og.sicurezza?' (non sui costi della sicurezza)':'')+'</span><b>−'+eur2(_og.ribasso)+'</b></div>'
          : '')
       +'<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
