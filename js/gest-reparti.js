@@ -575,6 +575,13 @@
         var b=document.querySelector(sel);
         if(b)b.style.display='';
       });
+      /* 16 nov 2026 — parole semplici: «Stati di avanzamento» per impresa e
+         artigiano si chiama «Acconti a lavoro fatto» (menu e titolo) */
+      document.querySelectorAll('[data-tab="sal"] span:not(.tab-cnt)').forEach(function(x){
+        if(x.textContent.trim()==='Stati di avanzamento')x.textContent='Acconti a lavoro fatto';
+      });
+      var hs=document.querySelector('#sal .sec-head h2');
+      if(hs&&hs.textContent.trim()==='Stati di avanzamento')hs.textContent='Acconti a lavoro fatto';
       /* la voce del menu */
       document.querySelectorAll('[data-tab="computi"] span').forEach(function(x){
         if(x.textContent.trim()===_CM.pro.nome)x.textContent=_cm('nome');

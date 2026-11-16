@@ -6297,3 +6297,5 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .cv-semplice #cv-conto{ margin-top:14px !important; }
 .cv-altro-pps{ padding:0 14px 16px; }
 .cv-altro-pps .btn{ min-height:48px; font-size:16px; }
+/* 16 nov 2026 — pagina Prezzi: i due pulsanti dei prezzi non si toccano */
+.cp-azioni{ display:flex; flex-wrap:wrap; gap:10px; }

@@ -189,6 +189,15 @@
   }
 
   /* le azioni del computo: le stesse nel menu "..." e sui pulsanti della scheda */
+  /* 16 nov 2026 — LE PAROLE SEMPLICI del computo, solo per impresa e
+     artigiano (lista «prima → dopo» approvata da Alessio). Lo studio tecnico
+     tiene le sue. Sui fogli stampati restano le parole ufficiali.
+       Ribasso → Sconto · Acconti (SAL) → Acconti a lavoro fatto ·
+       Cronoprogramma → Calendario dei lavori · Crea la variante → Fai una
+       copia per le modifiche · Scarica l'analisi dei prezzi → Scarica come
+       è fatto ogni prezzo · Lista da far prezzare → Foglio senza prezzi ·
+       Lavori pubblici → Gara pubblica */
+  function _cpar(studio,semplice){ return ruoloUtente==='professionista'?studio:semplice; }
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
             /* ⚠️ 22 agosto 2026 — QUI C'ERA SCRITTO SOLO «Scarica il PDF».
@@ -208,14 +217,14 @@
               che si manda a un subappaltatore per farsi fare i prezzi da lui.
               E' lo stesso documento che il geometra manda all'impresa.
               Cambia solo il nome: in una gara si chiama cosi', fra privati no. */
-           .concat([{lab:(c.tipo==="pubblico"?"🏛 Lista per la gara":"📋 Lista da far prezzare"),
+           .concat([{lab:(c.tipo==="pubblico"?"🏛 Lista per la gara":_cpar("📋 Lista da far prezzare","📋 Foglio senza prezzi")),
                      action:"comp-gara",data:{id:c.id}}])
            /* 22 agosto 2026 — l'analisi dei prezzi: il foglio che in una gara
               si consegna quando una lavorazione non sta nel prezzario. Sta in
               fila con gli altri documenti del computo perche' e' un documento
               del computo, non di una lavorazione: l'allegato e' uno solo, con
               dentro tutte le lavorazioni col prezzo costruito. */
-           .concat([{lab:"🧮 Scarica l'analisi dei prezzi",action:"comp-analisi",data:{id:c.id}}])
+           .concat([{lab:_cpar("🧮 Scarica l'analisi dei prezzi","🧮 Scarica come è fatto ogni prezzo"),action:"comp-analisi",data:{id:c.id}}])
            .concat([
             /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
                finestra. Adesso che le azioni del documento stanno in alto,
@@ -227,7 +236,7 @@
               ⛔ Su una variante non si offre di rifarne un'altra: una
               variante della variante non e' piu' un confronto, e' una
               catena in cui non si capisce piu' rispetto a cosa. */
-           .concat(c.variante_di?[]:[{lab:"± Crea la variante",action:"comp-variante",data:{id:c.id}}])
+           .concat(c.variante_di?[]:[{lab:_cpar("± Crea la variante","± Fai una copia per le modifiche"),action:"comp-variante",data:{id:c.id}}])
            .concat([{lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}]);
   }
   /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
@@ -245,8 +254,8 @@
         c.luogo?("📍 "+esc(c.luogo)):"",
         "📅 "+esc(q.testo),
         nVoci?("🧱 "+nVoci+(nVoci===1?" lavorazione":" lavorazioni")):"🧱 nessuna lavorazione",
-        '<b>'+eur(compNetto(c))+'</b>'+((+c.ribasso_perc)?(' <small>ribasso '+_pct(c.ribasso_perc)+'%</small>'):''),
-        c.tipo==="pubblico"?"🏛 lavori pubblici":"",
+        '<b>'+eur(compNetto(c))+'</b>'+((+c.ribasso_perc)?(' <small>'+_cpar('ribasso','sconto')+' '+_pct(c.ribasso_perc)+'%</small>'):''),
+        c.tipo==="pubblico"?_cpar("🏛 lavori pubblici","🏛 gara pubblica"):"",
         c.prezzario?("🏷 "+esc(c.prezzario)+(c.prezzario_anno?(" "+c.prezzario_anno):"")):""
       ],
       nota: c.note?("📝 "+esc(c.note)):"",
@@ -354,8 +363,8 @@
       +  (_capDaComputo(c)?'<hr><button type="button" data-chiudi="1" data-action="prev-capitolato" data-id="'+esc(String(c.preventivo_id))+'">Capitolato del preventivo</button>':'')
       +  ((ruoloUtente!=='professionista')?('<hr>'
            +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="4">La scheda (titolo, cliente, dove)</button>'
-           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="5">Acconti (SAL)</button>'
-           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="6">Cronoprogramma</button>'
+           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="5">Acconti a lavoro fatto</button>'
+           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="6">Calendario dei lavori</button>'
            +(c.variante_di?'<button type="button" data-chiudi="1" data-action="co-pag" data-p="7">Cosa è cambiato</button>':'')):'')
       +  '<div class="co-menu-ctr"></div>'
       +  (via.length?'<hr>'+via.map(btn).join(""):'')
@@ -462,7 +471,7 @@
       /* la 7 c'e' SOLO su una variante: su un computo normale non ci
          sarebbe niente da confrontare, e una voce che non fa mai niente
          e' peggio di una voce che non c'e' */
-      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,"Acconti (SAL)"],[6,"Cronoprogramma"]]
+      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,_cpar("Acconti (SAL)","Acconti a lavoro fatto")],[6,_cpar("Cronoprogramma","Calendario dei lavori")]]
          .concat(c.variante_di?[[7,"Cosa è cambiato"]]:[])
          .map(function(v){
            /* su un computo che non e' ancora stato salvato l'unica cosa che
@@ -535,7 +544,7 @@
       +'</div>'   /* <- fine pagina 3 (il ribasso ci arriva piu' sotto) */
 
       +'<div class="copag" data-p="5">'
-      +'<div class="sh-b"><div class="sh-tit">Stati di avanzamento (SAL)</div>'
+      +'<div class="sh-b"><div class="sh-tit">'+_cpar('Stati di avanzamento (SAL)','Acconti a lavoro fatto')+'</div>'
       +  '<div class="lav-media" id="co-sal">'+(isNew
           ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti gli stati di avanzamento.</div>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
@@ -558,7 +567,7 @@
             lascerebbe tutte sbagliate senza che nessuno se ne accorga.
          ============================================================ */
       +'<div class="copag" data-p="6">'
-      +'<div class="sh-b"><div class="sh-tit">Cronoprogramma</div>'
+      +'<div class="sh-b"><div class="sh-tit">'+_cpar('Cronoprogramma','Calendario dei lavori')+'</div>'
       /* ⚠️ NON scrivere «Il cantiere comincia il»: per gli studi tecnici il
          gestionale riscrive «cantiere» in «pratica» (vedi _FRASI) e usciva
          «Il pratica comincia il». Se l'ho visto io in una foto, l'avrebbe
@@ -597,13 +606,13 @@
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
       +  '<div class="field"><div class="seg" id="co-tipo">'
       +    '<button data-v="privato"'+((c.tipo||"privato")==="privato"?' class="on"':'')+'>Lavori privati</button>'
-      +    '<button data-v="pubblico"'+(c.tipo==="pubblico"?' class="on"':'')+'>Lavori pubblici</button>'
+      +    '<button data-v="pubblico"'+(c.tipo==="pubblico"?' class="on"':'')+'>'+_cpar('Lavori pubblici','Gara pubblica')+'</button>'
       +  '</div>'
       /* ⚠ Qui NON si scrive la parola "manodopera": per gli studi il gestionale
          la riscrive in "tempo speso" (vedi _FRASI), e usciva "l'incidenza della
          tempo speso". Il termine giusto per una gara e' "incidenza della
          manodopera": va sistemato nella traduzione prima di metterlo sul PDF. */
-      +  '<div class="sh-nota">Sui <b>lavori pubblici</b> il gestionale ti chiede anche quanta parte del prezzo è costo del personale e gli oneri della sicurezza, che nelle gare vanno dichiarati. Sui lavori privati non ti disturba.</div></div>'
+      +  '<div class="sh-nota">'+_cpar('Sui <b>lavori pubblici</b>','In una <b>gara pubblica</b>')+' il gestionale ti chiede anche quanta parte del prezzo è costo del personale e gli oneri della sicurezza, che nelle gare vanno dichiarati. Sui lavori privati non ti disturba.</div></div>'
       +  '<div class="field"><div class="seg" id="co-stato">'
       +    '<button data-v="bozza"'+((c.stato||"bozza")==="bozza"?' class="on"':'')+'>Bozza</button>'
       +    '<button data-v="definitivo"'+(c.stato==="definitivo"?' class="on"':'')+'>Definitivo</button>'
@@ -652,8 +661,8 @@
       /* il ribasso sta con il totale, non coi prezzi: e' l'ultima cosa che si
          tocca, e si guarda insieme alla cifra che cambia */
       +'<div class="copag" data-p="3">'
-      +'<div class="sh-b"><div class="sh-tit">Il ribasso</div>'
-      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
+      +'<div class="sh-b"><div class="sh-tit">'+_cpar('Il ribasso','Lo sconto')+'</div>'
+      +  '<div class="field"><label>'+_cpar('Ribasso o sconto (%)','Sconto (%)')+'</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
       +  '<div class="sh-nota">Lo sconto che fai sul totale. Qui sotto vedi subito com\'\u00e8 il conto.</div>'
       +  '<div id="co-rib-conto"></div>'
       +'</div></div>'
@@ -711,11 +720,11 @@
         const prima=(c.ribasso_perc==null||c.ribasso_perc==="")?null:+c.ribasso_perc;
         if(prima===n)return;
         const r=await sb.from("gest_computi").update({ribasso_perc:n}).eq("id",c.id).eq("user_id",sbUid).select("id");
-        if(r.error||!r.data||!r.data.length){toast("Il ribasso non si è salvato: premi «Salva» in fondo.");return;}
+        if(r.error||!r.data||!r.data.length){toast(_cpar("Il ribasso","Lo sconto")+" non si è salvato: premi «Salva» in fondo.");return;}
         c.ribasso_perc=n;
         const cc=compCache.find(function(x){return String(x.id)===String(c.id);});
         if(cc)cc.ribasso_perc=n;
-        toast("Ribasso salvato \u2714");
+        toast(_cpar("Ribasso","Sconto")+" salvato \u2714");
       }catch(e){}
     });
     qeAggiorna();
@@ -1165,7 +1174,7 @@
     box.innerHTML='<div class="qe-a">'
       +'<div class="qe-r"><span>Totale dei lavori</span><b>'+eur2(_s?_l:r.lordo)+'</b></div>'
       +(_s?'<div class="qe-r"><span>Costi della sicurezza, non soggetti a ribasso</span><b>'+eur2(_s)+'</b></div>':'')
-      +(r.perc?'<div class="qe-r"><span>Ribasso '+esc(_numTesto(r.perc))+'%'+(_s?' (solo sui lavori)':'')+'</span><b>\u2212 '+eur2(r.ribasso)+'</b></div>':'')
+      +(r.perc?'<div class="qe-r"><span>'+_cpar('Ribasso','Sconto')+' '+esc(_numTesto(r.perc))+'%'+(_s?' (solo sui lavori)':'')+'</span><b>\u2212 '+eur2(r.ribasso)+'</b></div>':'')
       +'<div class="qe-r qe-r--tot"><span>Totale del computo</span><b>'+eur2(r.netto)+'</b></div>'
       +(r.manodopera?'<div class="qe-r qe-r--dicui"><span>di cui costo del personale</span><b>'+eur2(r.manodopera)+'</b></div>':'')
       +'</div>';
@@ -1781,7 +1790,7 @@
   /* le mette tutte in un capitolo «Altri lavori» (se c'e' gia', usa quello) */
   async function cronoFuoriMetti(){
     const cid=compVociCompId||cronoCapCacheId; if(!cid||!sbUid)return;
-    if(cronoModifiche(cid)){ toast("Prima premi «Salva il cronoprogramma»: hai scritto dei giorni che non sono ancora salvati."); return; }
+    if(cronoModifiche(cid)){ toast("Prima premi «"+_cpar("Salva il cronoprogramma","Salva il calendario")+"»: hai scritto dei giorni che non sono ancora salvati."); return; }
     const TIT="Altri lavori";
     const rc=await sb.from("gest_computo_capitoli").select("id,titolo,ordine").eq("user_id",sbUid).eq("computo_id",cid).order("ordine");
     if(rc.error){ toast("Non riesco a leggere i capitoli: "+rc.error.message); return; }
@@ -1838,7 +1847,7 @@
     if(!caps.length){
       box.innerHTML='<div class="co-vuoto">'
         +'<div class="co-vuoto-ic">📅</div>'
-        +'<h4>Il cronoprogramma si fa a fasi</h4>'
+        +'<h4>'+_cpar('Il cronoprogramma','Il calendario dei lavori')+' si fa a fasi</h4>'
         +'<p>Le fasi sono i <b>capitoli</b> del computo: Demolizioni, Murature, Impianti… A ognuno dai quanti giorni dura, e il calendario si disegna da solo.<br>Questo computo non ha ancora capitoli.</p>'
         +'<div class="co-vuoto-due"><button type="button" class="btn-primary" data-action="co-pag" data-p="1">Vai alle lavorazioni e crea i capitoli</button></div>'
         +'</div>';
@@ -1885,7 +1894,7 @@
          del computo. Questo e' l'unico pulsante della pagina e serve a
          SALVARE: blu pieno, come «Crea computo». */
       +'<div class="cg-salva">'
-      +  '<button type="button" class="btn-primary" data-action="crono-salva">Salva il cronoprogramma</button>'
+      +  '<button type="button" class="btn-primary" data-action="crono-salva">'+_cpar('Salva il cronoprogramma','Salva il calendario')+'</button>'
       /* ⚠️ il blu pieno resta UNO SOLO per schermata, ed e' il Salva: questo
          e' secondario (.btn). In una gara il cronoprogramma va consegnato
          stampato, non fatto vedere sullo schermo. */
@@ -1895,7 +1904,7 @@
          stesso nome sulla stessa pagina che scaricano due documenti
          diversi: visto da Alessio in una foto dello schermo, non dal
          banco — il banco leggeva la pagina 6 da sola. */
-      +  '<button type="button" class="btn" data-action="crono-pdf">📄 Scarica il cronoprogramma</button>'
+      +  '<button type="button" class="btn" data-action="crono-pdf">📄 '+_cpar('Scarica il cronoprogramma','Scarica il calendario')+'</button>'
       +'</div>'
       +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato e domenica non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
     box.innerHTML=h;
@@ -1972,7 +1981,7 @@
        finestra il cronoprogramma torna a quella di prima */
     const cc=compCache.find(x=>String(x.id)===String(ctrComputoId));
     if(cc)cc.data_inizio=inizio;
-    toast("Cronoprogramma salvato ✔");
+    toast(_cpar("Cronoprogramma","Calendario")+" salvato ✔");
     await renderCrono(ctrComputoId);
   }
 
@@ -2073,7 +2082,7 @@
     const rp=compRiepilogo(voci,comp);
     const tv=box.querySelector("#cp-totv"); if(tv)tv.textContent=eur2(rp.lordo);
     const tl=box.querySelector("#cp-totl");
-    if(tl)tl.textContent=(rp.perc||rp.sicurezza)?"Totale dei lavori, prima del ribasso":"Totale del computo";
+    if(tl)tl.textContent=(rp.perc||rp.sicurezza)?_cpar("Totale dei lavori, prima del ribasso","Totale dei lavori, prima dello sconto"):"Totale del computo";
     const t=box.querySelector("#cp-testa");
     if(t){
       t.classList.toggle("tutto",!mancano);
@@ -2094,7 +2103,11 @@
     const unoSolo=gruppi.length===1&&!gruppi[0].cap;
     const zeri=voci.some(v=>!(+v.prezzo_unitario));
     let h='<div class="cp-testa" id="cp-testa"></div>';
-    if(zeri)h+='<div class="cp-azioni"><button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Riempi i vuoti dal prezzario</button></div>';
+    /* 16 nov 2026 — per impresa e artigiano i pulsanti dei prezzi hanno lo
+       STESSO nome in tutte e due le pagine (qui si chiamava «Riempi i vuoti
+       dal prezzario»), e c'e' anche quello dell'AI. */
+    if(zeri)h+='<div class="cp-azioni"><button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">'+_cpar('€ Riempi i vuoti dal prezzario','€ Prendi i prezzi dal prezzario')+'</button>'
+      +(ruoloUtente==='professionista'?'':'<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai-prezzi">Metti i prezzi con l\'AI</button>')+'</div>';
     if(compPrzEsito&&String(compPrzEsitoId||"")===String(compVociCompId))h+=compPrzEsito;
     h+='<div class="cp-tab"><div class="cp-r cp-h"><span>Lavorazione</span><span>Quantità</span><span>Prezzo €</span><span>Importo</span></div>';
     gruppi.forEach(function(g){
@@ -2178,6 +2191,13 @@
     }
     compCapCache=rc.data||[];
     compVociCache=rv.data||[];
+    /* 16 nov 2026 — nel menu «Altro» di impresa e artigiano il foglio dei
+       prezzi costruiti c'e' solo se un prezzo costruito esiste: una voce che
+       non fa mai niente e' peggio di una voce che non c'e'. */
+    if(ruoloUtente!=='professionista'){
+      const _an=document.querySelector('#sheet .co-menu [data-action="comp-analisi"]');
+      if(_an)_an.style.display=compVociCache.some(function(v){return !!v.prezzo_da_analisi;})?"":"none";
+    }
     compNavAggiorna(compVociCache.length);
     try{ renderCompPrezzi(); }catch(e){ console.warn("[computo] tabella prezzi:",e); }
 
@@ -2283,11 +2303,11 @@
       +(_spezza?"Totale dei lavori":"Totale del computo")+'</b></span><b>'+eur2(_spezza?_lav:rp.lordo)+'</b><span></span></div>';
     if(_sic){
       piede+='<div class="spesa-row"><span>Costi della sicurezza'
-        +'<small class="sp-forn">non soggetti a ribasso</small>'
+        +'<small class="sp-forn">'+_cpar('non soggetti a ribasso','non si scontano')+'</small>'
         +'</span><b>'+eur2(_sic)+'</b><span></span></div>';
     }
     if(rp.perc){
-      piede+='<div class="spesa-row"><span>Ribasso '+_pct(rp.perc)+'%'
+      piede+='<div class="spesa-row"><span>'+_cpar('Ribasso','Sconto')+' '+_pct(rp.perc)+'%'
         +(_sic?'<small class="sp-forn">solo sui lavori</small>':'')
         +'</span><b style="color:var(--err,#c0392b)">− '+eur2(rp.ribasso)+'</b><span></span></div>';
     }
@@ -2386,7 +2406,7 @@
          prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
          no sarebbe un pulsante che non fa mai niente. */
-      +  _btnPrezzi
+      +  (ruoloUtente==='professionista'?_btnPrezzi:'')
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
       /* il resoconto dell'ultima passata del prezzario: sta qui sotto e non in
@@ -2714,7 +2734,7 @@
       +'</div>'
 
       +(pubblico
-        ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
+        ? '<div class="sh-b"><div class="sh-tit">'+_cpar('Solo per i lavori pubblici','Solo per le gare pubbliche')+'</div>'
           +'<div class="row2">'
           +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="per cento"></div>'
           /* ⚠️ 6 set 2026 — LA VECCHIA CASELLA DELLA SICUREZZA SI VEDE SOLO SE

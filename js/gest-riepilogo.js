@@ -952,7 +952,7 @@
                  non e' un problema: e' un lavoro ancora in corso. */
               const daFatt2=SA.filter(x=>x.stato==="emesso"&&!x.fattura_id);
               C.push(rieCard({
-                tab:"sal", titolo:"Stati di avanzamento", n:SA.length, dati:SA.length>0,
+                tab:"sal", titolo:(ruoloUtente==='professionista'?"Stati di avanzamento":"Acconti a lavoro fatto"), n:SA.length, dati:SA.length>0,
                 lab: daFatt2.length
                       ? daFatt2.length+(daFatt2.length===1?" emesso e non ancora fatturato":" emessi e non ancora fatturati")
                       : _plur(SA.length,"stato di avanzamento","stati di avanzamento"),
