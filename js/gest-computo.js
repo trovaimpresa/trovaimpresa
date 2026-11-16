@@ -2606,6 +2606,7 @@
     if(_vuota&&/^Nessuna misura/.test(_vuota.textContent))_vuota.textContent=manuale?"Nessuna misura: vale la quantità che hai scritto tu.":"Nessuna misura: la quantità è zero.";
     const n=$("#cv-conta-nota"); if(n)n.textContent=CV_NOTE[m]||"";
     _cvConto();
+    _cvSempliceNota();
   }
   function _cvConto(){
     const out=$("#cv-conto"), um=$("#cv-qta-um"); if(!out)return;
@@ -2798,6 +2799,61 @@
     ppCerca(true);
     anEditId=null;
     if(!isNew){renderCompMisure(v.id);renderAnalisi(v.id);}
+    if(ruoloUtente!=='professionista')compVoceCorta(v,isNew);
+  }
+
+  /* ============================================================
+     LA SCHEDA DELLA LAVORAZIONE «SEMPLICE» — impresa e artigiano
+     ============================================================
+     La scheda era da geometra: misure pezzo per pezzo, «Si detrae», «Come e'
+     fatto il prezzo» con spese generali e utile. A chi deve solo mettere il
+     prezzo servono TRE cose: descrizione, quantita', prezzo.
+     ⛔ Le caselle NON si tolgono: si SPOSTANO. compVoceSalva le legge per id
+        e devono esserci tutte. Il resto sta chiuso dentro «Altro».
+     ⛔ Lo studio tecnico non passa di qui: la sua scheda resta com'era.
+     ============================================================ */
+  /* ⚠️ NON e' compVoceSemplice (6 nov, piu' su): quella riordina i riquadri
+     per tutti; questa gira DOPO e solo per impresa e artigiano. */
+  function compVoceCorta(v,isNew){
+    const sh=$("#sheet"); if(!sh)return;
+    const cols=sh.querySelector(".sh-cols"); if(!cols||sh.querySelector(".cv-semplice"))return;
+    const campo=function(id){const e=$("#"+id);return e?e.closest(".field"):null;};
+    /* una lavorazione nuova nasce con la quantita' scritta a mano: e' quello
+       che fa chi prezza. Una che ha gia' le misure resta com'e'. */
+    if(isNew){ const b=sh.querySelector('#cv-conta button[data-v="scritta"]'); if(b)b.click(); }
+    const box=document.createElement("div");
+    box.className="sh-b sh-centro cv-semplice";
+    box.innerHTML='<div class="sh-tit">La lavorazione</div>'
+      +'<div class="cv-s-desc"></div>'
+      +'<div class="cv-s-riga"></div>'
+      +'<div class="sh-nota cv-s-mis" style="display:none">La quantità di questa lavorazione viene dalle <b>misure</b>: le trovi in «Altro», qui sotto.</div>'
+      +'<div class="cv-s-cap"></div>';
+    const fd=campo("cv-desc"), fu=campo("cv-uni"), fq=$("#cv-qta-box"), fp=campo("cv-prezzo"), fc=campo("cv-cap");
+    if(fd)box.querySelector(".cv-s-desc").appendChild(fd);
+    const riga=box.querySelector(".cv-s-riga");
+    if(fq)riga.appendChild(fq); if(fu)riga.appendChild(fu); if(fp)riga.appendChild(fp);
+    if(fc&&compCapCache.length)box.querySelector(".cv-s-cap").appendChild(fc);
+    const d=$("#cv-desc"); if(d){ d.placeholder="Es. Demolizione di tramezzi"; d.rows=3; }
+    const altro=document.createElement("details");
+    altro.className="cv-altro sh-centro";
+    altro.innerHTML='<summary>Altro: misure pezzo per pezzo, prezzario, come è fatto il prezzo</summary>';
+    cols.parentNode.insertBefore(box,cols);
+    cols.parentNode.insertBefore(altro,cols);
+    altro.appendChild(cols);
+    /* il conto (quantita' × prezzo) sta sotto le tre caselle, non in mezzo;
+       l'unita' accanto alla quantita' e' un doppione della tendina */
+    const conto=$("#cv-conto"); if(conto)riga.after(conto);
+    const um=$("#cv-qta-um"); if(um)um.style.display="none";
+    /* «Salva nel mio prezzario» va in «Altro»: in fondo restano due tasti */
+    const pps=sh.querySelector('.sh-foot [data-action="pp-salva"]');
+    if(pps){ const w=document.createElement("div"); w.className="cv-altro-pps"; w.appendChild(pps); altro.appendChild(w); }
+    /* chi ha gia' le misure le deve vedere subito */
+    if(!isNew&&_cvModo(v)==="misure")altro.open=true;
+    _cvSempliceNota();
+  }
+  function _cvSempliceNota(){
+    const n=document.querySelector("#sheet .cv-s-mis"); if(!n)return;
+    n.style.display=((segVal("cv-conta")||"misure")==="misure")?"":"none";
   }
 
   /* ---- il prezzario personale (tabella gest_prezzi_propri) ---- */
