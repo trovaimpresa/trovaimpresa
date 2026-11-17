@@ -146,6 +146,8 @@
       +   '<div class="sh-tit">Dove sta</div>'
       +   _rigaDato("Indirizzo",ind)
       + '</div>'
+      /* 17 nov 2026 (voce Clienti, ok di Alex) — le note: solo se ci sono */
+      + (String(c.note||"").trim()?'<div class="sh-b"><div class="sh-tit">Note</div><div class="dato-val" style="white-space:pre-wrap">'+esc(String(c.note).trim())+'</div></div>':'')
       + '</div><div class="sh-col">'
       + '<div class="sh-b">'
       +   '<div class="sh-tit">Dati fiscali</div>'
@@ -161,11 +163,35 @@
       /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): i suoi lavori,
          preventivi e fatture, qui dentro. Prima per vederli bisognava cercare
          il nome nella casella in alto. Si riempie da sola (cliStoria). */
+      /* 17 nov 2026 (voce Clienti, ok di Alex) — da qui parti gia' col cliente scelto */
+      + '<div class="sh-b" style="margin-top:22px"><div class="sh-tit">Fai qualcosa per lui</div>'
+      +   '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +     '<button type="button" class="btn-primary" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-prev" data-id="'+esc(c.id)+'">+ Nuovo preventivo</button>'
+      +     '<button type="button" class="btn" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-lav" data-id="'+esc(c.id)+'">'+(ruoloUtente==='professionista'?'+ Nuova pratica':'+ Nuovo lavoro')+'</button>'
+      +   '</div></div>'
       + '<div class="sh-b" id="cli-storia"><div class="sh-tit">I suoi lavori, preventivi e fatture</div><div class="campo-aiuto">Sto guardando…</div></div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>'
       + '<button class="btn" data-action="doc-cli" data-id="'+esc(c.id)+'">&#128206; Documenti</button>'
       + '<button class="btn-primary" data-action="edit-cli" data-id="'+esc(c.id)+'">&#9998; Modifica</button>');
     cliStoria(c.id);
+  }
+
+  /* 17 nov 2026 — «+ Nuovo preventivo» / «+ Nuovo lavoro» dalla scheda del
+     cliente: apre il modulo di sempre e sceglie LUI nella tendina. La tendina
+     si riempie dopo una lettura: si aspetta che ci sia la sua riga. */
+  async function cliNuovoPer(tipo,cid){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(tipo==="prev")await prevForm(null,{cliente_id:cid});
+    else jobForm(null,"",{cliente_id:cid},true);
+    const q=tipo==="prev"?"#pv-cli":"#j-cliente", fine=Date.now()+5000;
+    (function prova(){
+      const s=$(q);
+      if(s&&Array.from(s.options).some(o=>String(o.value)===String(cid))){
+        if(String(s.value)!==String(cid)){s.value=cid;s.dispatchEvent(new Event("change",{bubbles:true}));}
+        return;
+      }
+      if(Date.now()<fine)setTimeout(prova,150);
+    })();
   }
 
   /* 7 nov 2026 — I SUOI LAVORI, PREVENTIVI E FATTURE (scheda del cliente).
@@ -402,7 +428,7 @@
       tipo:(($("#c-tipo-box")||{}).dataset||{}).tipo||"privato",
       indirizzo:v("#c-ind"), referente:v("#c-ref"), telefono:v("#c-tel"), email:v("#c-email")||null,
       cap:v("#c-cap")||null, citta:v("#c-citta")||null, prov:estero?null:(v("#c-prov").toUpperCase()||null),
-      paese:estero||null,
+      paese:estero||null, note:v("#c-note")||null,
       piva:v("#c-piva")||null, cod_fiscale:v("#c-cf").toUpperCase()||null,
       sdi_codice:v("#c-sdi").toUpperCase()||null, sdi_pec:v("#c-pec")||null};
 
@@ -411,7 +437,7 @@
       :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()}).select("id");
     /* se le colonne fiscali non ci sono ancora nel database, salvo il resto
        invece di far fallire tutto — stessa rete dei Dati azienda */
-    const OPZ=["tipo","email","cap","citta","prov","paese","piva","cod_fiscale","sdi_codice","sdi_pec"];
+    const OPZ=["tipo","email","cap","citta","prov","paese","note","piva","cod_fiscale","sdi_codice","sdi_pec"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);

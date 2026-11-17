@@ -1104,6 +1104,12 @@
         <div class="sh-nota">L'email serve per mandargli preventivi e fatture. Non &egrave; la PEC: quella sta nei dati per la fattura.</div>
       </div>
 
+      <div class="sh-b">
+        <div class="sh-tit">Note</div>
+        <div class="field"><textarea id="c-note" rows="3" placeholder="Es. chiamare dopo le 18, citofono Rossi, paga sempre a 30 giorni">${esc(c.note||"")}</textarea></div>
+        <div class="sh-nota">Le vedi solo tu, nella sua scheda. Non escono su preventivi e fatture.</div>
+      </div>
+
       </div><div class="sh-col">
 
       <div class="sh-b">

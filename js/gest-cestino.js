@@ -1533,7 +1533,7 @@
         [_pro?"Pratica":"Lavoro"]:lN[x.lavoro_id]||"",Note:x.note||""})));
     }
     /* 17 nov 2026 (voce Clienti) — la rubrica intera: prima uscivano 5 colonne su 14 */
-    add("Clienti",D.cli.map(c=>({Reparto:mN[c.mestiere_id]||"",Nome:c.nome||"",Tipo:c.tipo||"",Indirizzo:c.indirizzo||"",CAP:c.cap||"","Città":c.citta||"",Provincia:c.prov||"",Paese:c.paese||"",Referente:c.referente||"",Telefono:c.telefono||"",Email:c.email||"","Partita IVA":c.piva||"","Codice fiscale":c.cod_fiscale||"","Codice SDI":c.sdi_codice||"",PEC:c.sdi_pec||""})));
+    add("Clienti",D.cli.map(c=>({Reparto:mN[c.mestiere_id]||"",Nome:c.nome||"",Tipo:c.tipo||"",Indirizzo:c.indirizzo||"",CAP:c.cap||"","Città":c.citta||"",Provincia:c.prov||"",Paese:c.paese||"",Referente:c.referente||"",Telefono:c.telefono||"",Email:c.email||"","Partita IVA":c.piva||"","Codice fiscale":c.cod_fiscale||"","Codice SDI":c.sdi_codice||"",PEC:c.sdi_pec||"",Note:c.note||""})));
     add(_pro?"Collaboratori":"Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
     const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     add("Preventivi",D.prev.map(p=>({Numero:p.numero,Titolo:p.titolo||"",Reparto:mN[p.mestiere_id]||"",Cliente:cN[p.cliente_id]||"",Data:p.data||"",Stato:p.stato||"","Totale €":tot[p.id]||0,Note:p.note||""})));

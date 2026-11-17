@@ -724,6 +724,8 @@
     if(a==="save-comm")return saveComm();
     if(a==="comm-doc")return docCommApri();
     if(a==="apri-cli")return cliScheda(id);
+    if(a==="cli-nuovo-prev")return cliNuovoPer("prev",id);
+    if(a==="cli-nuovo-lav")return cliNuovoPer("lav",id);
     if(a==="doc-cli")return docCliApri(id);
     if(a==="doc-cli-apri")return docCliScarica(id);
     if(a==="doc-cli-del")return docCliElimina(id);

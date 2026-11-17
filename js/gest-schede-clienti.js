@@ -871,7 +871,8 @@
     const ind=cliIndirizzo(c), tel=String(c.telefono||"").trim();
     return [
       {lab:"👁 Apri scheda",action:"apri-cli",data:{id:c.id}},
-      tel?{lab:"📞 Chiama",action:"chiama",data:{q:tel},top:true,prima:true}:null,
+      /* 17 nov 2026 — «Chiama» solo se nel telefono c'e' almeno una cifra («abc» non chiama nessuno) */
+      tel.replace(/\D/g,"")?{lab:"📞 Chiama",action:"chiama",data:{q:tel},top:true,prima:true}:null,
       ind?{lab:"🗺 Mappa",action:"map",data:{q:ind},top:true}:null,
       {sep:true},
       {lab:"🗑 Elimina",action:"del-cli",data:{id:c.id},del:true}
