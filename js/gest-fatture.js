@@ -572,6 +572,7 @@
       return;
     }
     const mid=curMestiere();
+    listaCarica(body,"le fatture");
 
     let _r4=[];
     try{ _r4=await Promise.all([

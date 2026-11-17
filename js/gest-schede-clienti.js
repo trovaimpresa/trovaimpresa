@@ -262,6 +262,16 @@
        cosa  «i preventivi», «i lavori», …
        tab   la sezione da ridisegnare con Riprova (chiave di RENDER_TAB)
        viste i filtri sopra la lista, da svuotare (facoltativo) */
+  /* 17 nov 2026 — MENTRE SI LEGGE. Aprendo una sezione la lista restava bianca
+     finche' il database non rispondeva: sembrava vuota. Si scrive solo se la
+     lista e' ancora vuota (prima apertura): se c'e' gia' roba resta li' fino
+     ai dati nuovi, cosi' non lampeggia a ogni salvataggio. */
+  function listaCarica(box,cosa){
+    const b=typeof box==="string"?document.querySelector(box):box;
+    if(!b||b.firstElementChild)return;
+    b.style.display="block";
+    b.innerHTML='<div class="lav-vuoto lista-carica"><h3>Sto caricando '+cosa+'…</h3></div>';
+  }
   function listaNonLetta(box,cosa,tab,viste){
     const b=typeof box==="string"?document.querySelector(box):box;
     if(viste){const v=typeof viste==="string"?document.querySelector(viste):viste;if(v)v.innerHTML="";}
@@ -326,6 +336,7 @@
        mestiere_id=null e Supabase rispondeva 400 (tre errori rossi nella
        console). Si aspetta di essere dentro un reparto. */
     if(!curMestiere())return;
+    listaCarica(box,ruoloUtente==='professionista'?"le pratiche":"i lavori");
     const oggi=todayStr();
     let _r3=[];
     try{ _r3=await Promise.all([
@@ -946,6 +957,7 @@
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
     if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun cliente","Accedi per gestire i clienti.");return;}
+    listaCarica(box,"i clienti");
     let _rC=null; try{ _rC=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome"); }catch(e){}
     /* 11 nov 2026 — senza rete non si dice «nessun cliente»: si rischierebbe di
        riscriverli tutti da capo. E cliCache resta quella di prima (le tendine). */

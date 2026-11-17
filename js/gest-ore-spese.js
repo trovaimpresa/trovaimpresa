@@ -1166,6 +1166,7 @@
     filoMetti("preventivi","preventivi");
     const box=$("#prev-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
+    listaCarica(box,"i preventivi");   /* 17 nov 2026 — la scritta mentre si legge (gest-schede-clienti.js) */
     let _rPv,_rCl;
     try{ [_rPv,_rCl]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
