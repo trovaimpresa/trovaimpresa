@@ -101,7 +101,32 @@
 
   /* in regime forfettario non si applica IVA: il gestionale toglie la colonna,
      mette la dicitura di legge sul PDF e propone il bollo da 2 euro */
-  function fattForfettario(){ return (fattAzienda&&fattAzienda.regime_fiscale)==="RF19"; }
+  /* ===== 17 nov 2026 — UNA FATTURA SI CONTA COL REGIME CHE AVEVA QUANDO E' NATA =====
+     Chi passa da ordinario a forfettario (o il contrario) ha fatture vecchie
+     ancora aperte. Il conto guardava il regime di OGGI: una fattura emessa con
+     l'IVA al 22% diventava senza IVA nella sezione Fatture (1.850) e restava
+     con l'IVA nel Riepilogo (2.345), perche' li' i Dati azienda non erano
+     ancora letti. Adesso:
+       · una fattura COL NUMERO che si ricorda il suo regime usa quello,
+         dappertutto (fattBasi) — e uguale fa il database (gest_fattura_conti,
+         sql/2026-11-17-fattura-regime-suo.sql);
+       · una bozza segue il regime di oggi: verra' emessa oggi;
+       · mentre il modulo di una fattura gia' emessa e' APERTO, tutto il modulo
+         (colonna IVA, note, conto, salvataggio) lavora col regime di quella
+         fattura. Vale solo a modulo aperto: chiuso, torna il regime di oggi. */
+  let _fattForfModulo=null, _fattForfDisegno=false;
+  function fattForfettario(){
+    if(_fattForfModulo!==null){
+      /* mentre il modulo si sta disegnando, oppure e' aperto a schermo */
+      if(_fattForfDisegno)return _fattForfModulo;
+      const e=document.getElementById("fa-cli");
+      if(e&&e.offsetParent)return _fattForfModulo;
+    }
+    return (fattAzienda&&fattAzienda.regime_fiscale)==="RF19";
+  }
+  function fattForfDi(f){
+    return (f&&f.numero&&f.regime_fiscale)?(f.regime_fiscale==="RF19"):fattForfettario();
+  }
 
   /* i conti della fattura. Sono gli stessi della vista gest_fatture_totali su
      Supabase: qui li rifaccio in locale perché le righe le ho già lette per
@@ -165,7 +190,7 @@
      Sul PDF che legge il cliente lo sconto resta dov'era, una riga sola sotto
      il totale: e' piu' chiaro da leggere e i numeri sono gli stessi. */
   function fattBasi(f,R,forf){
-    if(forf===undefined)forf=fattForfettario();
+    if(forf===undefined)forf=fattForfDi(f);
     const c2=n=>_cent2(n);
     /* arrotondamento al centesimo PER DIFETTO: serve dove un tetto non deve mai
        superare il valore vero (lo sconto di una riga).
@@ -990,6 +1015,8 @@
        Serve all'anteprima "Il conto", che se no direbbe un numero diverso da
        quello che finisce nel database. */
     fattRegimeCorrente=isNew?"art15":(f.spese_regime||null);
+    /* la fattura gia' emessa tiene il suo regime per tutto il modulo */
+    _fattForfModulo=(f.id&&f.numero&&f.regime_fiscale)?(f.regime_fiscale==="RF19"):null;
     fattBolloAuto=isNew&&fattForfettario()&&!(+f.bollo);
     let righe=[];
     if(sb&&sbUid){
@@ -1035,6 +1062,8 @@
     const titolo = isNew ? "Nuova fattura"
                  : (f.numero ? "Fattura n. "+f.numero+"/"+fattAnno(f) : "Bozza di fattura");
 
+    _fattForfDisegno=true;
+    try{
     openSheetGrande(titolo,
       /* colonna di sinistra più larga: le voci hanno bisogno di spazio per la
          descrizione, che è la cosa che il cliente legge davvero */
@@ -1143,6 +1172,7 @@
       ctrTastoHTML('fattura')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-fatt" data-id="'+(f.id||"")+'">'+(isNew?"Crea fattura":"Salva")+'</button>');
+    }finally{ _fattForfDisegno=false; }
     ctrAscolta('fattura');
 
     /* i lavori scelti nel selettore viaggiano attaccati al modulo finche' non si salva */
@@ -1333,7 +1363,11 @@
       testata.cli_cap=c.cap||null; testata.cli_citta=c.citta||null; testata.cli_prov=c.prov||null;
       testata.cli_sdi=c.sdi_codice||null; testata.cli_pec=c.sdi_pec||null;
     }
-    testata.regime_fiscale=(fattAzienda&&fattAzienda.regime_fiscale)||null;
+    /* una fattura gia' emessa NON cambia regime perche' la risalvi oggi */
+    const _fPrima=id?fattCache.find(x=>String(x.id)===String(id)):null;
+    testata.regime_fiscale=(_fPrima&&_fPrima.numero&&_fPrima.regime_fiscale)
+      ? _fPrima.regime_fiscale
+      : ((fattAzienda&&fattAzienda.regime_fiscale)||null);
 
     let fid=id, vecchieRighe=[];
     /* se sql/gest-fattura-cassa.sql non è ancora stato eseguito, le tre
