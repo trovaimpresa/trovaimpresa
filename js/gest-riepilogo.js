@@ -962,7 +962,7 @@
                 /* i conti passano da salConti + compRiepilogoDa, come nell'elenco,
                    nella scheda e nel PDF: nessuna formula copiata */
                 righe: SA.slice(0,2).map(x=>({
-                  t:"SAL n. "+(x.numero||"")+" — "+((compDi[String(x.computo_id)]||{}).titolo||"Computo"),
+                  t:(ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(x.numero||"")+" — "+((compDi[String(x.computo_id)]||{}).titolo||"Computo"),
                   v:eur2(salConti(totSa[String(x.id)],compDi[String(x.computo_id)]||{}).netto)}))
               }));
             }

@@ -62,7 +62,7 @@
        dieci righe uguali e non si saprebbe quale si sta rimettendo a posto.
        NIENTE "foglia": sotto al SAL ci sono le sue righe. */
     {t:"gest_sal",         lab:"Stati di avanzamento", campo:"numero",       ic:"📈",
-     nome:function(r){ return "SAL n. "+(r.numero||"?")+" del "+fdate(r.data); }},
+     nome:function(r){ return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(r.numero||"?")+" del "+fdate(r.data); }},
     {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true}

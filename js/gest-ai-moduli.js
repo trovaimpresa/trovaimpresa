@@ -1129,9 +1129,9 @@
   function ctrRegoleSal(L){
     L=L||ctrDalModulo(); const out=[];
     const n=L.get("sal-num");
-    if(!n) out.push({campo:"sal-num",grave:"rosso", dice:"Manca il numero del SAL: sul foglio e in fattura serve (SAL n. 1, n. 2…)."});
-    else if(!(+n>=1)) out.push({campo:"sal-num",grave:"rosso", dice:"Il numero del SAL parte da 1."});
-    if(!L.get("sal-data")) out.push({campo:"sal-data",grave:"rosso", dice:"Manca la data del SAL."});
+    if(!n) out.push({campo:"sal-num",grave:"rosso", dice:(ruoloUtente==='professionista'?"Manca il numero del SAL: sul foglio e in fattura serve (SAL n. 1, n. 2…).":"Manca il numero dell'acconto: sul foglio e in fattura serve (n. 1, n. 2…).")});
+    else if(!(+n>=1)) out.push({campo:"sal-num",grave:"rosso", dice:(ruoloUtente==='professionista'?"Il numero del SAL parte da 1.":"Il numero dell'acconto parte da 1.")});
+    if(!L.get("sal-data")) out.push({campo:"sal-data",grave:"rosso", dice:(ruoloUtente==='professionista'?"Manca la data del SAL.":"Manca la data dell'acconto.")});
     const dal=L.get("sal-dal"), al=L.get("sal-al");
     if(dal&&al&&dal>al) out.push({campo:"sal-al",grave:"rosso",
       dice:"Il periodo finisce prima di cominciare: controlla le due date."});

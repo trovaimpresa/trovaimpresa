@@ -582,6 +582,9 @@
       });
       var hs=document.querySelector('#sal .sec-head h2');
       if(hs&&hs.textContent.trim()==='Stati di avanzamento')hs.textContent='Acconti a lavoro fatto';
+      /* 17 nov 2026 — anche la riga sotto il titolo: «SAL» → «acconto» */
+      const hi=document.querySelector('#sal .gal-intro');
+      if(hi&&/Ogni SAL /.test(hi.textContent))hi.textContent=hi.textContent.replace('Ogni SAL ','Ogni acconto ');
       /* la voce del menu */
       document.querySelectorAll('[data-tab="computi"] span').forEach(function(x){
         if(x.textContent.trim()===_CM.pro.nome)x.textContent=_cm('nome');

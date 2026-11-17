@@ -27,6 +27,11 @@
   let salCache=[], salTot={}, salVociCache=[], salRigheCache={}, salPrec={},
       salComputoId=null, salApertoId=null, salApertoDati=null, salDaElenco=false, salPrecTot=null;
 
+  /* 17 nov 2026 — LE PAROLE SEMPLICI DENTRO «ACCONTI A LAVORO FATTO».
+     Impresa e artigiano leggono «acconto»; lo studio tecnico legge «SAL» e
+     «stato di avanzamento» come prima. I PDF non passano di qui. */
+  function _sa(studio,semplice){ return (typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?studio:semplice; }
+
   function _salManca(err){
     const m=(err&&(err.message||err.details||""))||"";
     return /gest_sal/i.test(m) || /schema cache|does not exist|relation/i.test(m);
@@ -65,7 +70,7 @@
     if(rs.error){
       box.innerHTML='<div class="lm-vuoto">'+(_salManca(rs.error)
         ? 'La contabilità dei lavori non è ancora accesa. Esegui <b>sql/gest-sal.sql</b> su Supabase e riapri il computo.'
-        : 'Non riesco a leggere gli stati di avanzamento: controlla la connessione e riapri il computo.')+'</div>';
+        : _sa('Non riesco a leggere gli stati di avanzamento: controlla la connessione e riapri il computo.','Non riesco a leggere gli acconti: controlla la connessione e riapri il computo.'))+'</div>';
       return;
     }
 
@@ -75,12 +80,12 @@
 
     let h="";
     if(!salCache.length){
-      h+='<div class="lm-vuoto">'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Nessuno stato di avanzamento. Quando una parte dei lavori è stata eseguita e va certificata, creane uno.":"Nessuno stato di avanzamento. Quando hai fatto un pezzo di lavoro e vuoi chiedere un acconto, creane uno.")+'</div>';
+      h+='<div class="lm-vuoto">'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Nessuno stato di avanzamento. Quando una parte dei lavori è stata eseguita e va certificata, creane uno.":"Nessun acconto. Quando hai fatto un pezzo di lavoro e vuoi farti pagare quella parte, creane uno.")+'</div>';
     } else {
       salCache.forEach(s=>{
         const k=salConti(salTot[String(s.id)],comp);
         h+='<div class="spesa-row" data-action="sal-apri" data-id="'+esc(String(s.id))+'" style="cursor:pointer;align-items:flex-start">'
-          +'<span><b>SAL n. '+esc(String(s.numero))+'</b>'+(s.stato==="bozza"?' · bozza':'')
+          +'<span><b>'+_sa('SAL','Acconto')+' n. '+esc(String(s.numero))+'</b>'+(s.stato==="bozza"?' · bozza':'')
           +  '<small class="sp-forn">'+fdate(s.data)
           +    ' · fatto finora '+eur2(k.maturato)
           +    (k.precedente?(' · già chiesto '+eur2(k.precedente)):'')
@@ -97,10 +102,10 @@
              ci vuole scritto PDF. margin-top:0 solo perche' qui sta dentro una
              riga, non sotto un elenco. */
           +'<button type="button" class="quick-add" data-action="sal-pdf" data-id="'+esc(String(s.id))+'" title="Scarica il foglio da consegnare al committente" style="margin-top:0;flex:0 0 auto">📄 PDF</button>'
-          +'<button type="button" class="rdel" data-action="sal-del" data-id="'+esc(String(s.id))+'" title="Butta questo SAL nel cestino" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
+          +'<button type="button" class="rdel" data-action="sal-del" data-id="'+esc(String(s.id))+'" title="'+_sa('Butta questo SAL nel cestino','Butta questo acconto nel cestino')+'" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
       });
     }
-    h+='<button type="button" class="btn-ghost quick-add" data-action="sal-nuovo">+ Nuovo stato di avanzamento</button>';
+    h+='<button type="button" class="btn-ghost quick-add" data-action="sal-nuovo">'+_sa('+ Nuovo stato di avanzamento','+ Nuovo acconto')+'</button>';
     box.innerHTML=h;
   }
 
@@ -152,7 +157,7 @@
       : "";
     return schedaJob({
       tono: fatturato?"t-ok":"t-attesa",
-      titolo: "SAL n. "+esc(String(s.numero||"—"))+" — "+esc(comp.titolo||"(computo senza titolo)"),
+      titolo: _sa("SAL","Acconto")+" n. "+esc(String(s.numero||"—"))+" — "+esc(comp.titolo||"(computo senza titolo)"),
       destra: '<span class="stato '+(fatturato?"fatto":(bozza?"da_fare":"in_corso"))+'">'
               +(fatturato?"Fatturato":(bozza?"Bozza":"Emesso"))+'</span>',
       meta:[
@@ -194,7 +199,7 @@
     if(!sb||!sbUid){
       if(viste)viste.innerHTML="";
       box.style.display="block";
-      box.innerHTML=tabVuoto("Nessuno stato di avanzamento","Accedi per vedere la contabilità dei lavori.",_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>');
+      box.innerHTML=tabVuoto(_sa("Nessuno stato di avanzamento","Nessun acconto"),"Accedi per vedere la contabilità dei lavori.",_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>');
       return;
     }
     const mid=curMestiere();
@@ -216,9 +221,9 @@
       if(viste)viste.innerHTML="";
       box.style.display="block";
       /* 12 nov 2026 — regola 20: riquadro rosso con Riprova, niente «TypeError» */
-      if(!_salManca(err)){box.innerHTML=nonLettaHTML("gli stati di avanzamento","sal");return;}
+      if(!_salManca(err)){box.innerHTML=nonLettaHTML(_sa("gli stati di avanzamento","gli acconti"),"sal");return;}
       box.innerHTML=tabVuoto(
-        _salManca(err)?"La contabilità dei lavori non è ancora accesa":"Non riesco a leggere gli stati di avanzamento",
+        _salManca(err)?"La contabilità dei lavori non è ancora accesa":_sa("Non riesco a leggere gli stati di avanzamento","Non riesco a leggere gli acconti"),
         _salManca(err)
           ? "Esegui <b>sql/gest-sal.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina."
           : "Il database ha risposto: "+esc(err.message||""),
@@ -243,7 +248,7 @@
       id:"sal", box:"#sal-list",
       viste:"#sal-viste", visteDef:SAL_VISTE, vista:salFiltro, conta:conta, azioneVista:"sal-filtro",
       vuoto:salTuttiCache.length
-        ? tabVuoto("Nessuno stato di avanzamento con questo filtro","Prova a cambiare vista qui sopra.",
+        ? tabVuoto(_sa("Nessuno stato di avanzamento con questo filtro","Nessun acconto con questo filtro"),"Prova a cambiare vista qui sopra.",
             _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',null)
         : salVuotoCoiComputi(),
       colonne:[{lab:"N.",w:"10%"},{lab:"Computo",w:"34%"},{lab:"Cliente",w:"20%",cls:"c-cli"},
@@ -265,7 +270,7 @@
         };
       }),
       cards:()=>L.map(s=>salCard(s)).join(""),
-      totale: L.length?{testo:L.length+" "+(L.length===1?"stato di avanzamento":"stati di avanzamento"),valore:eur2(somma)}:null
+      totale: L.length?{testo:L.length+" "+(L.length===1?_sa("stato di avanzamento","acconto"):_sa("stati di avanzamento","acconti")),valore:eur2(somma)}:null
     });
   }
 
@@ -291,17 +296,17 @@
   function salVuotoCoiComputi(){
     const C=Object.values(salTuttiComp||{});
     const ico=_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>';
-    if(!C.length) return tabVuoto("Ancora nessuno stato di avanzamento",
-      "Il SAL è un acconto a metà lavoro: conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno.",
+    if(!C.length) return tabVuoto(_sa("Ancora nessuno stato di avanzamento","Ancora nessun acconto"),
+      _sa("Il SAL è un acconto a metà lavoro: conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno.","Conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno."),
       ico,{t:"Vai ai computi",a:"sal-vai-computi"});
     C.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
     return '<div class="salv">'
-      +'<div class="salv-tit">Ancora nessuno stato di avanzamento</div>'
-      +'<div class="salv-txt">Il SAL è un <b>acconto a metà lavoro</b>: conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.</div>'
+      +'<div class="salv-tit">'+_sa('Ancora nessuno stato di avanzamento','Ancora nessun acconto')+'</div>'
+      +'<div class="salv-txt">'+_sa('Il SAL è un <b>acconto a metà lavoro</b>: conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.','Conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.')+'</div>'
       +'<div class="salv-lista">'
       +C.map(c=>'<div class="salv-r">'
           +'<span class="salv-nome">'+(c.numero?"N. "+esc(String(c.numero))+" — ":"")+esc(c.titolo||"Computo")+'</span>'
-          +'<button type="button" class="btn btn-primary" data-action="sal-comp-apri" data-id="'+esc(String(c.id))+'">Fai un SAL</button>'
+          +'<button type="button" class="btn btn-primary" data-action="sal-comp-apri" data-id="'+esc(String(c.id))+'">'+_sa('Fai un SAL','Chiedi un acconto')+'</button>'
         +'</div>').join("")
       +'</div></div>';
   }
@@ -327,9 +332,9 @@
 
   async function salApriDaElenco(id){
     const s=salTuttiCache.find(x=>String(x.id)===String(id));
-    if(!s){toast("Stato di avanzamento non trovato: riapri la sezione");return;}
+    if(!s){toast(_sa("Stato di avanzamento","Acconto")+" non trovato: riapri la sezione");return;}
     const comp=salTuttiComp[String(s.computo_id)];
-    if(!comp){toast("Il computo di questo stato di avanzamento non si trova (potrebbe essere nel cestino)");return;}
+    if(!comp){toast("Il computo di questo "+_sa("stato di avanzamento","acconto")+" non si trova (potrebbe essere nel cestino)");return;}
 
     const i=compCache.findIndex(x=>String(x.id)===String(comp.id));
     if(i<0)compCache.push(comp); else compCache[i]=comp;
@@ -363,7 +368,7 @@
     if(salId){
       const {data,error}=await sb.from("gest_sal").select("*").eq("id",salId).eq("user_id",sbUid).maybeSingle();
       if(error){toast("Errore: "+error.message);return;}
-      if(!data){toast("Stato di avanzamento non trovato");return;}
+      if(!data){toast(_sa("Stato di avanzamento","Acconto")+" non trovato");return;}
       s=data;
     } else {
       /* il numero lo propone il gestionale: max+1 fra quelli che ci sono */
@@ -450,7 +455,7 @@
         +'</div>';
     };
 
-    openSheetGrande(isNew?"Nuovo stato di avanzamento":("SAL n. "+(s.numero||"")),
+    openSheetGrande(isNew?_sa("Nuovo stato di avanzamento","Nuovo acconto"):(_sa("SAL","Acconto")+" n. "+(s.numero||"")),
        '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Quello che hai fatto</div>'
       +  '<div class="sh-nota">In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non dall\'ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.</div>'
@@ -465,7 +470,7 @@
          gia' tre pulsanti e su un telefono da 390 px il quarto usciva fuori.
          Classe .quick-add, quella coi bordi che si vedono. */
       +  (isNew?'':'<button type="button" class="quick-add" data-action="sal-fattura" data-id="'+esc(String(s.id))+'">→ Crea la fattura di questo acconto</button>')
-      +  (s.fattura_id?'<div class="sh-nota">Da questo stato di avanzamento hai <b>già creato una fattura</b>. Se ne fai un\'altra, stai chiedendo due volte gli stessi soldi.</div>':'')
+      +  (s.fattura_id?'<div class="sh-nota">Da questo '+_sa('stato di avanzamento','acconto')+' hai <b>già creato una fattura</b>. Se ne fai un\'altra, stai chiedendo due volte gli stessi soldi.</div>':'')
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La scheda</div>'
       +  '<div class="row2">'
@@ -492,7 +497,7 @@
       /* il PDF solo su un SAL che esiste gia': su uno appena aperto non c'e'
          ancora niente di salvato da mettere sul foglio */
       +(isNew?"":'<button class="btn" data-action="sal-pdf" data-id="'+esc(String(s.id))+'">📄 PDF</button>')
-      +'<button class="btn-primary b-save" data-action="sal-salva" data-id="'+esc(String(s.id||""))+'">'+(isNew?"Crea il SAL":"Salva")+'</button>');
+      +'<button class="btn-primary b-save" data-action="sal-salva" data-id="'+esc(String(s.id||""))+'">'+(isNew?_sa("Crea il SAL","Crea l'acconto"):"Salva")+'</button>');
     /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
     try{ if(typeof ctrAscolta==="function") ctrAscolta("sal"); }catch(e){}
 
@@ -549,12 +554,12 @@
           +'<div class="qe-r"><span>Ribasso del computo '+String(_og.perc).replace(".",",")+'%'+(_og.sicurezza?' (non sui costi della sicurezza)':'')+'</span><b>−'+eur2(_og.ribasso)+'</b></div>'
          : '')
       +'<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
-      +'<div class="qe-r"><span>Già chiesto coi SAL prima</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
-      +'<div class="qe-r"><span>Questo stato di avanzamento</span><b>'+eur2(k.lordo)+'</b></div>'
-      +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>−'+eur2(k.ritenuta)+'</b></div>':'')
+      +'<div class="qe-r"><span>'+_sa('Già chiesto coi SAL prima','Già chiesto con gli acconti prima')+'</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
+      +'<div class="qe-r"><span>'+_sa('Questo stato di avanzamento','Questo acconto')+'</span><b>'+eur2(k.lordo)+'</b></div>'
+      +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>'+(k.ritenuta>0?'−'+eur2(k.ritenuta):eur2(-k.ritenuta))+'</b></div>':'')
       +'<div class="qe-r qe-r--tot"><span><b>Da chiedere adesso</b></span><b>'+eur2(k.netto)+'</b></div>'
       +(oltre?'<div class="sh-nota" style="color:var(--err,#c0392b)">Ci sono <b>'+oltre+'</b> lavorazioni contate oltre il computo. Non è vietato — i lavori cambiano — ma controlla che sia voluto.</div>':'')
-      +(k.lordo<0?'<div class="sh-nota" style="color:var(--err,#c0392b)">Questo SAL viene <b>negativo</b>: hai contato meno del SAL precedente. Ricorda che le quantità sono quelle fatte <b>dall\'inizio</b>.</div>':'');
+      +(k.lordo<0?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+_sa('Questo SAL viene <b>negativo</b>: hai contato meno del SAL precedente.','Questo acconto viene <b>negativo</b>: hai contato meno dell\'acconto prima.')+' Ricorda che le quantità sono quelle fatte <b>dall\'inizio</b>.</div>':'');
   }
 
   /* legge un numero scritto a mano (virgola o punto), senza passare dal DOM */
@@ -568,7 +573,7 @@
   async function salSalva(id){
     if(!sbUid||!salComputoId)return;
     const numero=parseInt(($("#sal-num")&&$("#sal-num").value)||"1",10);
-    if(!(numero>=1)){toast("Il numero del SAL parte da 1");return;}
+    if(!(numero>=1)){toast(_sa("Il numero del SAL parte da 1","Il numero dell'acconto parte da 1"));return;}
     const dal=($("#sal-dal")&&$("#sal-dal").value)||null;
     const al =($("#sal-al") &&$("#sal-al").value) ||null;
     if(dal&&al&&al<dal){toast("Il periodo finisce prima di cominciare: controlla le due date");return;}
@@ -591,7 +596,7 @@
     else   res=await sb.from("gest_sal").insert(testa).select("id");
     if(res.error){
       toast(/gest_sal_numero_unico|duplicate key/i.test(res.error.message||"")
-        ? "C'è già un SAL con questo numero su questo computo: cambia numero."
+        ? _sa("C'è già un SAL con questo numero su questo computo: cambia numero.","C'è già un acconto con questo numero su questo computo: cambia numero.")
         : (_salManca(res.error)
             ? "La contabilità dei lavori non è accesa: esegui sql/gest-sal.sql su Supabase."
             : "Errore: "+res.error.message));
@@ -617,7 +622,7 @@
       const ri=await sb.from("gest_sal_righe").insert(righe).select("id");
       if(ri.error){toast("Errore salvando le righe: "+ri.error.message);return;}
       if(!ri.data||ri.data.length!==righe.length){
-        toast("Attenzione: scritte "+((ri.data||[]).length)+" righe su "+righe.length+". Riapri il SAL e controlla.");
+        toast("Attenzione: scritte "+((ri.data||[]).length)+" righe su "+righe.length+". Riapri "+_sa("il SAL","l'acconto")+" e controlla.");
       }
     }
 
@@ -625,15 +630,15 @@
        salva un SAL, apre «Stati di avanzamento» e trova ancora i numeri di
        prima. */
     rinfresca("computi","sal");
-    if(!id){ salCache.push({id:salId,numero:numero}); toast("SAL creato ✔"); await salForm(salId); return; }
-    toast("SAL salvato ✔");
+    if(!id){ salCache.push({id:salId,numero:numero}); toast(_sa("SAL creato ✔","Acconto creato ✔")); await salForm(salId); return; }
+    toast(_sa("SAL salvato ✔","Acconto salvato ✔"));
     await salTorna();
   }
 
   async function salElimina(id){
     /* 13 nov 2026 (quarto giro) — la domanda dice QUALE stato di avanzamento */
     const _sl=salCache.find(x=>String(x.id)===String(id));
-    if(!(await window.chiediVia("lo stato di avanzamento"+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi.")))return;
+    if(!(await window.chiediVia(_sa("lo stato di avanzamento","l'acconto")+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const res=await sb.from("gest_sal").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
@@ -747,17 +752,17 @@
     }
 
     const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
-    if(rs.error){toast("Non riesco a leggere lo stato di avanzamento: "+rs.error.message);return;}
-    const s=rs.data; if(!s){toast("Stato di avanzamento non trovato");return;}
-    if(s.fattura_id&&!(await gconfirm("Da questo stato di avanzamento hai già creato una fattura.\n\nSe ne fai un'altra stai chiedendo due volte gli stessi soldi.\n\nNe faccio un'altra lo stesso?")))return;
+    if(rs.error){toast("Non riesco a leggere "+_sa("lo stato di avanzamento","l'acconto")+": "+rs.error.message);return;}
+    const s=rs.data; if(!s){toast(_sa("Stato di avanzamento","Acconto")+" non trovato");return;}
+    if(s.fattura_id&&!(await gconfirm("Da questo "+_sa("stato di avanzamento","acconto")+" hai già creato una fattura.\n\nSe ne fai un'altra stai chiedendo due volte gli stessi soldi.\n\nNe faccio un'altra lo stesso?")))return;
 
     const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
     if(rcp.error){toast("Non riesco a leggere il computo: "+rcp.error.message);return;}
-    const comp=rcp.data; if(!comp){toast("Il computo di questo stato di avanzamento non si trova");return;}
+    const comp=rcp.data; if(!comp){toast("Il computo di questo "+_sa("stato di avanzamento","acconto")+" non si trova");return;}
 
     const rt=await sb.from("gest_sal_totali").select("*").eq("sal_id",s.id).eq("user_id",sbUid).maybeSingle();
-    if(rt.error){toast("Non riesco a leggere i totali del SAL: senza quelli l'importo della fattura sarebbe sbagliato. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
-    if(!rt.data){toast("I totali di questo SAL non si trovano. Riapri il computo e riprova.");return;}
+    if(rt.error){toast("Non riesco a leggere i totali "+_sa("del SAL","dell'acconto")+": senza quelli l'importo della fattura sarebbe sbagliato. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
+    if(!rt.data){toast("I totali di questo "+_sa("SAL","acconto")+" non si trovano. Riapri il computo e riprova.");return;}
     const k=salConti(rt.data,comp);
 
     /* ⚠️ zero e negativo si fermano QUI. Un SAL negativo vuol dire che hai
@@ -765,8 +770,8 @@
        fattura, e' una nota di credito, ed e' un'altra cosa. */
     if(!(k.lordo>0)){
       toast(k.lordo<0
-        ? "Questo stato di avanzamento è negativo ("+eur2(k.lordo)+"): hai contato meno del SAL precedente. Controlla le quantità — su un importo negativo non si fa una fattura."
-        : "Questo stato di avanzamento vale 0 €: non c'è ancora niente da fatturare.");
+        ? "Questo "+_sa("stato di avanzamento","acconto")+" è negativo ("+eur2(k.lordo)+"): hai contato meno "+_sa("del SAL precedente","dell'acconto prima")+". Controlla le quantità — su un importo negativo non si fa una fattura."
+        : "Questo "+_sa("stato di avanzamento","acconto")+" vale 0 €: non c'è ancora niente da fatturare.");
       return;
     }
 
@@ -782,7 +787,7 @@
       +    '<span class="fn-t">Al netto della ritenuta · '+eur2(k.netto)+'</span>'
       +    '<span class="fn-d">'+(k.ritenuta
              ? 'La ritenuta di garanzia del '+_pct(k.perc)+'% ('+eur2(k.ritenuta)+') la togli tu dalla fattura. La riavrai a fine lavori, a collaudo fatto, con una fattura a parte.'
-             : 'Su questo SAL la ritenuta di garanzia è 0, quindi la cifra è la stessa di sopra.')+'</span></button>'
+             : 'Su questo '+_sa('SAL','acconto')+' la ritenuta di garanzia è 0, quindi la cifra è la stessa di sopra.')+'</span></button>'
       +'</div>'
       +'<div class="sh-nota">Non salvo niente adesso: si apre la fattura già scritta, la controlli tu e la salvi tu.</div>'
       +'</div>',
@@ -791,7 +796,7 @@
 
   async function salFatturaCon(modo){
     const d=salFattDati;
-    if(!d){toast("Riapri lo stato di avanzamento e riprova");return;}
+    if(!d){toast("Riapri "+_sa("lo stato di avanzamento","l'acconto")+" e riprova");return;}
     const s=d.sal, comp=d.comp, k=d.k;
     const importo=(modo==="netto")?k.netto:k.lordo;
     if(!(importo>0)){toast("Non c'è niente da fatturare");return;}
@@ -841,23 +846,23 @@
     }
 
     const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
-    if(rs.error){toast("Non riesco a leggere lo stato di avanzamento: "+rs.error.message);return;}
-    const s=rs.data; if(!s){toast("Stato di avanzamento non trovato");return;}
+    if(rs.error){toast("Non riesco a leggere "+_sa("lo stato di avanzamento","l'acconto")+": "+rs.error.message);return;}
+    const s=rs.data; if(!s){toast(_sa("Stato di avanzamento","Acconto")+" non trovato");return;}
 
     const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
     if(rcp.error){toast("Non riesco a leggere il computo: "+rcp.error.message);return;}
-    const comp=rcp.data; if(!comp){toast("Il computo di questo stato di avanzamento non si trova");return;}
+    const comp=rcp.data; if(!comp){toast("Il computo di questo "+_sa("stato di avanzamento","acconto")+" non si trova");return;}
 
     const [rt,rr]=await Promise.all([
       sb.from("gest_sal_totali").select("*").eq("sal_id",s.id).eq("user_id",sbUid).maybeSingle(),
       sb.from("gest_sal_righe_calc").select("*").eq("sal_id",s.id).eq("user_id",sbUid).order("ordine")
     ]);
-    if(rt.error){toast("Non riesco a leggere i totali del SAL: il foglio uscirebbe senza il conto. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
-    if(rr.error){toast("Non riesco a leggere le lavorazioni del SAL: il foglio uscirebbe senza le righe. Riprova fra un momento. ("+(rr.error.message||"")+")");return;}
+    if(rt.error){toast("Non riesco a leggere i totali "+_sa("del SAL","dell'acconto")+": il foglio uscirebbe senza il conto. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
+    if(rr.error){toast("Non riesco a leggere le lavorazioni "+_sa("del SAL","dell'acconto")+": il foglio uscirebbe senza le righe. Riprova fra un momento. ("+(rr.error.message||"")+")");return;}
     const t=rt.data;
-    if(!t){toast("I totali di questo SAL non si trovano. Se hai appena eseguito sql/gest-sal.sql, riapri il computo e riprova.");return;}
+    if(!t){toast("I totali di questo "+_sa("SAL","acconto")+" non si trovano. Se hai appena eseguito sql/gest-sal.sql, riapri il computo e riprova.");return;}
     const righe=rr.data||[];
-    if(!righe.length){toast("Questo stato di avanzamento non ha nessuna lavorazione contata: scrivi almeno una quantità, salva, e poi scarica il PDF.");return;}
+    if(!righe.length){toast("Questo "+_sa("stato di avanzamento","acconto")+" non ha nessuna lavorazione contata: scrivi almeno una quantità, salva, e poi scarica il PDF.");return;}
 
     const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     const az=azLetta||{};
@@ -873,7 +878,7 @@
        riquadro. Se non lo fa, il foglio si contraddice da solo e non esce. */
     const sommaRighe=Math.round(righe.reduce((a,r)=>a+(+r.importo||0),0)*100)/100;
     if(Math.abs(sommaRighe-oggi.lordo)>0.01){
-      toast("Non stampo il foglio: la somma delle righe ("+eur2(sommaRighe)+") non fa il totale del SAL ("+eur2(oggi.lordo)+"). Riapri il SAL, salvalo di nuovo e riprova.");
+      toast("Non stampo il foglio: la somma delle righe ("+eur2(sommaRighe)+") non fa il totale "+_sa("del SAL","dell'acconto")+" ("+eur2(oggi.lordo)+"). Riapri "+_sa("il SAL","l'acconto")+", salvalo di nuovo e riprova.");
       return;
     }
 
@@ -1077,7 +1082,7 @@
       +String(comp.titolo||cli.nome||"lavori").replace(/[^a-z0-9]+/gi,"-").toLowerCase().replace(/^-|-$/g,"")+".pdf");
     toast(_bozza
       ? ("Scaricato, ma sul foglio c'è la fascia rossa: "+motivi.join(" · ")+".")
-      : "PDF dello stato di avanzamento scaricato ✅");
+      : _sa("PDF dello stato di avanzamento scaricato ✅","PDF dell'acconto scaricato ✅"));
   }
 
 
