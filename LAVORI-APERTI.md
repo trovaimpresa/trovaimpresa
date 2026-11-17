@@ -4,7 +4,7 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 16 novembre 2026 — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
+Ultimo aggiornamento: 17 novembre 2026 — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
 
 
 
@@ -35,9 +35,9 @@ Ultimo aggiornamento: 16 novembre 2026 — riassunto di ottobre e inizio novembr
 ### 🔴 DA FARE
 1. Provare con un file VERO di un geometra (Excel e PDF).
 2. Provare da artigiano dal vivo e dal telefono vero.
-3. Dentro la sezione «Acconti a lavoro fatto» si legge ancora «SAL»; nella pagina «Cosa è cambiato» ancora «variante»: da decidere con Alex.
-4. Dopo aver caricato un PDF il computo si chiude: farlo restare aperto sulle lavorazioni (proposto, non chiesto).
-5. Rilanciare `node tools/banco-gestionale.js app` (erano 34 rosse per la striscia «Installa»).
+3. ✅ 17 nov: «SAL» → «acconto» e «variante» → «copia con le modifiche» per impresa e artigiano (studio e PDF uguali). RESTA: «SAL» in `js/gest-fatture.js` (la finestra «La fattura è salvata. Il SAL no.»): da decidere con Alex.
+4. ✅ 16 nov: dopo il PDF il computo resta aperto (0d4432e).
+5. ✅ 17 nov: `node tools/banco-gestionale.js app` rilanciato: ZERO difetti.
 
 ## 🆕 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV (lista di Alex, 21 punti)
 
