@@ -3283,3 +3283,28 @@ Provato dal vivo nel reparto «ferramenta» (`?vedi=professionista`, computo «P
 - I prezzi di riferimento dell'AI del preventivo stanno nel prompt di `supabase/functions/ai-generate/index.ts` (feature `preventivo`): Alex li deve ancora confrontare coi suoi.
 - 17 nov (mattina, 3) — **collaudo dal vivo dopo il push →d48fa14←** (computi «PROVA CONTROLLORE 20» e «21 (modifiche)» + un SAL, creati con SQL e poi cancellati: 5 computi, 91 messaggi, 0 prove). Da artigiano: «Acconti a lavoro fatto», «Ogni acconto…», «Acconto n. 1», «Già chiesto con gli acconti prima», «Questo acconto», «Copia con le modifiche», «−19,7%», «senza lo sconto», «Scarica il foglio delle modifiche» ✔. Con `?vedi=professionista`: «SAL n. 1», «Variante», «−19,733%», «senza il ribasso» ✔. Zero errori in console. ⚠️ **L'id del reparto per `enterPanel` CAMBIA** (`idmwjohu694grj` non esiste piu'): si cerca per nome, `state.panels.find(x=>x.name==='ferramenta').id`. ⚠️ In nuvola il push e' rifiutato finche' il repo non e' aggiunto alla sessione (`add_repo` con accesso push). `quantita_manuale` di `gest_computo_voci` e' un booleano.
 - 17 nov (mattina, 4): **anche la finestra «La fattura è salvata. Il SAL no.»** (`_salAvvisoPannello`, `_salNome` e i due motivi in `js/gest-fatture.js`) dice «acconto» a impresa e artigiano: titolo «La fattura è salvata. L'acconto non è segnato come fatturato.» (deciso da Alex). Lo studio resta «SAL». ⛔ NON toccata la riga della fattura «Stato avanzamento lavori n. …» (`desc` in `salFattura`): va al cliente e allo SDI. Fotografata col banco chiamando `_salAvvisoPannello({nome,perche,id})`; NON ancora online (parte col prossimo push), dal vivo non si puo' far uscire senza rompere apposta il collegamento.
+
+# 17 NOVEMBRE 2026 (sera) — UNA VOCE PER VOLTA: LE FATTURE
+
+Da oggi Alex fa collaudare il gestionale UNA VOCE DEL MENU PER SESSIONE (prima Fatture; la prossima e' Clienti, poi Calendario, poi «Tutto il resto»). A fine sessione Claude gli lascia il prompt per la voce dopo.
+
+Fatto e online (collaudo dal vivo nel reparto «ferramenta», prove «PROVA CONTROLLORE», tutto cancellato alla fine):
+- **Cassa e spese si vedono sempre se la fattura le ha dentro** (anche a chi oggi non e' studio); il cliente che non sta piu' in tendina si vede come «… — come scritto in fattura» e salvando resta.
+- **Bollo da 2 € automatico** in forfettario sulle fatture NUOVE sopra 77,47 € (`fattBolloAuto`); se lo tocchi tu non lo rimette.
+- **«Manda al cliente»** (`js/gest-fattura-manda.js`, azione `fatt-manda`): messaggio gia' scritto, WhatsApp, Email, Copia, Scarica PDF e, sul telefono, «Condividi il PDF» (`navigator.share` col file; `fatturaPdf(id,{blob:true})`). Non manda niente da solo e non scrive nel database.
+- **Controllo** (`ctrRegoleFattura`): ritenuta fuori da 0-100 rossa, ritenuta in forfettario arancio, scadenza prima della data rossa, avviso IBAN una volta sola.
+- **Acconto ricevuto**: ⛔ NON e' una funzione nuova. L'acconto su una fattura c'era dal 13 nov (ricevuta di pagamento con `fattura_id`); mancava la porta e il conto. Adesso: pulsante «Acconto ricevuto» nella fattura emessa (`fattAcconto` → `gestRicevutePagamento.nuova({cliente_id,fattura_id})`), e `fattAccontiLeggi()` / `fattGia()` in `js/gest-fatture.js` tolgono gli acconti da elenco, «Da incassare», Riepilogo e «Manda al cliente». Nel database la vista `gest_fatture_totali` ha `gia_ricevuto` e `resto` (`sql/2026-11-17-fatture-resto.sql`): li usano `chat_soldi`, `promemoria-mattina.js` e «Farsi pagare» (`js/gest-fisco.js`). ⛔ `totale` della vista NON e' cambiato.
+- **Numeri mancanti**: l'avviso non esce nei reparti senza fatture numerate nell'anno; per i numeri eliminati per sempre c'e' «Ho capito» (localStorage `ti_fatt_buchi_<uid>_<anno>`), torna solo se ne manca uno nuovo.
+- **Il regime della fattura** (`fattForfDi`, `_fattForfModulo` in `js/gest-fatture.js`; `gest_fattura_conti` in `sql/2026-11-17-fattura-regime-suo.sql`): una fattura COL NUMERO che si ricorda il suo regime si conta con quello, dappertutto; le bozze col regime di oggi. Il modulo di una fattura emessa lavora col suo regime e risalvandola non lo cambia.
+
+Lezioni:
+- ⛔ Avevo scritto ad Alex che «l'acconto ricevuto manca». C'era. Prima di dire «manca», cercare in TUTTI i file js (qui `gest-ricevute-pagamento.js`).
+- Il push da Claude passa solo quando Alex scrive «pubblica» in quel messaggio: un «sì» o «vai» a un piano non basta.
+- Per provare i conti senza `prove-claude/`: caricare `js/centesimi.js` + `js/gest-fatture.js` veri in una `vm` di Node con i globali finti e chiamare `fattConti` prima e dopo (`git stash`): devono cambiare solo i casi voluti.
+- Nelle prove dal vivo i reparti si aprono con `enterPanel(state.panels.find(x=>x.nome==='ferramenta').id)` (il campo e' `nome`, non `name`).
+
+Aperto sulle Fatture:
+1. NON provati dal vivo: «Condividi il PDF» dal telefono vero, «Acconto ricevuto» fino al salvataggio (serve una fattura emessa con un cliente dell'anagrafica: di prova non se ne emettono), l'email del mattino col resto.
+2. «I prossimi 3 mesi» in Tasse e fisco (`js/gest-fisco-vivere.js`) conta ancora la fattura intera, senza togliere gli acconti.
+3. Mancano ancora (non chiesti): email automatica col PDF allegato, sollecito dalle Fatture, «Duplica fattura», «Fai la nota di credito da questa».
+4. Non provati per regola: Emetti, «Ha pagato», invio allo SDI, controllo con l'AI, «Allega un PDF tuo», fattura da preventivo accettato (in «ferramenta» non ce n'e' uno).
