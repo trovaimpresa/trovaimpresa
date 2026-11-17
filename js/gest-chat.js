@@ -70,10 +70,15 @@
     d.style.color = brutta ? '#b3261e' : '';
   }
 
-  function scordaAllegato() {
+  /* ⛔ 17 nov 2026 (collaudo Chat) — `tieniRiga`: quando il file NON va bene
+     (tipo sbagliato, troppo pesante) la riga rossa che lo spiega deve
+     RESTARE. Prima qui si svuotava sempre, quindi il motivo spariva
+     nell'istante in cui veniva scritto: sceglievi un file e non succedeva
+     niente. */
+  function scordaAllegato(tieniRiga) {
     allegato = null;
     var c = document.getElementById('chat-file'); if (c) c.value = '';
-    rigaAllegato('');
+    if (tieniRiga !== true) rigaAllegato('');
   }
 
   function pesoScritto(n) {
@@ -101,19 +106,19 @@
     }
     rigaAllegato('Preparo il file&hellip;');
     var p = await window.preparaFileUpload(file, { lato: LATO_FOTO, qualita: QUALITA_FOTO, formato: 'jpeg' });
-    if (p.errore) { rigaAllegato(esc(p.errore), true); scordaAllegato(); return; }
+    if (p.errore) { rigaAllegato(esc(p.errore), true); scordaAllegato(true); return; }
     var tipo = (p.file && p.file.type) || file.type || '';
     if (TIPI_BUONI.indexOf(tipo) < 0) {
       /* le foto dell'iPhone in HEIC arrivano qui: il telefono le sa aprire,
          Claude no. Meglio dirlo con parole sue che far partire un messaggio
          che torna indietro con un errore in inglese. */
       rigaAllegato('Questo tipo di file non lo so leggere. Vanno bene le foto JPG, PNG, WEBP e i PDF.', true);
-      scordaAllegato(); return;
+      scordaAllegato(true); return;
     }
     if (p.file.size > PESO_MAX) {
       rigaAllegato('Il file pesa ' + pesoScritto(p.file.size) + ': il massimo &egrave; 3 MB. '
         + (tipo === 'application/pdf' ? 'Prova a mandarne una parte sola.' : 'Rifai la foto pi&ugrave; piccola.'), true);
-      scordaAllegato(); return;
+      scordaAllegato(true); return;
     }
     try {
       var dati = await inBase64(p.file);
@@ -122,7 +127,7 @@
         + ' <button type="button" class="chip" data-scorda="1">Togli</button>');
     } catch (e) {
       rigaAllegato('Non riesco a preparare il file: riprova.', true);
-      scordaAllegato();
+      scordaAllegato(true);
     }
   }
 
@@ -186,6 +191,10 @@
   }
   function testoRisposta(t) {
     return esc(pulisciMarkdown(t)).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
+      /* 17 nov 2026 (collaudo Chat) — un [apri:…] di un tipo che qui non si
+         sa aprire (visto dal vivo: [apri:scadenze:id]) restava scritto con
+         tutto il codice. Si toglie: meglio niente pulsante che una riga di sigle. */
+      .replace(/[ \t]*\[apri:[a-z_]{1,20}:[0-9a-fA-F-]{36}\]/g, '')
       .replace(SEGNALINO_VAI, pulsanteVai)
       .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata)
       /* 6 nov 2026 — due segnalini senza id: quando non sa, e quando gli

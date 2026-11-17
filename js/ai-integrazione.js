@@ -764,6 +764,36 @@
      le quattro righe stavano chiuse dentro `compilaCliente`, e adesso le
      usano tutte e due le strade — il pulsante «Compila con AI» dei
      Clienti e la chat. Una macchina sola. */
+  /* ⛔ 17 nov 2026 (collaudo Chat) — «premi Salva», ma «Salva» non c'e'.
+     In un modulo NUOVO il pulsante si chiama «Crea», «Crea lavoro»,
+     «Aggiungi»… Qui si LEGGE il nome dal pulsante vero (classe b-save)
+     dell'ultima finestra aperta: cosi' l'avviso dice quello che si vede. */
+  function nomeSalva() {
+    try {
+      const tutti = Array.prototype.slice.call(document.querySelectorAll('.b-save'))
+        .filter(function (b) { return b.offsetParent !== null; });
+      const b = tutti[tutti.length - 1];
+      const t = b ? String(b.textContent || '').replace(/\s+/g, ' ').trim() : '';
+      return t ? '«' + t + '»' : 'Salva';
+    } catch (e) { return 'Salva'; }
+  }
+  /* una TENDINA si riempie solo con una voce che c'e' davvero (stesse
+     lettere, maiuscole a parte). Se non c'e' e `ripiego` esiste, quello. */
+  function riempiTendina(id, val, ripiego) {
+    const el = document.getElementById(id);
+    if (!el || !el.options) return null;
+    const norma = function (x) { return String(x == null ? '' : x).trim().toLowerCase(); };
+    const cerca = function (v) {
+      if (!norma(v)) return null;
+      for (let i = 0; i < el.options.length; i++) if (norma(el.options[i].value) === norma(v)) return el.options[i].value;
+      return null;
+    };
+    const giusto = cerca(val) || cerca(ripiego);
+    if (giusto === null) return null;
+    el.value = giusto;
+    return el;
+  }
+
   function riempiCliente(d) {
     if (!d) return false;
     const primo = { el: null };
@@ -792,7 +822,7 @@
       }
     } catch (e) {}
 
-    avviso('Modulo compilato, controlla i dati e premi Salva');
+    avviso('Modulo compilato: controlla i dati e premi ' + nomeSalva());
     if (primo.el) primo.el.focus();
     return true;
   }
@@ -873,7 +903,7 @@
     impostaSelectQuando(document.getElementById('j-operaio'), d.operatore, 3000);
     riempiPratica(d, primo);
 
-    avviso('Modulo compilato, controlla i dati e premi Salva');
+    avviso('Modulo compilato: controlla i dati e premi ' + nomeSalva());
     if (primo.el) primo.el.focus();
     return true;
   }
@@ -973,9 +1003,13 @@
     if (!d) return false;
     const primo = { el: null };
     riempiCampo('s-tit', d.titolo, primo);
+    /* 17 nov 2026 — il TIPO: la tendina partiva sempre dalla prima voce
+       («DURC»), anche per la revisione del furgone. Si sceglie la voce
+       detta se c'e' nella tendina, se no «Altro». Mai una voce inventata. */
+    riempiTendina('s-tipo', d.tipo, 'Altro');
     riempiCampo('s-data', d.data, primo);
     riempiCampo('s-note', d.note, primo);
-    avviso('Modulo compilato, controlla i dati e premi Salva');
+    avviso('Modulo compilato: controlla i dati e premi ' + nomeSalva());
     if (primo.el) primo.el.focus();
     return true;
   }
@@ -984,12 +1018,12 @@
     if (!d) return false;
     const primo = { el: null };
     riempiCampo('fo-nome', d.nome, primo);
-    riempiCampo('fo-cat', d.categoria, primo);
+    riempiTendina('fo-cat', d.categoria, null);   /* 17 nov 2026: e' una tendina */
     riempiCampo('fo-tel', d.telefono, primo);
     riempiCampo('fo-email', d.email, primo);
     riempiCampo('fo-ind', d.indirizzo, primo);
     riempiCampo('fo-piva', d.piva, primo);
-    avviso('Modulo compilato, controlla i dati e premi Salva');
+    avviso('Modulo compilato: controlla i dati e premi ' + nomeSalva());
     if (primo.el) primo.el.focus();
     return true;
   }
@@ -1050,7 +1084,7 @@
             if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
           });
           riempiPratica(d, primo);
-          avviso('Ho cambiato le caselle: controlla e premi Salva');
+          avviso('Ho cambiato le caselle: controlla e premi ' + nomeSalva());
           if (primo.el) primo.el.focus();
         }, 120);
       })();

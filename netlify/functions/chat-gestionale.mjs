@@ -98,7 +98,9 @@ const ATTREZZI = {
   lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,cliente_id', ordine:'data_prevista', data:'data_prevista', nome:'i lavori' },
   preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data,cliente_id',             ordine:'data',          data:'data',          nome:'i preventivi' },
   fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome,cliente_id,data_pagata', ordine:'data',   data:'data',          nome:'le fatture' },
-  clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta',                                 ordine:'nome',          nome:'i clienti' },
+  /* 17 nov 2026 (collaudo Chat) — coi RECAPITI: senza, a «che telefono ha
+     Rossi?» rispondeva «non e' segnato nella scheda», ed era segnato. */
+  clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta,telefono,email,indirizzo,referente,note', ordine:'nome',     nome:'i clienti' },
   fornitori:    { tabella:'gest_fornitori',         campi:'id,nome,categoria,telefono',                         ordine:'nome',          nome:'i fornitori' },
   scadenze:     { tabella:'gest_scadenze',          campi:'id,titolo,data_scadenza,stato',                      ordine:'data_scadenza', data:'data_scadenza', nome:'le scadenze' },
   computi:      { tabella:'gest_computi',           campi:'id,numero,titolo,stato,data,ribasso_perc,tipo',      ordine:'data',          data:'data',          nome:'i computi' },
@@ -232,7 +234,7 @@ function costruisciLetturaFiglio(cosa, uid, idPadre, opzioni) {
 // intero si cerca solo se la parola e' fatta di cifre, con l'uguale.
 // ---------------------------------------------------------------------
 const DOVE_SI_CERCA = {
-  lavori:['descrizione','dove'], preventivi:['titolo'], fatture:['cli_nome'], clienti:['nome','citta'],
+  lavori:['descrizione','dove'], preventivi:['titolo'], fatture:['cli_nome'], clienti:['nome','citta','referente'],
   fornitori:['nome','categoria'], scadenze:['titolo'], computi:['titolo','numero'], sal:[],
   mezzi:['nome','targa'], operatori:['nome'], fatture_fornitori:['numero'],
   mezzi_scadenze:['nome','targa'], rifornimenti:['distributore'], carte_saldo:['nome'], rapportini:['note'],
@@ -382,7 +384,7 @@ const MODULI = {
      ⚠️ Solo caselle di TESTO: le tendine del modulo (il tipo, il mezzo, il
      cliente) restano da riempire a mano. Una tendina si riempie per id, e
      un id inventato attaccherebbe la scadenza al mezzo sbagliato. */
-  scadenza:  { caselle: ['titolo', 'data', 'note'],
+  scadenza:  { caselle: ['titolo', 'tipo', 'data', 'note'],
                serve: 'titolo', manca: 'manca cosa scade' },
   fornitore: { caselle: ['nome', 'categoria', 'telefono', 'email', 'indirizzo', 'piva'],
                serve: 'nome',   manca: 'manca il nome del fornitore' },
@@ -401,6 +403,57 @@ const CASELLE_LAVORO = MODULI.lavoro.caselle;    // per chi lo chiedeva prima
 const PRATICA_TIPI_OK  = ['CILA', 'CILAS', 'SCIA', 'SCIA alternativa al PdC', 'Permesso di Costruire', 'Autorizzazione paesaggistica', "Agibilita'", 'Sanatoria', 'Accatastamento', 'Voltura', 'Altro'];
 const PRATICA_STATI_OK = ['da_preparare', 'depositata', 'istruttoria', 'integrazioni', 'approvata', 'archiviata'];
 const CASELLE_PRATICA  = ['pratica_tipo', 'pratica_stato', 'pratica_comune', 'pratica_protocollo', 'pratica_data_dep', 'catasto_foglio', 'catasto_particella', 'catasto_sub'];
+
+/* ⛔ 17 nov 2026 (collaudo Chat) — LA CATEGORIA DEL FORNITORE E' UNA TENDINA.
+   Elenco chiuso, uguale a FORN_CATS di js/gest-fornitori.js: la chat diceva
+   «categoria materiale edile» e la casella restava su «— scegli —».
+   ⚠️ Se cambia l'elenco nel gestionale, va cambiato anche qui. */
+const FORN_CATS_OK = ['Rivendita edile', 'Ferramenta', 'Colorificio', 'Termoidraulica', 'Materiale elettrico', 'Legname', 'Noleggio attrezzature', 'Cava / Inerti', 'Altro'];
+
+/* ⛔ 17 nov 2026 (collaudo Chat) — COME SI CHIAMA IL PULSANTE PER SALVARE.
+   La chat diceva «premi Salva», ma in un modulo NUOVO «Salva» non c'e':
+   c'e' «Crea», «Crea lavoro», «Aggiungi»… (`b-save` nei moduli). */
+function bottoneDi(quale, ruolo, modifica) {
+  if (modifica) return 'Salva';
+  if (quale === 'lavoro') return ruolo === 'professionista' ? 'Crea pratica' : 'Crea lavoro';
+  if (quale === 'preventivo') return 'Crea preventivo';
+  if (quale === 'fornitore') return 'Aggiungi';
+  return 'Crea';
+}
+
+/* ⛔ 17 nov 2026 (collaudo Chat) — IL GIORNO DELLA SETTIMANA LO DECIDE CHI SCRIVE.
+   Dal vivo: «giovedì prossimo» (era martedì 17) → nel modulo il 20, che e'
+   VENERDI', e la risposta diceva «giovedì 20 novembre». Il calendario qui
+   sopra il modello ce l'aveva e l'ha letto male lo stesso.
+   Quindi si controlla dopo: se nella domanda c'e' UN SOLO giorno della
+   settimana e la data scelta cade in un altro giorno, si sposta al giorno
+   detto PIU' VICINO (al massimo 3 giorni: la settimana resta quella che ha
+   scelto lui). Con due giorni diversi nella domanda non si tocca niente.
+   Pura: tutto in UTC a mezzogiorno, come calendarioProssimo. */
+const GIORNI_DETTI = [['domenica'], ['lunedi', 'lunedì'], ['martedi', 'martedì'], ['mercoledi', 'mercoledì'], ['giovedi', 'giovedì'], ['venerdi', 'venerdì'], ['sabato']];
+function giornoGiusto(domanda, dataISO) {
+  const fuori = { data: dataISO, corretta: false };
+  if (!dataISO || !/^\d{4}-\d{2}-\d{2}$/.test(String(dataISO))) return fuori;
+  const testo = ' ' + String(domanda || '').toLowerCase().replace(/[^a-zàèéìòù]+/g, ' ') + ' ';
+  const detti = [];
+  GIORNI_DETTI.forEach(function (forme, n) {
+    if (forme.some(function (f) { return testo.indexOf(' ' + f + ' ') >= 0; })) detti.push(n);
+  });
+  if (detti.length !== 1) return fuori;
+  const d = new Date(dataISO + 'T12:00:00Z');
+  if (isNaN(d.getTime())) return fuori;
+  let salto = detti[0] - d.getUTCDay();          // da -6 a +6
+  if (salto > 3) salto -= 7;
+  if (salto < -3) salto += 7;
+  if (salto === 0) return fuori;
+  const g = new Date(d.getTime() + salto * 86400000);
+  const nomi = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+  const mesi = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+  const iso = g.toISOString().slice(0, 10);
+  return { data: iso, corretta: true,
+           nota: 'ATTENZIONE: il ' + dataISO + ' che avevi scritto e\' ' + nomi[d.getUTCDay()] + ', non ' + nomi[detti[0]]
+               + '. Nel modulo ho messo ' + nomi[g.getUTCDay()] + ' ' + g.getUTCDate() + ' ' + mesi[g.getUTCMonth()] + ' (' + iso + '): nella risposta di\' QUESTA data.' };
+}
 
 /* pura: prende quello che ha detto Claude e tiene solo le caselle buone */
 function casellePratica(d) {
@@ -435,6 +488,7 @@ function costruisciModulo(tipo, dati, opzioni) {
     const v = String(d[k]).trim().slice(0, LUNGHEZZA_MAX);
     if (!v) return;
     if (k === 'data' && !FORMA_DATA.test(v)) return;   // vedi la nota sopra
+    if (tipo === 'fornitore' && k === 'categoria' && FORN_CATS_OK.indexOf(v) < 0) return;
     campi[k] = v;
   });
   /* ⛔ 7 nov 2026 — la pratica dello studio: le caselle passano dal filtro
@@ -1215,6 +1269,7 @@ const STRUMENTI = [
       type: 'object',
       properties: {
         titolo: { type:'string', description:'cosa scade' },
+        tipo:   { type:'string', description:'il tipo, SOLO se e\' una di queste parole scritta uguale: DURC · Assicurazione · Revisione mezzo · Bollo · Tagliando · Manutenzione programmata · Certificazione · Pagamento fornitore · Patentino · Idoneità sanitaria · Altro (per lo studio: Presentazione pratica · Integrazione richiesta dal Comune · Inizio lavori · Fine lavori · Proroga · Collaudo · Agibilità · Rinnovo polizza · Altro). Se non sai, «Altro».' },
         data:   { type:'string', description:'la data, SOLO nella forma AAAA-MM-GG. Se non la sai con certezza, non metterla.' },
         note:   { type:'string', description:'due parole in piu\', se te le ha dette' }
       },
@@ -1229,10 +1284,10 @@ const STRUMENTI = [
       type: 'object',
       properties: {
         nome:      { type:'string', description:'il nome della ditta' },
-        categoria: { type:'string', description:'che roba vende' },
+        categoria: { type:'string', enum: FORN_CATS_OK, description:'che roba vende: UNA di queste, scritta uguale (e\' una tendina). Se nessuna va bene, «Altro».' },
         telefono:  { type:'string' },
         email:     { type:'string' },
-        indirizzo: { type:'string', description:'via e numero' },
+        indirizzo: { type:'string', description:'via, numero e citta\' (qui la citta\' non ha una casella sua)' },
         piva:      { type:'string', description:'la partita IVA, solo le cifre' }
       },
       required: ['nome']
@@ -1534,7 +1589,7 @@ function istruzioniFisse() {
     '· contratti → «fallo vedere a chi di dovere».',
     'Puoi spiegare come si fa una cosa NEL GESTIONALE anche su questi argomenti: quello che non fai è dire cosa è giusto per legge.',
     '',
-    'QUANDO NOMINI UNA COSA PRECISA che hai letto con un attrezzo (un lavoro, un preventivo, una fattura, un cliente), subito dopo il suo nome scrivi il segnalino [apri:TIPO:ID] con l\'id vero che hai letto. TIPO è uno fra: lav (lavoro), prev (preventivo), fatt (fattura), cli (cliente), comp (computo). Il gestionale lo trasforma in un pulsante «Aprilo» che porta l\'utente proprio li\'.',
+    'QUANDO NOMINI UNA COSA PRECISA che hai letto con un attrezzo (un lavoro, un preventivo, una fattura, un cliente), subito dopo il suo nome scrivi il segnalino [apri:TIPO:ID] con l\'id vero che hai letto. TIPO è uno fra: lav (lavoro), prev (preventivo), fatt (fattura), cli (cliente), comp (computo). Il gestionale lo trasforma in un pulsante «Aprilo» che porta l\'utente proprio li\'. ⛔ SOLO per questi cinque: per una scadenza, un promemoria, un fornitore, un mezzo NON scrivere [apri:…] (resterebbe scritto com\'è): portalo nella sezione con [vai:…].',
     'Esempio: «Sostituzione grondaia [apri:lav:1f2e...] vale 8.000,00 €». Il segnalino non si spiega e non si nomina: si scrive e basta.',
     // ⛔ 10 nov 2026 — dal collaudo: «vai in Fatture → scheda Bozze → menu…» sono tre cose da trovare.
     '⛔ QUANDO GLI DICI DOVE ANDARE, PORTACELO: invece di spiegare la strada a parole scrivi il segnalino [vai:SEZIONE] oppure [vai:SEZIONE:SCHEDA], che diventa il pulsante «Vai a…». SEZIONE è una fra: fatture, preventivi, lavori, scadenzario, computi, clienti, calendario, promemoria, dalsito (richieste dal sito), giornate, agenda, squadra, mezzi, attrezzature, fisco (tasse e fisco), prezzario, sal (stati di avanzamento), fornitori, carte, report, galleria, mappa, cestino, assistenza, richieste (chiedi una funzione). SCHEDA solo per: fatture (bozze, incassare, scadute, pagate) · preventivi (bozza, inviato, accettato, rifiutato) · lavori (ritardo, oggi, prossimi, incassare, archivio) · scadenzario (scadute, prossime, fatte). Esempio: «Hai 2 fatture in bozza: aprile ed emettile. [vai:fatture:bozze]». Al massimo 2 pulsanti per risposta, in fondo alla frase a cui servono. Dopo il pulsante di\' in UNA riga cosa premere lì (il nome vero del pulsante fra «»), non tutta la strada. Se la cosa è UNA sola e ne hai l\'id, usa [apri:…] al posto di [vai:…].',
@@ -1550,7 +1605,7 @@ function istruzioniFisse() {
     '⚠️ Una fattura in BOZZA non è un incasso: non contarla fra i soldi che deve avere, e se la nomini di\' che è ancora una bozza.',
     '⚠️ E un PREVENTIVO non è un incasso nemmeno se è accettato: è lavoro che deve ancora diventare fattura. Tienilo separato dai soldi che deve avere.',
     '',
-    'PUOI APRIRGLI UN MODULO GIÀ PIENO. Se ti chiede di segnare, aggiungere o creare un LAVORO nuovo, usa `compila_lavoro`: il gestionale gli apre il modulo del Lavoro con dentro quello che hai capito, e a salvarlo è lui col pulsante Salva.',
+    'PUOI APRIRGLI UN MODULO GIÀ PIENO. Se ti chiede di segnare, aggiungere o creare un LAVORO nuovo, usa `compila_lavoro`: il gestionale gli apre il modulo del Lavoro con dentro quello che hai capito, e a salvarlo è lui. ⛔ In un modulo NUOVO il pulsante NON si chiama «Salva»: il nome vero te lo dice l\'attrezzo quando apre il modulo («Crea lavoro», «Crea», «Aggiungi», «Crea preventivo»). Usa quello.',
     '⛔ Nel modulo ci metti SOLO quello che ti ha detto davvero. Quello che non sai si lascia vuoto, non si inventa: un modulo con dentro una data o un importo inventati è peggio di un modulo mezzo vuoto, perché uno lo salva senza guardare.',
     'La data va scritta AAAA-MM-GG, se no la casella la rifiuta senza dire niente. Se non sei sicuro di che giorno intende, lascia fuori la data e chiediglielo.',
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
@@ -2064,7 +2119,13 @@ export default async function (req) {
             } else {
               const m = costruisciModulo('lavoro', inp, { ruolo: ruolo, modifica: inp.id });
               if (m.errore) esito = { errore: m.errore };
-              else { modulo = m; daSistemare = false; esito = { ok: true, aperto: 'gli ho aperto «' + (rl.righe[0].descrizione || 'il lavoro') + '» con le caselle cambiate: salva lui' }; }
+              else {
+                const gg = giornoGiusto(domanda, m.campi.data);
+                if (gg.corretta) m.campi.data = gg.data;
+                modulo = m; daSistemare = false;
+                esito = { ok: true, aperto: 'gli ho aperto «' + (rl.righe[0].descrizione || 'il lavoro') + '» con le caselle cambiate: salva lui col pulsante «Salva»' };
+                if (gg.corretta) esito.data_corretta = gg.nota;
+              }
             }
           }
         } else if (t.name === 'agenda') {
@@ -2383,11 +2444,15 @@ export default async function (req) {
                 delete m.campi[campo];
               }
             }
+            const gg = giornoGiusto(domanda, m.campi.data);
+            if (gg.corretta) m.campi.data = gg.data;
             modulo = m;
             daSistemare = avvisi.length > 0;
+            const salvaCon = ' Il pulsante per salvarlo si chiama «' + bottoneDi(quale, ruolo, false) + '» (NON «Salva»): se lo nomini, chiamalo cosi\'.';
             esito = avvisi.length
-              ? { ok: true, aperto: 'modulo del ' + quale + ' aperto', da_sistemare: avvisi }
-              : { ok: true, aperto: 'gli ho aperto il modulo del ' + quale + ', gia\' compilato' };
+              ? { ok: true, aperto: 'modulo del ' + quale + ' aperto.' + salvaCon, da_sistemare: avvisi }
+              : { ok: true, aperto: 'gli ho aperto il modulo del ' + quale + ', gia\' compilato.' + salvaCon };
+            if (gg.corretta) esito.data_corretta = gg.nota;
           }
         } else {
           esito = { errore: 'attrezzo che non esiste' };
@@ -2531,4 +2596,5 @@ export default async function (req) {
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
 export { inPiu, mettiInFila, formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante, vicinaDi };
 export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { giornoGiusto, bottoneDi, FORN_CATS_OK };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

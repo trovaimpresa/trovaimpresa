@@ -3365,3 +3365,34 @@ Funzioni nuove (ok di Alex il 17 nov, foto prima):
 - **Si torna al Calendario** dopo aver chiuso un mezzo / promemoria / fattura aperti da li' (`calTornaQuandoChiude(tab)` in coda a `calVai`): guarda ogni 300 ms; se intanto cambi sezione tu, non ti sposta.
 
 Aperto sul Calendario: il pulsante «Parla» copre l'angolo della domenica in alto (vale per tutte le sezioni). NON provati: telefono vero, studio tecnico, fatture «Da incassare».
+
+Provato dal vivo dopo il push 3a3d355, computer e 375 px: tutto ✔
+
+# 17 NOVEMBRE 2026 (sera, 4) — UNA VOCE PER VOLTA: LA CHAT CON AI
+
+Collaudo dal vivo nel reparto «ferramenta» (1 cliente, 1 lavoro, 3 segnature di ore, 1 preventivo, 1 fattura in bozza, 1 scadenza «PROVA CONTROLLORE» creati con SQL; 7 chat di prova: tutto cancellato, 0 righe). Computer (1400) e 375 px.
+
+Dove sta il codice: `netlify/functions/chat-gestionale.mjs` (attrezzi, moduli, istruzioni), `js/gest-chat.js` (la sezione), `js/ai-integrazione.js` (`riempi*`, `compila*DaChat`), `js/gest-ricerca.js` (`apriCosa`). Stile: `css/gestionale-stile.css` (`#chat …`).
+
+Funziona (provato): numeri uguali al database (fattura in bozza 1.082,10 €, ore 15 in 3 segnature, preventivo 470,50 + IVA), lavori in ritardo, agenda, i 5 moduli (lavoro, cliente con tutte e 14 le caselle, scadenza, fornitore, preventivo coi SUOI prezzi), i 4 pulsanti «Apri», «Vai a…», Copia, Ferma, chat nuova pulita, archivio riaperto in ordine, foto letta giusta, altra lingua, «sei in un altro reparto».
+
+Sistemato (da pubblicare; banco nuovo `banco-collaudo-17nov.mjs`, 36 prove):
+- **Recapiti del cliente**: `ATTREZZI.clienti` leggeva solo nome, tipo, citta'. A «che telefono ha Rossi?» diceva «non è segnato», ed era segnato. Adesso anche telefono, email, indirizzo, referente, note.
+- **Giorno della settimana** (`giornoGiusto`): «giovedì prossimo» finiva nel modulo di VENERDI' (il calendario nelle istruzioni non basta). Se nella domanda c'e' UN solo giorno e la data cade in un altro, il server la sposta al giorno detto piu' vicino (max 3 giorni) e lo dice al modello (`data_corretta`). Vale per i moduli nuovi e per `modifica_lavoro`.
+- **Fornitore**: la categoria e' una TENDINA: elenco chiuso `FORN_CATS_OK` (uguale a `FORN_CATS` di js/gest-fornitori.js: se cambia, in DUE posti) + `riempiTendina`. Prima restava «— scegli —» e la chat diceva di averla messa.
+- **Scadenza**: casella `tipo` (parole della tendina); se non combacia → «Altro». Prima restava «DURC» anche per la revisione del furgone.
+- **«premi Salva»**: nei moduli NUOVI «Salva» non esiste («Crea», «Crea lavoro», «Aggiungi», «Crea preventivo»). Il server dice il nome vero (`bottoneDi`), l'avviso lo legge dal pulsante `.b-save` (`nomeSalva`).
+- **Segnalino sconosciuto**: `[apri:scadenze:id]` restava scritto col codice. Si toglie (js/gest-chat.js) e le istruzioni dicono di usare [vai:…].
+- **Allegato rifiutato**: il motivo (tipo sbagliato, oltre 3 MB) spariva subito: `scordaAllegato()` svuotava la riga rossa appena scritta. Adesso `scordaAllegato(true)`.
+- «Foto» alto come «Parla» e «Manda» (38 → 44 px).
+
+L'errore «400» all'apertura: NON e' del gestionale. Aperto 4 volte (computer e 375 px, elenco reparti e dentro il reparto): tutte le richieste 200. Nel registro di Supabase i 400 del 17 nov sono solo le prove dei collaudi (file `.exe` rifiutato, insert sbagliati apposta, una password sbagliata al login). La console del pannello Browser tiene gli errori vecchi anche dopo aver ricaricato: per questo «c'era già».
+
+Da sapere:
+- L'archivio delle chat e' dell'ACCOUNT, non del reparto (`chat_elenco` non filtra `mestiere_id`): in «ferramenta» si vedono anche le chat fatte in «giardiniere». Chiesto ad Alex se dividerle.
+- Una scadenza non si apre dalla chat (`apriCosa` conosce lav, prev, fatt, cli, comp). Chiesto ad Alex.
+- La chat riprende l'ultima conversazione dopo aver ricaricato (`sessionStorage ti_chat_conv`).
+- I banchi della chat stanno sul PC (`prove-claude/banchi-fissi/assistenza-ai/`); il PC puo' essere indietro rispetto a GitHub: si portano nella nuvola e si girano sul clone.
+
+NON provati: telefono vero, microfono («Parla»), PDF vero allegato, studio tecnico, «Manda su WhatsApp», «Segna come pagata» (non si emettono fatture di prova), computo con l'AI (provato il 16 nov).
+
