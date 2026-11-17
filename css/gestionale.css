@@ -6321,3 +6321,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 }
 /* 17 nov 2026: «Niente in programma» usciva anche sopra le scadenze del giorno; adesso solo se il giorno e' vuoto davvero */
 .day-vuoto{ color:var(--muted); font-size:17px; margin-bottom:12px; }
+/* 17 nov 2026 (ok di Alex): la nota scritta nella casella, solo sul computer */
+.cal-lav-bar.nota{ background:#94a3b8; }
+#calendario .cal-lav.nota .cal-lav-t{ font-weight:500!important; color:#334155!important; -webkit-line-clamp:2!important; }
+@media(max-width:760px){ #calendario .cal-lav.nota{ display:none!important; } }

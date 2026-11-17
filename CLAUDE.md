@@ -3360,4 +3360,8 @@ Da sapere:
 - I promemoria sono della persona: si vedono in tutti i reparti. `promemoria.id` e' un numero messo dal database (non passare l'id).
 - Esc non chiude nessuna finestra del gestionale (non e' del Calendario).
 
-Aperto sul Calendario (chiesto ad Alex, non deciso): scrivere la nota dentro la casella sul computer (sul telefono c'e' gia' nell'elenco); tornare al Calendario dopo aver chiuso un mezzo / promemoria / fattura fornitore aperti da li' (oggi si resta in quella sezione). Il pulsante «Parla» copre l'angolo della domenica in alto: vale per tutte le sezioni.
+Funzioni nuove (ok di Alex il 17 nov, foto prima):
+- **La nota scritta nella casella** sul computer (`.cal-lav.nota` in `renderCal`, 80 caratteri, 2 righe; non conta nei 3 posti; sul telefono e' spenta dal CSS perche' c'e' gia' nell'elenco).
+- **Si torna al Calendario** dopo aver chiuso un mezzo / promemoria / fattura aperti da li' (`calTornaQuandoChiude(tab)` in coda a `calVai`): guarda ogni 300 ms; se intanto cambi sezione tu, non ti sposta.
+
+Aperto sul Calendario: il pulsante «Parla» copre l'angolo della domenica in alto (vale per tutte le sezioni). NON provati: telefono vero, studio tecnico, fatture «Da incassare».

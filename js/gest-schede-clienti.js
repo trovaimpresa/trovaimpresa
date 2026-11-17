@@ -699,7 +699,11 @@
       const piu=tot>mostrate?`<span class="cal-piu">+${tot-mostrate}</span>`:"";
       const we=(lead+d-1)%7>=5?" we":"";
       const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
-      html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
+      /* 17 nov 2026 (ok di Alex) — la nota si legge nella casella anche sul
+         computer (sul telefono c'e' gia' nell'elenco sotto: li' questa riga
+         e' spenta dal CSS). Non conta nei 3 posti di lavori e scadenze. */
+      const notaRiga=noteCache[ds]?`<span class="cal-lav nota"><i class="cal-lav-bar nota"></i><span class="cal-lav-t">Nota: ${esc(String(noteCache[ds]).slice(0,80))}</span></span>`:"";
+      html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}${notaRiga}</div></div>`;
     }
     $("#cal-grid").style.display="";
     $("#cal-grid").innerHTML=html;
@@ -798,6 +802,26 @@
     }
     const x=document.createElement("button");x.type="button";x.style.display="none";
     x.dataset.action=azione;x.dataset.id=id;document.body.appendChild(x);x.click();x.remove();
+    calTornaQuandoChiude(tab);
+  }
+  /* 17 nov 2026 (ok di Alex) — aperto dal Calendario un mezzo, un promemoria
+     o una fattura (stanno in un'altra sezione), chiudendo si restava li'.
+     Adesso, quando la finestra si chiude e sei ancora in quella sezione,
+     torni al Calendario. Se intanto hai cambiato sezione tu, non ti sposta. */
+  let _calTornaT=null;
+  function calTornaQuandoChiude(tab){
+    if(_calTornaT)clearInterval(_calTornaT);
+    let vista=false, giri=0;
+    const attiva=()=>{const b=document.querySelector("nav.tabs button.active");return b?b.dataset.tab:"";};
+    _calTornaT=setInterval(function(){
+      giri++;
+      const aperta=!!document.querySelector(".overlay.open");
+      if(aperta){vista=true;return;}
+      if(attiva()!==tab||(!vista&&giri>20)||giri>12000){clearInterval(_calTornaT);_calTornaT=null;return;}
+      if(!vista)return;
+      clearInterval(_calTornaT);_calTornaT=null;
+      const b=document.querySelector('nav.tabs button[data-tab="calendario"]');if(b)b.click();
+    },300);
   }
   document.addEventListener("click",function(e){
     const t=e.target&&e.target.closest?e.target.closest('[data-action="cal-vai"]'):null;
