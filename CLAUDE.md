@@ -3325,7 +3325,6 @@ Sistemato e ONLINE (→ff81309← e →d93ee8e←, provato dal vivo dopo ogni pu
 Da sapere:
 - `#cli-search` e' NASCOSTA apposta: si cerca dalla casella in alto (`#ct-q`), che trova nome, P.IVA, telefono, citta'.
 - La scheda si apre dal pulsante «Apri»; i pulsanti in testa (Chiama, Mappa, Altro → Elimina) nascono dal menu della riga (`cliVoci`): chiamando `cliScheda(id)` a mano non ci sono, dal clic vero e da `apriCosa('cli',id)` si'.
-- `gest_clienti.note` esiste nel database ma nel modulo non c'e' la casella (chiesto ad Alex).
 - Nelle prove: lavori e preventivi di prova si creano con `sb.from(...).insert`, e si cancellano con `sb.raw(...).delete()` + `sb.storage.from('gestionale-foto').remove([...])`.
 
 Funzioni nuove (ok di Alex, foto prima, online con →d93ee8e←):
