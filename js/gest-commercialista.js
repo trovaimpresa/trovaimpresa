@@ -107,7 +107,7 @@
       '<div class="sh-b">'
       + '<div class="sh-tit">Carica un documento</div>'
       + '<p class="sh-nota" style="margin-top:0">Scontrini, ricevute, spese di cassa: quello che il commercialista non trova nel cassetto fiscale. Puoi caricarne pi&ugrave; di uno alla volta. Massimo 15 MB per file.</p>'
-      + '<button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file dal computer</button>'
+      + '<button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file</button>'
       + '</div>'
       + '<div class="sh-b">'
       + '<div class="sh-tit">Documenti gi&agrave; caricati</div>'
@@ -220,7 +220,7 @@
       `<div class="sh-b">
          <div class="sh-tit">Carica un documento</div>
          <p class="sh-nota" style="margin-top:0">Verbali, preventivi firmati, capitolati, permessi, foto: qui restano attaccati al cliente e non si perdono. Puoi caricarne pi&ugrave; di uno alla volta. Massimo 15 MB per file.</p>
-         <button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file dal computer</button>
+         <button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file</button>
        </div>
        <div class="sh-b">
          <div class="sh-tit">Documenti gi&agrave; caricati</div>
@@ -265,13 +265,20 @@
     if(!docCommAttivo&&!docCliId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     let ok=0, ko=0;
+    /* 17 nov 2026 (voce Clienti) — un file vuoto non si carica; il motivo del
+       rifiuto si dice in italiano; e se uno entra e uno no si dicono tutti e
+       due (prima «caricato ✔» copriva l'errore dell'altro). */
+    let perche="";
+    const _it=m=>/mime type|not supported/i.test(m||"")?"questo tipo di file non si può caricare (vanno bene PDF, foto, Word, Excel)":
+                 /exceeded|too large|maximum/i.test(m||"")?"è troppo grande (massimo 15 MB)":(typeof traduciErrore==="function"?traduciErrore(m):m);
     for(const file of Array.from(files)){
+      if(!file.size){perche="«"+String(file.name||"file").slice(0,60)+"» è vuoto (0 byte)";ko++;continue;}
       const p=await preparaFileUpload(file);
-      if(p.errore){toast(p.errore);ko++;continue;}
+      if(p.errore){perche=p.errore;ko++;continue;}
       const safe=String(p.nome||"documento").replace(/[^a-zA-Z0-9._-]/g,"_");
       const path=sbUid+(docCommAttivo?"/commercialista/":"/clienti/"+docCliId+"/")+Date.now()+"_"+safe;
       const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
-      if(up){toast("Non caricato: "+up.message);ko++;continue;}
+      if(up){perche="«"+String(file.name||"file").slice(0,60)+"»: "+_it(up.message);ko++;continue;}
       const riga=docCommAttivo
         ? {user_id:sbUid,tipo:"doc_commercialista",operatore:"Capo",storage_path:path,nome_file:p.nome||safe}
         : {user_id:sbUid,cliente_id:docCliId,tipo:"documento",operatore:"Capo",storage_path:path,nome_file:p.nome||safe};
@@ -281,10 +288,12 @@
         delete riga.nome_file;
         ({error:ins}=await sb.from("gest_foto").insert(riga));
       }
-      if(ins){await _fileOrfano("gestionale-foto",path);toast("File non salvato: "+ins.message);ko++;continue;}
+      if(ins){await _fileOrfano("gestionale-foto",path);perche="File non salvato: "+_it(ins.message);ko++;continue;}
       ok++;
     }
-    if(ok)toast(ok===1?"Documento caricato ✔":ok+" documenti caricati ✔");
+    if(ko&&ok)toast("Attenzione: "+ok+(ok===1?" caricato, ":" caricati, ")+ko+(ko===1?" no":" no")+". "+perche);
+    else if(ko)toast("Non caricato: "+perche);
+    else if(ok)toast(ok===1?"Documento caricato ✔":ok+" documenti caricati ✔");
     renderDocCli();
   }
 
@@ -361,7 +370,7 @@
     if(error){toast("Errore: "+error.message);return;}
     /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
     if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo()))await sb.storage.from("gestionale-foto").remove([r.storage_path]);
-    toast("Documento eliminato");
+    toast((window.cestinoAttivo&&window.cestinoAttivo())?"Documento nel cestino: lo riprendi da lì":"Documento eliminato");
     renderDocCli();
   }
 
@@ -376,6 +385,19 @@
     const estero=window.paeseEstero?window.paeseEstero(v("#c-paese")):"";
     if(!estero&&v("#c-cap")&&!/^\d{5}$/.test(v("#c-cap"))){campoManca($("#c-cap"),"Il CAP è di 5 cifre. Cliente estero? Scegli il suo paese qui sotto.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
+    /* 17 nov 2026 (voce Clienti) — IL DOPPIONE. Due «Mario Rossi» in rubrica
+       non si distinguono piu' nelle tendine di lavori, preventivi e fatture.
+       Il preventivo lo controllava gia' (pv-cli-salva), qui no. Avvisa e non
+       blocca: due clienti con lo stesso nome possono esistere davvero. */
+    if(!id&&typeof window.tiChiedi==="function"){
+      const _n=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+      const _gia=(typeof cliCache!=="undefined"?cliCache:[]).find(x=>_n(x.nome)===_n(nome));
+      if(_gia){
+        const _dove=(typeof cliIndirizzo==="function"&&cliIndirizzo(_gia))||_gia.telefono||"";
+        if(!(await window.tiChiedi((_dove?"Quello che hai già: "+_dove+".\n":"")+"Se è la stessa persona, torna indietro e apri la sua scheda.",
+          {titolo:"C'è già un cliente che si chiama «"+String(_gia.nome).slice(0,80)+"»",si:"È un altro: crealo",no:"Torno indietro"})))return;
+      }
+    }
     const row={nome,
       tipo:(($("#c-tipo-box")||{}).dataset||{}).tipo||"privato",
       indirizzo:v("#c-ind"), referente:v("#c-ref"), telefono:v("#c-tel"), email:v("#c-email")||null,

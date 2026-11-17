@@ -1068,6 +1068,12 @@
         dice:"Né codice SDI né PEC: la fattura elettronica non sa dove andare e finisce nel cassetto fiscale, dove il cliente non la guarda."});
       else if(hSdi&&hSdi.length!==7) out.push({campo:"c-sdi",grave:"arancio",
         dice:"Il codice SDI è di 7 caratteri, questo ne ha "+hSdi.length+"."});
+    }else{
+      /* 17 nov 2026 (voce Clienti) — anche a un privato: un codice di 2
+         caratteri passava zitto e la fattura lo portava allo SDI. */
+      const hSdiP=L.get("c-sdi");
+      if(hSdiP&&hSdiP.length!==7) out.push({campo:"c-sdi",grave:"arancio",
+        dice:"Il codice SDI è di 7 caratteri, questo ne ha "+hSdiP.length+". Se non ce l'ha, lascia vuoto."});
     }
 
     if(nPiva.length===11&&!ctrPivaOk(nPiva)) out.push({campo:"c-piva",grave:"rosso",
@@ -1083,6 +1089,9 @@
     const hTel=L.get("c-tel"), hMail=L.get("c-email"), hPec2=L.get("c-pec");
     if(!hTel&&!hMail) out.push({campo:"c-tel",grave:"arancio",
       dice:"Nessun telefono e nessuna email: questo cliente non lo puoi richiamare."});
+    /* 17 nov 2026 (voce Clienti) — «abc» nel telefono passava: «Chiama» non chiamava nessuno */
+    if(hTel&&ctrCifre(hTel).length<6) out.push({campo:"c-tel",grave:"arancio",
+      dice:"Questo telefono non sembra un numero: «"+hTel+"». Così il pulsante «Chiama» non funziona."});
     if(hMail&&!CTR_EMAIL.test(hMail)) out.push({campo:"c-email",grave:"rosso",
       dice:"Questa email non è scritta bene: «"+hMail+"». Le manca la chiocciola o il punto finale, e così non le arriva niente."});
     if(hPec2&&!CTR_EMAIL.test(hPec2)) out.push({campo:"c-pec",grave:"rosso",

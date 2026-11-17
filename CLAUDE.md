@@ -3308,3 +3308,27 @@ Aperto sulle Fatture:
 2. «I prossimi 3 mesi» in Tasse e fisco (`js/gest-fisco-vivere.js`) conta ancora la fattura intera, senza togliere gli acconti.
 3. Mancano ancora (non chiesti): email automatica col PDF allegato, sollecito dalle Fatture, «Duplica fattura», «Fai la nota di credito da questa».
 4. Non provati per regola: Emetti, «Ha pagato», invio allo SDI, controllo con l'AI, «Allega un PDF tuo», fattura da preventivo accettato (in «ferramenta» non ce n'e' uno).
+
+# 17 NOVEMBRE 2026 (sera, 2) — UNA VOCE PER VOLTA: I CLIENTI
+
+Collaudo dal vivo nel reparto «ferramenta» (2 clienti «PROVA CONTROLLORE», 1 lavoro, 1 preventivo, 2 documenti: tutto cancellato, anche dal Cestino e dal deposito: 0 righe).
+
+Dove sta il codice dei Clienti (non in un file solo): modulo `cliForm` in `js/gest-scadenze-pratiche.js`; salva `saveCli`, scheda `cliScheda`, storia `cliStoria`, documenti `docCli*` / `uploadDocCliente` in `js/gest-commercialista.js`; elenco `renderClienti`, `cliCard`, `cliVoci`, `delCli` in `js/gest-schede-clienti.js`; controllo `ctrRegoleCliente` in `js/gest-ai-moduli.js`; i clic in `js/gest-finestre-eventi.js`.
+
+Sistemato (parte col prossimo push):
+- **Doppione**: «+ Nuovo cliente» con un nome che c'e' gia' adesso chiede («C'è già un cliente che si chiama…» · «È un altro: crealo» / «Torno indietro»). Avvisa e non blocca. Solo sui NUOVI.
+- **Elimina**: la domanda conta anche i PREVENTIVI collegati (prima solo lavori e fatture).
+- **Documenti** (`uploadDocCliente`, vale anche per il commercialista): file vuoto rifiutato; errore del deposito in italiano; se uno entra e uno no si dicono tutti e due; eliminando dice «nel cestino»; pulsante «Scegli i file» (non piu' «dal computer»: sul telefono era sbagliato).
+- **Controllo**: telefono senza cifre («abc») e codice SDI non di 7 caratteri anche per il privato → arancio. Un telefono senza cifre nella scheda non e' piu' un link `tel:` vuoto.
+- **Excel del backup** (`js/gest-cestino.js`): il foglio «Clienti» porta tutta la rubrica (15 colonne, prima 5).
+
+Da sapere:
+- `#cli-search` e' NASCOSTA apposta: si cerca dalla casella in alto (`#ct-q`), che trova nome, P.IVA, telefono, citta'.
+- La scheda si apre dal pulsante «Apri»; i pulsanti in testa (Chiama, Mappa, Altro → Elimina) nascono dal menu della riga (`cliVoci`): chiamando `cliScheda(id)` a mano non ci sono, dal clic vero e da `apriCosa('cli',id)` si'.
+- `gest_clienti.note` esiste nel database ma nel modulo non c'e' la casella (chiesto ad Alex).
+- Nelle prove: lavori e preventivi di prova si creano con `sb.from(...).insert`, e si cancellano con `sb.raw(...).delete()` + `sb.storage.from('gestionale-foto').remove([...])`.
+
+Aperto sui Clienti:
+1. NON provati: «Compila con AI» e «Scrivilo a parole» (costano crediti), «Invia» documento per email fino all'invio vero, «Chiama» e «Mappa» fino all'apertura, il telefono vero.
+2. Visto fuori dalla voce: la riga del LAVORO non scrive il nome del cliente quando il cliente e' nel Cestino (il preventivo scrive «(nel cestino)»).
+3. Mancano (chiesti ad Alex): note sul cliente, «Nuovo preventivo / Nuovo lavoro» dalla scheda, «quanto mi deve» nella scheda, unire due clienti doppi.

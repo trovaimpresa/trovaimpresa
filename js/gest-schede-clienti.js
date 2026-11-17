@@ -901,7 +901,7 @@
       meta:[ind?"📍 "+esc(ind):"",
             c.referente?"👤 "+esc(c.referente):"",
             /* 11 nov 2026 — collaudo 3.5: il numero si tocca e chiama, l'email si tocca e scrive */
-            c.telefono?'📞 <a class="cli-link" href="tel:'+esc(String(c.telefono).replace(/[^\d+]/g,""))+'">'+esc(c.telefono)+'</a>':"",
+            c.telefono?(String(c.telefono).replace(/\D/g,"")?'📞 <a class="cli-link" href="tel:'+esc(String(c.telefono).replace(/[^\d+]/g,""))+'">'+esc(c.telefono)+'</a>':'📞 '+esc(c.telefono)):"",
             c.email?'✉️ <a class="cli-link" href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>':"",
             fisc?"🧾 "+fisc:""],
       azioni:cliVoci(c)
@@ -914,25 +914,30 @@
   async function delCli(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const pro=ruoloUtente==='professionista';
-    let nLav=0,nFat=0;
+    let nLav=0,nFat=0,nPrev=0;
     try{
-      const [{count:cl},{count:cf}]=await Promise.all([
+      /* 17 nov 2026 (voce Clienti) — si contano anche i PREVENTIVI: un cliente
+         con solo un preventivo si buttava con «niente collegato». */
+      const [{count:cl},{count:cf},{count:cp}]=await Promise.all([
         sb.from("gest_lavori").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id),
-        sb.from("gest_fatture").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id)
+        sb.from("gest_fatture").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id),
+        sb.from("gest_preventivi").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id)
       ]);
-      nLav=cl||0; nFat=cf||0;
+      nLav=cl||0; nFat=cf||0; nPrev=cp||0;
     }catch(e){}
     const pezzi=[];
     if(nLav)pezzi.push(nLav+" "+(pro?(nLav===1?"pratica":"pratiche"):(nLav===1?"lavoro":"lavori")));
+    if(nPrev)pezzi.push(nPrev+" "+(nPrev===1?"preventivo":"preventivi"));
     if(nFat)pezzi.push(nFat+" "+(nFat===1?"fattura":"fatture"));
     /* 9 agosto 2026 — la rassicurazione elencava solo le pratiche anche quando
        aveva appena contato una fattura: si costruisce da quello che ha trovato. */
     const restano=[];
     if(nLav)restano.push(pro?"le pratiche":"i lavori");
+    if(nPrev)restano.push(nPrev===1?"il preventivo":"i preventivi");
     if(nFat)restano.push(nFat===1?"la fattura":"le fatture");
     /* 11 nov 2026 — collaudo 3.5: «2 lavori collegate» → l'accordo segue
        la prima cosa dell'elenco (lavori/pratiche/fatture) */
-    const _coll=nLav?(pro?(nLav===1?"collegata":"collegate"):(nLav===1?"collegato":"collegati")):(nFat===1?"collegata":"collegate");
+    const _coll=nLav?(pro?(nLav===1?"collegata":"collegate"):(nLav===1?"collegato":"collegati")):nPrev?(nPrev===1?"collegato":"collegati"):(nFat===1?"collegata":"collegate");
     const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
     const _c=(typeof cliCache!=="undefined"?cliCache:[]).find(x=>String(x.id)===String(id));
     const _nm=_c&&_c.nome?"«"+String(_c.nome).slice(0,80)+"»":"questo cliente";
