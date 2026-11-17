@@ -43,7 +43,7 @@
   /* Regimi fiscali della fattura elettronica. Ne tengo pochi: sono quelli che
      usa davvero un'impresa edile o un artigiano. Gli altri li sa il commercialista. */
   const REGIMI=[
-    ["RF01","RF01 — Ordinario (il più comune)"],
+    ["RF01","RF01 — Ordinario"],
     ["RF19","RF19 — Forfettario"],
     ["RF02","RF02 — Minimi (vecchio regime)"],
     ["RF17","RF17 — IVA per cassa"],
@@ -92,6 +92,18 @@
       aziendaRow=data||null;
     }
     const a=aziendaRow||{};
+    /* 17 nov 2026 — due cose che il gestionale sa gia' e non faceva scrivere:
+       il regime scritto in «Tasse e fisco» e il nome dell'attivita' dato
+       all'iscrizione. Se non rispondono si va avanti come prima. */
+    let _azFisco="", _azNomeSito="";
+    if(sb&&sbUid){
+      try{ const rF=await sb.from("gest_fisco_profilo").select("regime").eq("user_id",sbUid).maybeSingle();
+           _azFisco=String((rF&&rF.data&&rF.data.regime)||""); }catch(e){}
+      if(!String(a.nome||"").trim()){
+        try{ const rI=await sb.from("imprese").select("nome_attivita").eq("user_id",sbUid).limit(1);
+             _azNomeSito=String((rI&&rI.data&&rI.data[0]&&rI.data[0].nome_attivita)||"").trim(); }catch(e){}
+      }
+    }
 /* 8 ott 2026 — «LE MIE EMAIL DI AVVISO». Chi non tocca niente riceve TUTTO
    come prima (colonne vuote = tutto acceso). L'interruttore grande
    (riepilogo_lunedi) resta quello di sempre. */
@@ -126,7 +138,18 @@ const avHtml=`
             <input type="radio" name="a-av-quando" value="lunedi"${avSoloLun?" checked":""} style="width:24px;height:24px;margin:0;flex:0 0 auto;cursor:pointer"><span>Solo il lunedì, con il quadro della settimana</span></label>
         </div>
       </div>`;
-    const reg=a.regime_fiscale||"RF01";
+    /* 17 nov 2026 — IL REGIME NON SI SCEGLIE DA SOLO «ORDINARIO». Prima la
+       tendina nasceva su RF01: chi non la toccava (un forfettario, per esempio)
+       salvava il regime sbagliato, e la fattura usciva con l'IVA. Adesso, se non
+       l'hai mai scelto, si prende quello scritto in «Tasse e fisco»; se non c'e'
+       nemmeno li', la tendina resta su «scegli» e la fattura lo chiede. */
+    const _regFisco=_azFisco==="forfettario"?"RF19":(_azFisco==="ordinario"?"RF01":"");
+    const reg=a.regime_fiscale||_regFisco||"";
+    const _regNota=(!a.regime_fiscale&&_regFisco)
+      ? '<div class="sh-nota">L\'ho preso da «Tasse e fisco»: controllalo e premi Salva.</div>'
+      : ((a.regime_fiscale&&_regFisco&&((a.regime_fiscale==="RF19")!==(_regFisco==="RF19")))
+        ? '<div class="sh-nota"><b class="az-rosso">Attenzione:</b> in «Tasse e fisco» hai scritto <b>'+_azFisco+'</b>. Qui c\'è un regime diverso: controlla qual è quello giusto.</div>'
+        : (!reg?'<div class="sh-nota">Se non lo sai, chiedilo al commercialista: decide se nella fattura c\'è l\'IVA.</div>':""));
     /* Modulo lungo -> finestra grande a due colonne, come persona, lavoro e
        preventivo. A sinistra chi sei e dove sei, a destra fisco e cantiere.
        Sotto i 900px torna una colonna sola. */
@@ -135,7 +158,8 @@ const avHtml=`
 
       <div class="sh-b">
         <div class="sh-tit">Chi sei</div>
-        <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
+        <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||_azNomeSito||"")}" placeholder="Es. Multiservizi Rossi srl">
+          <div class="sh-nota">È il nome che esce <b>in cima a preventivi e fatture</b>. Se lavori da solo: nome e cognome.${(!String(a.nome||"").trim()&&_azNomeSito)?" L'ho preso dal tuo profilo sul sito: controllalo.":""}</div></div>
         <div class="row2">
           <div class="field"><label>Partita IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="Es. 01234567890"></div>
           <div class="field"><label>Codice fiscale</label><input id="a-cf" value="${esc(a.cod_fiscale||"")}" placeholder="Se diverso dalla P.IVA"></div>
@@ -196,7 +220,7 @@ const avHtml=`
       <div class="sh-b">
         <div class="sh-tit">Fattura elettronica</div>
         <div class="field"><label>Regime fiscale</label>
-          <select id="a-regime">${REGIMI.map(r=>`<option value="${r[0]}"${reg===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select></div>
+          <select id="a-regime">${reg?"":'<option value="" selected>— scegli il tuo regime —</option>'}${REGIMI.map(r=>`<option value="${r[0]}"${reg===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select>${_regNota}</div>
         <div class="field"><label>Codice destinatario</label>
           <input id="a-sdi" value="${esc(a.sdi_codice||"")}" placeholder="7 caratteri, oppure 0000000" maxlength="7" style="text-transform:uppercase"></div>
         <div class="field"><label>PEC</label><input id="a-pec" type="email" value="${esc(a.sdi_pec||"")}" placeholder="nomeazienda@pec.it"></div>
