@@ -102,8 +102,12 @@
       return;
     }
     if(a==="fm-copia"){
-      try{ await navigator.clipboard.writeText(fmLeggi()); toast("Messaggio copiato ✅"); }
-      catch(err){ const x=document.getElementById("fm-testo"); if(x){x.focus();x.select();} toast("Selezionato: premi Ctrl+C per copiarlo"); }
+      /* prima la strada vecchia, che funziona sempre e non chiede permessi
+         (lezione del 19 settembre); quella nuova solo come riserva */
+      const x=document.getElementById("fm-testo"); let fatto=false;
+      try{ if(x){x.focus();x.select();fatto=document.execCommand("copy");} }catch(err){}
+      if(!fatto){ try{ await navigator.clipboard.writeText(fmLeggi()); fatto=true; }catch(err){} }
+      toast(fatto?"Messaggio copiato ✅":"Selezionato: premi Ctrl+C per copiarlo");
       return;
     }
     if(a==="fm-pdf"){ fatturaPdf(_fm.id); return; }

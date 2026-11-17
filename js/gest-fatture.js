@@ -531,7 +531,7 @@
        uno lo CREA il gestionale, l'altro lo ALLEGHI tu se ce l'hai. */
     az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id},top:true});
     /* 17 nov 2026 — al cliente con WhatsApp o email (js/gest-fattura-manda.js) */
-    az.push({lab:"📨 Manda al cliente",action:"fatt-manda",data:{id:f.id},top:true});
+    az.push({lab:"📧 Manda al cliente",action:"fatt-manda",data:{id:f.id},top:true});
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
@@ -905,7 +905,7 @@
       /* "Imponibile IVA" non si puo' piu' dire, da quando dentro ci sono anche
          le spese art. 15 che l'IVA non ce l'hanno: su 5.550 di imponibile
          l'IVA e' 1.188 e non 1.221, e chi fa il conto a mente non torna. */
-      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':(fattForfettario()?'Totale dopo lo sconto':(ruoloUtente==='professionista'?'Imponibile IVA':'Su cui si paga l\'IVA')))+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
+      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':(fattForfettario()?((b.sconto&&!b.cassa&&!b.spese&&!b.speseIva)?'Totale dopo lo sconto':'Imponibile'):(ruoloUtente==='professionista'?'Imponibile IVA':'Su cui si paga l\'IVA')))+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
       + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
       + (ritE   ?'<div class="fs-r"><span>Ritenuta '+_pct(f.ritenuta_perc)+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
