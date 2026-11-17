@@ -323,6 +323,7 @@
     "2026-11-13-rapportino-firma-voci.sql": "gest_rapportini.firma_cliente lavoro_voci_senza_prezzi()",
     "2026-11-13-studio-albo.sql": "gest_azienda.albo_nome gest_azienda.albo_numero",
     "2026-11-16-tecnico-firma.sql": "gest_azienda.tecnico_firma",
+    "2026-11-17-fatture-resto.sql": "gest_fatture_totali.resto gest_fatture_totali.gia_ricevuto",
     "2026-11-10-sconto-preventivi-e-ricevute.sql": "gest_preventivi.sconto gest_preventivi.sconto_perc gest_preventivi_totali.sconto gest_preventivi_totali.totale_voci gest_ricevute_pagamento"
   };
 

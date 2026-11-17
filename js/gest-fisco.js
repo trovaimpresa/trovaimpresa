@@ -242,7 +242,7 @@
     const cliIds = [...new Set(ff.map(f => f.cliente_id).filter(Boolean))];
 
     const [rT, rC] = await Promise.all([
-      ids.length ? sb.from("gest_fatture_totali").select("fattura_id,totale,segno").in("fattura_id", ids) : Promise.resolve({ data: [] }),
+      ids.length ? sb.from("gest_fatture_totali").select("fattura_id,totale,resto,segno").in("fattura_id", ids) : Promise.resolve({ data: [] }),
       cliIds.length ? sb.from("gest_clienti").select("id,nome,referente,telefono,email,tipo,piva,sdi_pec").in("id", cliIds) : Promise.resolve({ data: [] })
     ]);
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
@@ -251,7 +251,9 @@
 
     const lista = ff.map(f => {
       const t = tot[f.id] || {};
-      const importo = (+t.segno || 1) > 0 ? (+t.totale || 0) : 0;
+      /* 17 nov 2026 — si sollecita quello che MANCA: tolti gli acconti gia'
+         ricevuti (colonna «resto» della vista, sql/2026-11-17-fatture-resto.sql) */
+      const importo = (+t.segno || 1) > 0 ? (t.resto != null ? (+t.resto || 0) : (+t.totale || 0)) : 0;
       const c = cli[f.cliente_id] || {};
       const b2b = c.tipo ? c.tipo === "azienda" : !!String(f.cli_piva || c.piva || "").trim();
       const scadenza = f.scadenza || _giorniDopo(f.data, gg);

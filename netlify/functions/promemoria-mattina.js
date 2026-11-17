@@ -632,10 +632,13 @@ const handler = async function () {
          ⚠️ La vista porta gia' il SEGNO: una nota di credito toglie soldi. */
       const idFatture = (qFatt.data || []).map(f => f.id);
       if (idFatture.length) {
-        const q = await sb.from('gest_fatture_totali').select('fattura_id, totale')
+        /* 17 nov 2026 — «resto» = quanto manca ancora, tolti gli acconti gia'
+           ricevuti (sql/2026-11-17-fatture-resto.sql). Qui si parla di soldi
+           che devono ancora arrivare: si usa quello. */
+        const q = await sb.from('gest_fatture_totali').select('fattura_id, totale, resto')
                           .in('fattura_id', idFatture);
         if (q.error) throw q.error;
-        (q.data || []).forEach(t => { totali[String(t.fattura_id)] = +t.totale || 0; });
+        (q.data || []).forEach(t => { totali[String(t.fattura_id)] = (t.resto != null ? +t.resto : +t.totale) || 0; });
       }
     }
 
