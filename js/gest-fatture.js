@@ -1134,13 +1134,15 @@
           .eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
         tit=(c&&c.titolo)||"";
       }
-      return "SAL n. "+(s.numero==null?"—":s.numero)+(tit?(" — "+tit):"");
+      return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(s.numero==null?"—":s.numero)+(tit?(" — "+tit):"");
     }catch(e){ return ""; }
   }
 
   function _salAvvisoPannello(a){
-    const nome=a.nome||"Lo stato di avanzamento di questa fattura";
-    openSheetGrande("La fattura è salvata. Il SAL no.",
+    /* 17 nov 2026 — impresa e artigiano leggono «acconto», lo studio «SAL» */
+    const _st=(ruoloUtente==='professionista');
+    const nome=a.nome||(_st?"Lo stato di avanzamento di questa fattura":"L'acconto di questa fattura");
+    openSheetGrande(_st?"La fattura è salvata. Il SAL no.":"La fattura è salvata. L'acconto non è segnato come fatturato.",
         '<div class="sh-b"><div class="sh-nota"><b>'+esc(nome)+'</b> non risulta fatturato.<br><br>'
       + 'Finché resta così, il gestionale ti lascia fare una <b>seconda fattura per lo '
       /* ⛔ 19 settembre 2026 — QUESTO PANNELLO PARLAVA DA GEOMETRA.
@@ -1157,12 +1159,12 @@
       + '<div class="sh-nota">'+esc(a.perche)+'</div></div>'
       + '<div class="sh-b"><div class="sh-tit">Cosa fare adesso</div>'
       + '<ul class="xml-manca">'
-      + '<li>Apri quel SAL e guarda se c’è scritto <b>già fatturato</b>.</li>'
-      + '<li>Se non c’è, segnatelo: la fattura esiste lo stesso, è solo il SAL che non lo sa.</li>'
+      + '<li>'+(_st?'Apri quel SAL':'Apri quell’acconto')+' e guarda se c’è scritto <b>già fatturato</b>.</li>'
+      + '<li>Se non c’è, segnatelo: la fattura esiste lo stesso, è solo '+(_st?'il SAL':'l’acconto')+' che non lo sa.</li>'
       + '<li>Prima di rifare una fattura per quell’acconto, controlla in Fatture.</li>'
       + '</ul>'
       + '<button type="button" class="btn btn-primary" data-action="fatt-vai-sal" data-id="'
-      +   esc(String(a.id))+'">Apri lo stato di avanzamento</button></div>',
+      +   esc(String(a.id))+'">'+(_st?'Apri lo stato di avanzamento':'Apri l’acconto')+'</button></div>',
       '<button class="btn b-cancel" data-action="close">Ho capito</button>');
   }
 
@@ -1319,9 +1321,9 @@
           nome: await _salComeSiChiama(_salId),
           perche: e4
             ? (/fattura_id|column|schema cache/i.test(e4.message||"")
-               ? "Nel database manca la casella che tiene insieme il SAL e la fattura. Si accende così: Supabase → SQL Editor → incolla sql/gest-sal-fattura.sql → Run."
+               ? "Nel database manca la casella che tiene insieme "+(ruoloUtente==='professionista'?"il SAL":"l'acconto")+" e la fattura. Si accende così: Supabase → SQL Editor → incolla sql/gest-sal-fattura.sql → Run."
                : ("Il database ha risposto: "+(e4.message||"")))
-            : "Il collegamento non è stato scritto e il database non ha detto perché. Può essere che quel SAL sia finito nel Cestino."
+            : "Il collegamento non è stato scritto e il database non ha detto perché. Può essere che "+(ruoloUtente==='professionista'?"quel SAL":"quell'acconto")+" sia finito nel Cestino."
         };
       }
       fattSalInCorso=null;

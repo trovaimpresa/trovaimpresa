@@ -35,7 +35,7 @@ Ultimo aggiornamento: 17 novembre 2026 — riassunto di ottobre e inizio novembr
 ### 🔴 DA FARE
 1. Provare con un file VERO di un geometra (Excel e PDF).
 2. Provare da artigiano dal vivo e dal telefono vero.
-3. ✅ 17 nov: «SAL» → «acconto» e «variante» → «copia con le modifiche» per impresa e artigiano (studio e PDF uguali). RESTA: «SAL» in `js/gest-fatture.js` (la finestra «La fattura è salvata. Il SAL no.»): da decidere con Alex.
+3. ✅ 17 nov: «SAL» → «acconto» e «variante» → «copia con le modifiche» per impresa e artigiano (studio e PDF uguali). Anche la finestra dell'avviso in `js/gest-fatture.js` (deciso da Alex il 17 nov): pronta nel clone, DA PUBBLICARE col prossimo push.
 4. ✅ 16 nov: dopo il PDF il computo resta aperto (0d4432e).
 5. ✅ 17 nov: `node tools/banco-gestionale.js app` rilanciato: ZERO difetti.
 
