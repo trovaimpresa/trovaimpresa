@@ -3331,4 +3331,4 @@ Da sapere:
 Aperto sui Clienti:
 1. NON provati: «Compila con AI» e «Scrivilo a parole» (costano crediti), «Invia» documento per email fino all'invio vero, «Chiama» e «Mappa» fino all'apertura, il telefono vero.
 2. Visto fuori dalla voce: la riga del LAVORO non scrive il nome del cliente quando il cliente e' nel Cestino (il preventivo scrive «(nel cestino)»).
-3. Mancano (chiesti ad Alex): note sul cliente, «Nuovo preventivo / Nuovo lavoro» dalla scheda, «quanto mi deve» nella scheda, unire due clienti doppi.
+3. Mancano (chiesti ad Alex): note sul cliente, «Nuovo preventivo / Nuovo lavoro» dalla scheda, unire due clienti doppi.
