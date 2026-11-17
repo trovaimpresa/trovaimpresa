@@ -2313,7 +2313,7 @@
     if(!sb||!sbUid){toast("Devi essere collegato");return;}
     const c=compCache.find(x=>String(x.id)===String(id));
     if(!c){toast("Computo non trovato");return;}
-    if(!c.variante_di){toast("Questo computo non è una variante: non c'è niente da confrontare.");return;}
+    if(!c.variante_di){toast(_cpar("Questo computo non è una variante: non c'è niente da confrontare.","Questo computo non è una copia per le modifiche: non c'è niente da confrontare."));return;}
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
     const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
@@ -2339,7 +2339,7 @@
     }
     const part=(rP&&!rP.error)?rP.data:null;
     if(!orig.length&&!part){
-      toast("Il computo di partenza non c'è più: non c'è niente con cui confrontare questa variante.");
+      toast("Il computo di partenza non c'è più: non c'è niente con cui confrontare questa "+_cpar("variante","copia")+".");
       return;
     }
 
@@ -2580,7 +2580,7 @@
     }
     doc.save(_compNomeFile("variante",c.numero)+
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
-    toast("Computo di variante scaricato ✅");
+    toast(_cpar("Computo di variante scaricato ✅","Foglio delle modifiche scaricato ✅"));
   }
 
   /* ============================================================

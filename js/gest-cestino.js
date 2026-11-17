@@ -1199,10 +1199,10 @@
       /* le misure ci sono sempre: sono il punto di partenza di quello che
          cambierai. E si chiede una volta sola, con parole chiare. */
       conMisure=true;
-      if(!(await gconfirm("Faccio la variante del computo «"+(c.titolo||"")+"»?\n\n"
+      if(!(await gconfirm(_cpar("Faccio la variante del computo «","Faccio una copia per le modifiche del computo «")+(c.titolo||"")+"»?\n\n"
         +"Nasce una COPIA con dentro tutto: capitoli, lavorazioni, prezzi e misure. "
         +"Li cambi come sono andati davvero i lavori.\n\n"
-        +"Il computo di partenza NON si tocca, e nella variante trovi la pagina "
+        +"Il computo di partenza NON si tocca, e nella "+_cpar("variante","copia")+" trovi la pagina "
         +"«Cosa è cambiato» con le differenze e quanto costa in più o in meno.")))return;
     }else if(mis.length){
       conMisure=(await gconfirm("Copio anche le misure?\n\n"
@@ -1226,7 +1226,7 @@
       lavoro_id:null, preventivo_id:null,   /* la pratica NON si eredita */
       numero:null,                          /* lo metti tu: non invento un numero doppio */
       data:todayStr(), stato:"bozza",
-      titolo:((c.titolo||"Computo")+(variante?" (variante)":" (copia)")).slice(0,200),
+      titolo:((c.titolo||"Computo")+(variante?_cpar(" (variante)"," (modifiche)"):" (copia)")).slice(0,200),
       oggetto:c.oggetto||null, luogo:c.luogo||null, note:c.note||null,
       tipo:c.tipo||"privato",
       prezzario:c.prezzario||null, prezzario_anno:c.prezzario_anno||null,

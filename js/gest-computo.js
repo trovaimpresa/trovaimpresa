@@ -1408,7 +1408,7 @@
        piu' con cosa confrontarsi. Va detto, non vanno mostrati numeri
        inventati. */
     if(!c.variante_di){
-      box.innerHTML='<div class="lm-vuoto">Questo computo non è una variante.</div>';
+      box.innerHTML='<div class="lm-vuoto">'+_cpar('Questo computo non è una variante.','Questo computo non è una copia per le modifiche.')+'</div>';
       return;
     }
     const [rO,rN]=await Promise.all([
@@ -1436,7 +1436,7 @@
       box.innerHTML='<div class="co-vuoto">'
         +'<div class="co-vuoto-ic">🔍</div>'
         +'<h4>Il computo di partenza non c\'è più</h4>'
-        +'<p>Questa variante resta e funziona come un computo normale, ma non c\'è più niente con cui confrontarla. Se il computo di partenza è nel <b>Cestino</b>, rimettilo a posto e qui torna tutto.</p>'
+        +'<p>Questa '+_cpar('variante','copia')+' resta e funziona come un computo normale, ma non c\'è più niente con cui confrontarla. Se il computo di partenza è nel <b>Cestino</b>, rimettilo a posto e qui torna tutto.</p>'
         +'</div>';
       return;
     }
@@ -1454,12 +1454,12 @@
     };
 
     let h='<div class="sh-nota">Rispetto a <b>'+esc(nome)+'</b>. Le lavorazioni rimaste uguali non compaiono: qui c\'è solo quello che è cambiato'
-      +(r.uguali>0?' ('+r.uguali+(r.uguali===1?' riga uguale':' righe uguali')+' non elencate)':'')+'.</div>';
+      +(r.uguali>0?' ('+r.uguali+(r.uguali===1?' riga uguale non elencata)':' righe uguali non elencate)'):'')+'.</div>';
 
     if(!r.cambiate.length&&!r.aggiunte.length&&!r.tolte.length){
       h+='<div class="co-vuoto"><div class="co-vuoto-ic">✅</div>'
         +'<h4>Per ora non è cambiato niente</h4>'
-        +'<p>La variante è ancora identica al computo di partenza. Vai su <b>1 Lavorazioni</b>, cambia le quantità come sono andate davvero, e qui compare l\'elenco delle differenze.</p></div>';
+        +'<p>La '+_cpar('variante','copia')+' è ancora identica al computo di partenza. Vai su <b>1 Lavorazioni</b>, cambia le quantità come sono andate davvero, e qui compare l\'elenco delle differenze.</p></div>';
     }
 
     if(r.cambiate.length){
@@ -1507,14 +1507,14 @@
     const _pari=Math.abs(r.diff)<0.005;
     h+='<div class="var-conto">'
       +  '<div class="var-r"><span>Computo di partenza</span><b>'+eur2(r.impOrig)+'</b></div>'
-      +  '<div class="var-r"><span>Variante</span><b>'+eur2(r.impVar)+'</b></div>'
+      +  '<div class="var-r"><span>'+_cpar('Variante','Copia con le modifiche')+'</span><b>'+eur2(r.impVar)+'</b></div>'
       +  '<div class="var-r var-tot'+(_pari?' pari':(r.diff>0?' su':' giu'))+'"><span>'
       +    (_pari?'Nessuna differenza':(r.diff>0?'In più':'In meno'))+'</span><b>'
       +    (_pari?eur2(0):((r.diff>0?'+ ':'− ')+eur2(Math.abs(r.diff))))
-      +    ((!_pari&&r.perc!=null)?' <small>('+(r.diff>0?'+':'−')+_pct(Math.abs(r.perc))+'%)</small>':'')
+      +    ((!_pari&&r.perc!=null)?' <small>('+(r.diff>0?'+':'−')+_cpar(_pct(Math.abs(r.perc)),String(Math.round(Math.abs(r.perc)*10)/10).replace(".",","))+'%)</small>':'')
       +  '</b></div>'
       +'</div>'
-      +'<div class="sh-nota">Sono gli importi delle lavorazioni, <b>senza il ribasso</b>: il ribasso è lo stesso sui due computi e non cambia la differenza in percentuale.</div>';
+      +'<div class="sh-nota">Sono gli importi delle lavorazioni, <b>'+_cpar('senza il ribasso','senza lo sconto')+'</b>: '+_cpar('il ribasso','lo sconto')+' è lo stesso sui due computi e non cambia la differenza in percentuale.</div>';
 
     /* ⚠️ 21 agosto 2026 — IL FOGLIO STAMPATO.
        Sui lavori privati la variante detta a voce e' dove nascono le liti;
@@ -1524,7 +1524,7 @@
        identici stamperebbe un foglio che non dice niente. */
     if(r.cambiate.length||r.aggiunte.length||r.tolte.length){
       h+='<div class="var-stampa">'
-        +  '<button type="button" class="btn" data-action="var-pdf">📄 Scarica il computo di variante</button>'
+        +  '<button type="button" class="btn" data-action="var-pdf">'+_cpar('📄 Scarica il computo di variante','📄 Scarica il foglio delle modifiche')+'</button>'
         +'</div>';
     }
     box.innerHTML=h;
