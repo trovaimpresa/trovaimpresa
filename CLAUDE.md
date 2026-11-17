@@ -3315,7 +3315,7 @@ Collaudo dal vivo nel reparto «ferramenta» (2 clienti «PROVA CONTROLLORE», 1
 
 Dove sta il codice dei Clienti (non in un file solo): modulo `cliForm` in `js/gest-scadenze-pratiche.js`; salva `saveCli`, scheda `cliScheda`, storia `cliStoria`, documenti `docCli*` / `uploadDocCliente` in `js/gest-commercialista.js`; elenco `renderClienti`, `cliCard`, `cliVoci`, `delCli` in `js/gest-schede-clienti.js`; controllo `ctrRegoleCliente` in `js/gest-ai-moduli.js`; i clic in `js/gest-finestre-eventi.js`.
 
-Sistemato (parte col prossimo push):
+Sistemato e ONLINE (→ff81309← e →d93ee8e←, provato dal vivo dopo ogni push):
 - **Doppione**: «+ Nuovo cliente» con un nome che c'e' gia' adesso chiede («C'è già un cliente che si chiama…» · «È un altro: crealo» / «Torno indietro»). Avvisa e non blocca. Solo sui NUOVI.
 - **Elimina**: la domanda conta anche i PREVENTIVI collegati (prima solo lavori e fatture).
 - **Documenti** (`uploadDocCliente`, vale anche per il commercialista): file vuoto rifiutato; errore del deposito in italiano; se uno entra e uno no si dicono tutti e due; eliminando dice «nel cestino»; pulsante «Scegli i file» (non piu' «dal computer»: sul telefono era sbagliato).
@@ -3328,7 +3328,14 @@ Da sapere:
 - `gest_clienti.note` esiste nel database ma nel modulo non c'e' la casella (chiesto ad Alex).
 - Nelle prove: lavori e preventivi di prova si creano con `sb.from(...).insert`, e si cancellano con `sb.raw(...).delete()` + `sb.storage.from('gestionale-foto').remove([...])`.
 
+Funzioni nuove (ok di Alex, foto prima, online con →d93ee8e←):
+- **Note sul cliente**: casella `#c-note` nel modulo (`cliForm`), riquadro «Note» nella scheda solo se ci sono (`cliScheda`), colonna `gest_clienti.note` (c'era gia'), anche nell'Excel. Le vede solo l'impresa.
+- **«+ Nuovo preventivo» / «+ Nuovo lavoro» nella scheda** (riquadro «Fai qualcosa per lui», azioni `cli-nuovo-prev` / `cli-nuovo-lav` → `cliNuovoPer(tipo,id)` in `js/gest-commercialista.js`): `prevForm(null,{cliente_id})` e `jobForm(null,"",{cliente_id},true)`. ⚠️ La tendina del cliente nel lavoro e' `#j-cliente` (non `#j-cli`, che e' del ramo vecchio).
+- «Chiama» non esce piu' se nel telefono non c'e' una cifra.
+
+Provato dal vivo anche: «Invia» documento per email (mandato ad Alex, consegnato su Resend), «Mappa» (indirizzo giusto), fattura in bozza nella scheda, «Compila con AI».
+
 Aperto sui Clienti:
-1. NON provati: «Compila con AI» e «Scrivilo a parole» (costano crediti), «Invia» documento per email fino all'invio vero, «Chiama» e «Mappa» fino all'apertura, il telefono vero.
+1. ⛔ **«Compila con AI» riempie solo 4 caselle** (nome, referente, telefono, via): email, CAP, citta', partita IVA, codice SDI detti nel testo si perdono e una Srl resta «Privato». La causa e' il prompt `dati_cliente` in `supabase/functions/ai-generate/index.ts` (JSON di 4 chiavi) + `riempiCliente` in `js/ai-integrazione.js`. Chiesto ad Alex se sistemarlo: tocca la funzione AI che fa anche i preventivi. NON provati: «Chiama» fino alla telefonata, il telefono vero, l'Excel del backup aperto.
 2. Visto fuori dalla voce: la riga del LAVORO non scrive il nome del cliente quando il cliente e' nel Cestino (il preventivo scrive «(nel cestino)»).
-3. Mancano (chiesti ad Alex): note sul cliente, «Nuovo preventivo / Nuovo lavoro» dalla scheda, unire due clienti doppi.
+3. «Unire due clienti doppi»: Alex non sa; consigliato di NO per ora (il doppione si ferma alla nascita).
