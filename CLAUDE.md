@@ -3334,7 +3334,30 @@ Funzioni nuove (ok di Alex, foto prima, online con →d93ee8e←):
 
 Provato dal vivo anche: «Invia» documento per email (mandato ad Alex, consegnato su Resend), «Mappa» (indirizzo giusto), fattura in bozza nella scheda, «Compila con AI».
 
-Aperto sui Clienti:
-1. ⛔ **«Compila con AI» riempie solo 4 caselle** (nome, referente, telefono, via): email, CAP, citta', partita IVA, codice SDI detti nel testo si perdono e una Srl resta «Privato». La causa e' il prompt `dati_cliente` in `supabase/functions/ai-generate/index.ts` (JSON di 4 chiavi) + `riempiCliente` in `js/ai-integrazione.js`. Chiesto ad Alex se sistemarlo: tocca la funzione AI che fa anche i preventivi. NON provati: «Chiama» fino alla telefonata, il telefono vero, l'Excel del backup aperto.
-2. Visto fuori dalla voce: la riga del LAVORO non scrive il nome del cliente quando il cliente e' nel Cestino (il preventivo scrive «(nel cestino)»).
-3. «Unire due clienti doppi»: Alex non sa; consigliato di NO per ora (il doppione si ferma alla nascita).
+Chiuso la sera del 17 nov (commit 59443af, provato dal vivo, computer e 375 px):
+- **«Compila con AI» del cliente riempie tutte le caselle**: funzione nuova `netlify/functions/ai-cliente.mjs` (Haiku, 1 credito, stampo di ai-pratica) + `AI.cliente(testo)` in `js/ai-integrazione.js`. ⛔ `ai-generate` NON toccata. Caselle in «campi» di `js/gest-ai-moduli.js` (13 + il tipo, messo da «extra»); `riempiCliente` e `compila_cliente` / `MODULI.cliente` della Chat allargati uguale.
+- **Lavori**: nella riga (tabella e scheda) si legge il nome del cliente; se e' nel Cestino «(nel cestino)» (`cliVista` in `renderJobs`, settimo parametro `cliNome` di `jobCardSupa`).
+- **Excel della copia dei dati**: foglio «Clienti» con 16 colonne e la Nota, aperto dal vivo.
+- ⛔ **«Unire due clienti doppi»: NO**, deciso da Alex il 17 nov («lasciamoli doppi, potrebbe essere un lavoro differente con lo stesso cliente»). Non riproporlo.
+- Resta: la telefonata di «Chiama» e il telefono vero li prova solo Alex; il banco della Chat con AI non e' stato girato dopo aver allargato `MODULI.cliente`.
+
+# 17 NOVEMBRE 2026 (sera, 3) — UNA VOCE PER VOLTA: IL CALENDARIO
+
+Collaudo dal vivo nel reparto «ferramenta» (10 lavori, 3 scadenze, 1 promemoria, 1 mezzo, 1 fornitore + 1 sua fattura, 1 operaio, 2 note «PROVA CONTROLLORE»: tutto cancellato, 0 righe; il reparto e' tornato a 1 lavoro e 2 clienti).
+
+Dove sta il codice: `renderCal`, `caricaNote`, `calAltreDate`, `calVai`, `calListaTelefono`, `openDay` in `js/gest-schede-clienti.js`; i clic (`open-day`, `save-note`, `cal-prev/next/today`, `cal-ritardo`, `new-job-date`) in `js/gest-finestre-eventi.js`; la pagina in `gestionale-app.html` (`#calendario`); lo stile in `css/gestionale.css` (ultimo blocco «17 nov 2026 — COLLAUDO DEL CALENDARIO»).
+
+Sistemato (banco `tools/banco-gestionale.js app`: ZERO difetti):
+- **Note e rete**: un errore di RETE in `caricaNote` veniva preso per «manca la tabella»: da li' le note si salvavano solo nel browser. Adesso «manca la tabella» e' solo l'errore vero (`_notaTabellaManca`); `noteCache` non si svuota piu' prima di rileggere.
+- **Regola 20**: se lavori si' ma scadenze / promemoria / note no, riga ambra `#cal-parz` («Non riesco a leggere tutte le scadenze e le note… Tocca per riprovare»; `calAltreDate._ko`). Senza rete l'elenco del telefono non dice piu' «Niente in programma» sotto il riquadro rosso.
+- **Riquadro del giorno** (`openDay`): «Niente in programma» solo se il giorno e' vuoto davvero (usciva sopra le scadenze); un lavoro in ritardo dice «In ritardo» (diceva «Da fare» col pallino rosso); la scadenza ha il pallino della legenda (`.dot.scad`, `.stato.scad`); righe a 17 px, stato a 14.
+- **«Salva nota» a vuoto** in un giorno senza nota non dice piu' «Nota eliminata».
+- «Oggi» non sta piu' in un quadrato da 46 px; la puntina della nota e' grande (26 px, blu); sul telefono «Salva nota» e' largo e «+ Lavoro in questa data» va a capo.
+
+Da sapere:
+- «Salva nota» passa dal correttore (`js/correggi-giornata.js`, gratis): se corregge si ferma e chiede di premere Salva un'altra volta. NON e' un difetto.
+- Nella casella stanno 3 righe in tutto (lavori prima, poi scadenze), il resto e' «+N».
+- I promemoria sono della persona: si vedono in tutti i reparti. `promemoria.id` e' un numero messo dal database (non passare l'id).
+- Esc non chiude nessuna finestra del gestionale (non e' del Calendario).
+
+Aperto sul Calendario (chiesto ad Alex, non deciso): scrivere la nota dentro la casella sul computer (sul telefono c'e' gia' nell'elenco); tornare al Calendario dopo aver chiuso un mezzo / promemoria / fattura fornitore aperti da li' (oggi si resta in quella sezione). Il pulsante «Parla» copre l'angolo della domenica in alto: vale per tutte le sezioni.

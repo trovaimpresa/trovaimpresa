@@ -572,18 +572,37 @@
      Se la tabella non c'e' ancora (migrazione SQL non eseguita) si torna al
      vecchio modo e si avvisa: nessuna nota va persa. ---- */
   let noteCache={}, noteSupaOk=true, noteAvvisato=false;
+  /* 17 nov 2026 (collaudo del Calendario) — due difetti chiusi qui:
+     a) noteCache si svuotava PRIMA di rileggere: chi apriva un giorno in quel
+        momento vedeva la nota vuota. Adesso si riempie una lista nuova e si
+        scambia alla fine.
+     b) un errore di RETE veniva preso per «manca la tabella»: da li' in poi
+        le note si salvavano solo nel browser, e usciva un avviso tecnico.
+        Adesso «manca la tabella» e' solo l'errore vero di Postgres/PostgREST;
+        con la rete giu' le note di prima restano, si torna «ko» e il
+        calendario lo dice (riga #cal-parz). */
+  function _notaTabellaManca(e){
+    const c=String((e&&e.code)||""), m=String((e&&e.message)||"");
+    return c==="42P01"||c==="PGRST205"||/does not exist|schema cache/i.test(m);
+  }
   async function caricaNote(){
-    noteCache={};
     const mid=curMestiere();
-    if(!sb||!sbUid||!mid){noteCache=Object.assign({},db().note||{});return;}
-    const {data,error}=await sb.from("gest_note").select("data,testo").eq("user_id",sbUid).eq("mestiere_id",mid);
+    if(!sb||!sbUid||!mid){noteCache=Object.assign({},db().note||{});return false;}
+    let data=null,error=null;
+    try{ const r=await sb.from("gest_note").select("data,testo").eq("user_id",sbUid).eq("mestiere_id",mid); data=r.data;error=r.error; }
+    catch(e){ error=e||{message:"rete"}; }
     if(error){
-      noteSupaOk=false;noteCache=Object.assign({},db().note||{});
-      if(!noteAvvisato){noteAvvisato=true;toast("Le note del calendario restano solo su questo dispositivo: manca la migrazione SQL (gest_note)");}
-      return;
+      if(_notaTabellaManca(error)){
+        noteSupaOk=false;noteCache=Object.assign({},db().note||{});
+        if(!noteAvvisato){noteAvvisato=true;toast("Le note del calendario restano solo su questo dispositivo: manca la migrazione SQL (gest_note)");}
+        return false;
+      }
+      return true;   /* rete: le note gia' lette restano come sono */
     }
     noteSupaOk=true;
-    (data||[]).forEach(n=>{noteCache[n.data]=n.testo;});
+    const nuove={};
+    (data||[]).forEach(n=>{nuove[n.data]=n.testo;});
+    noteCache=nuove;
     /* migrazione automatica: le vecchie note del browser salgono su Supabase
        una volta sola, poi il localStorage si svuota */
     const vecchie=Object.entries(db().note||{}).filter(([ds,tx])=>tx&&String(tx).trim());
@@ -596,6 +615,7 @@
         toast("Le vecchie note del calendario sono state spostate su Supabase ✔");
       }
     }
+    return false;
   }
 
   let calJobs=[], calScad=[];
@@ -615,10 +635,11 @@
        Ci sono anche quelle delle PERSONE (visita medica, formazione, permesso
        di soggiorno), che non sono righe di gest_scadenze ma date sulla scheda. */
     calScad=[];
+    let _calParz=false;   /* 17 nov 2026 — regola 20: una parte delle date non letta si dice */
     if(sb&&sbUid){
       try{
         const mid=curMestiere();
-        const [{data:sc},per]=await Promise.all([
+        const [{data:sc,error:_eSc},per]=await Promise.all([
           sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id")
             .eq("user_id",sbUid).eq("mestiere_id",mid),
           scadenzePersone(mid)
@@ -631,16 +652,17 @@
              scheda dell'operaio). */
           .concat((per||[]).map(x=>({id:x.id,titolo:x.titolo+" · "+x._nome,data:x.data_scadenza,fatta:false,
                                      _persona:true,_opId:x._opId})));
-      }catch(e){ calScad=[]; }
+        if(_eSc)_calParz=true;
+      }catch(e){ calScad=[]; _calParz=true; }
       /* 21 ott 2026 — IL CALENDARIO UNICO. Le date stavano sparse in cinque
          sezioni: i promemoria, le scadenze scritte sulla scheda del mezzo
          (assicurazione, revisione, collaudo, verifica), le fatture da
          incassare e quelle dei fornitori da pagare. Adesso si vedono tutte
          qui. Ognuna legge per conto suo: se una tabella non risponde, le
          altre si vedono lo stesso. */
-      try{ calScad=calScad.concat(await calAltreDate(curMestiere())); }catch(e){}
+      try{ calScad=calScad.concat(await calAltreDate(curMestiere())); if(calAltreDate._ko)_calParz=true; }catch(e){ _calParz=true; }
     }
-    await caricaNote();
+    if(await caricaNote())_calParz=true;
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
@@ -682,6 +704,12 @@
     $("#cal-grid").style.display="";
     $("#cal-grid").innerHTML=html;
     if(_calKo){listaNonLetta("#cal-grid","il calendario","calendario");}
+    /* 17 nov 2026 — i lavori ci sono ma scadenze, promemoria o note no: prima
+       il mese usciva senza, zitto. Una riga ambra lo dice; toccandola rilegge. */
+    let parz=$("#cal-parz");
+    if(!parz){ $("#cal-grid").insertAdjacentHTML("beforebegin",'<div class="cal-parz" id="cal-parz" data-action="lista-riprova" data-tab="calendario" hidden></div>'); parz=$("#cal-parz"); }
+    parz.textContent=(_calParz&&!_calKo)?"⚠ Non riesco a leggere tutte le scadenze e le note: qui sotto ne manca qualcuna. Tocca per riprovare.":"";
+    parz.hidden=!(_calParz&&!_calKo);
     /* 11 nov 2026 — collaudo 3.12: i lavori in ritardo stanno in mesi
        passati, e il calendario del mese sembrava vuoto. Una riga rossa in
        cima li dice e porta a Lavori gia' filtrato. La regola e' quella di
@@ -694,6 +722,9 @@
       rit.hidden=!n;
     }
     calListaTelefono(y,m,days);
+    /* 17 nov 2026 — senza rete l'elenco del telefono diceva «Niente in
+       programma» sotto il riquadro rosso: una bugia (regola 20). */
+    if(_calKo){const cl=$("#cal-lista");if(cl)cl.innerHTML="";}
   }
 
   /* ===== 26 settembre 2026 — IL CALENDARIO SUL TELEFONO (modello «A») =====
@@ -713,6 +744,7 @@
   async function calAltreDate(mid){
     const out=[], ok=r=>(r&&!r.error&&r.data)||[];
     const vai=(tab,az,id)=>'data-action="cal-vai" data-tab="'+tab+'" data-azione="'+az+'" data-id="'+esc(String(id))+'"';
+    calAltreDate._ko=false;
     const [rp,rm,rf,rff,rfo,raz]=await Promise.all([
       sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
       sb.from("gest_mezzi").select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
@@ -724,6 +756,7 @@
       sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid),
       sb.from("gest_azienda").select("giorni_pagamento").eq("user_id",sbUid).maybeSingle()
     ]);
+    if(letturaKo(rp,rm,rf,rff))calAltreDate._ko=true;
     /* i promemoria sono della persona, non del reparto: si vedono da tutti */
     ok(rp).forEach(p=>{ if(p.data)out.push({id:p.id,titolo:p.testo||"Promemoria",data:p.data,fatta:p.stato==="fatto",
       _pre:"",_lab:"Promemoria: ",_az:vai("promemoria","edit-prom",p.id)}); });
@@ -830,12 +863,13 @@
     const list=jobs.length?jobs.map(j=>{
       const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds);
       const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
-      const lab=sf?'Fatto':(inCorso?'In corso':'Da fare');
+      /* 17 nov 2026 — pallino rosso e scritta «Da fare»: adesso dice «In ritardo», come in Lavori e nella legenda */
+      const lab=sf?'Fatto':(late?'In ritardo':(inCorso?'In corso':'Da fare'));
       const dot=sf?'done':(late?'ritardo':(inCorso?'corso':'todo'));  /* .dot.corso esiste gia' nel CSS, la usa la legenda del calendario */
       return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="Apri il lavoro"><i class="dot ${dot}"></i>
-        <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
+        <div style="flex:1"><b>${esc(j.descrizione||"(senza descrizione)")}</b></div>
         <span class="stato ${cls}">${lab}</span></div>`;}).join("")
-      :`<p style="color:var(--muted);font-size:15px;margin-bottom:12px">Niente in programma.</p>`;
+      :"";
     /* le scadenze di quel giorno: sola lettura, ma almeno si vedono */
     const scDel=calScad.filter(x=>x.data===ds);
     /* 12 agosto 2026 (sera) — queste righe usano .day-job, che nel CSS ha la
@@ -849,9 +883,10 @@
         : x._persona
         ? `data-action="scad-persona" data-id="${esc(String(x._opId||""))}" title="Apri la scheda della persona"`
         : `data-action="edit-scad" data-id="${esc(String(x.id))}" title="Apri la scadenza"`;
-      return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
-        <div style="flex:1"><b style="font-size:14px">${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</b></div>
-        <span class="stato ${x.fatta?'fatto':(late?'ritardo':'da_fare')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
+      /* 17 nov 2026 — il pallino di una scadenza e' quello della legenda (.dot.scad), non l'ambra del «Da fare» */
+      return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'scad')}"></i>
+        <div style="flex:1"><b>${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</b></div>
+        <span class="stato ${x.fatta?'fatto':(late?'ritardo':'scad')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
     /* ⛔ 29 agosto 2026 — Alessio: «la voglio come e' su tutti i gestionali».
        Era l'ultima finestra rimasta con la sola freccia in cima invece della
        testata col titolo e del piede fermo. Il contenuto e' lo stesso: cambia
@@ -860,7 +895,7 @@
     /* 11 nov 2026 — collaudo 3.12: il titolo era «12/11/2026» */
     const dd=new Date(ds+"T12:00:00"), GG=["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
     openSheetGrande(GG[dd.getDay()]+" "+dd.getDate()+" "+mesi[dd.getMonth()].toLowerCase()+" "+dd.getFullYear(),
-      `<div class="day-jobs">${list}${listSc}</div>
+      `<div class="day-jobs">${(list||listSc)?list+listSc:'<p class="day-vuoto">Niente in programma.</p>'}</div>
       <div class="field"><label>📌 Nota del giorno</label>
         <textarea id="day-note" placeholder="Scrivi qui cosa ti serve ricordare quel giorno">${esc(noteCache[ds]||"")}</textarea></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>

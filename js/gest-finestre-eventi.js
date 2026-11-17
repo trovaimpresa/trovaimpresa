@@ -699,6 +699,9 @@
         if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
         noteCache[ds]=v;
       }else{
+        /* 17 nov 2026 — «Salva nota» senza aver scritto niente, in un giorno
+           senza nota, diceva «Nota eliminata»: non c'era niente da eliminare. */
+        if(!noteCache[ds]){closeSheet();return;}
         const {error}=await sb.from("gest_note").delete().eq("user_id",sbUid).eq("mestiere_id",midN).eq("data",ds).select("id");
         if(error){toast("Nota non eliminata: "+error.message);return;}
         delete noteCache[ds];
