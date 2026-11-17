@@ -530,6 +530,8 @@
     /* due PDF diversi, e i nomi di prima si scambiavano facilmente:
        uno lo CREA il gestionale, l'altro lo ALLEGHI tu se ce l'hai. */
     az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id},top:true});
+    /* 17 nov 2026 — al cliente con WhatsApp o email (js/gest-fattura-manda.js) */
+    az.push({lab:"📨 Manda al cliente",action:"fatt-manda",data:{id:f.id},top:true});
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
@@ -552,7 +554,7 @@
          che questa scheda usa gia' piu' sotto per il dettaglio. */
       /* 7 nov 2026 — sotto l'importo si dice cos'e': nei Preventivi c'e' «IVA esclusa» */
       destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare)
-            +'<small class="fatt-imp-et">'+((+c.ritenuta>0)?"netto da incassare":"IVA compresa")+'</small></span>',
+            +'<small class="fatt-imp-et">'+((+c.ritenuta>0)?"netto da incassare":(((f.regime_fiscale||(fattAzienda||{}).regime_fiscale)==="RF19")?"totale fattura":"IVA compresa"))+'</small></span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -778,7 +780,9 @@
     const rank=f=>fattScaduta(f,gg)?0:(f.stato==="emessa"?1:(f.stato==="bozza"?2:(f.stato==="pagata"?3:4)));
     R.sort((a,b)=>rank(a)-rank(b)
       || String(b.data||"").localeCompare(String(a.data||""))
-      || (+b.numero||0)-(+a.numero||0));
+      || (+b.numero||0)-(+a.numero||0)
+      /* 17 nov 2026 — stesso giorno: in cima l'ultima salvata */
+      || String(b.created_at||"").localeCompare(String(a.created_at||"")));
 
     if(!R.length){
       body.className="";body.style.display="block";
@@ -845,6 +849,12 @@
   }
   /* il regime delle spese del modulo aperto adesso — vedi fattForm */
   let fattRegimeCorrente="art15";
+  /* 17 nov 2026 — IL BOLLO DA 2 € SI METTE DA SOLO. In forfettario, su una
+     fattura NUOVA, quando il totale passa i 77,47 € la casella prende 2,00;
+     se torna sotto si svuota. Appena la tocchi tu, il gestionale non la
+     tocca piu'. Sulle fatture gia' salvate non si cambia niente. */
+  let fattBolloAuto=false;
+  const FATT_BOLLO_SOGLIA=77.47;
   /* i totali si rifanno a ogni tasto premuto: si vede il conto crescere
      mentre scrivi, invece di scoprirlo dopo aver salvato */
   function fattTotaleLive(){
@@ -873,6 +883,13 @@
     /* 11 nov 2026 — collaudo 3.6: ritenuta, totale e netto li fa fattConti,
        la stessa funzione di elenco, PDF e file per lo SDI. Prima qui la
        formula della ritenuta era ricopiata a mano: una seconda copia. */
+    if(fattBolloAuto&&$("#fa-bollo")){
+      const _senza=fattConti(Object.assign({},f,{bollo:0}),R);
+      const _serve=(+_senza.totale||0)>FATT_BOLLO_SOGLIA;
+      f.bollo=_serve?2:0;
+      $("#fa-bollo").value=_serve?"2,00":"";
+      const _nb=$("#fa-bollo-nota");if(_nb)_nb.style.display=_serve?"":"none";
+    }
     const c=fattConti(f,R), b=c;
     const forf=fattForfettario();
     const ritE=c.ritenuta;
@@ -888,7 +905,7 @@
       /* "Imponibile IVA" non si puo' piu' dire, da quando dentro ci sono anche
          le spese art. 15 che l'IVA non ce l'hanno: su 5.550 di imponibile
          l'IVA e' 1.188 e non 1.221, e chi fa il conto a mente non torna. */
-      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':(ruoloUtente==='professionista'?'Imponibile IVA':'Su cui si paga l\'IVA'))+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
+      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':(fattForfettario()?'Totale dopo lo sconto':(ruoloUtente==='professionista'?'Imponibile IVA':'Su cui si paga l\'IVA')))+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
       + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
       + (ritE   ?'<div class="fs-r"><span>Ritenuta '+_pct(f.ritenuta_perc)+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
@@ -905,6 +922,7 @@
        Serve all'anteprima "Il conto", che se no direbbe un numero diverso da
        quello che finisce nel database. */
     fattRegimeCorrente=isNew?"art15":(f.spese_regime||null);
+    fattBolloAuto=isNew&&fattForfettario()&&!(+f.bollo);
     let righe=[];
     if(sb&&sbUid){
       if(!fattCliCache.length){
@@ -935,7 +953,14 @@
     if(!righe.length&&preset&&preset._righe)righe=preset._righe;
 
     const bloccata=f.stato==="emessa"||f.stato==="pagata";
-    const cliOpts=fattCliCache.map(c=>'<option value="'+c.id+'"'+(String(c.id)===String(f.cliente_id)?" selected":"")+'>'+esc(c.nome)+'</option>').join("");
+    let cliOpts=fattCliCache.map(c=>'<option value="'+c.id+'"'+(String(c.id)===String(f.cliente_id)?" selected":"")+'>'+esc(c.nome)+'</option>').join("");
+    /* 17 nov 2026 — IL CLIENTE CHE NON STA PIU' IN TENDINA. Una fattura si
+       tiene dentro una copia del cliente (cli_nome). Se quel cliente non e'
+       piu' fra quelli del reparto, la tendina diceva «nessuno» mentre
+       l'elenco e il PDF dicevano il suo nome. Adesso lo si vede anche qui,
+       e salvando resta com'e'. */
+    const _cliFuori=!!(f.id&&f.cli_nome&&!fattCliCache.some(c=>String(c.id)===String(f.cliente_id)));
+    if(_cliFuori)cliOpts='<option value="'+esc(String(f.cliente_id||""))+'" selected>'+esc(f.cli_nome)+' — come scritto in fattura</option>'+cliOpts;
     const tipoOpts=FATT_TIPI.map(t=>'<option value="'+t[0]+'"'+((f.tipo||"fattura")===t[0]?" selected":"")+'>'+t[1]+'</option>').join("");
     const nLav=(preset&&preset._lavori?preset._lavori.length:(fattLavori[f.id]||[]).length);
 
@@ -948,8 +973,8 @@
       '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
-      +   '<div class="field"><label>Cliente</label><select id="fa-cli"><option value="">— nessuno —</option>'+cliOpts+'</select>'
-      +     (fattCliCache.length?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Clienti</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
+      +   '<div class="field"><label>Cliente</label><select id="fa-cli">'+((_cliFuori&&!f.cliente_id)?'':'<option value="">— nessuno —</option>')+cliOpts+'</select>'
+      +     ((fattCliCache.length||_cliFuori)?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Clienti</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
       +   '</div>'
       +   '<div class="row2">'
       +     '<div class="field"><label>Data</label><input type="date" id="fa-data" value="'+(f.data||todayStr())+'"></div>'
@@ -985,7 +1010,11 @@
          nel file elettronico, per sapere DI QUALE cassa si tratta.
          12 agosto 2026 (sera): DUE campi invece di una tendina sola. Vedi il
          commento lungo su FATT_CASSE_TIPI. */
-      +   (ruoloUtente==='professionista'
+      /* 17 nov 2026 — STESSA FATTURA, DUE TOTALI. Una parcella nata con cassa
+         e spese, riaperta da chi oggi non e' studio tecnico, non mostrava
+         queste caselle: «Il conto» le perdeva e diceva 1.600 mentre elenco e
+         PDF dicevano 1.850. Se la fattura ce le ha dentro, si vedono sempre. */
+      +   ((ruoloUtente==='professionista'||(f.id&&((+f.cassa_perc||0)>0||(+f.spese||0)>0||(+f.spese_iva||0)>0)))
             ? (function(){
                 const _u=fattUltimaCassa();
                 /* fattura nuova: si parte da quello che ha usato l'ultima volta.
@@ -1015,7 +1044,8 @@
               })()
             : '')
       +   '<div class="field"><label>'+(ruoloUtente==='professionista'?'Ritenuta d\'acconto (%)':'Trattenuta (ritenuta d\'acconto) %')+'</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
-      +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
+      +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €.'+(isNew?' Lo metto io da solo.':' Scrivi 2 nel campo qui sopra.')+'</div>'
+          +'<div class="sh-nota" id="fa-bollo-nota" style="display:none;color:var(--ok)"><b>Bollo da 2 € messo in automatico.</b> Se non vuoi farlo pagare al cliente, scrivi 0 nella casella.</div>':'')
       + '</div>'
 
       + (function(){
@@ -1065,6 +1095,9 @@
        il riquadro restava fermo sul numero di prima; salvavi e cambiava.
        Se domani nasce un altro campo che entra nel conto, la sua riga va
        aggiunta QUI, se no il riquadro mente di nuovo. */
+    if($("#fa-bollo"))$("#fa-bollo").addEventListener("input",function(){
+      fattBolloAuto=false;const n=$("#fa-bollo-nota");if(n)n.style.display="none";
+    });
     ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese","#fa-spese-iva"].forEach(id=>{
       const e=$(id);if(!e)return;
       e.addEventListener("input",fattTotaleLive);
@@ -1630,7 +1663,7 @@
       + '<div class="fn-scelte">'
       +   '<button type="button" class="fn-s" data-action="fatt-da-lavori">'
       +     '<span class="fn-t">Da uno o più lavori finiti</span>'
-      +     '<span class="fn-d">'+(nLav?(nLav+(nLav===1?" lavoro finito aspetta":" lavori finiti aspettano")+" di essere fatturati. Li spunti e diventano le voci."):"Al momento non ci sono lavori finiti da fatturare.")+'</span></button>'
+      +     '<span class="fn-d">'+(nLav?(nLav+(nLav===1?" lavoro finito aspetta di essere fatturato. Lo spunti e diventa la voce.":" lavori finiti aspettano di essere fatturati. Li spunti e diventano le voci.")):"Al momento non ci sono lavori finiti da fatturare.")+'</span></button>'
       +   '<button type="button" class="fn-s" data-action="fatt-da-prev">'
       +     '<span class="fn-t">Da un preventivo accettato</span>'
       +     '<span class="fn-d">Si porta dietro tutte le righe con quantità e prezzi. Non riscrivi niente.</span></button>'
@@ -1685,7 +1718,7 @@
      l'aliquota, il riepilogo per aliquota che chiede lo SDI, e le diciture di
      legge per il forfettario. Resta una copia di cortesia: la fattura valida
      è quella elettronica. */
-  async function fatturaPdf(id){
+  async function fatturaPdf(id,opz){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const f=fattCache.find(x=>String(x.id)===String(id));
     if(!f){toast("Fattura non trovata");return;}
@@ -1829,7 +1862,7 @@
          e' su quello che resta che si calcola l'IVA */
       if(c.sconto)riga("Sconto","-"+eurPdf(c.sconto));
     }
-    riga((c.spese&&c.art15)?"Totale imponibile":("Imponibile"+(_extra?" IVA":"")),eurPdf(c.imponibile));
+    riga((c.spese&&c.art15)?"Totale imponibile":("Imponibile"+((_extra&&!forf)?" IVA":"")),eurPdf(c.imponibile));
     if(!forf)riga("IVA",eurPdf(c.iva));
     if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
     if(c.ritenuta)riga("Ritenuta d'acconto "+_pct(f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
@@ -1885,7 +1918,11 @@
     });
 
     const nome=(f.cli_nome||cli.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
-    doc.save("fattura-"+(f.numero?f.numero+"-"+fattAnno(f):"bozza")+"-"+nome+".pdf");
+    const _nomePdf="fattura-"+(f.numero?f.numero+"-"+fattAnno(f):"bozza")+"-"+nome+".pdf";
+    /* 17 nov 2026 — «Manda al cliente» (js/gest-fattura-manda.js) vuole il
+       file in mano, non scaricato */
+    if(opz&&opz.blob)return {blob:doc.output("blob"),nome:_nomePdf};
+    doc.save(_nomePdf);
     toast("PDF scaricato ✅");
   }
 

@@ -821,7 +821,7 @@
 
     /* --- il cliente: su una fattura non e' un dettaglio --- */
     const cli=$("#fa-cli");
-    if(cli&&!cli.value) out.push({el:cli,grave:"rosso",
+    if(cli&&!cli.value&&!(cli.selectedOptions[0]&&/come scritto in fattura$/.test(cli.selectedOptions[0].text))) out.push({el:cli,grave:"rosso",
       dice:"Manca il cliente. Una fattura senza intestatario non si manda a nessuno e il commercialista te la rimanda indietro."});
 
     /* --- le voci --- */
@@ -865,8 +865,27 @@
 
     /* --- 14 nov 2026: bonifico (o Ri.Ba.) senza IBAN --- */
     const fmo=$("#fa-modo"), fib=$("#fa-iban");
-    if(fmo&&fib&&(fmo.value==="bonifico"||fmo.value==="riba")&&!fib.value.trim()) out.push({el:fib,grave:"arancio",
+    if(fmo&&fib&&(fmo.value==="bonifico"||fmo.value==="riba")&&!fib.value.trim()){
+      out.push({el:fib,grave:"arancio",
       dice:"Manca l'IBAN: nel PDF esce «Bonifico» ma il cliente non sa dove pagare. Scrivilo qui o nei Dati azienda."});
+      /* 17 nov 2026 — la stessa frase usciva due volte, una sotto l'altra */
+      const _im=$("#fa-iban-manca"); if(_im)_im.style.display="none";
+    }
+
+    /* --- 17 nov 2026: la scadenza prima della data della fattura --- */
+    const fsd=$("#fa-scad");
+    if(fsd&&dt&&fsd.value&&dt.value&&fsd.value<dt.value) out.push({el:fsd,grave:"rosso",
+      dice:"La scadenza è prima della data della fattura: uno dei due giorni è scritto sbagliato."});
+
+    /* --- 17 nov 2026: la ritenuta. Sopra il 100% il netto va sotto zero --- */
+    const frt=$("#fa-rit");
+    if(frt&&frt.value.trim()){
+      const rv=_numIt("#fa-rit")||0;
+      if(rv<0||rv>100) out.push({el:frt,grave:"rosso",
+        dice:"La ritenuta è una percentuale fra 0 e 100 (di solito 4 per il condominio, 20 per lo studio). Così il netto da pagare va sotto zero."});
+      else if(rv>0&&typeof fattForfettario==="function"&&fattForfettario()) out.push({el:frt,grave:"arancio",
+        dice:"Sei in forfettario: di norma la ritenuta d'acconto non si applica. Fattelo confermare dal commercialista prima di emetterla."});
+    }
 
     /* --- il bollo del forfettario: 2 € sopra i 77,47 € --- */
     if(typeof fattForfettario==="function"&&fattForfettario()){

@@ -579,6 +579,7 @@
     if(a==="fatt-riprova")return renderFatture();   /* 15 nov 2026: «Non riesco a controllare i numeri delle fatture» */
     if(a==="del-fatt")return eliminaFattura(id);
     if(a==="fatt-pdf")return fatturaPdf(id);
+    if(a==="fatt-manda")return fattManda(id);   /* 17 nov 2026 — js/gest-fattura-manda.js */
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="fatt-sdi")return fattSdi(id);   /* 29/09/2026 — js/gest-sdi.js */
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
