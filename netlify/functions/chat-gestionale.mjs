@@ -372,7 +372,8 @@ function giornoPiu(oggiISO, n) {
 const MODULI = {
   lavoro:  { caselle: ['descrizione', 'dove', 'data', 'importo', 'cliente', 'operatore'],
              serve: 'descrizione', manca: 'manca cosa c\'e\' da fare' },
-  cliente: { caselle: ['nome', 'indirizzo', 'referente', 'telefono'],
+  /* 17 nov 2026 — le caselle in piu' del cliente (le riempie riempiCliente) */
+  cliente: { caselle: ['nome', 'tipo', 'indirizzo', 'cap', 'citta', 'prov', 'referente', 'telefono', 'email', 'piva', 'cod_fiscale', 'sdi_codice', 'pec', 'note'],
              serve: 'nome',        manca: 'manca il nome del cliente' },
   /* ⛔ 30 agosto 2026 — DUE MODULI IN PIU'.
      Erano due su tanti, e i due che mancavano di piu' sono questi: una
@@ -1245,9 +1246,19 @@ const STRUMENTI = [
       type: 'object',
       properties: {
         nome:      { type:'string', description:'il nome del cliente, del condominio o della ditta' },
-        indirizzo: { type:'string', description:'via e numero' },
+        tipo:      { type:'string', enum:['privato','azienda','condominio'], description:'azienda se e\' una ditta o una societa\', condominio, se no privato' },
+        indirizzo: { type:'string', description:'SOLO via e numero (la citta\' va in citta)' },
+        cap:       { type:'string', description:'5 cifre, solo se te lo ha detto' },
+        citta:     { type:'string', description:'il comune' },
+        prov:      { type:'string', description:'sigla di 2 lettere, solo se detta o se la citta\' e\' un capoluogo' },
         referente: { type:'string', description:'la persona con cui si parla' },
-        telefono:  { type:'string', description:'il numero di telefono' }
+        telefono:  { type:'string', description:'il numero di telefono' },
+        email:     { type:'string', description:'email normale (non la PEC)' },
+        piva:      { type:'string', description:'partita IVA, 11 cifre, ricopiata com\'e\'' },
+        cod_fiscale: { type:'string', description:'codice fiscale, ricopiato com\'e\'' },
+        sdi_codice: { type:'string', description:'codice destinatario della fattura elettronica, 7 caratteri' },
+        pec:       { type:'string', description:'la PEC, solo se detta' },
+        note:      { type:'string', description:'cose da ricordare sul cliente (orari, citofono, come paga)' }
       },
       required: ['nome']
     }

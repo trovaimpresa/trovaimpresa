@@ -187,8 +187,28 @@
         { id:'c-nome', da:'nome',      nome:'Nome' },
         { id:'c-ind',  da:'indirizzo', nome:'Via e numero' },
         { id:'c-ref',  da:'referente', nome:'Referente' },
-        { id:'c-tel',  da:'telefono',  nome:'Telefono' }
-      ]
+        { id:'c-tel',  da:'telefono',  nome:'Telefono' },
+        /* 17 nov 2026 (voce Clienti) — prima le caselle erano quattro: email,
+           CAP, citta', partita IVA e codice SDI detti nel testo si perdevano.
+           Le chiavi sono quelle di netlify/functions/ai-cliente.mjs. */
+        { id:'c-email', da:'email',       nome:'Email' },
+        { id:'c-cap',   da:'cap',         nome:'CAP' },
+        { id:'c-citta', da:'citta',       nome:'Città' },
+        { id:'c-prov',  da:'prov',        nome:'Provincia' },
+        { id:'c-piva',  da:'piva',        nome:'Partita IVA' },
+        { id:'c-cf',    da:'cod_fiscale', nome:'Codice fiscale' },
+        { id:'c-sdi',   da:'sdi_codice',  nome:'Codice destinatario' },
+        { id:'c-pec',   da:'pec',         nome:'PEC' },
+        { id:'c-note',  da:'note',        nome:'Note' }
+      ],
+      /* il tipo non e' una casella: sono i tre pulsanti Privato/Azienda/Condominio */
+      extra: function(d,messi){
+        const t=d&&String(d.tipo||"").toLowerCase();
+        if(t!=="privato"&&t!=="azienda"&&t!=="condominio")return;
+        const b=document.querySelector('#c-tipo-box .tipo-btn[data-t="'+t+'"]');
+        if(b&&!b.classList.contains("on")&&typeof window.setTipoCliente==="function"){window.setTipoCliente(b);messi.push("Tipo");}
+        if(typeof cliFiscApri==="function"&&(d.piva||d.cod_fiscale||d.sdi_codice||d.pec))cliFiscApri();
+      }
     },
     /* ⚠️ 18 agosto 2026 — IL PREVENTIVO NON E' FATTO DI CASELLE SINGOLE.
        Lavoro e Cliente hanno quattro caselle in croce; qui la sostanza sono
@@ -357,7 +377,9 @@
         /* ⛔ 7 nov 2026 — lo studio passa dall'AI della pratica, che riempie
            anche tipo, stato, Comune, protocollo e catasto. */
         const pratica = ruoloUtente==='professionista' && tipo==='lavoro' && window.AI && typeof window.AI.pratica==="function";
-        const d=pratica ? await window.AI.pratica(testo,null) : await window.AI.dati(m.feature,testo);
+        /* 17 nov 2026 — il cliente passa da ai-cliente (tutte le caselle) */
+        const _aiCli = tipo==='cliente' && window.AI && typeof window.AI.cliente==="function";
+        const d=pratica ? await window.AI.pratica(testo,null) : (_aiCli ? await window.AI.cliente(testo) : await window.AI.dati(m.feature,testo));
         if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
         const messi=[];
         m.campi.forEach(c=>{

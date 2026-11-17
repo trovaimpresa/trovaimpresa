@@ -263,6 +263,28 @@
     return body.dati || {};
   };
 
+  /* 17 nov 2026 — l'AI del cliente (netlify/functions/ai-cliente.mjs): tutte
+     le caselle del modulo, non piu' quattro. Stessa forma di AI.pratica. */
+  AI.cliente = async function (testo) {
+    const token = getToken();
+    if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
+    let res;
+    try {
+      res = await fetch('/.netlify/functions/ai-cliente', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testo: testo || '' }),
+      });
+    } catch (e) {
+      throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
+    }
+    const body = await res.json().catch(function () { return {}; });
+    if (res.status === 402) { await caricaStato(); mostraUpgrade(body.reason); return null; }
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    if (AI.stato && typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+    return body.dati || {};
+  };
+
   const CAPITOLATO_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-capitolato';
   AI.capitolato = async function (testo, modo) {
     const token = getToken();
@@ -749,6 +771,26 @@
     riempiCampo('c-ind', d.indirizzo, primo);
     riempiCampo('c-ref', d.referente, primo);
     riempiCampo('c-tel', d.telefono, primo);
+    /* 17 nov 2026 — le caselle in piu' (stesse chiavi di gest-ai-moduli.js) */
+    riempiCampo('c-email', d.email, primo);
+    riempiCampo('c-cap', d.cap, primo);
+    riempiCampo('c-citta', d.citta, primo);
+    riempiCampo('c-prov', d.prov, primo);
+    riempiCampo('c-piva', d.piva, primo);
+    riempiCampo('c-cf', d.cod_fiscale, primo);
+    riempiCampo('c-sdi', d.sdi_codice, primo);
+    riempiCampo('c-pec', d.pec, primo);
+    riempiCampo('c-note', d.note, primo);
+    /* il tipo sono i tre pulsanti Privato / Azienda / Condominio */
+    try {
+      const t = String(d.tipo || '').toLowerCase();
+      const b = document.querySelector('#c-tipo-box .tipo-btn[data-t="' + t + '"]');
+      if (b && !b.classList.contains('on') && typeof window.setTipoCliente === 'function') window.setTipoCliente(b);
+      if (d.piva || d.cod_fiscale || d.sdi_codice || d.pec) {
+        const ap = document.getElementById('c-fisc-apri');
+        if (ap && ap.style.display !== 'none') ap.click();
+      }
+    } catch (e) {}
 
     avviso('Modulo compilato, controlla i dati e premi Salva');
     if (primo.el) primo.el.focus();

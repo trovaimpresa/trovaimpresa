@@ -345,7 +345,13 @@
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
       sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere()))
+      /* 17 nov 2026 (voce Clienti) — anche i clienti nel Cestino, come fa
+         l'elenco dei Preventivi: il lavoro di un cliente buttato non diceva
+         piu' di chi era. */
+      ((window.cestinoAttivo&&window.cestinoAttivo()&&sb.raw)
+        ? sb.raw("gest_clienti").select("id,nome,eliminato_il")
+        : sb.from("gest_clienti").select("id,nome")
+      ).eq("user_id",sbUid).or(_cliOr(curMestiere()))
     ]); }catch(e){}
     /* 11 nov 2026 — senza rete non si dice «nessun lavoro» (listaNonLetta) */
     if(letturaKo(_r3[0],_r3[1],_r3[2])){listaNonLetta(box,"i lavori","lavori",viste);return;}
@@ -355,6 +361,8 @@
     lavTel=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
     const opName=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome||""]));
     const cliName=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
+    /* quello che si LEGGE a schermo (il messaggio WhatsApp resta col nome pulito) */
+    const cliVista=Object.fromEntries((cls||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
     /* conteggi per vista: sulla lista intera, non su quella cercata */
     const conta={};LAV_VISTE.forEach(v=>conta[v.k]=lavFiltra(TUTTI,v.k,oggi).length);
     let L=lavFiltra(TUTTI,filter.vista,oggi);
@@ -395,7 +403,7 @@
           celle:[
             `<span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span>`
               +((_praPro&&l.pratica_tipo)?`<span class="pra-tag">${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""),
-            cellaCliente(cliName[l.cliente_id],l.dove),
+            cellaCliente(cliVista[l.cliente_id],l.dove),
             {h:q.testo,cls:q.classe},
             _praPro?(_staPra?esc(_staPra):"\u2014"):esc(opName[l.operatore_id]||"\u2014"),
             +l.importo?eur(l.importo):"\u2014"
@@ -407,7 +415,7 @@
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
       /* 7 nov 2026 — collaudo della semplicita': l'importo si vede su ogni riga,
          se no il totale in cima non si capisce da dove viene */
-      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",true,"lav")).join("")
+      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",true,"lav","",cliVista[l.cliente_id]||"")).join("")
     });
   }
 
