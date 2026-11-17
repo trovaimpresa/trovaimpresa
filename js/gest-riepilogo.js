@@ -369,7 +369,10 @@
        copia. Oggi, cambiando la base della ritenuta, si e' scollata e il
        Riepilogo diceva 400 € meno del vero su tre fatture su quattro. Adesso
        chiama fattConti come tutti gli altri: di copie ne resta UNA. */
-    const totaleFatt=f=>fattConti(f,fattRigheRie[f.id]||[]).daPagareFirmato;
+    /* 17 nov 2026 — tolti gli acconti gia' ricevuti (le ricevute legate alla
+       fattura): stesso conto della sezione Fatture, letto dalla stessa funzione */
+    let _accRie={}; try{ _accRie=await fattAccontiLeggi(); }catch(e){ _accRie={}; }
+    const totaleFatt=f=>{const c=fattConti(f,fattRigheRie[f.id]||[]);return c.daPagareFirmato-fattGia(f,c,_accRie);};
     const daInc    = FT.filter(f=>f.stato==="emessa");
     const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
     /* "da fatturare" = lavori finiti con un importo che non stanno ancora

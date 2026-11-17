@@ -424,6 +424,41 @@
     return FATT_MODI.find(x=>x[0]===m)||null;
   }
   function fattIban(f){ return String(f.iban||(fattAzienda||{}).iban||"").trim(); }
+  /* ===== 17 nov 2026 — GLI ACCONTI GIA' RICEVUTI SI VEDONO IN FATTURE =====
+     L'acconto su una fattura si segna dal 13 nov con una «Ricevuta di
+     pagamento» legata alla fattura (gest_ricevute_pagamento.fattura_id). Ma
+     qui non lo sapeva nessuno: «Da incassare» contava la fattura intera, e
+     la carta non diceva quanto restava. Adesso si legge UNA volta, qui, e lo
+     usano l'elenco, i riquadri, il Riepilogo e «Manda al cliente».
+     Niente tabella nuova e niente formula nuova: resto = fattConti − ricevute. */
+  let fattAcconti={};
+  async function fattAccontiLeggi(){
+    const m={};
+    if(!sb||!sbUid)return m;
+    const {data,error}=await sb.from("gest_ricevute_pagamento").select("fattura_id,importo,data")
+      .eq("user_id",sbUid).not("fattura_id","is",null);
+    if(error)throw error;
+    (data||[]).forEach(r=>{
+      const k=String(r.fattura_id); const x=(m[k]=m[k]||{tot:0,righe:[]});
+      x.tot=_cent2(x.tot+(+r.importo||0)); x.righe.push({data:r.data,importo:+r.importo||0});
+    });
+    return m;
+  }
+  /* quanto e' gia' entrato su questa fattura (mai piu' del suo netto) */
+  function fattGia(f,c,mappa){
+    if(!f||fattSegno(f)<0)return 0;
+    const a=(mappa||fattAcconti)[String(f.id)];
+    return a?Math.min(a.tot,Math.max(0,+c.daPagare||0)):0;
+  }
+  /* la porta dalla fattura alla ricevuta: «Acconto ricevuto» */
+  function fattAcconto(id){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f){toast("Fattura non trovata");return;}
+    if(!f.cliente_id||!fattCliCache.some(c=>String(c.id)===String(f.cliente_id))){
+      toast("Questa fattura non ha un cliente dell'anagrafica: scegli il cliente nella fattura, poi segna l'acconto");return;}
+    if(!window.gestRicevutePagamento){toast("Le ricevute non sono ancora pronte: riprova fra un attimo");return;}
+    window.gestRicevutePagamento.nuova({cliente_id:f.cliente_id,fattura_id:f.id});
+  }
   function fattScaduta(f,gg){
     if(f.stato!=="emessa")return false;
     const sc=fattScadenza(f,gg);
@@ -525,6 +560,8 @@
     /* 7 nov 2026 — top/prima: cosa resta in vista nella finestra (gest-schede-clienti.js) */
     if(f.stato==="bozza")   az.push({lab:"📤 Emetti",       action:"fatt-stato",data:{id:f.id,v:"emessa"},top:true,prima:true});
     if(f.stato==="emessa")  az.push({lab:"💶 Ha pagato", action:"fatt-stato",data:{id:f.id,v:"pagata"},top:true,prima:true});
+    /* 17 nov 2026 — ha pagato solo una parte: si segna con una ricevuta legata a questa fattura */
+    if(f.stato==="emessa"&&f.numero&&fattSegno(f)>0) az.push({lab:"💶 Acconto ricevuto",action:"fatt-acconto",data:{id:f.id},top:true});
     if(f.stato==="pagata")  az.push({lab:"↩ Non pagata",    action:"fatt-stato",data:{id:f.id,v:"emessa"}});
     az.push({lab:"✏ Apri",     action:"edit-fatt",data:{id:f.id}});
     /* due PDF diversi, e i nomi di prima si scambiavano facilmente:
@@ -553,8 +590,8 @@
          scrive coi centesimi (860,50 € usciva «861 €»). eur2 e' lo stesso
          che questa scheda usa gia' piu' sotto per il dettaglio. */
       /* 7 nov 2026 — sotto l'importo si dice cos'e': nei Preventivi c'e' «IVA esclusa» */
-      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare)
-            +'<small class="fatt-imp-et">'+((+c.ritenuta>0)?"netto da incassare":(((f.regime_fiscale||(fattAzienda||{}).regime_fiscale)==="RF19")?"totale fattura":"IVA compresa"))+'</small></span>',
+      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare-(f.stato==="emessa"?fattGia(f,c):0))
+            +'<small class="fatt-imp-et">'+((f.stato==="emessa"&&fattGia(f,c)>0)?("resta da incassare · già ricevuti "+eur2(fattGia(f,c))):((+c.ritenuta>0)?"netto da incassare":(((f.regime_fiscale||(fattAzienda||{}).regime_fiscale)==="RF19")?"totale fattura":"IVA compresa")))+'</small></span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -617,6 +654,8 @@
     const gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
     const anno=todayStr().slice(0,4);
     const conti={};fattCache.forEach(f=>{conti[f.id]=fattConti(f);});
+    /* se la lettura degli acconti cade si resta al conto intero, come prima */
+    try{ fattAcconti=await fattAccontiLeggi(); }catch(e){ fattAcconti={}; }
 
     const emesse = fattCache.filter(f=>f.stato==="emessa");
     const pagate = fattCache.filter(f=>f.stato==="pagata");
@@ -626,10 +665,15 @@
 
     /* le note di credito entrano col meno: se no "da incassare" cresce proprio
        quando hai appena restituito dei soldi */
-    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].daPagareFirmato,0);
+    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].daPagareFirmato-fattGia(f,conti[f.id]),0);
     const tFatt = fattLavLiberi.reduce((s,l)=>s+(+l.importo||0),0);
+    /* gli acconti entrano il giorno in cui sono arrivati; il saldo il giorno
+       in cui la fattura e' stata segnata pagata */
+    const _accAnno=f=>((fattAcconti[String(f.id)]||{}).righe||[]).filter(r=>String(r.data||"").slice(0,4)===anno).reduce((s,r)=>s+r.importo,0);
     const incAnno = pagate.filter(f=>String(f.data_pagata||f.data||"").slice(0,4)===anno)
-                          .reduce((s,f)=>s+conti[f.id].daPagareFirmato,0);
+                          .reduce((s,f)=>s+conti[f.id].daPagareFirmato-fattGia(f,conti[f.id]),0)
+                  + fattCache.filter(f=>(f.stato==="emessa"||f.stato==="pagata")&&fattSegno(f)>0)
+                          .reduce((s,f)=>s+Math.min(_accAnno(f),fattGia(f,conti[f.id])),0);
     const attese = emesse.filter(f=>fattSegno(f)>0).map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
     const piuVecchio = attese.length?Math.max.apply(null,attese):null;
     const emesseAnno = fattCache.filter(f=>f.numero&&String(f.anno)===anno).length;
@@ -662,6 +706,7 @@
        sua riga: dove sono quelle che si riprendono, e quali sono eliminate
        per sempre. Vuoto = i buchi sono tutti dello stesso tipo (frase di prima). */
     let buchiRighe=[];
+    let _buchiSoloPersi="";   /* i numeri, se sono TUTTI eliminati per sempre */
     try{
       const _raw=(sb.raw||sb.from.bind(sb));
       const [rVivi,rTutti]=await Promise.all([
@@ -701,6 +746,7 @@
          su dati che non hanno niente di sbagliato. Nel gestionale vero i
          numeri li dai tu da 1 e l'avviso resta. */
       if(buchi.length&&!window.TI_GIRO){
+        if(buchi.every(b=>!b.cestino&&!b.nol))_buchiSoloPersi=buchi.map(b=>b.n).join(",");
         const nCest=buchi.filter(b=>b.cestino).length;
         buchiNelCestino=nCest;
         const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")
@@ -751,11 +797,27 @@
        se e' nel Cestino, la riga si clicca e apre il Cestino (19 settembre). */
     const avvisi=[];
     if(piuVecchio!=null&&piuVecchio>gg) avvisi.push("credito fermo da "+piuVecchio+(piuVecchio===1?" giorno":" giorni"));
+    /* 17 nov 2026 — I NUMERI MANCANTI: MENO RUMORE.
+       (1) in un reparto che quest'anno non ha fatture col numero l'avviso non
+           c'entra: lo si vede dove le fatture ci sono;
+       (2) i numeri eliminati PER SEMPRE non tornano piu': detto una volta,
+           con «Ho capito» l'avviso si spegne e torna solo se ne manca uno nuovo.
+       Quelli nel Cestino restano sempre: li' c'e' ancora qualcosa da fare. */
+    _fattBuchiChiave=""; let _buchiZitti=false;
+    if(buchiTono==="err"){
+      if(!emesseAnno&&!buchiNelCestino)_buchiZitti=true;
+      else if(_buchiSoloPersi){
+        _fattBuchiChiave=_buchiSoloPersi;
+        try{ if(localStorage.getItem("ti_fatt_buchi_"+sbUid+"_"+anno)===_buchiSoloPersi)_buchiZitti=true; }catch(e){}
+      }
+    }
+    if(buchiTono==="err"&&_buchiZitti)buchiTono="visto";
     if(buchiTono==="err") avvisi.push(buchiTesto);
     if(sum&&avvisi.length)
       sum.innerHTML+='<div class="fatt-avviso"'+(buchiNelCestino?' data-action="vai-sezione" data-go="cestino" style="cursor:pointer"':'')+'>⚠ '
         +esc(avvisi.join(" · "))+(buchiNelCestino?" · apri il Cestino":"")
-        +(buchiTono==="err"?buchiRighe.map(r=>'<div class="fatt-avviso-riga">'+esc(r)+'</div>').join(""):"")+'</div>';
+        +(buchiTono==="err"?buchiRighe.map(r=>'<div class="fatt-avviso-riga">'+esc(r)+'</div>').join(""):"")
+        +((buchiTono==="err"&&_fattBuchiChiave)?' <button type="button" class="btn btn-sm" data-action="fatt-buchi-ok" style="margin-left:10px">Ho capito</button>':"")+'</div>';
     /* i numeri non si sono potuti controllare: una riga sua, col pulsante (nel giro di prova no) */
     if(sum&&buchiNonLetti&&!window.TI_GIRO)
       sum.innerHTML+='<div class="fatt-avviso fatt-avviso--riprova"><span>⚠ Non riesco a controllare i numeri delle fatture: riprova.</span>'
@@ -848,6 +910,12 @@
       + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
   }
   /* il regime delle spese del modulo aperto adesso — vedi fattForm */
+  let _fattBuchiChiave="";
+  function fattBuchiOk(){
+    if(!_fattBuchiChiave)return;
+    try{ localStorage.setItem("ti_fatt_buchi_"+sbUid+"_"+todayStr().slice(0,4),_fattBuchiChiave); }catch(e){}
+    renderFatture();
+  }
   let fattRegimeCorrente="art15";
   /* 17 nov 2026 — IL BOLLO DA 2 € SI METTE DA SOLO. In forfettario, su una
      fattura NUOVA, quando il totale passa i 77,47 € la casella prende 2,00;

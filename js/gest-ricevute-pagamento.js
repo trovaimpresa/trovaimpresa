@@ -131,9 +131,12 @@
   }
 
   /* ── il modulo ───────────────────────────────────────────────────────── */
-  async function nuova() {
+  async function nuova(pre) {
     if (!pronto()) return;
     await leggiClienti();
+    /* 17 nov 2026 — si arriva anche dalla fattura («Acconto ricevuto»): servono
+       le ricevute gia' fatte, per sapere quanto resta */
+    if (pre && pre.cliente_id) { try { await leggi(); } catch (_) {} }
     const opz = '<option value="">— scegli il cliente —</option>'
       + _clienti.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.nome || "") + '</option>'; }).join("")
       + '<option value="__altro">Un altro (scrivo il nome)</option>';
@@ -214,6 +217,24 @@
     };
     document.getElementById("rp-imp").addEventListener("input", cont);
     document.getElementById("rp-met").addEventListener("change", cont);
+    /* 17 nov 2026 — dalla fattura: cliente e fattura gia' scelti, l'importo lo
+       scrive lui (e' un acconto: se scrive tutto il resto, la fattura si salda) */
+    if (pre && pre.cliente_id) {
+      sel.value = String(pre.cliente_id);
+      if (sel.value === String(pre.cliente_id)) {
+        await fattCarica();
+        if (pre.fattura_id) {
+          fSel.value = String(pre.fattura_id);
+          const f = _aperte.find(function (x) { return String(x.id) === fSel.value; });
+          if (f) {
+            document.getElementById("rp-caus").value = "Acconto fattura " + f.nome;
+            const d = document.getElementById("rp-fatt-dice");
+            if (d) d.innerHTML = "Restano da pagare <b>" + eur2(f.resta) + "</b>. Scrivi quanto ti ha dato.";
+            const imp = document.getElementById("rp-imp"); if (imp) imp.focus();
+          }
+        }
+      }
+    }
   }
 
   async function salva(btn) {
@@ -259,6 +280,9 @@
       if (fatt && importo >= fatt.resta - 0.004 && typeof window.chatSegnaPagata === "function") {
         try { pagata = await window.chatSegnaPagata(fatt.id); } catch (_) { pagata = false; }
       }
+      /* un acconto non cambia lo stato della fattura, ma cambia quanto resta:
+         Fatture e Riepilogo vanno ridisegnati */
+      if (fatt && !pagata && typeof rinfresca === "function") { try { rinfresca("fatture", "riepilogo"); } catch (_) {} }
       toast("Ricevuta N. " + numero + "/" + anno + " salvata ✔"
         + (fatt ? (pagata ? " — fattura " + fatt.nome + " pagata" : " — fattura " + fatt.nome + ": resta da saldare") : ""));
       await pdf(nuovaR);

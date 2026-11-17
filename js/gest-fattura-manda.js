@@ -31,7 +31,11 @@
     const cosa=(f.tipo==="nota_credito"?"la nota di credito ":"la fattura ")+num;
     const r=[];
     r.push("Buongiorno, le mando "+(f.numero?cosa.trim():"in anticipo la fattura (ancora in bozza)")+(f.data?" del "+fdate(f.data):"")+".");
-    r.push("Importo"+(f.stato==="pagata"?"":" da pagare")+": "+eur2(c.daPagare)+".");
+    const gia=(f.stato==="emessa"&&typeof fattGia==="function")?fattGia(f,c):0;
+    if(gia>0){
+      r.push("Importo della fattura: "+eur2(c.daPagare)+".");
+      r.push("Già ricevuti: "+eur2(gia)+". Resta da pagare: "+eur2(c.daPagare-gia)+".");
+    }else r.push("Importo"+(f.stato==="pagata"?"":" da pagare")+": "+eur2(c.daPagare)+".");
     if(f.stato!=="pagata"&&f.tipo!=="nota_credito"){
       const gg=(+az.giorni_pagamento)||30, sc=fattScadenza(f,gg), mo=fattModo(f), ib=fattIban(f);
       if(sc)r.push("Da pagare entro il "+fdate(sc)+".");
