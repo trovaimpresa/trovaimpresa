@@ -120,7 +120,12 @@
                       :v==="prossime"?A.filter(s=>s.stato!=="fatta"&&(!s.data_scadenza||s.data_scadenza>=oggi))
                       :v==="fatte"?A.filter(s=>s.stato==="fatta"):A.slice();
     const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadTutte,v.k).length);
-    const L=filtra(scadTutte,scadVista);
+    let L=filtra(scadTutte,scadVista);
+    /* 18 nov 2026 — collaudo dello Scadenzario: in «Tutte» una scadenza fatta
+       stava in mezzo a quelle ancora da fare (ordine per data): adesso le fatte
+       vanno in fondo. In «Fatte» in cima sta l'ultima, non la piu' vecchia. */
+    if(scadVista==="fatte") L.reverse();
+    else if(scadVista==="tutte") L=L.filter(s=>s.stato!=="fatta").concat(L.filter(s=>s.stato==="fatta").reverse());
     renderTabella({
       id:"scad", box:"#scad-list",
       viste:"#scad-viste", visteDef:SCAD_VISTE, vista:scadVista, conta:conta, azioneVista:"scad-vista",
@@ -264,7 +269,13 @@
         .eq("user_id",sbUid).eq("mestiere_id",mid).order("data_prevista",{ascending:false}).limit(100);
       lv=dl||[];
     }
-    const tipoOpts=tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
+    /* 18 nov 2026 — collaudo dello Scadenzario: una scadenza NUOVA nasceva col
+       tipo «DURC» gia' scelto. Chi scriveva «Revisione furgone» e non toccava
+       la tendina si ritrovava «DURC» sulla scheda; chi lasciava il titolo vuoto
+       salvava una scadenza chiamata «DURC» senza volerlo. Adesso la nuova parte
+       da «— scegli —». Una gia' salvata tiene il suo tipo. */
+    const tipoVuoto=(isNew&&!s.tipo_pratica)?'<option value="" selected>— scegli —</option>':"";
+    const tipoOpts=tipoVuoto+tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     const opeOpts=(dipCache||[]).map(o=>`<option value="${o.id}" ${String(o.id)===String(s.operatore_id||"")?"selected":""}>${esc(o.nome)}</option>`).join("");
     const mezOpts=mz.map(m=>`<option value="${m.id}" ${m.id===s.mezzo_id?"selected":""}>${esc(m.nome)}${m.targa?" ("+esc(m.targa)+")":""}</option>`).join("");
@@ -283,7 +294,7 @@
       +`<label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:2px 0 10px;cursor:pointer"><input type="checkbox" id="s-avvisa" ${avvisaOn?"checked":""} style="width:20px;height:20px"><span>Avvisami per email</span></label>`
       +`<div class="field"><label>Si ripete</label><select id="s-ripeti">`
       +  SCAD_RIPETI.map(r=>'<option value="'+r[0]+'"'+((+s.ripeti_mesi||0)===r[0]?' selected':'')+'>'+r[1]+'</option>').join("")
-      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola. Prima dovevi ricordartene tu.</div></div>`
+      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola.</div></div>`
       +'<p class="sh-nota">Ti arriva una email 30 giorni prima, 7 giorni prima e il giorno prima, all\'indirizzo con cui entri qui. Una sola email al giorno con tutte le scadenze vicine, non una per ognuna.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -307,7 +318,15 @@
       +`<button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button>`);
     ctrAscolta('scadenza');
   }
+  /* 18 nov 2026 — collaudo dello Scadenzario: due tocchi veloci su «Crea»
+     facevano DUE scadenze uguali (visto dal vivo). Stesso freno dei Promemoria. */
+  let _scadSalvo=false;
   async function saveScad(id){
+    if(_scadSalvo)return;
+    _scadSalvo=true;
+    try{ await _saveScad(id); } finally{ _scadSalvo=false; }
+  }
+  async function _saveScad(id){
     /* 11 nov 2026 — collaudo 3.11: se il titolo e' vuoto ma il tipo e'
        scelto (DURC, Revisione…) il titolo e' il tipo: una casella in meno.
        Quello che manca davvero si segna sulla casella (campoManca). */

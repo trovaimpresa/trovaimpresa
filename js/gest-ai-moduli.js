@@ -1264,13 +1264,18 @@
   function ctrRegoleScadenza(){
     const out=[];
     const tit=$("#s-tit");
-    if(tit&&!tit.value.trim()) out.push({el:tit,grave:"rosso",
-      dice:"Manca il titolo: nell'elenco e nell'email di promemoria esce una riga senza nome, e non sai cosa scade."});
+    /* 18 nov 2026 — collaudo dello Scadenzario: il controllo diceva «DA
+       CORREGGERE: manca il titolo» anche quando il Salva lo accetta (dall'11 nov
+       col titolo vuoto e il tipo scelto, il titolo e' il tipo). Adesso i due
+       dicono la stessa cosa: rosso solo se manca anche il tipo. */
+    const _tp=$("#s-tipo"); const _tpv=_tp?String(_tp.value||""):"";
+    if(tit&&!tit.value.trim()&&(!_tpv||/^altro$/i.test(_tpv))) out.push({el:tit,grave:"rosso",
+      dice:"Manca cosa scade: scrivilo nel titolo, o scegli il tipo qui sotto."});
     const data=$("#s-data");
     if(data&&!data.value) out.push({el:data,grave:"rosso",
       dice:"Manca la data: senza, non scade mai e il promemoria non parte."});
     else if(data&&data.value&&data.value<todayStr()) out.push({el:data,grave:"arancio",
-      dice:"Questa data è già passata: il promemoria non ti arriverà più."});
+      dice:"Questa data è già passata: nasce già scaduta. La rivedi in rosso qui, nel Riepilogo e nell'email del lunedì."});
     return out;
   }
 

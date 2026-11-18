@@ -3492,3 +3492,33 @@ Aperto sui Promemoria:
 Funzione nuova (sì di Alex il 18 nov, foto prima): **«Rimanda ▾»** in alto nella finestra del promemoria, dopo «Segna fatto»: A domani / Fra 3 giorni / Fra una settimana (`PROM_RIMANDA`, `promRimandaMetti`, `promRimanda`, azione `prom-rimanda` in `js/gest-promemoria.js`). Si conta da OGGI, non dalla data vecchia; azzera `inviato` (l'avviso riparte). Non c'è sul promemoria nuovo né su quello fatto. La mette `promForm` dopo `openSheetGrande` (un `<details class="sh-altro">` suo: stile e chiusura sono quelli di «Altro ▾»). Sul telefono è una riga larga sotto «Segna fatto». ⚠️ NON nel Noleggio: lì le schede hanno un'altra grafica, serve prima la foto.
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: LO SCADENZARIO
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 5 scadenze e 1 persona «PROVA CONTROLLORE» (più una chiamata «Bollo», nata dal titolo vuoto), tutto cancellato anche dal Cestino: →0← righe, conti delle tabelle uguali a prima.
+
+Dove sta il codice: `js/gest-scadenze-pratiche.js` (elenco `renderScadenze`, scheda `scadCard`, modulo `scadForm`, `saveScad` → `_saveScad`, le righe in sola lettura `scadenzePersone` / `scadenzeMezzi`, il riquadro dentro il lavoro `renderLavScadenze`); i clic (`new-scad`, `edit-scad`, `scad-stato`, `del-scad`, `scad-persona`) in `js/gest-finestre-eventi.js`; i tipi `tipiScadenza` e `scadCache` in `js/gest-richieste-chat.js`; il controllo `ctrRegoleScadenza` in `js/gest-ai-moduli.js`; l'email in `netlify/functions/promemoria-mattina.js`.
+
+Sistemato (DA PUBBLICARE: commit sul clone, Alex non ha ancora scritto «pubblica»; banco `tools/banco-gestionale.js app`: ZERO difetti):
+- **Due tocchi su «Crea» = due scadenze** (visto dal vivo): freno `_scadSalvo`, come i Promemoria.
+- **La prossima perdeva la persona**: una scadenza che si ripete, segnata fatta, rinasceva senza `operatore_id` (il patentino di Mario senza Mario).
+- **«Segna fatta», «Riapri», «Segna fatta» = due prossime uguali**: adesso se la prossima c'è già (stesso nome, stesso giorno, aperta) non se ne fa un'altra, e lo dice.
+- La prossima si fa dalla riga che torna dal database (`.select("*")`), non da `scadCache`: dal Calendario la memoria può essere vuota e la prossima non nasceva.
+- **Una scadenza nuova nasceva col tipo «DURC»**: adesso parte da «— scegli —» (solo le NUOVE). Titolo vuoto + tipo scelto = il titolo è il tipo (regola dell'11 nov), titolo vuoto + nessun tipo = casella rossa.
+- **Ordine**: in «Tutte» le fatte vanno in fondo (stavano in mezzo alle aperte); in «Fatte» in cima c'è l'ultima.
+- Il controllo diceva «DA CORREGGERE: manca il titolo» anche quando il Salva lo accetta; e «data passata: il promemoria non ti arriverà più» (non vero: torna nell'email del lunedì).
+- Tolta dal modulo la frase «Prima dovevi ricordartene tu».
+
+Funziona (provato): crea, modifica, scaduta in rosso, pallino nel menu, Riepilogo, Calendario (si apre da lì e chiudendo si torna lì), pulsanti in alto della scadenza giusta, cestino → rimetti a posto, note con `<b>` e virgolette scritte pulite, 375 px senza niente fuori né sotto 13 px, console pulita.
+
+Da sapere:
+- Le correzioni sono state provate PRIMA del push rimettendo le funzioni nella pagina vera (`(0,eval)(String(fn).replace(…))`); `scad-stato` sta dentro l'ascoltatore grande: per provarlo si mette un ascoltatore «capture» con la copia del pezzo. `ctrRegoleScadenza` invece NON si riesce a sostituire così (il controllore tiene la funzione vecchia): si prova dopo il push.
+- Lo Scadenzario del Noleggio (`js/nol-giornata-squadra-promemoria.js`) è spento (la sezione non c'è nel menu): non toccato.
+- Nelle prove: le date nel 2027 o passate da più di un giorno non entrano nell'email del mattino.
+
+Aperto sullo Scadenzario:
+1. Funzione proposta ad Alex (aspetta il sì): le fatture dei fornitori da pagare anche nello Scadenzario, in sola lettura come mezzi e persone (oggi stanno in Fornitori, Calendario ed email).
+2. Nel Cestino due scadenze con lo stesso nome non si distinguono (manca la data nella riga).
+3. NON provati: l'email del mattino con dentro una scadenza (parte una volta al giorno), Chat con AI e «Parla» che riempiono la scadenza col tipo nuovo «— scegli —» (costano crediti; `riempiTendina('s-tipo', …, 'Altro')` non è cambiata), lo studio tecnico, il telefono vero.
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
