@@ -994,7 +994,13 @@
      funzionato: non si toccano. */
   function quandoCompare(id, poi, tentativi) {
     var n = (tentativi == null) ? 50 : tentativi;      /* 50 x 60 ms = 3 secondi */
-    if (document.getElementById(id)) { poi(); return; }
+    /* ⛔ 18 nov 2026 (collaudo dal vivo dopo 29a782f) — la casella deve essere
+       quella VISIBILE. Una finestra chiusa lascia le sue caselle nella pagina,
+       nascoste: dopo un lavoro aperto e chiuso, la scadenza chiesta alla chat
+       si apriva VUOTA, perche' si riempiva la casella vecchia mentre
+       `scadForm` (async) costruiva quella nuova. */
+    var el = document.getElementById(id);
+    if (el && el.offsetParent !== null) { poi(); return; }
     if (n <= 0) return;
     setTimeout(function () { quandoCompare(id, poi, n - 1); }, 60);
   }
