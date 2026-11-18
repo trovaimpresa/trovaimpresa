@@ -32,7 +32,13 @@
     {t:"gest_fornitori",   lab:"Fornitori",         campo:"nome",           ic:"🏪"},
     {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true},
     {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
-    {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
+    /* 18 nov 2026 (collaudo di Giornate): le ore non hanno un nome, la riga diceva solo «del 18/11/2026» */
+    {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true,
+     nome:function(r){
+       const n=String(r.nota||"").trim(); if(n) return n;
+       const o=+r.ore||0;
+       return (o?String(o).replace(".",",")+(o===1?" ora":" ore"):"Ore")+(r.data?" del "+fdate(r.data):"");
+     }},
     /* 15 agosto 2026 — il rapportino di cantiere.
        ⚠️ "campo" non basta e per questo c'e' "nome": un rapportino non ha ne'
        nome ne' titolo ne' descrizione, e il ripiego del Cestino avrebbe

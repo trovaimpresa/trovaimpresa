@@ -3403,3 +3403,34 @@ NON provati: telefono vero, microfono («Parla»), PDF vero allegato, studio tec
 - Provato dal vivo dopo il push →29a782f← (computer e 375 px): archivio per reparto ✔, data ✔, «Apri la scadenza» ✔, telefono letto ✔, giorno della settimana ✔, categoria del fornitore ✔, «premi «Crea lavoro»» ✔, allegato rifiutato che lo dice ✔, «Foto» alto come gli altri ✔.
 - ⛔ Trovato dal vivo: dopo un modulo chiuso, la scadenza chiesta alla chat si apriva VUOTA (`quandoCompare` riempiva la casella della finestra vecchia, nascosta, mentre `scadForm` async costruiva la nuova). Adesso aspetta la casella VISIBILE. E una volta la chat ha scritto un telefono inventato: istruzione nuova «telefoni, email, importi, date solo se letti con un attrezzo in questa risposta».
 
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: LE GIORNATE
+
+Collaudo dal vivo nel reparto «ferramenta» (2 lavori, 1 persona «Prova Controllore», 5 giornate, 1 spesa, 1 pieno, 1 foto, 1 mezzo di prova: tutto cancellato, anche dal deposito; i conti delle tabelle sono tornati uguali a prima, 0 righe).
+
+Dove sta il codice: `js/gest-giornate.js` (lettura `giorCarica`, disegno `giorDisegna` / `giorDisegnaProp`, AI `giorCompila`, salva `giorSalva` → `giorScrivi`, `giorCancella`, `giorModSalva`, `giorPdf`, i clic su `[data-gior]`); `js/gest-giornate-extra.js` (foto, spesa, benzina e km, fattura o bolla: `gx*`, clic su `[data-gx]`); `js/gest-giornata-completa.js` (le giornate mandate dagli operai); `js/correggi-giornata.js` (il correttore). `giorScrivi` la usano anche «Parla» (`gest-parla.js`) e «Approva».
+
+Sistemato e online:
+- ⛔ **Le 8 ore si dividono anche con le giornate GIA' salvate** (`giorScrivi`). Prima si guardavano solo le schede dello stesso salvataggio: la stessa persona segnata in due volte in due cantieri lo stesso giorno prendeva 8 + 8 ore (visto dal vivo: 2 giorni di lavoro, 480 € di manodopera invece di 320). Adesso: ore «da giornata intera» → si ridividono (4 + 4); ore scritte a mano dall'operaio (5) → non si toccano, alla nuova va quello che manca (3). Cancellando una delle due, all'altra tornano le 8 (`giorCancella`).
+- **Doppione**: stessa persona, stesso giorno, stesso cantiere → non salva e lo dice («… ha già la giornata di … a «…»»). Capitava con «Come ieri» premuto due volte.
+- **Il racconto si svuota dopo il Salva** (restava nella casella, pronto per un doppione).
+- **«+ nuovo»**: «DAVID» o «prova controllore» scritti diversi sono la persona che c'e' gia' (nasceva un doppione in Squadra). Confronto con `_gNorm` sul nome intero.
+- **«modifica»** cambia solo la nota (`g.nota`): se il rapportino aveva i materiali, «Materiali: …» finiva scritto due volte.
+- **Numeri**: «12o» nei chilometri si salvava come 12 (anche nell'importo di spesa e benzina) → adesso lo rifiuta (`gxNonNumero`). ⚠️ La causa e' `_numeroIt` (parseFloat) che vale per tutto il gestionale: NON toccata.
+- Solo chilometri: non scrive piu' «0,00 € · 12 km».
+- Il messaggio «Controlla qui sotto e premi Salva» non sparisce piu' quando arriva il nome del titolare (`giorMsgSchede`).
+- Cestino: la riga delle ore dice «8 ore del 18/11/2026» (diceva solo « del 18/11/2026»).
+
+Da sapere:
+- «Salva» passa dal correttore: se corregge «Cosa avete fatto» si ferma e va premuto un'altra volta (come la nota del Calendario).
+- «Io»: la scelta sta nel browser (`localStorage gior_io_<uid>`). Nelle prove rimetterla com'era.
+- Una giornata nel Cestino sono DUE righe (rapportino + ore): «Rimetti a posto» sul rapportino riporta su anche le ore.
+- La spesa e il pieno tolti da Giornate si cancellano per sempre (non vanno nel Cestino), dopo il secondo tocco.
+- «Acquisti del mese» conta solo la merce letta da fatture e bolle, non le spese a mano.
+- Provare il codice nuovo PRIMA del push: le funzioni di `gest-giornate.js` sono globali, si ridefiniscono nella pagina vera con `(0,eval)(String.raw\`async function giorScrivi(){…}\`)`.
+- In nuvola `add_repo` con accesso push passa solo DOPO che Alex ha scritto «pubblica» (prima e' rifiutato): intanto si lavora in un `git clone` pubblico.
+
+Aperto sulle Giornate:
+1. Rimettendo a posto dal Cestino una delle due mezze giornate, l'altra (tornata a 8) non si ridivide: 4 + 8.
+2. Proposte ad Alex (da decidere, foto fatte): **«Giornata intera / Mezza giornata»** per ogni persona nella scheda (oggi il capo non puo' segnare mezza giornata: l'AI sente «mezza giornata» e scrive 8 ore); **«modifica» completa** (giorno, cantiere, persone: oggi cambia solo il testo); **togliere una foto** dalla finestra Foto.
+3. NON provati: la notifica della sera e il consulente del lavoro (sono le impostazioni vere di Alex), «Approva / Scarta» di una giornata mandata da un operaio (serve l'app operaio), «Fattura o bolla» fino al salvataggio (il modulo si apre col lavoro e la data giusti), il telefono vero.

@@ -85,6 +85,8 @@ function gxDella(g, primaDelGiorno) {
   };
 }
 function gxNomeMezzo(id) { const m = gxDati.mezzi.find(x => String(x.id) === String(id)); return m ? m.nome : ""; }
+/* nel numero c'e' qualcosa che non e' una cifra (una «o» al posto dello zero…) */
+function gxNonNumero(t) { return /[^0-9.,\s€'’\u00a0-]/.test(String(t || "")); }
 function gxSomma(a) { return a.reduce((s, x) => s + (+x.importo || 0), 0); }
 
 /* ---------------------------------------------------------------------
@@ -109,7 +111,7 @@ function gxHtmlGiorno(g, primaDelGiorno) {
   if (d.rif.length) {
     const km = d.rif.reduce((s, r) => s + (+r.km || 0), 0);
     const mezzi = [...new Set(d.rif.map(r => gxNomeMezzo(r.mezzo_id)).filter(Boolean))];
-    ha.push('<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + gxEuro(gxSomma(d.rif)) + (km > 0 ? " · " + gxKm(km) : "") + (mezzi.length ? " · " + esc(mezzi.join(", ")) : "") + '</button>');
+    ha.push('<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + [gxSomma(d.rif) > 0 ? gxEuro(gxSomma(d.rif)) : "", km > 0 ? gxKm(km) : ""].filter(Boolean).join(" · ") + (mezzi.length ? " · " + esc(mezzi.join(", ")) : "") + '</button>');
   }
   if (d.fatt.length) ha.push('<span>' + GX_IC.fatt + d.fatt.length + (d.fatt.length === 1 ? " fattura" : " fatture") + " · " + gxEuro(gxSomma(d.fatt)) + '</span>');
   return (ha.length ? '<div class="gx-ha">' + ha.join("") + '</div>' : "")
@@ -211,7 +213,8 @@ async function gxSpesaSalva(btn) {
   const descrizione = ($("#gx-sp-desc").value || "").trim();
   const testo = ($("#gx-sp-imp").value || "").trim();
   const importo = _numIt("#gx-sp-imp");
-  if (testo && importo == null) { toast("Non ho capito l'importo: scrivilo come 12,50"); return; }
+  /* 18 nov 2026: «12o» si leggeva 12 (la lettera spariva zitta) */
+  if (testo && (importo == null || gxNonNumero(testo))) { toast("Non ho capito l'importo: scrivilo come 12,50"); return; }
   if (importo == null || importo <= 0) { toast("Scrivi quanto hai speso, per esempio 12,50"); return; }
   if (!descrizione) { toast("Scrivi cosa hai comprato"); return; }
   if (btn) btn.disabled = true;
@@ -241,7 +244,7 @@ function gxBenzApri(g) {
   const mezzi = gxDati.mezzi.slice().sort((a, b) => (String(b.mestiere_id) === String(mid)) - (String(a.mestiere_id) === String(mid)));
   const righe = delGiorno.map(function (r) {
     const aspetta = gxTogli === "rif:" + r.id;
-    return '<div class="gx-riga"><div class="t">' + esc(gxNomeMezzo(r.mezzo_id) || "Mezzo") + (+r.km > 0 ? " · " + gxKm(r.km) : "") + (r.distributore ? " · " + esc(r.distributore) : "") + '</div><b>' + gxEuro(r.importo) + '</b>'
+    return '<div class="gx-riga"><div class="t">' + esc(gxNomeMezzo(r.mezzo_id) || "Mezzo") + (+r.km > 0 ? " · " + gxKm(r.km) : "") + (r.distributore ? " · " + esc(r.distributore) : "") + '</div><b>' + (+r.importo > 0 ? gxEuro(r.importo) : "") + '</b>'
       + (aspetta ? '<button type="button" class="gx-si" data-gx="benz-togli-si" data-id="' + esc(String(r.id)) + '">Sì, togli</button>'
                  : '<button type="button" class="gx-link" data-gx="benz-togli" data-id="' + esc(String(r.id)) + '">togli</button>')
       + '</div>';
@@ -277,8 +280,8 @@ async function gxBenzSalva(btn) {
   if (!mezzo_id) { toast("Scegli il mezzo"); return; }
   const tImp = ($("#gx-bz-imp").value || "").trim(), tKm = ($("#gx-bz-km").value || "").trim();
   const importo = _numIt("#gx-bz-imp"), kmN = _numIt("#gx-bz-km");
-  if (tImp && importo == null) { toast("Non ho capito la benzina: scrivila come 50 o 50,00"); return; }
-  if (tKm && kmN == null) { toast("Non ho capito i chilometri: scrivi solo il numero, per esempio 120"); return; }
+  if (tImp && (importo == null || gxNonNumero(tImp))) { toast("Non ho capito la benzina: scrivila come 50 o 50,00"); return; }
+  if (tKm && (kmN == null || gxNonNumero(tKm.replace(/\s*km\s*$/i, "")))) { toast("Non ho capito i chilometri: scrivi solo il numero, per esempio 120"); return; }
   const imp = importo == null ? 0 : importo, km = kmN == null ? null : Math.round(kmN);
   if (!(imp > 0) && !(km > 0)) { toast("Scrivi la benzina, i chilometri, o tutti e due"); return; }
   if (btn) btn.disabled = true;
