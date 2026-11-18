@@ -75,6 +75,22 @@
     t.click();
   });
 
+  /* 18 nov 2026 — LE AZIONI DELLA SCHEDA GIUSTA.
+     «Apri» su una scheda mette da parte le altre sue azioni (_azPendenti) e la
+     finestra che si apre se le prende. Lo faceva l'ascoltatore qui sotto. Ma i
+     Promemoria hanno un ascoltatore LORO (js/gest-promemoria.js), che e'
+     caricato prima e quindi parte prima: la finestra si apriva con le azioni
+     del promemoria aperto LA VOLTA PRIMA. Aprivi A, poi B, premevi «Butta» e
+     nel Cestino finiva A; e dopo, «Nuovo cliente» si apriva con «Segna fatto»
+     e «Butta» di un promemoria.
+     Adesso lo fa questo ascoltatore, che lavora «in discesa» (capture) e
+     quindi parte prima di TUTTI gli altri, in qualunque file stiano. */
+  document.addEventListener("click",function(e){
+    const t=e.target&&e.target.closest?e.target.closest("[data-action]"):null;if(!t)return;
+    const a=String(t.dataset.action||""),id=t.dataset.id;
+    if(AZ_APERTURA.test(a)) _azPendenti=AZ_APRI[a+":"+String(id==null?"":id)]||null;
+  },true);
+
   document.addEventListener("click",async e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
@@ -83,7 +99,8 @@
     if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
     /* «Apri» su una scheda: le altre azioni di quella scheda aspettano qui,
        e se le prende la finestra appena si apre (vedi openSheetGrande). */
-    if(AZ_APERTURA.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
+    /* 18 nov 2026 — questa riga adesso sta nell'ascoltatore qui sopra, che
+       parte PRIMA di tutti gli altri (vedi «LE AZIONI DELLA SCHEDA GIUSTA»). */
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){

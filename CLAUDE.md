@@ -3459,4 +3459,34 @@ Funzione nuova (sì di Alex, foto prima): pulsante **«Apri il preventivo»** ne
 
 Da sapere: in `gest_dalsito` di Alex ci sono →3← righe vecchie (richieste →16, 42, 43←, di prima dell'8 nov, non sue): non si vedono, non toccate. Le Giornate del 18 nov erano ancora in lavorazione in un'altra sessione: su GitHub non c'erano.
 
+Provato dal vivo dopo il push 44fa9dd, computer e 375 px: tutto ✔
+
 NON provati: una richiesta vera mandata dalla scheda pubblica (email di avviso comprese), gli incarichi dello studio tecnico (`incarichi_richieste`), la foto allegata, «Email» e «Copia» della risposta, il clic vero su WhatsApp, telefono vero.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: I PROMEMORIA
+
+Collaudo dal vivo (computer 1440 e 375 px). ⚠️ I promemoria NON sono di un reparto: sono dell'account (tabella `promemoria`, niente `mestiere_id`). La tabella era a →0← righe: le prove «PROVA CONTROLLORE …» si scrivono dal modulo vero e alla fine si cancellano con SQL (`delete … where testo ilike 'PROVA CONTROLLORE%'`). Fatto: →0← righe. Per non finire nell'email del mattino (parte alle 5:30 UTC) le prove hanno date del 2027 e si cancellano in giornata.
+
+Dove sta il codice: `js/gest-promemoria.js` (elenco `renderPromemoria`, scheda `promCard`, modulo `promForm`, `salvaPromemoria`, `promStato`, `promButta`, i clic in un ascoltatore SUO). Il pallino lo conta `renderContatori` (js/gest-riepilogo-schede.js), il Calendario li legge in `calAltreDate`, l'email in `netlify/functions/promemoria-mattina.js`. Il Noleggio ha la sua copia in `js/nol-giornata-squadra-promemoria.js`.
+
+Sistemato:
+- ⛔ **I pulsanti in alto erano del promemoria aperto LA VOLTA PRIMA.** Aprivi A, poi B, premevi «Butta» (o «Segna fatto») e toccava ad A. Alla prima apertura non c'erano proprio. E dopo, «Nuovo cliente» si apriva con «Segna fatto / Butta» di un promemoria. Causa: l'ascoltatore dei Promemoria è caricato prima di quello della pagina, che è quello che metteva da parte le azioni (`_azPendenti`). Adesso lo fa un ascoltatore «capture» in `js/gest-finestre-eventi.js`, che parte prima di tutti. ⚠️ Chi fa un file nuovo con un ascoltatore suo e un'azione `edit-…` / `apri-…` è coperto da quello.
+- **Due tocchi su «Salva» = due promemoria**: fermato (`_promSalvo`). Anche nel Noleggio.
+- **«Ogni mese» dal 31 gennaio saltava febbraio** (andava al 3 marzo): `promProssima` si ferma all'ultimo giorno del mese (28 febbraio). Anche nel Noleggio.
+- **Il pallino nel menu, l'Assistente e il Calendario** non si aggiornavano dopo Salva / Segna fatto / Butta: `promRidisegna()` → `rinfresca("promemoria","calendario","riepilogo")`.
+- **«Butta» senza domanda**: adesso chiede «Mettere nel cestino «…»?» (`tiChiedi`, come lo Scadenzario). Il banco non lo vedeva perché alla prima apertura i pulsanti in alto mancavano.
+- Nei «Fatti» in cima c'è l'ultimo. La nota del modulo diceva «alle 7:30»: d'inverno arriva alle 6:30 → «la mattina presto» (anche nel Noleggio).
+
+Da sapere:
+- Nelle prove, dopo un'azione aspettare che l'elenco si ridisegni prima di cliccare un'altra scheda; e i pulsanti in alto si cercano dentro `#sheet` (la finestra chiusa resta nella pagina).
+- «Salva» passa dal correttore delle parole (come le Giornate): se corregge, va premuto due volte. Ha cambiato «aggiunta una nota» in «Aggiunte una nota»: è il correttore generale, NON toccato.
+- Un promemoria «fatto» aperto dal Calendario mentre l'elenco è su «Da fare» prende i pulsanti dall'ultimo disegno che lo conteneva.
+- Uno che si ripete, segnato fatto in forte ritardo, va alla data dopo anche se è ancora passata (scelta del 14 set: si parte dalla SUA data).
+- Per provare il codice nuovo prima del push: le funzioni di `gest-promemoria.js` sono globali, si ridefiniscono nella pagina vera con `(0,eval)(String(funzione).replace(…))`.
+
+Aperto sui Promemoria:
+1. Proposta ad Alex (foto mandate): pulsante «Rimanda» (a domani / fra 3 giorni / fra una settimana). Aspetta il suo sì.
+2. NON provati: l'email del mattino con dentro un promemoria (parte una volta al giorno), «Parla» e la Chat con AI che scrivono/leggono un promemoria (costano crediti), il Noleggio dal vivo (solo banco), il telefono vero.
+3. In `strumenti-comuni.js` restano le vecchie funzioni promemoria dei pannelli (`apriPromemoria`, `eliminaPromemoria`…): nessuna pagina le chiama più (cercato in tutti gli html e js). Codice morto, non toccato.
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.

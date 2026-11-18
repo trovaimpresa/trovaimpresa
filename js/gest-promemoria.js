@@ -84,9 +84,23 @@
      ritardo, il giro dopo non slitta. */
   function promProssima(dataISO, mesi) {
     const [y, m, d] = String(dataISO).split("-").map(Number);
-    const dt = new Date(y, m - 1 + (+mesi || 0), d);
+    /* 18 nov 2026 — il 31 gennaio «ogni mese» saltava febbraio e finiva al
+       3 marzo (il 31 febbraio non esiste, e JavaScript va avanti di tre
+       giorni). Adesso si ferma all'ultimo giorno del mese: 28 febbraio. */
+    const primo = new Date(y, m - 1 + (+mesi || 0), 1);
+    const ultimo = new Date(primo.getFullYear(), primo.getMonth() + 1, 0).getDate();
+    const dt = new Date(primo.getFullYear(), primo.getMonth(), Math.min(d, ultimo));
     return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0")
            + "-" + String(dt.getDate()).padStart(2, "0");
+  }
+
+  /* 18 nov 2026 — dopo ogni scrittura si ridisegna con rinfresca(): cosi' si
+     aggiornano anche il pallino nel menu, la riga «promemoria passati»
+     dell'Assistente e il Calendario. Prima si ridisegnava solo l'elenco e il
+     pallino restava fermo fino a quando non si ricaricava la pagina. */
+  function promRidisegna() {
+    if (typeof rinfresca === "function") rinfresca("promemoria", "calendario", "riepilogo");
+    else renderPromemoria();
   }
 
   // ---------------------------------------------------------------------
@@ -117,6 +131,8 @@
     const conta = {};
     PROM_VISTE.forEach(v => { conta[v.k] = filtra(promCache, v.k).length; });
     const L = filtra(promCache, promVista);
+    /* 18 nov 2026 — nei «Fatti» in cima sta l'ultimo, non il piu' vecchio */
+    if (promVista === "fatti") L.reverse();
 
     renderTabella({
       id: "prom", box: "#prom-list",
@@ -216,7 +232,7 @@
           <select id="p-avvisa">${opz(PROM_AVVISI, p.avvisa_giorni || 0)}</select></div>
         <div class="field"><label>Si ripete</label>
           <select id="p-ripeti">${opz(PROM_RIPETI, p.ripeti_mesi || "")}</select></div>
-        <div class="sh-nota">L'email ti arriva la mattina alle <b>7:30</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
+        <div class="sh-nota">L'email ti arriva <b>la mattina presto</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
       </div>
 
       </div></div>`,
@@ -226,7 +242,15 @@
     try{ if(typeof ctrAscolta==="function") ctrAscolta("promemoria"); }catch(e){}
   }
 
+  /* 18 nov 2026 — due tocchi veloci su «Salva» facevano nascere due promemoria
+     uguali. Finche' il primo salvataggio non ha risposto, il secondo aspetta. */
+  let _promSalvo = false;
   async function salvaPromemoria(id) {
+    if (_promSalvo) return;
+    _promSalvo = true;
+    try { await _salvaPromemoria(id); } finally { _promSalvo = false; }
+  }
+  async function _salvaPromemoria(id) {
     if (!sbUid) { toast("Devi essere loggato"); return; }
     const v = s => { const e = $(s); return e ? String(e.value || "").trim() : ""; };
 
@@ -267,7 +291,7 @@
     }
     closeSheet();
     toast(id ? "Promemoria aggiornato ✔" : "Promemoria creato ✔");
-    renderPromemoria();
+    promRidisegna();
   }
 
   /* Segna fatto / riapri. Se si ripete, segnarlo fatto NON lo chiude: lo
@@ -296,12 +320,20 @@
     } else {
       toast(stato === "fatto" ? "Segnato fatto ✔" : "Riaperto");
     }
-    renderPromemoria();
+    promRidisegna();
   }
 
   /* Butta = scrivi la data in eliminato_il. La riga resta e si recupera dal
      Cestino, come tutto il resto del gestionale. */
   async function promButta(id) {
+    /* 18 nov 2026 — «Butta» partiva al primo tocco, senza chiedere niente
+       (regola 22: la domanda dice QUALE cosa). Stessa domanda dello Scadenzario. */
+    const _p = promCache.find(x => String(x.id) === String(id));
+    const _nm = _p && _p.testo ? "«" + String(_p.testo).slice(0, 80) + "»" : "questo promemoria";
+    const _ok = (typeof window.tiChiedi === "function")
+      ? await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.", { titolo: "Mettere nel cestino " + _nm + "?", si: "Sì, nel cestino", no: "No", rosso: true })
+      : confirm("Mettere nel cestino " + _nm + "?");
+    if (!_ok) return;
     const q = await sb.from("promemoria")
       .update({ eliminato_il: new Date().toISOString() })
       .eq("id", id).eq("user_id", sbUid).select("id");
@@ -310,7 +342,7 @@
       return;
     }
     toast("Buttato nel cestino");
-    renderPromemoria();
+    promRidisegna();
   }
 
   // ---------------------------------------------------------------------
