@@ -671,17 +671,25 @@
     const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const OPS=ops||[];
     const telMap=Object.fromEntries(OPS.map(o=>[o.id,o.telefono||""]));
-    if(sel)sel.innerHTML=[`<option value=""${agFilter.op===""?" selected":""}>Tutti</option>`]
-      .concat(OPS.map(d=>`<option value="${esc(d.id)}"${agFilter.op===d.id?" selected":""}>${esc(d.nome)}</option>`)).join("");
     /* lavori del reparto (Supabase) */
     /* "*" per i professionisti: le schede mostrano tipo pratica, stato e
        protocollo, e con l'elenco fisso quei campi non arrivavano mai (9/8/2026) */
     const {data,error:_eAg}=await sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,importo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     /* 12 nov 2026 — regola 20: senza rete non si dice «Niente da fare qui» */
-    if(_eAg){listaNonLetta(body,ruoloUtente==='professionista'?"le pratiche":"i lavori","agenda");return;}
+    if(_eAg){if(sel&&!sel.options.length)sel.innerHTML=`<option value="">Tutti</option>`;listaNonLetta(body,ruoloUtente==='professionista'?"le pratiche":"i lavori","agenda");return;}
     let L=data||[];
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
-    if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
+    /* 18 nov 2026 — si' di Alex: nella tendina «Nessuno assegnato» e, accanto a
+       ogni nome, quanti lavori ha (di quelli che si stanno guardando: «Da fare»
+       o «Tutti»). La tendina si riempie qui, dopo aver letto i lavori. */
+    if(agFilter.op&&agFilter.op!=="_nessuno"&&!OPS.some(o=>o.id===agFilter.op))agFilter.op="";
+    const _agN=id=>L.filter(l=>l.operatore_id===id).length;
+    const _agSenza=L.filter(l=>!l.operatore_id).length;
+    if(sel)sel.innerHTML=[`<option value=""${agFilter.op===""?" selected":""}>Tutti (${L.length})</option>`]
+      .concat(OPS.map(d=>`<option value="${esc(d.id)}"${agFilter.op===d.id?" selected":""}>${esc(d.nome)} (${_agN(d.id)})</option>`))
+      .concat([`<option value="_nessuno"${agFilter.op==="_nessuno"?" selected":""}>Nessuno assegnato (${_agSenza})</option>`]).join("");
+    if(agFilter.op==="_nessuno")L=L.filter(l=>!l.operatore_id);
+    else if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
     /* 18 nov 2026 — collaudo dell'Agenda operatore: in «Tutti» i lavori fatti
        stavano in cima (hanno le date piu' vecchie). Prima quelli da fare, i
        fatti in fondo con l'ultimo per primo (come lo Scadenzario). */
@@ -706,7 +714,7 @@
     renderTabella({
       id:"ag", box:"#ag-body",
       vuoto:tabVuoto("Niente da fare qui",
-        agFilter.op?"Questo operatore non ha lavori assegnati.":"Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO),
+        agFilter.op==="_nessuno"?"Tutti i lavori hanno una persona.":agFilter.op?"Questa persona non ha lavori assegnati.":"Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO),
       colonne:[{lab:"Lavoro",w:"34%"},{lab:"Dove",w:"26%",cls:"c-cli"},{lab:"Quando",w:"16%"},
                {lab:"Stato",w:"12%"},{lab:"Importo",w:"12%",cls:"c-imp"}],
       righe:L.map(l=>{

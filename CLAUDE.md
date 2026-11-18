@@ -3548,7 +3548,7 @@ Da sapere:
 - Per provare prima del push: `(0,eval)(String(renderOre).replace(…))` funziona per `renderOre` e `renderAgenda`.
 
 Aperto sull'Agenda operatore:
-1. Proposta ad Alex (aspetta il sì): nella tendina «Operatore» la voce «Nessuno assegnato» e il numero dei lavori accanto a ogni nome.
+1. (chiuso) Funzione nuova, sì di Alex il 18 nov (foto prima): nella tendina «Operatore» la voce **«Nessuno assegnato»** (`agFilter.op=="_nessuno"`) e il numero dei lavori accanto a ogni nome (`_agN`, conta quelli che si stanno guardando: «Da fare» o «Tutti»). La tendina adesso si riempie DOPO aver letto i lavori (`renderAgenda`).
 2. La linguetta viola «F» a sinistra copre la prima lettera di «Mostra» sul telefono (vale per tutte le sezioni, come «Parla»).
 3. NON provati: l'app dell'operaio che timbra davvero (le timbrature sono state scritte con SQL), lo studio tecnico, il telefono vero. La correzione di `jobForm` va riprovata dal vivo dopo il push (non si riesce a sostituire nella pagina).
 
