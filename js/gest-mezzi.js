@@ -110,6 +110,48 @@
     return Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
   }
 
+  /* ============================================================
+     18 nov 2026 — MEZZI E ATTREZZATURE: UNA VOCE SOLA, DUE LINGUETTE
+     (deciso da Alex, foto approvata). Non si cancella niente: le due
+     sezioni #mezzi e #attrezzature restano, e resta anche il pulsante
+     «attrezzature» del menu, solo che non si vede (classe .mz-dentro):
+     cosi' tutto quello che lo «preme» da fuori (Scadenzario, Calendario,
+     Riepilogo, Chat, collegamenti #attrezzature) continua a funzionare.
+     ⛔ Lo studio tecnico NON ha i mezzi (TAB_NASCOSTI_PRO): li' resta la
+     voce sola «Strumenti», senza linguette. mzUnito() lo decide.
+     La chiamano renderParcoMezzi e le tre adattaMenu… (js/gest-reparti.js). */
+  function mzUnito(){
+    try{ return !(typeof tabNascosto==="function"&&tabNascosto("mezzi")); }catch(e){ return true; }
+  }
+  function mzUnisci(){
+    const uni=mzUnito(), pro=(ruoloUtente==='professionista');
+    const nomeA=pro?"Strumenti":"Attrezzature";
+    const tutto=pro?"Mezzi e strumenti":"Mezzi e attrezzature";
+    const bM=document.querySelector('nav.tabs button[data-tab="mezzi"]'),
+          bA=document.querySelector('nav.tabs button[data-tab="attrezzature"]');
+    if(bA)bA.classList.toggle("mz-dentro",uni);
+    if(bM){ const s=bM.querySelector("span"); if(s){ const t=uni?tutto:"Mezzi"; if(s.textContent!==t)s.textContent=t; } }
+    const nA=mezziCache.filter(m=>m.categoria==="attrezzatura").length, nM=mezziCache.length-nA;
+    [["mezzi","Mezzi"],["attrezzature",nomeA]].forEach(function(x){
+      const sec=document.getElementById(x[0]); if(!sec)return;
+      const h=sec.querySelector(".sec-head h2"), t=uni?tutto:x[1];
+      if(h&&h.textContent!==t)h.textContent=t;
+      let g=sec.querySelector(".mz-ling");
+      if(!uni){ if(g)g.remove(); return; }
+      if(!g){ g=document.createElement("div"); g.className="segm mz-ling"; const sh=sec.querySelector(".sec-head"); if(!sh)return; sh.after(g); }
+      const html='<button type="button" data-mz="mezzi"'+(x[0]==="mezzi"?' class="on"':'')+'>Mezzi ('+nM+')</button>'
+        +'<button type="button" data-mz="attrezzature"'+(x[0]==="attrezzature"?' class="on"':'')+'>'+nomeA+' ('+nA+')</button>';
+      if(g.innerHTML!==html)g.innerHTML=html;
+    });
+  }
+  if(!window.__mzAscolto){
+    window.__mzAscolto=1;
+    document.addEventListener("click",function(e){
+      const b=e.target.closest&&e.target.closest("[data-mz]"); if(!b||b.classList.contains("on"))return;
+      const v=document.querySelector('nav.tabs button[data-tab="'+b.getAttribute("data-mz")+'"]');
+      if(v)v.click();
+    });
+  }
   async function renderMezzi(){ return renderParcoMezzi("mezzo"); }
   async function renderAttrezzature(){ return renderParcoMezzi("attrezzatura"); }
 
@@ -124,6 +166,7 @@
       return;
     }
     const scadMap=await caricaMezziCache();
+    try{ mzUnisci(); }catch(e){}
     /* 12 nov 2026 — regola 20: senza rete non si dice «I mezzi» vuoti */
     if(window._mezziKo){listaNonLetta(box,attrezzo?(STRU?"gli strumenti":"le attrezzature"):"i mezzi",attrezzo?"attrezzature":"mezzi",attrezzo?"#attr-viste":"#mezzi-viste");return;}
     const tutti=mezziCache.filter(m=> attrezzo ? m.categoria==="attrezzatura" : m.categoria!=="attrezzatura");

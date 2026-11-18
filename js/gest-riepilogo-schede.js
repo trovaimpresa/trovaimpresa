@@ -163,6 +163,11 @@
       const mAvvisa=_avvisa(_idVeicoli), sAvvisa2=_avvisa(_idStrum);
       setCnt("#cnt-mezzi",mAvvisa.length,mAvvisa.some(v=>v.scadute>0)?"err":"attesa");
       setCnt("#cnt-attrezzature",sAvvisa2.length,sAvvisa2.some(v=>v.scadute>0)?"err":"attesa");
+      /* 18 nov 2026 — voce sola «Mezzi e attrezzature»: il numerino conta tutte e due */
+      if(typeof mzUnito==="function"&&mzUnito()){
+        const _tut=mAvvisa.concat(sAvvisa2);
+        setCnt("#cnt-mezzi",_tut.length,_tut.some(v=>v.scadute>0)?"err":"attesa");
+      }
       /* Scadenzario: aperte, scadute o entro 30 giorni. */
       /* 27 set 2026 — anche quelle delle PERSONE (visita medica, formazione...):
          lo Scadenzario le mostra, e il numerino del menu diceva 1 mentre dentro

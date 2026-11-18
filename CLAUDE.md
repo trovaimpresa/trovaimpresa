@@ -3553,3 +3553,33 @@ Aperto sull'Agenda operatore:
 3. NON provati: l'app dell'operaio che timbra davvero (le timbrature sono state scritte con SQL), lo studio tecnico, il telefono vero. La correzione di `jobForm` va riprovata dal vivo dopo il push (non si riesce a sostituire nella pagina).
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: SQUADRA, MEZZI E ATTREZZATURE (e le due unite)
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 2 persone, 2 lavori, 5 righe di ore, 1 attestato, 2 mezzi, 1 scadenza, 3 pieni «PROVA CONTROLLORE». Tutto cancellato: →0← righe, conti delle tabelle uguali a prima.
+
+Dove sta il codice: Squadra = `js/gest-squadra.js` (elenco `renderDip`, modulo `squadraForm`, `squadraAdd`, `squadraSave`, `dipElimina`, attestati `doc*`), le schede `js/gest-squadra-giornate.js` (`sqgCard`, `sqgApri`), messaggi `js/chat-squadra.js` + `js/chat-gest.js`, QR `mostraQrInvito` in `js/gest-reparti.js`. Mezzi e Attrezzature = `js/gest-mezzi.js` (una funzione sola, `renderParcoMezzi`), rifornimenti in `js/gest-carte-documenti.js`.
+
+Squadra, sistemato:
+- ⛔ **L'invito vale 14 giorni e una volta sola** (`gest_redeem_invito`), ma la scheda diceva «Invitato» + «Mandagli l'app» per sempre, anche dopo «Rimuovi accesso». Il 18 nov gli inviti in attesa nel database erano →5← e tutti e →5← scaduti. Adesso `invitoStato(inv)` → attivo · invitato · scaduto · tolto · senza; `dipStato` dice «Invito scaduto» / «Accesso tolto»; i pulsanti del link ci sono solo se l'invito è vivo (`invitoVivo`).
+- **«Nuovo invito»** (sì di Alex, foto prima): `squadraNuovoInvito(id)`, azione `sq-invito`. Codice nuovo, altri 14 giorni, stessa riga di `gest_membri` (ruolo e permessi restano); chi non l'ha mai avuta nasce coi permessi dell'operaio. Poi apre il QR, che adesso ha anche «Invia su WhatsApp».
+- Salvare una persona senza invito diceva «ruolo e permessi non aggiornati» a ogni Salva. I messaggi che dicevano «rimandale il link d'invito» / «Nessun accesso» / «Apri la sua scheda e fagli inquadrare il QR» parlavano di cose che non c'erano.
+- Sul telefono «Invia» dei messaggi usciva dallo schermo (il microfono avvolge la casella in `.dt-box`). Vale anche per i messaggi del lavoro e per l'app operaio.
+- Le schede cambiavano posto (nessun ordine): ultima aggiunta in cima. Con una cosa scaduta, quella in scadenza spariva dalla scheda. Telefono senza cifre: niente link vuoto, e il Controllo lo segna. «Il documento è scaduta» → «scaduto» (`_ctrScad`, quinto parametro).
+
+Mezzi e Attrezzature, sistemato: il Controllo taceva con assicurazione / revisione / collaudo già scaduti; chilometri più bassi di un pieno di prima → chiede; senza carte il pieno partiva su «Carta aziendale»; «9000 km» senza il punto; spostando da una parte all'altra lo dice; «Rifornimenti» non esce più sulle attrezzature.
+
+**UNA VOCE SOLA «Mezzi e attrezzature»** (deciso da Alex, foto prima): `mzUnito()` / `mzUnisci()` in `js/gest-mezzi.js`, stile in fondo a `css/gestionale-stile.css` (`?v=32`).
+- ⛔ Non è stato cancellato niente: le sezioni `#mezzi` e `#attrezzature` restano, e resta il pulsante `attrezzature` del menu con la classe `.mz-dentro` (non si vede). Chi lo «preme» da fuori (Scadenzario, Calendario, Riepilogo, Chat `[vai:attrezzature]`, `#attrezzature`) funziona come prima; nel menu si accende «Mezzi e attrezzature» (riga in `js/gest-finestre-eventi.js`). Il numerino conta tutte e due.
+- ⛔ Studio tecnico: i mezzi sono nascosti → `mzUnito()` è falso → resta la voce sola «Strumenti», senza linguette. Chi ha scelto «Sei anche un professionista?» vede «Mezzi e strumenti».
+- Il Noleggio ha già una voce sola «Mezzi»: non toccato. La Squadra del Noleggio non è nel menu: non toccata.
+- Nomi aggiornati: MANUALE di `chat-gestionale.mjs`, `js/aiuti.js`, `js/gest-tutorial.js`, testi delle due sezioni. ⚠️ Il video `attrezzature.mp4` non ha più una voce sua: il ▶ di «Mezzi e attrezzature» fa vedere quello dei mezzi. Da rifare con `tools/tutorial/registra.py` se Alex lo vuole.
+- Il banco adesso misura 25 sezioni (Attrezzature non è più una voce): la linguetta Attrezzature si guarda a mano.
+
+Aperto:
+1. NON provati: l'operaio che apre il link nuovo dal telefono (serve un telefono vero e un account suo), lo studio tecnico dal vivo prima del push, il telefono vero.
+2. Proposto e non deciso: avviso «C'è già una persona con questo nome» quando si aggiunge (come per i clienti).
+3. Agenda operatore + Squadra in una voce sola: deciso da Alex il 18 nov in un'altra chat, in questa sessione NON fatto (la riga non è arrivata qui).
+4. Mezzi: l'elenco è in ordine di nome, non «ultimi in cima».
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.

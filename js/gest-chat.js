@@ -403,7 +403,9 @@
   };
   function voceDelMenu(sez) {
     var b = document.querySelector('nav.tabs button[data-tab="' + sez + '"]');
-    if (!b || b.hidden || getComputedStyle(b).display === 'none') return null;
+    if (!b || b.hidden) return null;
+    /* 18 nov 2026: «attrezzature» sta dentro «Mezzi e attrezzature» (.mz-dentro): non si vede nel menu ma ci si va */
+    if (getComputedStyle(b).display === 'none' && !b.classList.contains('mz-dentro')) return null;
     return b;
   }
   function pulsanteVai(tutto, sez, vista) {

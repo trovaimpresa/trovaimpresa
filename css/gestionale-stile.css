@@ -300,3 +300,10 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 /* 11 nov 2026 — regola 19: uno zero e' grigio (prima «0 da fare» era arancione) */
 #landing .pc3:not(.c-dafare) .pc3-num b{color:#9fb2c9 !important}
 .pc3:not(.c-dafare) .pc3-num b{color:#64748b}
+
+/* 18 nov 2026 — MEZZI E ATTREZZATURE: una voce sola, due linguette (js/gest-mezzi.js, mzUnisci).
+   La voce «attrezzature» del menu resta nella pagina ma non si vede. */
+#appview nav.tabs button.mz-dentro{display:none!important}
+#appview .wrap section .segm.mz-ling{display:flex;width:100%;max-width:560px;margin:0 0 16px;padding:4px}
+#appview .wrap section .segm.mz-ling button{flex:1;height:48px;font-size:18px;font-weight:700}
+@media(max-width:620px){#appview .wrap section .segm.mz-ling{max-width:none}}

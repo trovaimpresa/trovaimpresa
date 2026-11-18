@@ -296,6 +296,8 @@
     return ruoloUtente==='professionista'&&(v==='impresa'||v==='artigiano');
   }
   function adattaMenuProfessionista(){
+    /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
     if(ruoloUtente!=='professionista')return;
     try{
       tabNascosti().forEach(function(t){
@@ -452,6 +454,8 @@
     return 'Lavori';
   }
   function adattaMenuArtigiano(){
+    /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
     if(ruoloUtente!=='artigiano')return;
     try{
       /* ⚠️ tutto dentro `nav.tabs`: fuori di li' ci sono i pulsantini
@@ -570,6 +574,8 @@
   function _cm(k){ return (ruoloUtente==='professionista'?_CM.pro:_CM.imp)[k]; }
 
   function adattaMenuImpresa(){
+    /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
     if(ruoloUtente==='professionista')return;
     try{
       ['#tab-computi','#tab-prezzario','#tab-sal'].forEach(function(sel){
