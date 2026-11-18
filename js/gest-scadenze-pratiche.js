@@ -86,6 +86,33 @@
       return out;
     }catch(_){ return []; }
   }
+  /* ============================================================
+     18 nov 2026 (si' di Alex, foto prima) — LE FATTURE DEI FORNITORI DA PAGARE.
+     Stavano in Fornitori, nel Calendario e nell'email, ma non qui: proprio
+     dove uno guarda cosa scade. Stessa idea di persone e mezzi: sola lettura,
+     il dato resta in un posto solo, si apre e si segna pagata dalla fattura.
+     Solo quelle NON pagate e con la data di scadenza scritta.
+     ============================================================ */
+  async function scadenzeFornitori(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const m=mid||curMestiere();
+      const [rff,rfo]=await Promise.all([
+        sb.from("gest_fatture_fornitori").select("id,numero,scadenza,stato,importo,fornitore_id").eq("user_id",sbUid).eq("mestiere_id",m),
+        sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",m)
+      ]);
+      if(rff.error)return [];
+      const nomi={};((rfo&&rfo.data)||[]).forEach(function(f){nomi[String(f.id)]=f.nome;});
+      const out=[];
+      (rff.data||[]).forEach(function(x){
+        if(!x.scadenza||x.stato==="pagata")return;
+        out.push({id:"ff:"+x.id,_forn:true,_ffId:x.id,_nome:nomi[String(x.fornitore_id)]||"Fornitore",
+          titolo:"Fattura"+(x.numero?" n. "+x.numero:"")+((+x.importo||0)?" — "+eur2(+x.importo):""),
+          tipo_pratica:"Da pagare",data_scadenza:x.scadenza,stato:"aperta"});
+      });
+      return out;
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -112,8 +139,8 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const [scadPersone,scadMezzi]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid)]);
-    const scadTutte=scadCache.concat(scadPersone,scadMezzi).sort(function(a,b){
+    const [scadPersone,scadMezzi,scadForn]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid)]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
@@ -142,6 +169,20 @@
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._forn){
+          const apriF={action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}};
+          return {
+            id:s.id,
+            click:apriF,
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `🏭 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"🏭 Apri la fattura del fornitore",action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}}]
+          };
+        }
         if(s._mezzo){
           const apri={action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}};
           return {
@@ -195,6 +236,17 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    if(s._forn){
+      let bgF="var(--sfondo)",fgF="var(--testo-2)",labF="In tempo",tonoF="t-neutro";
+      if(s.data_scadenza<oggi){bgF="var(--err-bg)";fgF="var(--err)";labF="Scaduta";tonoF="t-err";}
+      else if(s.data_scadenza<=lim){bgF="var(--attesa-bg)";fgF="var(--attesa)";labF="In scadenza";tonoF="t-attesa";}
+      return schedaJob({
+        tono:tonoF, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgF};color:${fgF}">${labF}</span>`,
+        meta:["🏭 "+esc(s._nome)+" (fornitore)", "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri",action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}}]
+      });
+    }
     if(s._mezzo){
       let bgM="var(--sfondo)",fgM="var(--testo-2)",labM="In tempo",tonoM="t-neutro";
       if(s.data_scadenza<oggi){bgM="var(--err-bg)";fgM="var(--err)";labM="Scaduta";tonoM="t-err";}

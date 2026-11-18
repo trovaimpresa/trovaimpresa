@@ -3499,7 +3499,7 @@ Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 5 scadenz
 
 Dove sta il codice: `js/gest-scadenze-pratiche.js` (elenco `renderScadenze`, scheda `scadCard`, modulo `scadForm`, `saveScad` → `_saveScad`, le righe in sola lettura `scadenzePersone` / `scadenzeMezzi`, il riquadro dentro il lavoro `renderLavScadenze`); i clic (`new-scad`, `edit-scad`, `scad-stato`, `del-scad`, `scad-persona`) in `js/gest-finestre-eventi.js`; i tipi `tipiScadenza` e `scadCache` in `js/gest-richieste-chat.js`; il controllo `ctrRegoleScadenza` in `js/gest-ai-moduli.js`; l'email in `netlify/functions/promemoria-mattina.js`.
 
-Sistemato (DA PUBBLICARE: commit sul clone, Alex non ha ancora scritto «pubblica»; banco `tools/banco-gestionale.js app`: ZERO difetti):
+Sistemato e ONLINE (→d69f526←, Netlify riuscito, riprovato dal vivo dopo il push su computer e 375 px: tutto ✔, compreso `ctrRegoleScadenza`; banco `tools/banco-gestionale.js app`: ZERO difetti):
 - **Due tocchi su «Crea» = due scadenze** (visto dal vivo): freno `_scadSalvo`, come i Promemoria.
 - **La prossima perdeva la persona**: una scadenza che si ripete, segnata fatta, rinasceva senza `operatore_id` (il patentino di Mario senza Mario).
 - **«Segna fatta», «Riapri», «Segna fatta» = due prossime uguali**: adesso se la prossima c'è già (stesso nome, stesso giorno, aperta) non se ne fa un'altra, e lo dice.
@@ -3517,8 +3517,10 @@ Da sapere:
 - Nelle prove: le date nel 2027 o passate da più di un giorno non entrano nell'email del mattino.
 
 Aperto sullo Scadenzario:
-1. Funzione proposta ad Alex (aspetta il sì): le fatture dei fornitori da pagare anche nello Scadenzario, in sola lettura come mezzi e persone (oggi stanno in Fornitori, Calendario ed email).
+1. (chiuso) Le fatture dei fornitori nello Scadenzario: Alex ha detto sì, vedi sotto.
 2. Nel Cestino due scadenze con lo stesso nome non si distinguono (manca la data nella riga).
 3. NON provati: l'email del mattino con dentro una scadenza (parte una volta al giorno), Chat con AI e «Parla» che riempiono la scadenza col tipo nuovo «— scegli —» (costano crediti; `riempiTendina('s-tipo', …, 'Altro')` non è cambiata), lo studio tecnico, il telefono vero.
+
+Funzione nuova (sì di Alex il 18 nov, foto prima): **le fatture dei fornitori da pagare nello Scadenzario** (`scadenzeFornitori(mid)` in `js/gest-scadenze-pratiche.js`, righe con `_forn:true`, in sola lettura come mezzi e persone). Solo quelle NON pagate e con la scadenza scritta, del reparto. «Apri» passa da `cal-vai` → Fornitori → `edit-fattf`. E `calVai` (js/gest-schede-clienti.js) adesso riporta DA DOVE si è partiti (`_da`): dallo Scadenzario, chiuso un mezzo o una fattura, si finiva nel Calendario.
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
