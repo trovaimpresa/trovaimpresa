@@ -3671,4 +3671,4 @@ Difetti trovati e sistemati:
 5. Sotto «+ Nuovo acconto» una riga ripeteva il messaggio vuoto: tolta per impresa e artigiano (resta allo studio).
 6. «Ci sono 1 lavorazioni» → «C'è 1 lavorazione». La domanda «Mettere nel cestino l'acconto n. …» trova il numero anche dall'elenco.
 
-Errore 400 all'apertura: non si ripete (3 aperture, 0 errori). Nei registri Supabase del 18 nov l'unico 400 su una lettura è `gest_preventivi?computo_id=…` (colonna che non esiste) alle 20:49: NON sta in nessun file del sito, era una prova scritta a mano in un'altra sessione.
+Errore 400 all'apertura: non si ripete (3 aperture, 0 errori). Nei registri Supabase del 18 nov l'unico 400 su una lettura è `gest_preventivi?computo_id=…` (colonna che non esiste) alle 20:49: NON sta in nessun file del sito, quasi certo una prova scritta a mano in un'altra sessione.
