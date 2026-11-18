@@ -154,6 +154,7 @@
     /* --- fatture --- */
     'fatt-riga-add':     'Aggiungi una voce alla fattura: descrizione, quantità, prezzo e IVA.',
     'prev-riga-add':     'Aggiungi una voce al preventivo: descrizione, quantità e prezzo.',
+    'prev-pz-apri':      'Cerca una voce nel tuo prezzario e mettila nel preventivo con descrizione e prezzo.',
     'upload-fattura':    'Attacca alla fattura il suo PDF, così lo ritrovi qui invece che nelle cartelle del computer.',
     'fatt':              'Crea la fattura di questo lavoro, con dentro già la voce giusta.',
 

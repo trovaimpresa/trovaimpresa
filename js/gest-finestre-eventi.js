@@ -265,6 +265,8 @@
       return;
     }
     if(a==="dp-metti")return dpMetti();
+    if(a==="prev-pz-apri")return prevPzApri();     /* 18 nov 2026 */
+    if(a==="prev-pz-usa")return prevPzUsa(id);
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     /* un capitolo si può aggiungere anche a mano, non solo arrivando da un
        computo: chi scrive il preventivo a mano ha lo stesso bisogno di

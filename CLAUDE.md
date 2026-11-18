@@ -3657,4 +3657,4 @@ Difetti trovati e sistemati:
 7. Importa: il confronto con la tariffa vecchia leggeva 999 voci su 12.762 (tetto 1000 del database). Ora a pezzi da 1000. «mio» non compare più fra le tariffe da aggiornare (col cestino buttava i prezzi suoi).
 8. Tendina «Prezzario» del computo e «Prendi i prezzi dal prezzario»: una tariffa appena importata non c'era (contavano solo le 500 voci più usate). Ora `ppCaricaFonti()` le chiede al database (si azzera con `ppFontiDb=null` dove si azzera `ppTutte`). «mio» non è una tariffa.
 
-Non c'è: scegliere una voce del prezzario DENTRO il preventivo (oggi ci arriva solo passando dal computo). Proposto ad Alex con la foto, aspetta il sì.
+Nuovo (sì di Alex, foto approvata): «€ Prendi dal prezzario» dentro il preventivo, sotto «+ Aggiungi voce». `prevPzApri` / `prevPzCerca` / `prevPzUsa` in js/gest-preventivi.js (ricerca come il computo: `_ppFiltra` + `_ppCercaDb`). La voce entra con descrizione, unità e prezzo, quantità 1 da correggere (il cursore va lì); se l'ultima riga è vuota la riempie. Conta +1 su `usata_volte`. Provato dal vivo: 12 × 24,50 = 294,00 €, salvato giusto; 375 px a posto.

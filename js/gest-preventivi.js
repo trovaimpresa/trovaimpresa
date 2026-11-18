@@ -165,6 +165,68 @@
     if(!pz||!String(pz.value||"").trim())return "";
     return "= "+eur2(impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0)));
   }
+  /* ============================================================
+     18 nov 2026 — «€ PRENDI DAL PREZZARIO» DENTRO IL PREVENTIVO
+     ============================================================
+     Chiesto da Alessio dopo il collaudo del Prezzario (foto approvata):
+     prima una voce del prezzario arrivava nel preventivo SOLO passando dal
+     computo. Adesso si cerca qui e si tocca. Stessa ricerca del computo
+     (_ppFiltra in memoria + _ppCercaDb con tutte le parole, js/gest-computo.js).
+     Il prezzo entra come una FOTO: se domani lo cambi nel prezzario, il
+     preventivo non cambia. */
+  let prevPzCache=[], prevPzTimer=null, prevPzGiro=0;
+  function prevPzApri(){
+    const box=$("#prev-pz");if(!box)return;
+    const vedi=(box.style.display==="none");
+    box.style.display=vedi?"":"none";
+    const c=$("#prev-pz-cerca");
+    if(vedi&&c){
+      if(!c._agganciato){c._agganciato=true;c.oninput=function(){clearTimeout(prevPzTimer);prevPzTimer=setTimeout(prevPzCerca,350);};}
+      c.focus();prevPzCerca();
+    }
+  }
+  async function prevPzCerca(){
+    const box=$("#prev-pz-lista");if(!box)return;
+    const giro=++prevPzGiro;
+    if(!ppTutte.length){ const e=await ppCarica(); if(e){box.innerHTML='<p class="fatt-empty">Non riesco a leggere il prezzario.</p>';return;} }
+    const q=String(($("#prev-pz-cerca")&&$("#prev-pz-cerca").value)||"").trim();
+    let L=_ppFiltra(ppTutte,q);
+    if(q&&ppTetto){
+      const db=await _ppCercaDb(q,null,40);
+      const ids=new Set(L.map(x=>String(x.id)));
+      db.forEach(x=>{ if(!ids.has(String(x.id))){ids.add(String(x.id));L.push(x);} });
+    }
+    if(giro!==prevPzGiro)return;   /* nel frattempo ha scritto altro */
+    prevPzCache=L.slice(0,8);
+    if(!ppTutte.length){box.innerHTML='<p class="fatt-empty">Il prezzario è vuoto: le voci le scrivi nella voce Prezzario del menu.</p>';return;}
+    if(!prevPzCache.length){box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola.</p>';return;}
+    box.innerHTML=prevPzCache.map(x=>
+      '<div class="spesa-row" data-action="prev-pz-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
+      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
+      +'<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
+      +((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
+      +(x.fonte?(" · "+(x.fonte==="mio"?"prezzo tuo":esc(x.fonte))):"")
+      +'</small></span><b></b></div>').join("")
+      +((L.length>prevPzCache.length)?'<div class="sh-nota">Ne ho trovate '+L.length+': qui sopra le 8 che usi di più. Scrivi una parola in più per restringere.</div>':'');
+  }
+  function prevPzUsa(id){
+    const x=prevPzCache.find(v=>String(v.id)===String(id));if(!x)return;
+    const righe=$("#prev-righe");if(!righe)return;
+    const nuova={descrizione:x.descrizione||"",qta:1,unita:x.unita||"",prezzo:+x.prezzo_unitario||0};
+    /* se l'ultima riga e' ancora vuota (il preventivo nuovo ne ha una) si
+       riempie quella, invece di lasciare una riga vuota sopra */
+    const tutte=righe.querySelectorAll(".prev-riga:not(.prev-riga-cap)");
+    const ult=tutte.length?tutte[tutte.length-1]:null;
+    const vuota=ult&&!String((ult.querySelector(".pr-desc")||{}).value||"").trim()&&!String((ult.querySelector(".pr-prezzo")||{}).value||"").trim();
+    let d;
+    if(vuota){ ult.insertAdjacentHTML("afterend",prevRigaHtml(nuova)); d=ult.nextElementSibling; ult.remove(); }
+    else{ righe.insertAdjacentHTML("beforeend",prevRigaHtml(nuova)); d=righe.lastElementChild; }
+    try{ prevTotaleLive(); }catch(e){}
+    sb.from("gest_prezzi_propri").update({usata_volte:(+x.usata_volte||0)+1}).eq("id",x.id).eq("user_id",sbUid).then(function(){},function(){});
+    x.usata_volte=(+x.usata_volte||0)+1;
+    const q=d&&d.querySelector(".pr-qta"); if(q){q.focus();try{q.select();}catch(e){}}
+    toast("Voce presa dal prezzario ✔ Scrivi la quantità");
+  }
   function prevRigaHtml(r){
     r=r||{};prevRigheCount++;
     /* la riga di capitolo si scrive e si cancella come tutte le altre: una
@@ -623,6 +685,12 @@
       <div class="field">
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
+        <button type="button" class="btn-ghost quick-add" data-action="prev-pz-apri">€ Prendi dal prezzario</button>
+        <div id="prev-pz" class="sh-b" style="display:none;margin-top:10px">
+          <div class="field"><label>Cerca nel tuo prezzario</label><input id="prev-pz-cerca" autocomplete="off" placeholder="Es. intonaco, tramezzo"></div>
+          <div id="prev-pz-lista"></div>
+          <div class="sh-nota">Tocca una voce: entra nel preventivo con descrizione e prezzo. La quantità la scrivi tu.</div>
+        </div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-cap-add">+ Aggiungi capitolo</button>
         ${bloccoDecreto()}
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0))}</div></div>
