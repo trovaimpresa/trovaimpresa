@@ -38,7 +38,7 @@
     giornate:    "Qui segni le giornate della squadra. A fine mese esce il PDF.",
     dalsito:     "Qui arrivano le richieste di preventivo dei clienti dal sito.",
     promemoria:  "Qui scrivi le cose da ricordare. Ti arriva l'avviso al momento giusto.",
-    scadenzario: "Qui ci sono le scadenze: revisioni, DURC, visite mediche, assicurazioni.",
+    scadenzario: "Qui ci sono le scadenze (revisioni, DURC, visite mediche, assicurazioni) e, nella linguetta Promemoria, le cose da ricordare.",
     agenda:      "Qui vedi i lavori di ogni operaio.",
     squadra:     "Qui metti i tuoi operai e decidi cosa possono vedere dal telefono.",
     mezzi:       "Qui ci sono i tuoi mezzi e le attrezzature, in due linguette, con revisioni e verifiche.",

@@ -37,7 +37,7 @@
     squadra:      'Le persone che lavorano con te: contatti, ruolo e documenti.',
     carte:        'Le carte aziendali e le spese fatte con ognuna.',
     clienti:      'Privati, aziende e condomini. Una volta inserito un cliente lo scegli dal menu, senza riscrivere ogni volta indirizzo e dati.',
-    scadenzario:  'Le scadenze da non dimenticare, con l’avviso prima che arrivino.',
+    scadenzario:  'Le scadenze da non dimenticare e i tuoi promemoria, con l’avviso prima che arrivino.',
     report:       'I numeri: quanto hai lavorato, quanto hai incassato, dove vanno i soldi.',
     galleria:     'Le foto e i video dei cantieri, tutti in un posto solo.',
     mappa:        'Dove sono i tuoi cantieri e quanto distano da te.',

@@ -194,6 +194,11 @@
           .is("eliminato_il",null).neq("stato","fatto").lte("data",lim30);
         const prAp=pr||[];
         setCnt("#cnt-promemoria",prAp.length,prAp.some(x=>x.data&&x.data<oggi)?"err":"attesa");
+        /* 18 nov 2026 — voce sola «Scadenze e promemoria»: il numerino conta tutte e due */
+        if(typeof spUnito==="function"&&spUnito()){
+          const _scErr=sAperte.some(x=>x.data_scadenza<oggi), _prErr=prAp.some(x=>x.data&&x.data<oggi);
+          setCnt("#cnt-scadenzario",sAperte.length+prAp.length,(_scErr||_prErr)?"err":"attesa");
+        }
         /* nella fascia vanno solo quelli GIA' PASSATI: «Da sistemare oggi»
            sono le cose che chiedono attenzione adesso, non fra tre settimane */
         _riePromem=prAp.filter(x=>x.data&&x.data<oggi).length;

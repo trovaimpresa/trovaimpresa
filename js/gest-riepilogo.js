@@ -975,7 +975,7 @@
     }
 
     C.push(rieCard({
-      tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length, dati:scTutte.length>0,
+      tab:"scadenzario", titolo:"Scadenze", n:scAperte.length, dati:scTutte.length>0,
       lab:_plur(scAperte.length,"scadenza entro 30 giorni","scadenze entro 30 giorni"),
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
       /* rosso gia' a sette giorni: una scadenza che scade lunedi' non si

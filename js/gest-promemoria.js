@@ -106,6 +106,67 @@
   // ---------------------------------------------------------------------
   // L'ELENCO
   // ---------------------------------------------------------------------
+  /* ============================================================
+     18 nov 2026 — SCADENZE E PROMEMORIA: UNA VOCE SOLA, DUE LINGUETTE
+     (deciso da Alex, foto approvata). Come «Mezzi e attrezzature»
+     (js/gest-mezzi.js, mzUnisci): non si cancella niente. Le due sezioni
+     #scadenzario e #promemoria restano, e resta il pulsante «promemoria» del
+     menu, solo che non si vede (classe .sp-dentro): cosi' Calendario, Chat
+     ([vai:promemoria]), Assistente e #promemoria funzionano come prima.
+     ⛔ Da tenere: i promemoria sono dell'ACCOUNT (tutti i reparti), le
+        scadenze del REPARTO. Lo dice la riga sotto le linguette.
+     I numeri delle linguette (le cose da fare) li scrivono renderScadenze e
+     renderPromemoria in window._spN; quello che manca si legge qui sotto.
+     La chiamano le due render e le tre adattaMenu… (js/gest-reparti.js). */
+  function spUnito() {
+    try {
+      return !!document.querySelector('nav.tabs button[data-tab="promemoria"]')
+        && !(typeof tabNascosto === "function" && tabNascosto("scadenzario"));
+    } catch (e) { return true; }
+  }
+  function spUnisci() {
+    const uni = spUnito(), tutto = "Scadenze e promemoria";
+    const bS = document.querySelector('nav.tabs button[data-tab="scadenzario"]'),
+          bP = document.querySelector('nav.tabs button[data-tab="promemoria"]');
+    if (bP) bP.classList.toggle("sp-dentro", uni);
+    if (bS) { const s = bS.querySelector("span"); const t = uni ? tutto : "Scadenzario"; if (s && s.textContent !== t) s.textContent = t; }
+    const N = window._spN || {};
+    let mid = null; try { mid = typeof curMestiere === "function" ? curMestiere() : null; } catch (e) {}
+    const nS = (N.scad != null && N.scadMid === mid) ? N.scad : null, nP = N.prom != null ? N.prom : null;
+    const lab = (t, n) => t + (n != null ? " (" + n + ")" : "");
+    [["scadenzario", "Scadenzario"], ["promemoria", "Promemoria"]].forEach(function (x) {
+      const sec = document.getElementById(x[0]); if (!sec) return;
+      const h = sec.querySelector(".sec-head h2"), t = uni ? tutto : x[1];
+      if (h && h.textContent !== t) h.textContent = t;
+      let g = sec.querySelector(".sp-ling"), nota = sec.querySelector(".sp-nota");
+      if (!uni) { if (g) g.remove(); if (nota) nota.remove(); return; }
+      if (!g) { g = document.createElement("div"); g.className = "segm mz-ling sp-ling"; const sh = sec.querySelector(".sec-head"); if (!sh) return; sh.after(g); }
+      const html = '<button type="button" data-sp="scadenzario"' + (x[0] === "scadenzario" ? ' class="on"' : '') + '>' + lab("Scadenze", nS) + '</button>'
+        + '<button type="button" data-sp="promemoria"' + (x[0] === "promemoria" ? ' class="on"' : '') + '>' + lab("Promemoria", nP) + '</button>';
+      if (g.innerHTML !== html) g.innerHTML = html;
+      if (x[0] === "promemoria" && !nota) {
+        nota = document.createElement("p"); nota.className = "sp-nota";
+        nota.textContent = "I promemoria si vedono in tutti i reparti.";
+        g.after(nota);
+      }
+    });
+    /* il numero che manca: si legge l'altra sezione (nascosta) una volta */
+    if (!uni) return;
+    if (nP == null && !window._spCaricoP && typeof renderPromemoria === "function" && sb && sbUid) {
+      window._spCaricoP = 1; Promise.resolve(renderPromemoria()).catch(function () {}).then(function () { window._spCaricoP = 0; });
+    } else if (nS == null && !window._spCaricoS && typeof renderScadenze === "function" && typeof cur !== "undefined" && cur) {
+      window._spCaricoS = 1; Promise.resolve(renderScadenze()).catch(function () {}).then(function () { window._spCaricoS = 0; });
+    }
+  }
+  if (!window.__spAscolto) {
+    window.__spAscolto = 1;
+    document.addEventListener("click", function (e) {
+      const b = e.target.closest && e.target.closest("[data-sp]"); if (!b || b.classList.contains("on")) return;
+      const v = document.querySelector('nav.tabs button[data-tab="' + b.getAttribute("data-sp") + '"]');
+      if (v) v.click();
+    });
+  }
+
   async function renderPromemoria() {
     const box = $("#prom-list"); if (!box) return;
     if (!sb || !sbUid) {
@@ -130,6 +191,9 @@
                            : A.slice();
     const conta = {};
     PROM_VISTE.forEach(v => { conta[v.k] = filtra(promCache, v.k).length; });
+    /* 18 nov 2026 — il numero della linguetta «Promemoria» (quelli da fare) */
+    window._spN = window._spN || {}; window._spN.prom = conta.aperti || 0;
+    try { spUnisci(); } catch (e) {}
     const L = filtra(promCache, promVista);
     /* 18 nov 2026 — nei «Fatti» in cima sta l'ultimo, non il piu' vecchio */
     if (promVista === "fatti") L.reverse();

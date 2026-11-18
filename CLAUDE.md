@@ -3622,3 +3622,14 @@ Aperto su Tasse e fisco:
 4. Supabase dal connettore: il 18 nov un `delete` ha chiesto conferma ad Alex e non ha avuto risposta; le righe di prova sono state cancellate dalla pagina (`sb.raw(...).delete()`).
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — SCADENZE E PROMEMORIA: UNA VOCE SOLA (deciso da Alex, foto approvata)
+
+Come «Mezzi e attrezzature»: `spUnito()` / `spUnisci()` in `js/gest-promemoria.js`, stile in fondo a `css/gestionale-stile.css` (`?v=33`, linguette con la stessa classe `.mz-ling` + `.sp-ling`, riga `.sp-nota`).
+- ⛔ Non è stato cancellato niente: `#scadenzario` e `#promemoria` restano, e resta il pulsante `promemoria` del menu con la classe `.sp-dentro` (non si vede). Chi lo «preme» da fuori (Calendario, Chat `[vai:promemoria]`, Assistente, `#promemoria`) funziona come prima; nel menu si accende «Scadenze e promemoria» (riga in `js/gest-finestre-eventi.js`, e `js/gest-chat.js` lo accetta come `mz-dentro`).
+- Linguette «Scadenze (n)» e «Promemoria (n)»: n = le cose DA FARE. Li scrivono `renderScadenze` / `renderPromemoria` in `window._spN`; quello che manca si legge una volta facendo girare l'altra render in silenzio (flag `_spCaricoP` / `_spCaricoS`). Il numero delle scadenze vale per il reparto (`scadMid`).
+- Il pallino del menu (`#cnt-scadenzario`) è la SOMMA dei due (`renderContatori`, js/gest-riepilogo-schede.js), rosso se uno dei due è scaduto.
+- Da tenere: promemoria dell'ACCOUNT, scadenze del REPARTO. Nella linguetta Promemoria la riga «I promemoria si vedono in tutti i reparti.» (sì di Alex).
+- Studio tecnico: stessa cosa (lo Scadenzario dello studio ha anche le pratiche). Noleggio: NON toccato.
+- Nomi aggiornati: MANUALE di `chat-gestionale.mjs`, `js/aiuti.js`, `js/gest-tutorial.js`, card «Scadenze» del Riepilogo (`js/gest-riepilogo.js`), avviso delle integrazioni (`js/gest-scadenze-pratiche.js`), titolo della sezione. Il banco adesso misura 24 sezioni: la linguetta Promemoria si guarda a mano.
+- ⚠️ Il video `promemoria.mp4` non ha più una voce sua: il ▶ fa vedere quello dello Scadenzario.

@@ -297,7 +297,7 @@
   }
   function adattaMenuProfessionista(){
     /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
-    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}try{if(typeof spUnisci==='function')spUnisci();}catch(e){}},0);
     if(ruoloUtente!=='professionista')return;
     try{
       tabNascosti().forEach(function(t){
@@ -455,7 +455,7 @@
   }
   function adattaMenuArtigiano(){
     /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
-    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}try{if(typeof spUnisci==='function')spUnisci();}catch(e){}},0);
     if(ruoloUtente!=='artigiano')return;
     try{
       /* ⚠️ tutto dentro `nav.tabs`: fuori di li' ci sono i pulsantini
@@ -575,7 +575,7 @@
 
   function adattaMenuImpresa(){
     /* 18 nov 2026 — Mezzi e attrezzature in una voce sola (js/gest-mezzi.js) */
-    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}},0);
+    setTimeout(function(){try{if(typeof mzUnisci==='function')mzUnisci();}catch(e){}try{if(typeof spUnisci==='function')spUnisci();}catch(e){}},0);
     if(ruoloUtente==='professionista')return;
     try{
       ['#tab-computi','#tab-prezzario','#tab-sal'].forEach(function(sel){

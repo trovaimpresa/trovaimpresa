@@ -147,6 +147,9 @@
                       :v==="prossime"?A.filter(s=>s.stato!=="fatta"&&(!s.data_scadenza||s.data_scadenza>=oggi))
                       :v==="fatte"?A.filter(s=>s.stato==="fatta"):A.slice();
     const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadTutte,v.k).length);
+    /* 18 nov 2026 — il numero della linguetta «Scadenze» (quelle da fare) */
+    window._spN=window._spN||{};window._spN.scad=(conta.scadute||0)+(conta.prossime||0);window._spN.scadMid=mid;
+    try{ if(typeof spUnisci==="function") spUnisci(); }catch(e){}
     let L=filtra(scadTutte,scadVista);
     /* 18 nov 2026 — collaudo dello Scadenzario: in «Tutte» una scadenza fatta
        stava in mezzo a quelle ancora da fare (ordine per data): adesso le fatte
@@ -844,7 +847,7 @@
       const desc=String((dati&&dati.descrizione)||"").trim();
       const tipo=praticaTipoScritto((dati&&dati.pratica_tipo)||"");   /* 15 nov 2026: nel titolo «Agibilità» */
       const titolo=("Integrazioni "+(tipo?tipo+" ":"")+(desc?"— "+desc:"")).trim();
-      if(!(await gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi dallo Scadenzario.")))return;
+      if(!(await gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi da «Scadenze e promemoria».")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
         tipo_pratica:"Integrazione richiesta dal Comune",lavoro_id:lavId,
         cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};
