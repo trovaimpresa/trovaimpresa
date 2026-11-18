@@ -489,15 +489,15 @@
       <div class="sh-b"><div class="sh-tit">I dettagli</div>
         <div class="ft-solo-forf">
           <div class="field"><label>5. Che lavoro fai? (il coefficiente)</label><select id="ft-coeff">${opz(FT_COEFF.concat([["altro", "Altro: lo scrivo io"]]), coeffSel)}</select></div>
-          <div class="field" id="ft-coeff-altro-box"${coeffSel === "altro" ? "" : ' style="display:none"'}><label>Coefficiente %</label><input id="ft-coeff-altro" type="number" min="1" max="100" value="${esc(String(p.coeff || ""))}"></div>
+          <div class="field" id="ft-coeff-altro-box"${coeffSel === "altro" ? "" : ' style="display:none"'}><label>Coefficiente %</label><input id="ft-coeff-altro" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto(p.coeff))}"></div>
           <label class="ft-check"><input type="checkbox" id="ft-5"${p.aliquota_5 ? " checked" : ""}> Pago il 5% (primi 5 anni)</label>
           <label class="ft-check ft-solo-inps"><input type="checkbox" id="ft-35"${p.riduzione35 ? " checked" : ""}> Ho già lo sconto del 35% sui contributi INPS</label>
         </div>
         <div class="ft-solo-ord">
           <div class="field"><label>5. Ogni quanto paghi l'IVA?</label><select id="ft-iva">${opz([["trimestrale", "Ogni 3 mesi"], ["mensile", "Ogni mese"]], p.iva || "trimestrale")}</select></div>
-          <div class="field ft-solo-indiv"><label>6. Quanto spendi in un anno, circa? (materiali, furgone, attrezzi…)</label><input id="ft-spese" type="number" min="0" step="100" value="${esc(String(p.spese_anno || ""))}" placeholder="Es. 12000"></div>
+          <div class="field ft-solo-indiv"><label>6. Quanto spendi in un anno, circa? (materiali, furgone, attrezzi…)</label><input id="ft-spese" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto(p.spese_anno || ""))}" placeholder="Es. 12.000"></div>
         </div>
-        <div class="field"><label>Il tuo commercialista ti ha detto una % da mettere da parte? (facoltativo)</label><input id="ft-perc" type="number" min="0" max="100" step="1" value="${esc(String(p.perc_commercialista || ""))}" placeholder="Es. 30"></div>
+        <div class="field"><label>Il tuo commercialista ti ha detto una % da mettere da parte? (facoltativo)</label><input id="ft-perc" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto(p.perc_commercialista || ""))}" placeholder="Es. 30"></div>
         <div class="sh-nota">Non sai una risposta? Lascia com'è e chiedi al commercialista: la puoi cambiare quando vuoi.</div>
       </div></div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
@@ -524,7 +524,9 @@
   async function ftSalvaProfilo() {
     if (!sbUid) { toast("Devi essere loggato"); return; }
     const v = s => { const e = $(s); return e ? String(e.value || "").trim() : ""; };
-    const num = s => { const x = parseFloat(v(s).replace(/\./g, "").replace(",", ".")); return isFinite(x) ? x : null; };
+    /* 18 nov 2026 — all'italiana: «12.000» = dodicimila (prima la casella era
+       type="number" e «12.000» arrivava come 12) */
+    const num = s => { const x = fpNum(v(s)); return x != null && isFinite(x) ? x : null; };
     const forma = v("#ft-forma"), soc = forma === "societa_persone" || forma === "srl";
     const regime = soc ? "ordinario" : v("#ft-regime");
     const anno = num("#ft-anno");
@@ -554,8 +556,16 @@
     closeSheet(); toast("Profilo salvato ✔"); renderFisco();
   }
 
+  /* 18 nov 2026 — due tocchi su «Ricordamelo» facevano due promemoria (il
+     controllo «ce l'hai gia'» guarda prima che il primo sia scritto). */
+  let _ftRicordo = false;
   async function ftRicorda(d, testo, imp) {
     if (!sbUid) { toast("Devi essere loggato"); return; }
+    if (_ftRicordo) return;
+    _ftRicordo = true;
+    try { await _ftRicorda(d, testo, imp); } finally { _ftRicordo = false; }
+  }
+  async function _ftRicorda(d, testo, imp) {
     const t = "Tasse: " + testo;
     const gia = await sb.from("promemoria").select("id").eq("user_id", sbUid).eq("data", d).eq("testo", t).is("eliminato_il", null);
     if (gia.data && gia.data.length) { toast("Ce l'hai già nei Promemoria ✔"); return; }
@@ -568,6 +578,8 @@
       toast("Non salvato: " + (typeof traduciErrore === "function" ? traduciErrore(m) : m)); return;
     }
     toast("Fatto ✔ Te lo ricordo 7 giorni prima, nell'email del mattino");
+    /* il pallino del menu e il Calendario lo devono vedere subito */
+    if (typeof rinfresca === "function") rinfresca("promemoria", "calendario", "riepilogo");
   }
 
   // ---------------------------------------------------------------------
@@ -598,7 +610,7 @@
   function ftRavvForm() {
     fpSheet("Ho pagato in ritardo: quanto costa?", `<div class="sh-b">
       <p>Se una tassa la paghi in ritardo <b>di tua iniziativa</b>, prima che arrivi la lettera, la multa è molto più bassa. Si chiama <b>ravvedimento operoso</b>.</p>
-      <div class="row2"><div class="field"><label>Quanto dovevi pagare</label><input id="ft-r-imp" type="number" min="0" step="0.01" placeholder="Es. 1500"></div>
+      <div class="row2"><div class="field"><label>Quanto dovevi pagare</label><input id="ft-r-imp" type="text" inputmode="decimal" autocomplete="off" placeholder="Es. 1.500,00"></div>
       <div class="field"><label>Entro quando</label><input id="ft-r-sc" type="date"></div></div>
       <div class="field"><label>Quando paghi</label><input id="ft-r-pag" type="date" value="${todayStr()}"></div>
       <div id="ft-r-out"></div>
@@ -608,7 +620,7 @@
   }
   function ftRavvCalcola() {
     const out = $("#ft-r-out"); if (!out) return;
-    const imp = parseFloat(($("#ft-r-imp") || {}).value), sc = ($("#ft-r-sc") || {}).value, pag = ($("#ft-r-pag") || {}).value;
+    const imp = fpNum(($("#ft-r-imp") || {}).value), sc = ($("#ft-r-sc") || {}).value, pag = ($("#ft-r-pag") || {}).value;
     if (!(imp > 0) || !sc || !pag) { out.innerHTML = ""; return; }
     const [a, b, c] = sc.split("-").map(Number), [d, e, f] = pag.split("-").map(Number);
     const gg = Math.round((new Date(d, e - 1, f) - new Date(a, b - 1, c)) / 86400000);
@@ -649,7 +661,7 @@
   // telefono: 7 giorni prima e il giorno prima, alle 9. L'UID e' fisso per
   // data+testo: se lo riscarica, Google e iPhone aggiornano invece di doppiare.
   // ---------------------------------------------------------------------
-  function ftIcsTesto(t) { return String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+  function ftIcsTesto(t) { return String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
   function ftIcsUid(d, t) { let h = 0; for (const c of d + t) h = (h * 31 + c.charCodeAt(0)) | 0; return "ti-fisco-" + d + "-" + (h >>> 0).toString(36) + "@trovaimpresa.com"; }
   function ftIcs() {
     if (!ftProfilo || !ftDati) { toast("Prima compila il profilo fiscale"); return; }
@@ -710,9 +722,21 @@
   function ftIvaDisegna() {
     const box = $("#ft-iva-box"); if (!box) return;
     const S = ftIvaStato, p = ftProfilo || {};
+    /* 18 nov 2026 — LO STUDIO TECNICO. Le domande qui sotto sono per chi fa
+       i LAVORI: un geometra o un ingegnere non fattura il lavoro ma la
+       prestazione, e quella va sempre al 22% (niente 10%, niente reverse
+       charge), con la cassa e la ritenuta. Prima allo studio diceva «10%». */
+    const pro = typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista";
+    if (pro && !(p.regime === "forfettario" && !S.tutte)) {
+      box.innerHTML = ftIvaRis("22%", "Per lo studio: IVA al 22%, sempre",
+        ["Progetto, direzione lavori, pratiche, rilievi: è una prestazione professionale, anche se il lavoro in cantiere va al 10% o al 4%.",
+         "Prima dell'IVA aggiungi la <b>cassa</b> (Geometri 5%, Inarcassa 4%): l'IVA si calcola anche sulla cassa.",
+         "Se il cliente è un'azienda, un condominio o un altro professionista togli la <b>ritenuta del 20%</b> sul compenso. Con un privato no."], "");
+      return;
+    }
     if (p.regime === "forfettario" && !S.tutte) {
       box.innerHTML = ftIvaRis("0", "Sei forfettario: niente IVA, mai",
-        ["Né 10%, né 22%, né reverse charge: anche se lavori in subappalto per un'impresa edile.",
+        [(typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? "Né 22%, né ritenuta del 20%: in fattura metti solo il compenso e la cassa." : "Né 10%, né 22%, né reverse charge: anche se lavori in subappalto per un'impresa edile.",
          "Se la fattura supera <b>77,47 €</b> ci va il <b>bollo da 2 €</b>. Il gestionale lo mette nel campo «Bollo»."],
         "Operazione senza applicazione dell'IVA, effettuata ai sensi dell'art. 1, commi da 54 a 89, Legge n. 190/2014 – Regime forfettario")
         + `<p class="ft-grigio">Non sei forfettario? <button class="fp-link" data-action="ft-iva-da-capo">Rispondi alle domande</button> e poi correggi il profilo.</p>`;

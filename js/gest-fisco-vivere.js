@@ -62,7 +62,7 @@
     ]);
     const ff = rF.data || [];
     const ids = ff.map(f => f.id);
-    const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva,totale,segno").in("fattura_id", ids) : { data: [] };
+    const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva,totale,segno,resto").in("fattura_id", ids) : { data: [] };
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
     rN.fatture.forEach(f => { ff.push(f); tot[f.id] = rN.tot[f.id]; });
     const errore = [rF, rS, rC, rR, rFF, rT].some(r => r && r.error) || rN.errore;
@@ -136,12 +136,12 @@
     h += `<h3 class="fp-h3">Il prezzo giusto</h3>
       <div class="fp-card fv-pg"><p class="fp-sotto" style="margin-top:0">Dimmi quanto vuoi portare a casa: ti dico quanto devi chiedere al giorno e all'ora per starci dentro, tasse comprese.</p>
       <div class="fv-pg-campi">
-        <div class="field"><label>Quanto vuoi in tasca al mese</label><input id="fv-netto" type="number" min="0" step="50" value="${esc(String((p && p.pg_netto_mese) || ""))}" placeholder="Es. 2000"></div>
-        <div class="field"><label>Spese fisse al mese (furgone, assicurazione, telefono, commercialista…)</label><input id="fv-fisse" type="number" min="0" step="50" value="${esc(String((p && p.pg_spese_mese) || ""))}" placeholder="Es. 700"></div>
-        <div class="field"><label>Mesi di lavoro in un anno</label><input id="fv-mesi" type="number" min="1" max="12" step="0.5" value="${esc(String((p && p.pg_mesi) || 11))}"></div>
-        <div class="field"><label>Giorni di lavoro al mese</label><input id="fv-giorni" type="number" min="1" max="31" value="${esc(String((p && p.pg_giorni) || 20))}"></div>
-        <div class="field"><label>Ore al giorno</label><input id="fv-ore" type="number" min="1" max="24" step="0.5" value="${esc(String((p && p.pg_ore) || 8))}"></div>
-        <div class="field"><label>Ore che nessuno ti paga (preventivi, viaggi, materiali) %</label><input id="fv-nf" type="number" min="0" max="90" value="${esc(String((p && p.pg_non_fatt != null) ? p.pg_non_fatt : 20))}"></div>
+        <div class="field"><label>Quanto vuoi in tasca al mese</label><input id="fv-netto" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_netto_mese) || ""))}" placeholder="Es. 2000"></div>
+        <div class="field"><label>Spese fisse al mese (furgone, assicurazione, telefono, commercialista…)</label><input id="fv-fisse" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_spese_mese) || ""))}" placeholder="Es. 700"></div>
+        <div class="field"><label>Mesi di lavoro in un anno</label><input id="fv-mesi" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_mesi) || 11))}"></div>
+        <div class="field"><label>Giorni di lavoro al mese</label><input id="fv-giorni" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_giorni) || 20))}"></div>
+        <div class="field"><label>Ore al giorno</label><input id="fv-ore" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_ore) || 8))}"></div>
+        <div class="field"><label>Ore che nessuno ti paga (preventivi, viaggi, materiali) %</label><input id="fv-nf" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_non_fatt != null) ? p.pg_non_fatt : 20))}"></div>
       </div>
       <div id="fv-pg-out"></div></div>`;
 
@@ -157,6 +157,15 @@
   /* I PROSSIMI 3 MESI: entrate attese (fatture emesse non pagate, alla loro
      scadenza) e uscite (fornitori da pagare + scadenze fiscali stimate) */
   /* 7 nov 2026: uno zero e' grigio, senza segno e senza verde */
+  /* 18 nov 2026 — quanto manca su una fattura emessa: il «resto» della vista
+     (tolti gli acconti, sql/2026-11-17-fatture-resto.sql), se no il totale.
+     Le note di credito (segno −) non sono soldi da incassare. Le fatture del
+     Noleggio non hanno acconti: il loro resto e' il totale. */
+  function fvResto(t) {
+    t = t || {};
+    if ((+t.segno || 1) < 0) return 0;
+    return t.resto != null ? (+t.resto || 0) : (+t.totale || 0);
+  }
   function fvZero(v, segno, cls) {
     return Math.abs(v) < 0.005 ? '<b class="fp-zero">0,00 €</b>' : '<b class="' + cls + '">' + segno + eur(v) + '</b>';
   }
@@ -169,7 +178,8 @@
     d.fatture.forEach(f => {
       if (f.stato !== "emessa") return;
       const t = d.tot[f.id] || {}; if ((+t.segno || 1) < 0) return;
-      const v = +t.totale || 0; if (!(v > 0)) return;
+      /* 18 nov 2026 — quello che MANCA (tolti gli acconti), come «Farsi pagare» */
+      const v = fvResto(t); if (!(v > 0)) return;
       const sc = f.scadenza || _giorniDopo(f.data, gg);
       /* «nol-…» = fatture del Noleggio: «Farsi pagare» non le conta,
          quindi qui si dicono a parte (7 nov 2026) */
@@ -233,7 +243,9 @@
 
   function fvPrezzo() {
     const out = $("#fv-pg-out"); if (!out || !fvDati) return;
-    const n = id => { const x = parseFloat(($(id) || {}).value); return isFinite(x) ? x : 0; };
+    /* 18 nov 2026 — all'italiana: «2.000» sono duemila (con type="number"
+       diventava 2 € e proponeva una tariffa di 7 € l'ora) */
+    const n = id => { const x = fpNum(($(id) || {}).value); return x != null && isFinite(x) ? x : 0; };
     const netto = n("#fv-netto"), fisse = n("#fv-fisse"), mesi = n("#fv-mesi"), giorni = n("#fv-giorni"), ore = n("#fv-ore"), nf = n("#fv-nf");
     const p = fvDati.p;
     if (!(netto > 0)) { out.innerHTML = ""; return; }
@@ -280,7 +292,7 @@
   }
 
   async function fvSalvaNumeri() {
-    const n = id => { const x = parseFloat(($(id) || {}).value); return isFinite(x) ? x : null; };
+    const n = id => { const x = fpNum(($(id) || {}).value); return x != null && isFinite(x) ? x : null; };
     const q = await sb.from("gest_fisco_profilo").update({
       pg_netto_mese: n("#fv-netto"), pg_spese_mese: n("#fv-fisse"), pg_mesi: n("#fv-mesi"),
       pg_giorni: n("#fv-giorni"), pg_ore: n("#fv-ore"), pg_non_fatt: n("#fv-nf")
@@ -334,11 +346,11 @@
     riga("Fatture dei fornitori", eP(d.sp.forn));
     riga("Totale spese", eP(d.sp.tot), true);
 
-    const aperte = d.fatture.filter(f => f.stato === "emessa" && (+(d.tot[f.id] || {}).totale || 0) > 0);
+    const aperte = d.fatture.filter(f => f.stato === "emessa" && fvResto(d.tot[f.id]) > 0);
     if (aperte.length) {
       titolo("Fatture emesse e non ancora pagate");
-      aperte.forEach(f => riga("n. " + f.numero + "/" + (f.anno || String(f.data).slice(0, 4)) + " del " + fdate(f.data) + " — " + String(f.cli_nome || "").slice(0, 45), eP((d.tot[f.id] || {}).totale)));
-      riga("Totale da incassare", eP(aperte.reduce((s, f) => s + (+(d.tot[f.id] || {}).totale || 0), 0)), true);
+      aperte.forEach(f => riga("n. " + f.numero + "/" + (f.anno || String(f.data).slice(0, 4)) + " del " + fdate(f.data) + " — " + String(f.cli_nome || "").slice(0, 45), eP(fvResto(d.tot[f.id]))));
+      riga("Totale da incassare", eP(aperte.reduce((s, f) => s + fvResto(d.tot[f.id]), 0)), true);
     }
     const fornAperte = d.fornF.filter(f => f.stato !== "pagata" && +f.importo > 0);
     if (fornAperte.length) {

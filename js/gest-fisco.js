@@ -167,8 +167,18 @@
       tot += importo * fpTasso(tab, fpIso(g)) / 100 / 365;
       g.setDate(g.getDate() + 1); giri++;
     }
-    return Math.round(tot * 100) / 100;
+    return typeof _cent2 === "function" ? _cent2(tot) : Math.round(tot * 100) / 100;
   }
+  /* 18 nov 2026 — i numeri scritti a mano nel reparto (ravvedimento, profilo,
+     prezzo giusto): si leggono all'italiana, «1.500,50» = 1500,50. Prima le
+     caselle erano type="number" e «1.500,50» diventava 1,50 €. La regola sta
+     in _numeroIt (js/gest-computo.js): qui solo la chiamata. */
+  function fpNum(v) {
+    if (typeof _numeroIt === "function") return _numeroIt(v);
+    const n = parseFloat(String(v == null ? "" : v).replace(/[€\s]/g, "").replace(/\./g, "").replace(",", "."));
+    return isFinite(n) ? n : null;
+  }
+  function fpNumTesto(v) { return v == null || v === "" ? "" : (typeof _numTesto === "function" ? _numTesto(v) : String(v).replace(".", ",")); }
   function fpContributo(importo) {
     for (let i = 0; i < FP_CONTRIBUTO.length; i++) if (importo <= FP_CONTRIBUTO[i][0]) return FP_CONTRIBUTO[i][1];
     return null; /* oltre 52.000 €: si chiede all'avvocato */
@@ -523,7 +533,7 @@
     t += "\n" + (luogo ? luogo + ", " : "") + fdate(todayStr()) + "\n\n";
     t += "Oggetto: diffida ad adempiere e costituzione in mora — fattura n. " + num + " del " + fdate(f.data) + "\n\n";
     t += "La scrivente " + (a.nome || "") + " ricorda che la fattura n. " + num + " del " + fdate(f.data) + ", di " + imp
-      + ", è scaduta " + fpIl(f.scadenza) + " e ad oggi non risulta pagata, nonostante i solleciti inviati.\n\n";
+      + ", è scaduta " + fpIl(f.scadenza) + " e ad oggi non risulta pagata" + (f.sol.length ? ", nonostante i solleciti inviati" : "") + ".\n\n";
     t += "Con la presente Vi invita e diffida formalmente a pagare, entro 15 giorni dal ricevimento di questa lettera, la somma di " + imp + ", oltre a:\n";
     if (f.b2b) {
       t += "- interessi di mora ai sensi del D.Lgs. 231/2002, pari a " + eur(f.interessi) + " alla data odierna, che continuano a maturare fino al saldo;\n";
@@ -638,8 +648,16 @@
     toast(cosa + ": " + (typeof traduciErrore === "function" ? traduciErrore(m) : m));
   }
 
+  /* 18 nov 2026 — due tocchi su «L'ho mandata» / «WhatsApp» = due passi
+     segnati. Freno come _promSalvo dei Promemoria. */
+  let _fpSegno = false;
   async function fpSegna(id, passo, canale, testo) {
     if (!sbUid) { toast("Devi essere loggato"); return false; }
+    if (_fpSegno) return false;
+    _fpSegno = true;
+    try { return await _fpSegna(id, passo, canale, testo); } finally { _fpSegno = false; }
+  }
+  async function _fpSegna(id, passo, canale, testo) {
     const q = await sb.from("gest_solleciti").insert({
       user_id: sbUid, fattura_id: id, passo: +passo, canale: canale,
       testo: testo != null ? String(testo).slice(0, 20000) : null

@@ -3591,3 +3591,34 @@ Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si ripa
 - `calVai` / `calTornaQuandoChiude` guardano la SEZIONE aperta (`section.active`), non la voce accesa del menu: con la voce unita le voci accese sono due. `mzUnisci` accende «Mezzi e attrezzature» anche entrando da `#attrezzature`.
 - ⚠️ Studio «puro» (voce sola «Strumenti») NON provabile col conto di Alex: con `?vedi=professionista` (`_facciaScelta()`) i Mezzi restano accesi e si vede «Mezzi e strumenti» con le linguette.
 - Deciso da Alex: **Agenda operatore + Squadra in una voce sola** → prossima sessione, foto prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: TASSE E FISCO
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px), tutte e 4 le linguette e tutte le finestre. Il profilo fiscale e la fattura «Prova Srl» sono di Alex: solo guardati, non toccati. Nessun sollecito segnato, nessuna fattura. Prove: 3 promemoria «Tasse: …» (cancellati) → →0← righe.
+
+Dove sta il codice: `js/gest-fisco.js` (Farsi pagare, «Da fare adesso», lettere, giudice, `fpNum`), `js/gest-fisco-tasse.js` (Le tue tasse, profilo, scadenze, ravvedimento, lettera, IVA, bonus, .ics), `js/gest-fisco-confronto.js` (Chi paga più tasse?), `js/gest-fisco-vivere.js` (Quanto ti resta, prezzo giusto, PDF), `js/gest-fisco-ai.js` (Chiedi all'AI).
+
+Sistemato (banco `tools/banco-gestionale.js app`: ZERO difetti):
+- ⛔ **I numeri scritti col punto delle migliaia si rompevano.** Ravvedimento: «1.500,50» = 1,50 € (misurato). Prezzo giusto: «2.000» al mese = 2 € → proponeva una tariffa di 7 € l'ora. Profilo: spese «12.000» = 12. Adesso caselle `type="text" inputmode="decimal"` lette da `fpNum()` (che chiama `_numeroIt`) e riscritte con `fpNumTesto()`.
+- **Chi paga più tasse?**: «40.000,50» diventava 4.000.050 € (`fcNum` buttava via la virgola).
+- **Due tocchi su «Ricordamelo» = due promemoria** (misurato): freno `_ftRicordo`. E dopo il salvataggio si aggiornano pallino dei Promemoria e Calendario.
+- Due tocchi su «L'ho mandata» / «Fatto» = due passi segnati: freno `_fpSegno` (letto nel codice, non provato: avrebbe scritto sulla fattura di Alex).
+- «Quanto ti resta», il PDF del commercialista e la Chat dell'AI contavano il TOTALE delle fatture aperte; «Farsi pagare» dal 17 nov conta quello che MANCA (tolti gli acconti, colonna `resto`). Adesso tutti col resto (`fvResto`).
+- La lettera PEC diceva «nonostante i solleciti inviati» anche senza solleciti.
+- Il file .ics non proteggeva il «;» nei testi.
+- Chat dell'AI: una domanda fatta appena aperta partiva senza i numeri. Adesso li aspetta.
+- Interessi di mora con `_cent2` (regola dei centesimi).
+
+Studio tecnico (`?vedi=professionista`):
+- ⛔ «Quale IVA metto?» rispondeva «10% sulla ristrutturazione» anche allo studio. Per lo studio adesso: 22% sempre, cassa prima dell'IVA, ritenuta 20% solo con clienti aziende/condomini/professionisti. Da forfettario: niente IVA e niente ritenuta.
+- «Chi paga più tasse?»: niente pulsante «Dipendente in cassa edile» (già niente Srl).
+
+Funziona (provato): interessi di mora (2.345 € × 71 giorni = 47,44 € + 40 €), i 4 testi (gentile, sollecito, PEC, giudice), PDF della lettera non scaricato, profilo indovinato/salvato, salvadanaio, scadenze (date feriali), consigli, confronto (40.000 €: forfettario 9.726 €, conti rifatti a mano), bonus casa (11.000 → 991,80 €), IVA, 375 px senza niente fuori né sotto 13 px.
+
+Aperto su Tasse e fisco:
+1. NON provati: WhatsApp/email del sollecito (scrive sulla fattura vera), «Ha pagato», «Usa come mia tariffa» e «Ricorda questi numeri» (cambierebbero i dati di Alex), le domande all'AI e la foto della lettera (costano crediti), lo studio tecnico dal vivo con le correzioni (si prova dopo il push), il telefono vero.
+2. Le date delle scadenze sono scritte a mano fino al 31/12/2027 (`ftScadenze`): a fine 2027 vanno aggiunte quelle del 2028. «IVA del 3° trimestre» legge sempre luglio-settembre 2026.
+3. «Incassato» conta solo le fatture PAGATE: gli acconti di una fattura ancora aperta non entrano nelle tasse finché non è pagata tutta.
+4. Supabase dal connettore: il 18 nov un `delete` ha chiesto conferma ad Alex e non ha avuto risposta; le righe di prova sono state cancellate dalla pagina (`sb.raw(...).delete()`).
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.

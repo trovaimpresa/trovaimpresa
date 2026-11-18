@@ -37,8 +37,9 @@
       const Y = ftAnno();
       let inc = 0;
       d.fatture.forEach(f => { if (f.stato === "pagata" && String(f.data_pagata || "").slice(0, 4) === String(Y)) inc += +(d.tot[f.id] || {}).imponibile || 0; });
-      const aperte = d.fatture.filter(f => f.stato === "emessa");
-      const daIncassare = aperte.reduce((s, f) => s + (+(d.tot[f.id] || {}).totale || 0), 0);
+      /* 18 nov 2026 — quello che manca (tolti gli acconti), come «Farsi pagare» */
+      const aperte = d.fatture.filter(f => f.stato === "emessa" && fvResto(d.tot[f.id]) > 0);
+      const daIncassare = aperte.reduce((s, f) => s + fvResto(d.tot[f.id]), 0);
       const sp = fvSpese(d);
       const righe = [];
       if (p) {
@@ -146,6 +147,10 @@
     if (!window.AI || typeof window.AI.cantiere !== "function") { toast("L'assistente non si è caricato: ricarica la pagina (F5)"); return; }
     fiStoria.push({ chi: "io", testo: q }); ta.value = "";
     fiOccupato = true; fiDisegna();
+    /* 18 nov 2026 — una domanda fatta appena aperta la linguetta partiva
+       prima che i numeri fossero letti: l'AI rispondeva «numeri non
+       disponibili». Si aspettano. */
+    if (!fiCtx && sb && sbUid) { try { fiCtx = await fiContesto(); } catch (e) {} }
     const prima = fiStoria.slice(0, -1).filter(x => !x.lettera).slice(-6)
       .map(x => (x.chi === "io" ? "Domanda: " : "Risposta: ") + x.testo).join("\n");
     const lettera = fiStoria.slice().reverse().find(x => x.lettera);

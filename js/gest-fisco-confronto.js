@@ -55,7 +55,10 @@
   function fcP(n) { return String(Math.round(+n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
   /* lo spazio prima di € non va mai a capo (sul telefono stretto il € restava da solo) */
   function fcE(n) { return fcP(n) + "\u00a0€"; }
-  function fcNum(v) { return +String(v == null ? "" : v).replace(/[^\d]/g, "") || 0; }
+  /* 18 nov 2026 — all'italiana: prima si buttava via tutto quello che non era
+     una cifra, e «40.000,50» diventava 4.000.050 €. Adesso i centesimi si
+     tagliano (qui si ragiona in euro tondi). */
+  function fcNum(v) { const n = typeof fpNum === "function" ? fpNum(v) : +String(v == null ? "" : v).replace(/[^\d]/g, ""); return n > 0 ? Math.floor(n) : 0; }
   /* una percentuale scritta a mano: «33,68», «7.5», «7,5 %» */
   function fcPerc(v) { const n = parseFloat(String(v == null ? "" : v).replace(",", ".").replace(/[^\d.]/g, "")); return isFinite(n) ? Math.min(100, Math.max(0, n)) : 0; }
   function fcPercTesto(n) { return String(Math.round(n * 100) / 100).replace(".", ","); }
@@ -121,7 +124,8 @@
       const s = fcSrl(S.inc, S.spese, cassa);
       out.push({ k: "srl", nome: "Srl", sotto: "IRES, IRAP e dividendi", imposta: s.imposta, contrib: s.contrib, totale: s.totale, no: "" });
     }
-    const d = fcDip(Math.max(0, S.inc - S.spese), !!S.ce, S.inps, S.inail);
+    /* lo studio tecnico non ha l'operaio in cassa edile (il pulsante non c'e') */
+    const d = fcDip(Math.max(0, S.inc - S.spese), !!S.ce && !pro, S.inps, S.inail);
     out.push({ k: "dip", nome: "Dipendente", sotto: S.ce ? "busta paga con cassa edile" : "busta paga, stesso guadagno", imposta: d.imposta, contrib: d.contrib, totale: d.totale, ditta: d.ditta, no: "" });
     out.forEach(x => { x.resta = S.inc - S.spese - x.totale; });
     return out;
@@ -130,6 +134,7 @@
   function fcForm() {
     const p = (typeof ftProfilo !== "undefined" && ftProfilo) || {};
     if (!fcStato) fcStato = { inc: 40000, spese: +p.spese_anno || 0, r35: true, a5: !!p.aliquota_5, ce: !fcPro() };
+    if (fcPro()) fcStato.ce = false;
     if (fcStato.inps == null) { const r = fcRicordati() || FC_DITTA; fcStato.inps = r.inps; fcStato.inail = r.inail; }
     const S = fcStato, cassa = fcCassa(), sconto35 = cassa === "artigiani" || cassa === "commercianti";
     fpSheet("Chi paga più tasse?", `<div class="sh-cols"><div class="sh-col"><div class="sh-b fc"><div class="sh-tit">I tuoi numeri</div>
@@ -142,7 +147,7 @@
         <div class="fc-tasti fc-opz">
           ${sconto35 ? `<button class="fp-chip" data-action="fc-opz" data-k="r35">Sconto 35% INPS</button>` : ""}
           <button class="fp-chip" data-action="fc-opz" data-k="a5">Primi 5 anni (5%)</button>
-          <button class="fp-chip" data-action="fc-opz" data-k="ce">Dipendente in cassa edile</button>
+          ${fcPro() ? "" : `<button class="fp-chip" data-action="fc-opz" data-k="ce">Dipendente in cassa edile</button>`}
         </div>
         <div class="fc-campi" id="fc-ditta-campi">
           <div class="field"><label for="fc-inps">INPS della ditta (%)</label><input id="fc-inps" inputmode="decimal" autocomplete="off" value="${fcPercTesto(S.inps)}"></div>
