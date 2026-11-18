@@ -180,10 +180,27 @@ async function gxVediFoto(g) {
   for (const f of d.foto) {
     try {
       const su = await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path, 3600);
-      if (su && su.data && su.data.signedUrl) pezzi.push('<a href="' + esc(su.data.signedUrl) + '" target="_blank" rel="noopener"><img src="' + esc(su.data.signedUrl) + '" alt="Foto del lavoro" loading="lazy"></a>');
+      /* 18 nov 2026 (ok di Alex): sotto ogni foto «togli», col secondo tocco come spesa e benzina */
+      if (su && su.data && su.data.signedUrl) pezzi.push('<div class="gx-foto"><a href="' + esc(su.data.signedUrl) + '" target="_blank" rel="noopener"><img src="' + esc(su.data.signedUrl) + '" alt="Foto del lavoro" loading="lazy"></a>'
+        + (gxTogli === "foto:" + f.id ? '<button type="button" class="gx-si" data-gx="foto-togli-si" data-id="' + esc(String(f.id)) + '" data-k="' + esc(g.k) + '">Sì, togli</button>'
+                                      : '<button type="button" class="gx-link" data-gx="foto-togli" data-id="' + esc(String(f.id)) + '" data-k="' + esc(g.k) + '">togli</button>')
+        + '</div>');
     } catch (e) {}
   }
   if (document.getElementById("gx-griglia") === box) box.innerHTML = pezzi.length ? pezzi.join("") : '<div class="gx-vuoto">Le foto non si riescono ad aprire adesso. Riprova fra poco.</div>';
+}
+
+async function gxFotoTogli(id, k) {
+  const f = gxDati.foto.find(x => String(x.id) === String(id));
+  gxTogli = null;
+  const r = await sb.from("gest_foto").delete().eq("id", id).eq("user_id", sbUid).select("id");
+  if (r.error || !r.data || !r.data.length) { toast("Foto non tolta: " + ((r.error && r.error.message) || "riprova")); return; }
+  const nelCestino = !!(window.cestinoAttivo && window.cestinoAttivo());
+  if (!nelCestino && f && f.storage_path) { try { await sb.storage.from("gestionale-foto").remove([f.storage_path]); } catch (e) {} }
+  toast(nelCestino ? "Foto nel cestino: la riprendi da lì" : "Foto tolta");
+  await gxRicarica();
+  const g = gxTrova(k);
+  if (g && gxDella(g, false).foto.length) gxVediFoto(g); else closeSheet();
 }
 
 /* ---------------------------------------------------------------------
@@ -314,7 +331,9 @@ document.addEventListener("click", async function (e) {
   const a = b.dataset.gx;
   const g = b.dataset.k ? gxTrova(b.dataset.k) : null;
   if (a === "foto") { if (g) gxScegliFoto(g); return; }
-  if (a === "vedi-foto") { if (g) gxVediFoto(g); return; }
+  if (a === "vedi-foto") { if (g) { gxTogli = null; gxVediFoto(g); } return; }
+  if (a === "foto-togli") { gxTogli = "foto:" + b.dataset.id; if (g) gxVediFoto(g); return; }
+  if (a === "foto-togli-si") { b.disabled = true; return gxFotoTogli(b.dataset.id, b.dataset.k); }
   if (a === "spesa") { if (g) { gxTogli = null; gxSpesaApri(g); } return; }
   if (a === "spesa-salva") return gxSpesaSalva(b);
   if (a === "spesa-togli") { gxTogli = "spesa:" + b.dataset.id; const gg = gxAperta && gxTrova(gxAperta.k); if (gg) gxSpesaApri(gg); return; }
