@@ -3524,3 +3524,32 @@ Aperto sullo Scadenzario:
 Funzione nuova (sì di Alex il 18 nov, foto prima): **le fatture dei fornitori da pagare nello Scadenzario** (`scadenzeFornitori(mid)` in `js/gest-scadenze-pratiche.js`, righe con `_forn:true`, in sola lettura come mezzi e persone). Solo quelle NON pagate e con la scadenza scritta, del reparto. «Apri» passa da `cal-vai` → Fornitori → `edit-fattf`. E `calVai` (js/gest-schede-clienti.js) adesso riporta DA DOVE si è partiti (`_da`): dallo Scadenzario, chiuso un mezzo o una fattura, si finiva nel Calendario.
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: L'AGENDA OPERATORE
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 3 persone «PROVA CONTROLLORE» (una nel Cestino), 5 lavori, 4 righe di ore, 12 timbrature create con SQL. Tutto cancellato: →0← righe, conti delle tabelle uguali a prima.
+
+Dove sta il codice: linguetta «Lavori» = `renderAgenda`, `agVoci` in `js/gest-elimina-reparto.js`; linguetta «Ore fatte» = `renderOre`, `oreMettiUscita`, `oreScaricaCsv` in `js/gest-ore-spese.js`; i clic (`ag-stato`, `ag-vista`, `ore-mese`, `ore-fix`, `ore-apri`, `ore-csv`) in `js/gest-finestre-eventi.js`; la pagina in `gestionale-app.html` (`#agenda`). «Ore fatte» conta TUTTA l'azienda, non il reparto.
+
+Sistemato (provato sulla pagina vera PRIMA del push; banco `tools/banco-gestionale.js app`: ZERO difetti):
+- ⛔ **«Metti l'uscita» non faceva niente.** Il pulsante stava dentro uno `<span class="fix" onclick="event.stopPropagation()">`: il clic non arrivava all'ascoltatore della pagina. Tolto lo stop (la riga del giorno non sta dentro la riga della persona).
+- **Il mese delle timbrature si tagliava sull'ora di Greenwich**: chi timbrava fra mezzanotte e l'una del primo del mese finiva nel mese prima, come «giornata rimasta aperta», e le sue ore sparivano. Adesso i confini sono `new Date(anno, mese, 1).toISOString()`.
+- **Ore scritte senza nome**: si buttavano via e il totale «Ore scritte a mano» era più basso del vero (14 invece di 17). Adesso hanno la riga «Ore senza nome» (`_senza_nome`, non conta in «Chi ha timbrato»).
+- **Persona nel Cestino**: in «Ore fatte» era «Persona non in elenco», nei Lavori la riga non diceva nessun nome. Adesso «Nome (nel cestino)» (letto con `sb.raw`).
+- ⛔ **Il lavoro di una persona nel Cestino la PERDEVA col Salva** (`jobForm`: la tendina «Chi ci va» restava su «— nessuno —»). Adesso la sua voce resta nella tendina (`option[data-fuori]`).
+- **«Tutti»**: i lavori fatti stavano in cima. Adesso in fondo, l'ultimo per primo.
+- Se le ore scritte non si leggono lo dice (prima: 0 in silenzio).
+
+Funziona (provato): filtro per persona, «Da fare / Tutti», «Apri» → modifica → Salva e l'Agenda si aggiorna, «Segna fatto» dall'alto, mese prima / dopo, differenza timbrate-scritte, file per Excel (letto il contenuto), 375 px senza niente fuori né sotto 13 px, console pulita.
+
+Da sapere:
+- Sul computer E sul telefono i lavori sono schede `.job` (`cards` di `renderTabella`); `display:none` scritto a mano su una scheda sul computer non la nasconde.
+- Le foto del pannello Browser arrivano in ritardo: una foto presa nello stesso giro del comando mostra lo stato di PRIMA.
+- Per provare prima del push: `(0,eval)(String(renderOre).replace(…))` funziona per `renderOre` e `renderAgenda`.
+
+Aperto sull'Agenda operatore:
+1. Proposta ad Alex (aspetta il sì): nella tendina «Operatore» la voce «Nessuno assegnato» e il numero dei lavori accanto a ogni nome.
+2. La linguetta viola «F» a sinistra copre la prima lettera di «Mostra» sul telefono (vale per tutte le sezioni, come «Parla»).
+3. NON provati: l'app dell'operaio che timbra davvero (le timbrature sono state scritte con SQL), lo studio tecnico, il telefono vero. La correzione di `jobForm` va riprovata dal vivo dopo il push (non si riesce a sostituire nella pagina).
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.

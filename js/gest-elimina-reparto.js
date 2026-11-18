@@ -682,8 +682,27 @@
     let L=data||[];
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
     if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
-    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    /* 18 nov 2026 — collaudo dell'Agenda operatore: in «Tutti» i lavori fatti
+       stavano in cima (hanno le date piu' vecchie). Prima quelli da fare, i
+       fatti in fondo con l'ultimo per primo (come lo Scadenzario). */
+    L.sort((a,b)=>{
+      const fa=a.stato==="fatto"?1:0, fb=b.stato==="fatto"?1:0;
+      if(fa!==fb)return fa-fb;
+      if(fa)return (b.data_prevista||"").localeCompare(a.data_prevista||"");
+      return (a.data_prevista||"9999").localeCompare(b.data_prevista||"9999");
+    });
     const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
+    /* 18 nov 2026 — chi ci va e' nel Cestino: la riga non diceva nessun nome.
+       Si legge il nome dalla porta di servizio e si scrive «… (nel cestino)». */
+    const nomeOp=Object.fromEntries(OPS.map(o=>[String(o.id),o.nome||""]));
+    const _fuori=Array.from(new Set(L.map(l=>l.operatore_id).filter(x=>x&&!(String(x) in nomeOp))));
+    if(_fuori.length&&typeof sb.raw==="function"){
+      try{
+        const rF=await sb.raw("gest_operatori").select("id,nome,eliminato_il").eq("user_id",sbUid).in("id",_fuori);
+        (rF&&rF.data||[]).forEach(o=>{nomeOp[String(o.id)]=(o.nome||"")+(o.eliminato_il?" (nel cestino)":"");});
+      }catch(e){}
+    }
+    _fuori.forEach(x=>{if(!nomeOp[String(x)])nomeOp[String(x)]="persona nel cestino";});
     renderTabella({
       id:"ag", box:"#ag-body",
       vuoto:tabVuoto("Niente da fare qui",
@@ -712,7 +731,7 @@
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
       /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): nella riga si vede CHI ci va
          (era lo scopo della sezione) e l'importo, come nei Lavori */
-      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"",true,"ag",((OPS.find(o=>String(o.id)===String(l.operatore_id))||{}).nome)||(l.operatore_id?"":"nessuno assegnato"))).join("")
+      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"",true,"ag",l.operatore_id?(nomeOp[String(l.operatore_id)]||""):"nessuno assegnato")).join("")
     });
   }
 

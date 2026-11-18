@@ -559,7 +559,20 @@
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
-    const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
+    /* 18 nov 2026 — collaudo dell'Agenda operatore: se chi ci va non e' piu' in
+       squadra (e' nel Cestino) la tendina restava su «— nessuno —» e premendo
+       Salva il lavoro PERDEVA la persona, in silenzio. Adesso la sua voce resta
+       («… (nel cestino)») e salvando non cambia niente. */
+    const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("")
+      +((id&&!dipCache.some(d=>d.id===id))?`<option value="${esc(id)}" data-fuori="1" selected>Persona nel cestino</option>`:"");
+    if(job.assegnatoId&&!dipCache.some(d=>d.id===job.assegnatoId)&&sb&&typeof sb.raw==="function"){
+      const _idF=job.assegnatoId;
+      (async()=>{try{
+        const r=await sb.raw("gest_operatori").select("nome,eliminato_il").eq("id",_idF).maybeSingle();
+        const o=document.querySelector('#j-dip option[data-fuori]');
+        if(o&&r&&r.data&&r.data.nome)o.textContent=r.data.nome+(r.data.eliminato_il?" (nel cestino)":"");
+      }catch(e){}})();
+    }
     /* Modulo lungo -> modale grande. A sinistra il lavoro in se' (cosa, dove,
        quando, chi, com'e' andata), a destra gli allegati e i soldi. */
     openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",

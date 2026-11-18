@@ -92,7 +92,11 @@
       sb.from("gest_operatori").select("id,nome").eq("user_id", sbUid),
       sb.from("gest_timbrature").select("id,tipo,quando,ora_telefono,creato_da,corretta_da")
         .eq("user_id", sbUid).is("eliminato_il", null)
-        .gte("quando", dal + "T00:00:00").lte("quando", al + "T23:59:59.999"),
+        /* 18 nov 2026 — collaudo: il mese si tagliava sull'ora di Greenwich.
+           Chi timbrava fra mezzanotte e l'una (le due, d'estate) del primo
+           del mese finiva nel mese PRIMA, come giornata rimasta aperta. Il
+           mese adesso e' quello dell'orologio di qui. */
+        .gte("quando", new Date(q.a, q.m, 1).toISOString()).lt("quando", new Date(q.a, q.m+1, 1).toISOString()),
       sb.from("gest_ore").select("ore,operatore_id,data")
         .eq("user_id", sbUid).is("eliminato_il", null)
         .gte("data", dal).lte("data", al)
@@ -106,6 +110,17 @@
     const NOMI = Object.fromEntries(OPS.map(o => [o.id, o.nome || "senza nome"]));
     const TMB = (rTmb && rTmb.data) || [];
     const ORE = (rOre && !rOre.error && rOre.data) ? rOre.data : [];
+    /* 18 nov 2026 — collaudo: chi e' nel Cestino usciva come «Persona non in
+       elenco». Il nome si legge dalla porta di servizio: «… (nel cestino)». */
+    const _oreFuori = Array.from(new Set(TMB.map(r => r.creato_da).concat(ORE.map(r => r.operatore_id)).filter(x => x && !(x in NOMI))));
+    if(_oreFuori.length && typeof sb.raw === "function"){
+      try{
+        const rF = await sb.raw("gest_operatori").select("id,nome,eliminato_il").eq("user_id", sbUid).in("id", _oreFuori);
+        ((rF && rF.data) || []).forEach(o => { NOMI[o.id] = (o.nome || "senza nome") + (o.eliminato_il ? " (nel cestino)" : ""); });
+      }catch(e){}
+    }
+    const SENZA = "_senza_nome";
+    NOMI[SENZA] = "Ore senza nome";
 
     /* timbrature: persona -> giorno -> righe */
     const perPersona = {};
@@ -117,7 +132,10 @@
     });
     /* ore scritte a mano: persona -> minuti */
     const scritte = {};
-    ORE.forEach(r => { if(r.operatore_id) scritte[r.operatore_id] = (scritte[r.operatore_id]||0) + (+r.ore||0); });
+    /* 18 nov 2026 — collaudo: le ore scritte senza il nome di una persona si
+       buttavano via, e il totale «Ore scritte a mano» veniva piu' basso di
+       quello vero. Adesso hanno la loro riga, «Ore senza nome». */
+    ORE.forEach(r => { const k = r.operatore_id || SENZA; scritte[k] = (scritte[k]||0) + (+r.ore||0); });
 
     /* chi far vedere: chi ha timbrato, chi ha ore scritte, e tutta la squadra */
     const ids = Array.from(new Set(OPS.map(o=>o.id).concat(Object.keys(perPersona)).concat(Object.keys(scritte))));
@@ -142,8 +160,9 @@
     const totScr  = PERS.reduce((s,p) => s + p.scrMs, 0);
     const totBuchi= PERS.reduce((s,p) => s + p.buchi.length, 0);
     const quanti  = PERS.filter(p => p.ms > 0).length;
+    const quantePers = PERS.filter(p => p.id !== SENZA).length;
 
-    if(!TMB.length && !ORE.length){
+    if(!TMB.length && !ORE.length && !(rOre && rOre.error)){
       body.innerHTML = tabVuoto("Nessuna ora in " + MESI_L[q.m],
         "Qui arrivano le ore che la squadra timbra dal telefono e quelle scritte in «Segna la giornata». Se il mese è appena iniziato, è normale.", AG_VUOTO);
       return;
@@ -151,6 +170,11 @@
 
     /* ---- l'avviso delle giornate aperte ---- */
     let H = "";
+    /* 18 nov 2026 — regola 20: se le ore scritte non si leggono, si dice (prima: 0 in silenzio) */
+    if(rOre && rOre.error){
+      H += '<div class="ore-avviso"><span class="ore-av-ic">⚠️</span><div><span class="ore-av-t">Le ore scritte a mano non riesco a leggerle</span>'
+        + '<p>Qui sotto vedi solo quelle timbrate. Controlla la connessione e riapri «Ore fatte».</p></div></div>';
+    }
     if(totBuchi){
       const primo = PERS.find(p => p.buchi.length);
       const b = primo.buchi[0];
@@ -167,7 +191,7 @@
       + '<div class="ore-st ok"><div class="n">'  + _oreHM(totMs)  + '</div><div class="l">Ore timbrate</div></div>'
       + '<div class="ore-st"><div class="n">'     + _oreHM(totScr) + '</div><div class="l">Ore scritte a mano</div></div>'
       + '<div class="ore-st' + (totBuchi ? ' att' : '') + '"><div class="n">' + totBuchi + '</div><div class="l">Giornate aperte</div></div>'
-      + '<div class="ore-st"><div class="n">' + quanti + ' / ' + PERS.length + '</div><div class="l">Chi ha timbrato</div></div>'
+      + '<div class="ore-st"><div class="n">' + quanti + ' / ' + quantePers + '</div><div class="l">Chi ha timbrato</div></div>'
       + '</div>';
 
     /* ---- la tabella, persona per persona ---- */
@@ -200,7 +224,11 @@
           if(d.buco){
             H += '<div class="ore-g buco"><span class="d">' + _oreGiornoIt(d.giorno) + '</span>'
               + '<span class="t">' + _oreHHMM(d.buco.quando) + ' → <b>manca l\'uscita</b></span>'
-              + '<span class="fix" onclick="event.stopPropagation()">'
+              /* 18 nov 2026 — collaudo: qui c'era onclick="event.stopPropagation()".
+                 Fermava il clic PRIMA dell'ascoltatore della pagina: «Metti
+                 l'uscita» non faceva niente. La riga del giorno non sta dentro
+                 la riga della persona, quindi non c'e' niente da fermare. */
+              + '<span class="fix">'
               + '<input type="time" class="ore-ora" id="fix-' + esc(d.buco.id) + '" value="17:00">'
               + '<button class="btn btn-sm" data-action="ore-fix" data-id="' + esc(d.buco.id) + '" data-op="' + esc(p.id) + '" data-g="' + d.giorno + '" data-e="' + _oreHHMM(d.buco.quando) + '">Metti l\'uscita</button>'
               + '</span></div>';
