@@ -729,7 +729,7 @@
     const pro = typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista";
     if (pro && !(p.regime === "forfettario" && !S.tutte)) {
       box.innerHTML = ftIvaRis("22%", "Per lo studio: IVA al 22%, sempre",
-        ["Progetto, direzione lavori, pratiche, rilievi: è una prestazione professionale, anche se il lavoro in cantiere va al 10% o al 4%.",
+        ["Progetto, direzione lavori, pratiche, rilievi: è una prestazione professionale, anche quando l'impresa edile mette il 10% o il 4% sulle sue opere.",
          "Prima dell'IVA aggiungi la <b>cassa</b> (Geometri 5%, Inarcassa 4%): l'IVA si calcola anche sulla cassa.",
          "Se il cliente è un'azienda, un condominio o un altro professionista togli la <b>ritenuta del 20%</b> sul compenso. Con un privato no."], "");
       return;
