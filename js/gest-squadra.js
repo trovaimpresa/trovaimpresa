@@ -42,8 +42,10 @@
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
     if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
     const _rD=await Promise.all([
-      sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()),
-      sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi"),
+      /* 18 nov 2026 (voce Squadra) — ordine fisso: l'ultima persona aggiunta in cima
+         (prima non c'era nessun ordine e le schede si scambiavano di posto) */
+      sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
+      sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi,created_at"),
       sb.from("gest_operatore_documenti").select("*"),
       /* 11 ott 2026 — messaggi della chat generale non ancora letti, per persona */
       sb.from("gest_messaggi").select("operatore_id").eq("autore","operaio").is("letto_il",null).is("lavoro_id",null)
@@ -55,12 +57,12 @@
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     const dB={};(docsAll||[]).forEach(function(d){(dB[d.operatore_id]=dB[d.operatore_id]||[]).push(d);});
     /* dipCache alimenta il modulo di modifica: deve contenere tutti i campi della persona */
-    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{},docs:dB[o.id]||[]});});
+    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{},docs:dB[o.id]||[],acc:invitoStato(inv)});});
     let L=(ops||[]).map(o=>{
       const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
       const link=inviteLink(inv.codice||"");
       return Object.assign({},o,{ruolo:dc.ruolo||"operaio",docs:dc.docs||[],nuovi:nB[o.id]||0,
-        attivo:inv.stato==="attivo",codice:inv.codice||"",link:link,
+        attivo:inv.stato==="attivo",acc:invitoStato(inv),codice:inv.codice||"",link:link,
         wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)});
     });
     if(dipQ){const q=dipQ.toLowerCase();
@@ -470,11 +472,59 @@
   /* 14 nov 2026 (quinto giro, n. 5) — LO STATO DELLA PERSONA, in un posto solo.
      Chi nasce da «＋ Un'altra persona…» nelle ore non ha nessun invito: usciva
      «Invitato» lo stesso. Senza codice d'invito adesso dice «Senza invito». */
-  function dipStato(o){ return o&&o.attivo?"Attivo":(o&&o.codice?"Invitato":"Senza invito"); }
+  function dipStato(o){
+    if(o&&o.acc==="scaduto")return "Invito scaduto";
+    if(o&&o.acc==="tolto")return "Accesso tolto";
+    return o&&o.attivo?"Attivo":(o&&o.codice?"Invitato":"Senza invito");
+  }
+  /* 18 nov 2026 (voce Squadra) — COME STA DAVVERO L'INVITO.
+     Il codice d'invito vale 14 giorni e una volta sola (gest_redeem_invito),
+     e «Rimuovi accesso» lo spegne. Ma la scheda diceva «Invitato» e offriva
+     «Mandagli l'app» anche con l'invito scaduto o tolto: il link mandato non
+     apriva niente. Misurato il 18 nov: 5 inviti in attesa su 5 erano scaduti.
+     attivo · invitato · scaduto · tolto · senza */
+  const INVITO_GIORNI=14;
+  function invitoStato(inv){
+    if(!inv||!inv.codice)return "senza";
+    if(inv.stato==="attivo")return "attivo";
+    if(inv.stato==="revocato")return "tolto";
+    const t=Date.parse(inv.created_at||"");
+    if(!isNaN(t)&&Date.now()-t>INVITO_GIORNI*86400000)return "scaduto";
+    return "invitato";
+  }
+  /* il link serve solo se l'invito e' vivo (o la persona e' gia' dentro) */
+  function invitoVivo(o){ return !!(o&&o.codice&&(o.acc===undefined||o.acc==="attivo"||o.acc==="invitato")); }
+  /* INVITO NUOVO (ok di Alex, 18 nov): codice nuovo che vale altri 14 giorni,
+     per chi ha l'invito scaduto, l'accesso tolto o non l'ha mai avuto.
+     La riga di gest_membri resta la stessa (ruolo e permessi non si perdono);
+     chi non ce l'ha nasce coi permessi dell'operaio. */
+  async function squadraNuovoInvito(id){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const o=(dipCache||[]).find(x=>String(x.id)===String(id))||{};
+    const r=await sb.from("gest_membri").select("id,stato").eq("operatore_id",id).eq("impresa_id",sbUid).limit(1);
+    if(r.error){toast("Invito non creato: "+r.error.message);return;}
+    const codice=sbRand();
+    if(r.data&&r.data.length){
+      if(r.data[0].stato==="attivo"){toast("Ha già l'app attiva: non serve un invito nuovo");renderDip();return;}
+      const u=await sb.from("gest_membri").update({codice,stato:"invitato",membro_id:null,created_at:new Date().toISOString()})
+        .eq("id",r.data[0].id).eq("impresa_id",sbUid).select("id");
+      if(u.error){toast("Invito non creato: "+u.error.message);return;}
+      if(!u.data||!u.data.length){toast("Invito non creato: nessuna riga modificata. Riprova.");return;}
+    }else{
+      const permessi={};PERMS.forEach(p=>permessi[p.key]=RUOLO_PRESET.operaio.includes(p.key));
+      const i=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:id,codice,stato:"invitato",ruolo:"operaio",permessi}).select("id");
+      if(i.error){toast("Invito non creato: "+i.error.message);return;}
+    }
+    await renderDip();
+    toast("Invito nuovo pronto: vale "+INVITO_GIORNI+" giorni ✔");
+    const link=inviteLink(codice);
+    mostraQrInvito(link,o.nome||"","https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link));
+  }
   function dipVoci(o){
     const v=[{lab:"\ud83d\udcac Messaggi"+(o.nuovi?" ("+o.nuovi+")":""),action:"chat-squadra",data:{id:o.id,nome:o.nome||""}},
              {lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
-    if(o.codice){
+    const vivo=invitoVivo(o);
+    if(vivo){
       v.push({lab:"🔗 Copia link",action:"sq-copy",data:{link:o.link}});
       v.push({lab:"💬 Invia su WhatsApp",action:"sq-wa",data:{wa:o.wa}});
       /* 5 set 2026 — il QR: in cantiere non si scrive un indirizzo a mano e
@@ -485,7 +535,12 @@
     }
     /* 12 agosto 2026 (sera) — c'era solo «Rimuovi accesso», che toglie la
        password ma lascia la persona in elenco per sempre. */
-    if(!o.codice)v.push({sep:true});
+    if(!vivo){
+      /* 18 nov 2026 — invito scaduto, accesso tolto o mai invitata: il link
+         vecchio non apre niente, quindi non si offre; si offre quello nuovo */
+      v.push({lab:"📨 Nuovo invito",action:"sq-invito",data:{id:o.id}});
+      v.push({sep:true});
+    }
     v.push({lab:"🗑 Elimina",action:"sq-del",data:{id:o.id},del:true});
     return v;
   }
@@ -668,6 +723,7 @@ ${vecchi?`
 
       <div class="sh-b">
         <div class="sh-tit">Cosa vede sul telefono</div>
+        ${(!isNew&&op.acc&&op.acc!=="attivo"&&op.acc!=="invitato")?`<p class="sh-nota" style="margin:0 0 10px;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px">${op.acc==="senza"?"Non ha ancora l'app: ruolo e permessi valgono dopo che premi <b>Nuovo invito</b> sulla sua scheda.":(op.acc==="tolto"?"Le hai tolto l'accesso: dal telefono non entra. Per ridarglielo premi <b>Nuovo invito</b> sulla sua scheda.":"L'invito è scaduto (vale 14 giorni): premi <b>Nuovo invito</b> sulla sua scheda.")}</p>`:""}
         <div class="field"><label>Ruolo nell'app</label><select id="d-ruolo">
           <option value="operaio">Operaio</option>
           <option value="preposto">Preposto</option>
@@ -805,7 +861,10 @@ ${vecchi?`
     const {data:okMem,error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
     if(e2){toast("Errore permessi: "+e2.message);return;}
     closeSheet();renderDip();
-    if(!okMem||!okMem.length){toast("Salvato, ma ruolo e permessi non aggiornati");return;}
+    /* 18 nov 2026 — chi non ha mai avuto un invito non ha la riga dei permessi:
+       non e' un errore («Salvato, ma ruolo e permessi non aggiornati» usciva a
+       ogni Salva). Si dice cosa manca davvero. */
+    if(!okMem||!okMem.length){toast("Aggiornato ✔ — non ha ancora l'app: ruolo e permessi valgono dopo «Nuovo invito»");return;}
     toast("Aggiornato ✔");
   }
 
@@ -955,7 +1014,7 @@ ${vecchi?`
       if(!(rev&&rev.data&&rev.data.length)){
         tiAvviso("Non ho eliminato «"+nome+"».\n\nHo provato a togliergli l'accesso dal telefono "
           +"ma non ho trovato nessuna riga da cambiare. Prima usa «🚫 Rimuovi accesso» sulla "
-          +"sua scheda, controlla che diventi «Nessun accesso», poi rielimina.");
+          +"sua scheda, controlla che diventi «Accesso tolto», poi rielimina.");
         return;
       }
     }
@@ -978,8 +1037,8 @@ ${vecchi?`
         +(tornato
           ? "L'accesso dal telefono è rimasto com'era. Riprova fra un momento."
           : "⚠️ ATTENZIONE: le avevo già tolto l'accesso dal telefono e non sono riuscito a "
-            +"rimetterlo. La persona è ancora in squadra ma dal telefono non entra. Vai sulla "
-            +"sua scheda e rimandale il link d'invito."));
+            +"rimetterlo. La persona è ancora in squadra ma dal telefono non entra. Sulla "
+            +"sua scheda premi «Nuovo invito»."));
       return;
     }
     renderDip();

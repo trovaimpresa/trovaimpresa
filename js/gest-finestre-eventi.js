@@ -967,14 +967,18 @@
     if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-qr"){mostraQrInvito(t.dataset.link,t.dataset.nome||"");return;}
+    if(a==="sq-invito")return squadraNuovoInvito(id);
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
-      if(!(await gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale.")))return;
+      /* 18 nov 2026 — il «Sì» diceva «Sì, elimina»: qui non si elimina nessuno */
+      if(!(typeof window.tiChiedi==="function"
+        ?await window.tiChiedi("Dal telefono non entra più. La persona resta in squadra: glielo ridai con «Nuovo invito».",{titolo:"Togliere l'accesso a "+String(t.dataset.nome||"questa persona").slice(0,60)+"?",si:"Sì, togli l'accesso",no:"No",rosso:true})
+        :await gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale.")))return;
       const {data:okRev,error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
-      renderDip();toast("Accesso rimosso");return;
+      renderDip();toast("Accesso tolto");return;
     }
     if(a==="sq-del")return dipElimina(id);
     if(a==="save-dip")return saveDip(id);
@@ -1109,6 +1113,8 @@
          in silenzio, portandosi dietro tutti gli altri pulsanti. */
       if(b.dataset.vai){location.href=b.dataset.vai;return;}
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+      /* 18 nov 2026 — Attrezzature sta dentro «Mezzi e attrezzature»: nel menu si accende quella */
+      if(b.classList.contains("mz-dentro")){const _mzb=$('nav.tabs button[data-tab="mezzi"]');if(_mzb)_mzb.classList.add("active");}
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
       /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
          rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si

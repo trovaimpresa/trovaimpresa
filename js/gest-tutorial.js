@@ -41,7 +41,7 @@
     scadenzario: "Qui ci sono le scadenze: revisioni, DURC, visite mediche, assicurazioni.",
     agenda:      "Qui vedi i lavori di ogni operaio.",
     squadra:     "Qui metti i tuoi operai e decidi cosa possono vedere dal telefono.",
-    mezzi:       "Qui ci sono i tuoi mezzi, con revisioni e assicurazioni.",
+    mezzi:       "Qui ci sono i tuoi mezzi e le attrezzature, in due linguette, con revisioni e verifiche.",
     attrezzature:"Qui ci sono le attrezzature e dove si trovano.",
     fisco:       "Qui vedi le tasse da mettere da parte e le date da non dimenticare.",
     prezzario:   "Qui tieni i tuoi prezzi, così i preventivi si fanno prima.",

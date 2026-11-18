@@ -32,7 +32,7 @@
     fatture:      'Le fatture emesse, quelle da incassare e quelle pagate. Da qui esce il PDF e il file per lo SdI.',
     calendario:   'Il mese a colpo d’occhio: quando è previsto ogni lavoro.',
     agenda:       'Cosa deve fare la squadra giorno per giorno. È quello che gli operai vedono sul telefono.',
-    mezzi:        'Furgoni e macchine, con le scadenze di bollo, assicurazione e revisione.',
+    mezzi:        'Furgoni e macchine con bollo, assicurazione e revisione. Nella linguetta «Attrezzature»: betoniere, ponteggi, utensili.',
     attrezzature: 'Betoniere, ponteggi, utensili: cosa hai e a chi è in mano.',
     squadra:      'Le persone che lavorano con te: contatti, ruolo e documenti.',
     carte:        'Le carte aziendali e le spese fatte con ognuna.',
