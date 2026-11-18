@@ -141,6 +141,27 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TrovaImpresa">
+<style>
+/* 18 nov 2026: fascia «Iscriviti gratis», la stessa di subappalto.html */
+.sub-invito { max-width:1200px; margin:28px auto 0; padding:0 20px; box-sizing:border-box; }
+.sub-invito-box { background:#fff; border:2px solid #f0a020; border-radius:18px; padding:26px 30px;
+  display:flex; gap:28px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  box-shadow:0 6px 20px rgba(10,42,77,.08); }
+.sub-invito-tit { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:#0a2a4d; margin:0 0 12px; }
+.sub-invito ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.sub-invito li { font-size:1.12rem; color:#1a1a1a; line-height:1.4; padding-left:30px; position:relative; }
+.sub-invito li::before { content:"\2713"; position:absolute; left:0; top:0; color:#1b8a3a; font-weight:800; font-size:1.2rem; }
+.sub-invito-btn { display:inline-block; background:#ff8800; color:#fff; text-decoration:none; font-weight:800;
+  font-size:1.25rem; padding:18px 30px; border-radius:14px; white-space:nowrap; box-shadow:0 4px 14px rgba(255,136,0,.35); }
+.sub-invito-btn:hover { background:#e67a00; }
+.sub-invito-nota { display:block; text-align:center; margin-top:8px; color:#5b6b80; font-size:.95rem; }
+.f-layout .sub-invito { grid-column:1/-1; max-width:none; margin:0 0 4px; padding:0; }
+@media (max-width:700px){ .sub-invito-box{padding:20px} .sub-invito-tit{font-size:1.4rem} .sub-invito-btn{white-space:normal; text-align:center; width:100%; box-sizing:border-box} .sub-invito-cta{width:100%} }
+</style>
+<style>
+/* 18 nov 2026: sul telefono il titolo andava fuori dallo schermo: titolo sopra, ricerca sotto */
+@media (max-width:700px){ .top-bar{flex-wrap:wrap;padding:16px 18px} .top-bar h1{white-space:normal;font-size:1.5rem;width:100%} .top-search{width:100%;min-width:0} .top-search input{min-width:0} .btn-cerca{padding:14px 18px} }
+</style>
 </head>
 <body>
 
@@ -169,6 +190,23 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   <a class="btn-azione" href="/offerte-registrazione.html"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Pubblica un'offerta di lavoro</a>
 </div>
 
+
+<section class="sub-invito" aria-label="Iscrivi la tua impresa">
+  <div class="sub-invito-box">
+    <div>
+      <h2 class="sub-invito-tit">Sei un'impresa? Iscriviti gratis</h2>
+      <ul>
+        <li>I clienti ti trovano e ti chiedono preventivi</li>
+        <li>Trovi operai e subappaltatori della tua zona</li>
+        <li>Gestionale gratis: preventivi, fatture e cantieri</li>
+      </ul>
+    </div>
+    <div class="sub-invito-cta">
+      <a class="sub-invito-btn" href="/iscriviti.html">Iscrivi la tua impresa</a>
+      <span class="sub-invito-nota">Gratis per sempre &middot; 1 minuto</span>
+    </div>
+  </div>
+</section>
 
 <div class="page-body">
 

@@ -102,6 +102,23 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TrovaImpresa">
+<style>
+/* 18 nov 2026: fascia «Iscriviti gratis», la stessa di subappalto.html */
+.sub-invito { max-width:1200px; margin:28px auto 0; padding:0 20px; box-sizing:border-box; }
+.sub-invito-box { background:#fff; border:2px solid #f0a020; border-radius:18px; padding:26px 30px;
+  display:flex; gap:28px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  box-shadow:0 6px 20px rgba(10,42,77,.08); }
+.sub-invito-tit { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:#0a2a4d; margin:0 0 12px; }
+.sub-invito ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.sub-invito li { font-size:1.12rem; color:#1a1a1a; line-height:1.4; padding-left:30px; position:relative; }
+.sub-invito li::before { content:"\2713"; position:absolute; left:0; top:0; color:#1b8a3a; font-weight:800; font-size:1.2rem; }
+.sub-invito-btn { display:inline-block; background:#ff8800; color:#fff; text-decoration:none; font-weight:800;
+  font-size:1.25rem; padding:18px 30px; border-radius:14px; white-space:nowrap; box-shadow:0 4px 14px rgba(255,136,0,.35); }
+.sub-invito-btn:hover { background:#e67a00; }
+.sub-invito-nota { display:block; text-align:center; margin-top:8px; color:#5b6b80; font-size:.95rem; }
+.f-layout .sub-invito { grid-column:1/-1; max-width:none; margin:0 0 4px; padding:0; }
+@media (max-width:700px){ .sub-invito-box{padding:20px} .sub-invito-tit{font-size:1.4rem} .sub-invito-btn{white-space:normal; text-align:center; width:100%; box-sizing:border-box} .sub-invito-cta{width:100%} }
+</style>
 </head>
 <body>
 <!-- 24 ott 2026 — TrovaImpresa Lavoro Edilizia: offerte di lavoro e subappalti in un posto solo.
@@ -143,6 +160,22 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
 </div></div>
 <div class="fs-tag"><div class="box le-dove"><label for="le-regione">Dove cerchi?</label><select id="le-regione" aria-label="Scegli la regione"><option value="">Tutta Italia</option></select><span class="le-dove-n">Chi lavora in tutta Italia compare in ogni regione.</span></div></div>
 <div class="f-layout">
+<section class="sub-invito" aria-label="Iscrivi la tua impresa">
+  <div class="sub-invito-box">
+    <div>
+      <h2 class="sub-invito-tit">Sei un'impresa? Iscriviti gratis</h2>
+      <ul>
+        <li>I clienti ti trovano e ti chiedono preventivi</li>
+        <li>Trovi operai e subappaltatori della tua zona</li>
+        <li>Gestionale gratis: preventivi, fatture e cantieri</li>
+      </ul>
+    </div>
+    <div class="sub-invito-cta">
+      <a class="sub-invito-btn" href="/iscriviti.html">Iscrivi la tua impresa</a>
+      <span class="sub-invito-nota">Gratis per sempre &middot; 1 minuto</span>
+    </div>
+  </div>
+</section>
   <main class="f-main">
     <div class="le-sez" id="le-sez" role="group" aria-label="Scegli cosa vedere">
       <button type="button" data-sez="lavoro">Offerte di lavoro <span>(<b id="le-n-lavoro">0</b>)</span></button>
@@ -175,6 +208,7 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
       <a href="/registrazione-candidato.html" class="f-link2">Iscriviti gratis come lavoratore</a>
       <a href="/quanto-guadagna-un-muratore.html" class="f-link2">Quanto guadagna un muratore: stipendio per livello</a>
     </div>
+<div class="ti-ads"><small>Pubblicit&agrave;</small><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3621975687116775" data-ad-slot="7886156385" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
     <div class="f-box2">
       <h3>Come funziona</h3>
       <ol>
@@ -183,6 +217,7 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
         <li>Quando trova la persona, lo chiude.</li>
       </ol>
     </div>
+<div class="ti-ads"><small>Pubblicit&agrave;</small><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3621975687116775" data-ad-slot="7886156385" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
   </aside>
 </div>
 <div class="pb-due">

@@ -55,6 +55,17 @@ function esc(s) {
 }
 const emailValida = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e || '').trim());
 
+/* 18 nov 2026 (richiesta di Alex): a ogni offerta nuova arriva un avviso a info@,
+   come per le iscrizioni. Se non parte, l'offerta resta pubblicata lo stesso. */
+async function avvisaAdmin(o) {
+  if (!RESEND_KEY) return;
+  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a">
+    <p><b>${esc(o.nome_azienda || '—')}</b> ha pubblicato un'offerta di lavoro.</p>
+    <p>${esc(o.titolo || '')}${o.tipo_contratto ? ' · ' + esc(o.tipo_contratto) : ''}<br>📍 ${esc([o.citta, o.provincia].filter(Boolean).join(', ') || '—')}</p>
+    <p><a href="${SITO}/lavoro-edilizia">Vedi gli annunci</a> · <a href="${SITO}/admin.html">Apri il pannello admin</a></p></div>`;
+  try { await mandaEmail('info@trovaimpresa.com', '🔔 Nuova offerta di lavoro: ' + (o.titolo || o.nome_azienda || ''), html); } catch (e) { console.warn('[offerta-gestione] avviso admin:', e.message); }
+}
+
 async function mandaEmail(to, subject, html) {
   const rr = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -197,8 +208,9 @@ exports.handler = async function (event) {
     }
 
     if (azione === 'link') {
+      if (tok && tok.email_avvisata) return risposta(200, { gia_inviata: true });
+      await avvisaAdmin(o);
       if (!tok) return risposta(200, { inviata: false });
-      if (tok.email_avvisata) return risposta(200, { gia_inviata: true });
       if (!RESEND_KEY || !emailValida(o.email)) return risposta(200, { inviata: false });
       const ok = await mandaEmail(o.email, `La tua offerta è online — ${o.titolo}`, emailLink(o, linkGestione(id, tok.token)));
       if (ok) await sb(`offerte_token?offerta_id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ email_avvisata: true }) });

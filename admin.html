@@ -707,12 +707,14 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       </div>
       <div class="nav-item" onclick="showSection('subappalti',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 1 0-2.8l.8-.8a2 2 0 0 1 2.8 0L21 9"/><path d="m21 3-5 5"/><path d="M3 9l3.5-3.5a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L6 13"/></svg></span> Subappalti
+        <span class="nav-badge" id="badge-subappalti" style="background:#15803d;display:none" title="Nuovi da quando l'hai aperta">0</span>
       </div>
       <div class="nav-item" onclick="showSection('forum',this)">
         <span class="nav-icon">💬</span> Forum <span id="badge-forum" style="display:none;background:#c0392b;color:#fff;border-radius:10px;padding:1px 7px;font-size:.75rem;font-weight:800;margin-left:4px"></span>
       </div>
       <div class="nav-item" onclick="showSection('offerte-lavoro',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span> Offerte di lavoro
+        <span class="nav-badge" id="badge-offerte-lavoro" style="background:#15803d;display:none" title="Nuovi da quando l'hai aperta">0</span>
       </div>
       <div class="nav-item" onclick="showSection('candidati',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Candidati registrati
@@ -916,6 +918,17 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div class="stat-card apri" data-va="segnalazioni">
           <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg></div>
           <div><div class="stat-num" id="stat-segnalazioni">–</div><div class="stat-lbl">Segnalazioni</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <!-- 18 nov 2026 (richiesta di Alex): chi pubblica in Lavoro Edilizia -->
+        <div class="stat-card apri" data-va="subappalti">
+          <div class="stat-icon g"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 1 0-2.8l.8-.8a2 2 0 0 1 2.8 0L21 9"/><path d="m21 3-5 5"/><path d="M3 9l3.5-3.5a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L6 13"/></svg></div>
+          <div><div class="stat-num" id="stat-sub">–</div><div class="stat-lbl">Subappalti online</div><div class="stat-conf" id="stat-sub-sub"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="offerte-lavoro">
+          <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+          <div><div class="stat-num" id="stat-off">–</div><div class="stat-lbl">Offerte di lavoro online</div><div class="stat-conf" id="stat-off-sub"></div></div>
           <span class="stat-freccia">›</span>
         </div>
       </div>
@@ -1561,11 +1574,13 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
               <th>Città</th>
               <th>Descrizione</th>
               <th>Contatti</th>
+              <th>Stato</th>
+              <th>Sul sito</th>
               <th>Data</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-subappalti"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-subappalti"><tr><td colspan="9" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -2245,9 +2260,9 @@ function showSection(id, el, fromPopstate) {
   if (id === 'locandine') caricaPreviewLocandine();
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
-  if (id === 'subappalti') caricaSubappalti();
+  if (id === 'subappalti') { caricaSubappalti(); segnaVistiLavoro('subappalti'); }
   if (id === 'forum') caricaForum();
-  if (id === 'offerte-lavoro') caricaOfferteLavoro();
+  if (id === 'offerte-lavoro') { caricaOfferteLavoro(); segnaVistiLavoro('offerte-lavoro'); }
   if (id === 'candidati') caricaCandidati();
   if (id === 'clienti-iscritti') caricaClientiIscritti();
   if (id === 'candidature') caricaCandidature();
@@ -4411,7 +4426,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti(), caricaBadgeRichieste(), caricaClientiIscritti().catch(() => {})]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti(), caricaBadgeRichieste(), caricaClientiIscritti().catch(() => {}), caricaNumeriLavoro().catch(() => {})]);
   caricaVotiGestionale();   /* dopo le imprese: serve il nome di chi ha votato */
 }
 
@@ -5604,9 +5619,43 @@ async function disegnaNumeri(boxId, chiave, carteAnnunci) {
 }
 
 // SUBAPPALTI
+/* ---------- 18 nov 2026: Subappalti e Offerte di lavoro in Dashboard e nel menu ----------
+   Casella in Dashboard: quanti sono online adesso, e quanti pubblicati oggi e in 7 giorni.
+   Numero verde nel menu: quanti pubblicati da quando hai aperto quella sezione l'ultima volta
+   (si ricorda nel browser; la prima volta conta gli ultimi 7 giorni). */
+const _LAV_DATA = { 'subappalti': [], 'offerte-lavoro': [] };
+function _lavVisto(k) {
+  let v = null; try { v = localStorage.getItem('admin_visto_' + k); } catch (e) {}
+  return v ? new Date(v) : new Date(Date.now() - 7 * 864e5);
+}
+function _lavBadge(k) {
+  const b = document.getElementById('badge-' + k); if (!b) return;
+  const da = _lavVisto(k);
+  const n = _LAV_DATA[k].filter(x => x.created_at && new Date(x.created_at) > da).length;
+  b.textContent = n; b.style.display = n ? '' : 'none';
+}
+function segnaVistiLavoro(k) {
+  try { localStorage.setItem('admin_visto_' + k, new Date().toISOString()); } catch (e) {}
+  _lavBadge(k);
+}
+async function caricaNumeriLavoro() {
+  const oggi = new Date().toLocaleDateString('sv-SE'), sette = new Date(Date.now() - 7 * 864e5);
+  const riga = l => 'oggi ' + l.filter(x => x.created_at && new Date(x.created_at).toLocaleDateString('sv-SE') === oggi).length
+    + ' · 7 giorni ' + l.filter(x => x.created_at && new Date(x.created_at) >= sette).length;
+  const [sub, off] = await Promise.all([adminApi('list', 'subappalti').catch(() => null), adminApi('list', 'offerte_lavoro').catch(() => null)]);
+  if (sub) {
+    _LAV_DATA['subappalti'] = sub;
+    _set('stat-sub', sub.filter(x => x.attivo !== false).length); _set('stat-sub-sub', riga(sub)); _lavBadge('subappalti');
+  }
+  if (off) {
+    _LAV_DATA['offerte-lavoro'] = off;
+    _set('stat-off', off.filter(x => x.attiva).length); _set('stat-off-sub', riga(off)); _lavBadge('offerte-lavoro');
+  }
+}
+
 async function caricaSubappalti() {
   const tbody = document.getElementById('table-subappalti');
-  tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9" class="loading">Caricamento...</td></tr>';
   let data;
   try {
     const res = await fetch('/.netlify/functions/admin-dati', {
@@ -5618,20 +5667,20 @@ async function caricaSubappalti() {
     if (!res.ok || !json.success) throw new Error();
     data = json.data;
   } catch {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
   }
   {
     const l = data || [];
     const senza = l.filter(s => !s.user_id).length;
     disegnaNumeri('sa-numeri', 'subappalti',
-        _numCarta(l.length, 'Annunci in tutto')
+        _numCarta(l.length, 'Annunci in tutto', '', l.filter(s => s.attivo !== false).length + ' online')
       + _numCarta(_numDa(l, 'created_at', 30), 'Annunci ultimi 30 giorni', 'giallo', _numDa(l, 'created_at', 7) + ' negli ultimi 7')
-      + _numCarta(l.filter(s => s.tipo !== 'cerca').length + ' / ' + l.filter(s => s.tipo === 'cerca').length, 'Offrono lavoro / Cercano lavoro', 'viola')
+      + _numCarta(l.filter(s => s.tipo !== 'cerca').length + ' / ' + l.filter(s => s.tipo === 'cerca').length, 'Offrono disponibilità / Cercano subappaltatori', 'viola')
       + _numCarta(senza, 'Senza account sul sito', senza ? 'rosso' : '', senza ? 'imprese da invitare a iscriversi' : ''));
   }
   if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🤝</div>Nessun annuncio subappalto</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-table"><div class="eicon">🤝</div>Nessun annuncio subappalto</div></td></tr>';
     return;
   }
   tbody.innerHTML = data.map(s => {
@@ -5646,6 +5695,8 @@ async function caricaSubappalti() {
       <td>📍 ${esc(s.citta) || '–'}</td>
       <td style="max-width:300px;word-break:break-word;white-space:pre-line">${esc(descr)}</td>
       <td style="font-size:0.82rem">${contatti}</td>
+      <td>${s.attivo === false ? '<span class="badge badge-rig">Nascosto</span>' : '<span class="badge badge-v">Online</span>'}</td>
+      <td>${s.user_id ? '<span class="badge badge-v">Iscritto</span>' : '<span class="badge badge-att">Non iscritto</span>'}</td>
       <td style="white-space:nowrap;font-size:0.78rem;color:var(--light)">${data_fmt}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaSubappalto('${s.id}')">🗑️ Elimina</button></td>
     </tr>`;
