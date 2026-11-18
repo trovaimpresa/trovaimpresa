@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <link rel="canonical" href="https://trovaimpresa.com/subappalti-campania">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subappalti edili in Campania: lavori e imprese disponibili | TrovaImpresa</title>
+  <meta name="description" content="Subappalti edili in Campania: imprese che cercano subappaltatori e squadre disponibili a lavorare in subappalto. Pubblichi gratis, senza registrarti.">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f6f8; min-height:100vh; color:#1a1a1a; }
+
+    header { background:white; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; flex-wrap: wrap; gap: 14px; }
+    header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; font-size: 17px; padding: 6px 4px; border-radius: 8px; }
+    header nav a:hover { text-decoration: underline; }
+    header nav a.attivo { background: #eaf2ff; color: #0047b3; padding: 6px 14px; }
+    header nav a.due-righe { text-align: center; line-height: 1.15; }
+    .btn-pannello { background: #0066ff; color: #fff !important; border-radius: 10px; padding: 10px 18px !important; font-weight: 700; white-space: nowrap; }
+    .btn-pannello:hover { background: #0052cc; text-decoration: none !important; }
+    @media (max-width: 900px) { header nav a { font-size: 15.5px; } header nav { gap: 4px 12px; } }
+    header a img { height:44px; }
+    header nav a { color:#0066ff; text-decoration:none; font-weight:600; margin-left:20px; font-size:15px; }
+    header nav a:hover { color:#1a3a5e; }
+
+    .top-bar {
+      background:linear-gradient(135deg,#0a2a4d,#0066ff);
+      padding:44px 32px 36px; text-align:center; color:white;
+    }
+    .top-bar h1 { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:800; margin-bottom:10px; }
+    .top-bar p { font-size:1rem; opacity:0.85; max-width:560px; margin:0 auto; }
+
+    .page-body { display:flex; gap:0; min-height:calc(100vh - 180px); }
+
+    /* COLONNE */
+    .col { flex:1; padding:28px 24px; }
+    .col-left { background:#f0f9f4; border-right:2px solid #e0eee8; }
+    .col-right { background:#fff8f0; }
+
+    .col-title {
+      font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:800;
+      margin-bottom:6px; display:flex; align-items:center; gap:8px;
+    }
+    .col-sub { font-size:0.85rem; color:#666; margin-bottom:18px; }
+
+    .btn-pubblica {
+      display:inline-flex; align-items:center; gap:8px;
+      background:#0066ff; color:white; border:none; border-radius:10px;
+      padding:11px 22px; font-family:'DM Sans',sans-serif; font-weight:700;
+      font-size:0.92rem; cursor:pointer; margin-bottom:20px; transition:background 0.2s,transform 0.15s;
+    }
+    .btn-pubblica:hover { background:#1a3a5e; transform:translateY(-1px); }
+    .col-right .btn-pubblica { background:#d4a017; }
+    .col-right .btn-pubblica:hover { background:#b8880f; }
+
+    /* CARD ANNUNCI */
+    .annuncio-card {
+      background:white; border-radius:14px; padding:18px 20px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.07); margin-bottom:12px;
+      border-left:4px solid #0066ff; transition:box-shadow 0.2s,transform 0.15s;
+    }
+    .annuncio-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.12); transform:translateY(-2px); }
+    .col-right .annuncio-card { border-left-color:#d4a017; }
+    .annuncio-nome { font-weight:800; font-size:1rem; color:#1a1a1a; margin-bottom:4px; }
+    .annuncio-desc { font-size:0.85rem; color:#555; margin-bottom:8px; line-height:1.5; }
+    .annuncio-meta { display:flex; flex-wrap:wrap; gap:10px; font-size:0.8rem; color:#777; }
+    .annuncio-meta span { display:flex; align-items:center; gap:4px; }
+
+    .loading-state, .empty-state {
+      text-align:center; padding:40px 20px; color:#888; font-size:0.92rem;
+    }
+    .empty-state-icon { font-size:2.5rem; margin-bottom:10px; }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+      z-index:200; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal {
+      background:white; border-radius:20px; width:100%; max-width:500px;
+      max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      background:linear-gradient(135deg,#0a2a4d,#0066ff);
+      padding:22px 26px; border-radius:20px 20px 0 0; color:white;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .modal-header.offre { background:linear-gradient(135deg,#7a5200,#d4a017); }
+    .modal-header h2 { font-family:'Playfair Display',serif; font-size:1.15rem; }
+    .modal-close { background:none; border:none; color:white; font-size:1.3rem; cursor:pointer; opacity:0.8; line-height:1; padding:0; }
+    .modal-close:hover { opacity:1; }
+    .modal-body { padding:24px 26px; }
+    .form-group { margin-bottom:16px; }
+    .form-label { font-size:0.82rem; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block; }
+    .form-input, .form-textarea {
+      width:100%; border:1.5px solid #ddd; border-radius:10px;
+      padding:11px 14px; font-family:'DM Sans',sans-serif; font-size:0.95rem;
+      outline:none; transition:border-color 0.2s; color:#1a1a1a;
+    }
+    .form-input:focus, .form-textarea:focus { border-color:#0066ff; }
+    .form-textarea { resize:vertical; min-height:90px; }
+    .btn-submit {
+      width:100%; background:#0066ff; color:white; border:none; border-radius:10px;
+      padding:13px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+      cursor:pointer; margin-top:8px; transition:background 0.2s;
+    }
+    .btn-submit:hover { background:#1a3a5e; }
+    .btn-submit.offre { background:#d4a017; }
+    .btn-submit.offre:hover { background:#b8880f; }
+    .form-msg { margin-top:10px; padding:10px 14px; border-radius:8px; font-size:0.88rem; font-weight:600; display:none; }
+    .form-msg.ok { background:#e8f5ec; color:#0066ff; }
+    .form-msg.err { background:#fdecea; color:#c0392b; }
+    .checkbox-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:6px; }
+    .checkbox-item { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#333; cursor:pointer; }
+    .checkbox-item input[type=checkbox] { width:16px; height:16px; accent-color:#d4a017; cursor:pointer; flex-shrink:0; }
+    /* 6 set 2026 — i link alla pagina singola dell'annuncio */
+    .annuncio-titolo { text-decoration:none; }
+    .annuncio-titolo:hover { text-decoration:underline; }
+    .annuncio-vedi { color:#0066ff; text-decoration:none; font-weight:700; }
+    .annuncio-vedi:hover { text-decoration:underline; }
+    .annuncio-tag { display:inline-block; background:#e8f5ec; color:#1a3a5e; border-radius:6px; padding:2px 8px; font-size:0.78rem; font-weight:700; margin-bottom:6px; }
+    .col-right .annuncio-tag { background:#fff3cd; color:#7a5200; }
+
+    @media (max-width:768px) {
+      .page-body { flex-direction:column; }
+      .col-left { border-right:none; border-bottom:2px solid #e0eee8; }
+      .top-bar h1 { font-size:1.5rem; }
+    }
+  </style>
+<link rel="stylesheet" href="/css/mobile.css?v=3">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://trovaimpresa.com/subappalto">
+  <meta property="og:title" content="Subappalto — Imprese cercano Imprese | TrovaImpresa">
+  <meta property="og:description" content="Subappalti edili su TrovaImpresa: imprese che cercano imprese. Trova subappaltatori o offri la tua disponibilità nella tua zona.">
+  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
+<style>/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
+body{background:#e7eef8 !important}
+body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .gest-box,body .highlight-box,body .misura-card,body .riepilogo-box,body .periodo-box,body .info-box,body .annuncio-card,body .card-offerta,body .gratis-box,body .imprese-box,body .mappa-box,body .duebox>div,body .cat-card,body .ti-promo-cli,body .ti-promo-imp,body .ti-riga,body .faq-item,body .faq details{border:2px solid #0a2a4d !important}
+</style>
+<!-- App sul telefono (15 nov 2026) -->
+<link rel="manifest" href="/manifest-sito.json">
+<link rel="apple-touch-icon" href="/img/app/trovaimpresa-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TrovaImpresa">
+<style>
+/* 18 nov 2026 (Alex: «ingrandisci»): su schermo grande le scritte delle pagine subappalto erano piccole */
+header a img { height:62px; }
+.top-bar h1 { font-size:2.8rem; }
+.top-bar p { font-size:1.3rem; max-width:820px; }
+.page-body .col { padding:34px 30px; }
+.col-title { font-size:1.75rem; }
+.col-sub { font-size:1.1rem; margin-bottom:22px; }
+.btn-pubblica { font-size:1.15rem; padding:14px 26px; }
+.annuncio-card { padding:22px 26px; }
+.annuncio-tag { font-size:.95rem; }
+.annuncio-nome { font-size:1.3rem; }
+.annuncio-desc { font-size:1.08rem; }
+.annuncio-meta { font-size:1rem; gap:14px; }
+.empty-state, .loading-state { font-size:1.1rem; }
+@media (max-width:700px) { .top-bar h1 { font-size:1.8rem; } .top-bar p { font-size:1.1rem; } .page-body .col { padding:22px 16px; } .col-title { font-size:1.4rem; } .annuncio-nome { font-size:1.15rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="/bandi.html">Bandi e fondi</a>
+    <a href="/blog.html">Guide e costi</a>
+    <a href="/lavoro-edilizia" class="attivo">Lavoro Edilizia</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/pubblicita.html">Pubblicit&agrave;</a>
+    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
+  </nav>
+</header>
+
+<div class="top-bar">
+  <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Subappalti in Campania</h1>
+  <p>Imprese che cercano subappaltatori e squadre disponibili in Campania</p>
+</div>
+
+<!-- 22 ott 2026: la fascia che invita le imprese a iscriversi. Subappalto e' l'unica
+     pagina dove da Google arrivano IMPRESE: qui si chiede l'iscrizione. -->
+<style>
+  .sub-invito { max-width:1200px; margin:28px auto 0; padding:0 20px; box-sizing:border-box; }
+  .sub-invito-box { background:#fff; border:2px solid #f0a020; border-radius:18px; padding:26px 30px;
+    display:flex; gap:28px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    box-shadow:0 6px 20px rgba(10,42,77,.08); }
+  .sub-invito-tit { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:#0a2a4d; margin:0 0 12px; }
+  .sub-invito ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .sub-invito li { font-size:1.12rem; color:#1a1a1a; line-height:1.4; padding-left:30px; position:relative; }
+  .sub-invito li::before { content:"✓"; position:absolute; left:0; top:0; color:#1b8a3a; font-weight:800; font-size:1.2rem; }
+  .sub-invito-btn { display:inline-block; background:#ff8800; color:#fff; text-decoration:none; font-weight:800;
+    font-size:1.25rem; padding:18px 30px; border-radius:14px; white-space:nowrap; box-shadow:0 4px 14px rgba(255,136,0,.35); }
+  .sub-invito-btn:hover { background:#e67a00; }
+  .sub-invito-nota { display:block; text-align:center; margin-top:8px; color:#5b6b80; font-size:.95rem; }
+  @media (max-width:700px){ .sub-invito-box{padding:20px} .sub-invito-tit{font-size:1.4rem} .sub-invito-btn{white-space:normal; text-align:center; width:100%; box-sizing:border-box} .sub-invito-cta{width:100%} }
+</style>
+<section class="sub-invito" aria-label="Iscrivi la tua impresa">
+  <div class="sub-invito-box">
+    <div>
+      <h2 class="sub-invito-tit">Sei un'impresa? Iscriviti gratis</h2>
+      <ul>
+        <li>Le imprese della tua zona ti trovano per i subappalti</li>
+        <li>I clienti ti chiedono preventivi dalla tua vetrina</li>
+        <li>Gestionale gratis: preventivi, fatture e cantieri</li>
+      </ul>
+    </div>
+    <div class="sub-invito-cta">
+      <a class="sub-invito-btn" href="/iscriviti.html">Iscrivi la tua impresa</a>
+      <span class="sub-invito-nota">Gratis per sempre · 1 minuto</span>
+    </div>
+  </div>
+</section>
+
+<div class="page-body">
+
+  <!-- SINISTRA: Cerco Subappaltatori -->
+  <div class="col col-left" id="col-cerca">
+    <div class="col-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Cerco Subappaltatori</div>
+    <div class="col-sub">Imprese che cercano subappaltatori per i loro cantieri</div>
+    <button class="btn-pubblica" onclick="apriModal('cerca')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta</button>
+    <div id="lista-cerca"><div class="loading-state"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
+  </div>
+
+  <!-- DESTRA: Sono Subappaltatore -->
+  <div class="col col-right" id="col-offre">
+    <div class="col-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Sono Subappaltatore</div>
+    <div class="col-sub">Imprese disponibili a lavorare in subappalto</div>
+    <button class="btn-pubblica" onclick="apriModal('offre')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
+    <div id="lista-offre"><div class="loading-state"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
+  </div>
+
+</div>
+
+
+<!-- Pagina subappalti per regione (18 nov 2026, generata da genera-subappalti-regioni) -->
+<style>
+.smest { max-width:1200px; margin:0 auto; padding:34px 20px 40px; box-sizing:border-box; }
+.smest h2 { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:#0a2a4d; margin:0 0 14px; }
+.smest-faq { background:#fff; border-radius:12px; padding:16px 20px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.smest-faq summary { font-weight:700; font-size:1.1rem; cursor:pointer; color:#0a2a4d; }
+.smest-faq p { margin-top:10px; font-size:1.05rem; line-height:1.5; color:#333; }
+.smest-altri { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+.smest-altri a { background:#eaf2ff; color:#0047b3; text-decoration:none; font-weight:700; padding:10px 16px; border-radius:10px; font-size:1.02rem; }
+.smest-altri a:hover { background:#d6e6ff; }
+.sreg-imp { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:34px; }
+.sreg-imp a { display:block; background:#fff; border-radius:14px; padding:18px 20px; box-shadow:0 2px 10px rgba(0,0,0,.07); text-decoration:none; color:#1a1a1a; }
+.sreg-imp a:hover { box-shadow:0 6px 24px rgba(0,0,0,.12); }
+.sreg-imp b { display:block; font-size:1.1rem; color:#0a2a4d; margin-bottom:4px; }
+.sreg-imp span { font-size:1rem; color:#5a6b80; }
+@media (max-width:900px) { .sreg-imp { grid-template-columns:1fr 1fr; } }
+@media (max-width:600px) { .sreg-imp { grid-template-columns:1fr; } .smest h2 { font-size:1.4rem; } }
+</style>
+<section class="smest">
+  <h2>Imprese iscritte in Campania</h2>
+  <div class="sreg-imp" id="sreg-imprese"></div>
+  <h2>Domande frequenti</h2>
+  <details class="smest-faq"><summary>Come trovo un subappaltatore in Campania?</summary><p>Clicca «Pubblica richiesta» e scrivi il lavoro, la zona del cantiere e il periodo. La richiesta resta visibile qui e le imprese ti contattano direttamente.</p></details><details class="smest-faq"><summary>Ho una squadra: come trovo cantieri in subappalto in Campania?</summary><p>Clicca «Offri disponibilità», scrivi cosa fai e in che zone lavori. Le imprese in Campania che cercano una squadra ti trovano qui.</p></details><details class="smest-faq"><summary>Che documenti chiedono per lavorare in subappalto?</summary><p>Di solito visura camerale, DURC in regola, POS del cantiere e assicurazione RC. Negli appalti pubblici il subappalto va anche autorizzato dalla stazione appaltante.</p></details><details class="smest-faq"><summary>Quanto costa pubblicare un annuncio?</summary><p>Niente. Pubblicare è gratis e TrovaImpresa non prende commissioni: vi accordate direttamente tra imprese.</p></details>
+  <h2 style="margin-top:30px">Subappalti per mestiere</h2>
+  <div class="smest-altri"><a href="/subappalto-muratura">Muratura</a><a href="/subappalto-cartongesso">Cartongesso</a><a href="/subappalto-impianti">Impianti</a><a href="/subappalto-carpenteria">Carpenteria</a><a href="/subappalto-cappotto-termico">Cappotto termico</a></div>
+  <h2 style="margin-top:30px">Subappalti nelle altre regioni</h2>
+  <div class="smest-altri"><a href="/subappalti-lombardia">Lombardia</a><a href="/subappalti-lazio">Lazio</a><a href="/subappalti-emilia-romagna">Emilia-Romagna</a><a href="/subappalti-piemonte">Piemonte</a><a href="/subappalti-toscana">Toscana</a><a href="/subappalti-sicilia">Sicilia</a><a href="/subappalti-veneto">Veneto</a><a href="/subappalti-puglia">Puglia</a><a href="/subappalti-sardegna">Sardegna</a><a href="/subappalti-liguria">Liguria</a><a href="/subappalti-umbria">Umbria</a><a href="/subappalti-calabria">Calabria</a><a href="/subappalti-abruzzo">Abruzzo</a><a href="/subappalti-friuli-venezia-giulia">Friuli-Venezia Giulia</a><a href="/subappalti-trentino-alto-adige">Trentino-Alto Adige</a><a href="/subappalti-marche">Marche</a><a href="/subappalti-basilicata">Basilicata</a><a href="/subappalto">Tutta Italia</a></div>
+</section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Come trovo un subappaltatore in Campania?", "acceptedAnswer": {"@type": "Answer", "text": "Clicca «Pubblica richiesta» e scrivi il lavoro, la zona del cantiere e il periodo. La richiesta resta visibile qui e le imprese ti contattano direttamente."}}, {"@type": "Question", "name": "Ho una squadra: come trovo cantieri in subappalto in Campania?", "acceptedAnswer": {"@type": "Answer", "text": "Clicca «Offri disponibilità», scrivi cosa fai e in che zone lavori. Le imprese in Campania che cercano una squadra ti trovano qui."}}, {"@type": "Question", "name": "Che documenti chiedono per lavorare in subappalto?", "acceptedAnswer": {"@type": "Answer", "text": "Di solito visura camerale, DURC in regola, POS del cantiere e assicurazione RC. Negli appalti pubblici il subappalto va anche autorizzato dalla stazione appaltante."}}, {"@type": "Question", "name": "Quanto costa pubblicare un annuncio?", "acceptedAnswer": {"@type": "Answer", "text": "Niente. Pubblicare è gratis e TrovaImpresa non prende commissioni: vi accordate direttamente tra imprese."}}]}</script>
+
+<!-- MODAL CERCA -->
+<div class="modal-overlay" id="modal-cerca" onclick="if(event.target===this)chiudiModal('cerca')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta subappalto</h2>
+      <button class="modal-close" onclick="chiudiModal('cerca')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome impresa *</label>
+        <input class="form-input" id="cerca-nome" placeholder="Es. Edil Rossi Srl" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo lavoro richiesto *</label>
+        <input class="form-input" id="cerca-tipo-lavoro" placeholder="Es. Posa pavimenti, impianto elettrico..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrizione del lavoro</label>
+        <textarea class="form-textarea" id="cerca-desc" placeholder="Descrivi il lavoro nel dettaglio: quantità, materiali, modalità di esecuzione..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zona cantiere *</label>
+        <input class="form-input" id="cerca-zona" value="Campania" placeholder="Es. Roma Nord, provincia di Milano..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Periodo lavori</label>
+        <input class="form-input" id="cerca-periodo" placeholder="Es. Maggio–Giugno 2026" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Budget indicativo</label>
+        <input class="form-input" id="cerca-budget" placeholder="Es. 15.000 €" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Requisiti richiesti</label>
+        <textarea class="form-textarea" id="cerca-requisiti" placeholder="Es. Iscrizione alla Camera di Commercio, SOA cat. OG2, esperienza minima 5 anni..." style="min-height:70px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefono</label>
+        <input class="form-input" id="cerca-tel" placeholder="Es. 333 1234567" type="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email * <span style="font-weight:400;color:#666">(ti mandiamo il link per gestire l'annuncio)</span></label>
+        <input class="form-input" id="cerca-email" placeholder="info@tuaimpresa.it" type="email">
+      </div>
+      <button class="btn-submit" onclick="salvaCerca()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta</button>
+      <div class="form-msg" id="msg-cerca"></div>
+      <div id="gestione-link-cerca" style="display:none; margin-top:14px; padding:14px; border:2px solid #0066ff; border-radius:10px; background:#eafaf0;">
+        <div style="font-weight:700; color:#1a3a5e; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Ti abbiamo mandato questo link anche per email. Da qui modifichi, chiudi o rinnovi il tuo annuncio:</div>
+        <a id="gestione-link-url-cerca" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#0066ff; font-weight:600;"></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OFFRE -->
+<div class="modal-overlay" id="modal-offre" onclick="if(event.target===this)chiudiModal('offre')">
+  <div class="modal">
+    <div class="modal-header offre">
+      <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità come subappaltatore</h2>
+      <button class="modal-close" onclick="chiudiModal('offre')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome impresa *</label>
+        <input class="form-input" id="offre-nome" placeholder="Es. Posa Pavimenti Bianchi Srl" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Specializzazione *</label>
+        <input class="form-input" id="offre-spec" placeholder="Es. Pavimentazioni industriali, impianti idraulici..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zone coperte Italia *</label>
+        <input class="form-input" id="offre-zone" value="Campania" placeholder="Es. Lazio, Umbria, Toscana — tutto il Centro Italia" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Anni esperienza</label>
+        <input class="form-input" id="offre-esperienza" placeholder="Es. 15" type="number" min="0" max="99">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Certificazioni possedute</label>
+        <div class="checkbox-grid">
+          <label class="checkbox-item"><input type="checkbox" id="cert-soa" value="SOA"> SOA</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso9001" value="ISO 9001"> ISO 9001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso14001" value="ISO 14001"> ISO 14001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso45001" value="ISO 45001"> ISO 45001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-durc" value="DURC regolare"> DURC regolare</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-altro" value="Altro"> Altro</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefono</label>
+        <input class="form-input" id="offre-tel" placeholder="Es. 347 9876543" type="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email * <span style="font-weight:400;color:#666">(ti mandiamo il link per gestire l'annuncio)</span></label>
+        <input class="form-input" id="offre-email" placeholder="info@tuaimpresa.it" type="email">
+      </div>
+      <button class="btn-submit offre" onclick="salvaOffre()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
+      <div class="form-msg" id="msg-offre"></div>
+      <div id="gestione-link-offre" style="display:none; margin-top:14px; padding:14px; border:2px solid #d4a017; border-radius:10px; background:#fff8e8;">
+        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Ti abbiamo mandato questo link anche per email. Da qui modifichi, chiudi o rinnovi il tuo annuncio:</div>
+        <a id="gestione-link-url-offre" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#a07a00; font-weight:600;"></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseClient = supabase.createClient(
+    'https://nacvrsgkyfavykxjxszu.supabase.co',
+    'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R'
+  );
+
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  async function caricaLista(tipo) {
+    const divId = tipo === 'cerca' ? 'lista-cerca' : 'lista-offre';
+    const div = document.getElementById(divId);
+    try {
+      const { data, error } = await supabaseClient
+        .from('subappalti')
+        .select('id, tipo, nome_impresa, descrizione, lavoro, citta, telefono, email, created_at, categoria, mestiere, regione')
+        .eq('tipo', tipo)
+        .eq('attivo', true)
+        .or("citta.ilike.%campania%,citta.ilike.%napoli%,citta.ilike.%salerno%,citta.ilike.%caserta%,citta.ilike.%avellino%,citta.ilike.%benevento%,citta.ilike.%tutta italia%,citta.ilike.%tutta l'italia%,citta.ilike.%territorio nazionale%,citta.ilike.%tutto il territorio%,citta.ilike.%nazionale%,citta.ilike.%sud%,citta.ilike.%mezzogiorno%") /* pagina subappalti-campania */ /* 24 ott 2026: i chiusi e gli scaduti non si vedono */
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      if (!data || !data.length) {
+        const label = tipo === 'cerca' ? 'richieste' : 'subappaltatori';
+        div.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${tipo === 'cerca' ? '📋' : '🙋'}</div>Nessun${tipo === 'cerca' ? 'a' : ''} ${label} ancora.<br>Sii il primo a pubblicare!</div>`;
+        return;
+      }
+      if (tipo === 'cerca') {
+        div.innerHTML = data.map(r => {
+          const lines = (r.descrizione || '').split('\n');
+          const tipoLavoro = lines[0] || '';
+          const resto = lines.slice(1).join(' · ');
+          return `<div class="annuncio-card">
+            <div class="annuncio-tag">📋 Cerca subappaltatore</div>
+            <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
+            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;"><a class="annuncio-titolo" href="/subappalto-annuncio?id=${r.id}" style="color:#0a2a4d;">${esc(tipoLavoro)}</a></div>` : ''}
+            ${resto ? `<div class="annuncio-desc">${esc(resto)}</div>` : ''}
+            <div class="annuncio-meta">
+              ${r.citta ? `<span>📍 ${esc(r.citta)}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#0066ff;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#0066ff;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
+              <span><a class="annuncio-vedi" href="/subappalto-annuncio?id=${r.id}">Vedi l'annuncio →</a></span>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        div.innerHTML = data.map(r => {
+          const lines = (r.lavoro || '').split('\n');
+          const spec = lines[0] || '';
+          const extra = lines.slice(1).join(' · ');
+          return `<div class="annuncio-card">
+            <div class="annuncio-tag">🙋 Disponibile</div>
+            <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
+            ${spec ? `<div class="annuncio-desc" style="font-weight:600;"><a class="annuncio-titolo" href="/subappalto-annuncio?id=${r.id}" style="color:#7a5200;">${esc(spec)}</a></div>` : ''}
+            ${extra ? `<div class="annuncio-desc">${esc(extra)}</div>` : ''}
+            <div class="annuncio-meta">
+              ${r.citta ? `<span>🗺️ ${esc(r.citta)}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#d4a017;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#d4a017;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
+              <span><a class="annuncio-vedi" href="/subappalto-annuncio?id=${r.id}">Vedi l'annuncio →</a></span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    } catch(e) {
+      div.innerHTML = `<div class="empty-state">⚠️ Errore caricamento: ${e.message}</div>`;
+    }
+  }
+
+  function apriModal(tipo) {
+    document.getElementById('modal-' + tipo).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function chiudiModal(tipo) {
+    document.getElementById('modal-' + tipo).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  async function salvaCerca() {
+    const nome = document.getElementById('cerca-nome').value.trim();
+    const tipoLavoro = document.getElementById('cerca-tipo-lavoro').value.trim();
+    const desc = document.getElementById('cerca-desc').value.trim();
+    const zona = document.getElementById('cerca-zona').value.trim();
+    const periodo = document.getElementById('cerca-periodo').value.trim();
+    const budget = document.getElementById('cerca-budget').value.trim();
+    const requisiti = document.getElementById('cerca-requisiti').value.trim();
+    const tel = document.getElementById('cerca-tel').value.trim();
+    const email = document.getElementById('cerca-email').value.trim();
+
+    if (!nome || !tipoLavoro || !zona) {
+      mostraMsg('cerca', 'Compila i campi obbligatori (nome impresa, tipo lavoro, zona).', 'err');
+      return;
+    }
+    // 24 ott 2026: l'email serve: li' arriva il link per modificare, chiudere o rinnovare l'annuncio
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      mostraMsg('cerca', 'Scrivi la tua email: ti mandiamo il link per modificare o chiudere l\'annuncio.', 'err');
+      return;
+    }
+
+    let descrizione = tipoLavoro;
+    if (desc) descrizione += '\n' + desc;
+    if (periodo) descrizione += '\nPeriodo: ' + periodo;
+    if (budget) descrizione += '\nBudget: ' + budget;
+    if (requisiti) descrizione += '\nRequisiti: ' + requisiti;
+
+    // 24 ott 2026: chi e' iscritto ritrova l'annuncio nel suo pannello
+    let _uid = null;
+    try { const { data: _s } = await supabaseClient.auth.getSession(); _uid = (_s && _s.session && _s.session.user) ? _s.session.user.id : null; } catch (_) {}
+    const token = crypto.randomUUID();
+
+    try {
+      const { data: nuovo, error } = await supabaseClient.from('subappalti').insert({
+        tipo: 'cerca',
+        nome_impresa: nome,
+        descrizione,
+        citta: zona,
+        telefono: tel || null,
+        email: email || null,
+        user_id: _uid,
+        token,
+        created_at: new Date().toISOString()
+      }).select('id').single();
+      if (error) throw error;
+      mostraMsg('cerca', '✅ Richiesta pubblicata con successo!', 'ok');
+      const linkGestione = `${location.origin}/subappalto-gestisci.html?id=${nuovo.id}&token=${token}`;
+      const aLink = document.getElementById('gestione-link-url-cerca');
+      aLink.href = linkGestione;
+      aLink.textContent = linkGestione;
+      document.getElementById('gestione-link-cerca').style.display = 'block';
+      // 24 ott 2026: il link arriva anche per email, cosi' non si perde
+      fetch('/.netlify/functions/subappalto-gestione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ azione: 'link', id: nuovo.id, token }) }).catch(() => {});
+      ['cerca-nome','cerca-tipo-lavoro','cerca-desc','cerca-zona','cerca-periodo','cerca-budget','cerca-requisiti','cerca-tel','cerca-email']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      caricaLista('cerca');
+    } catch(e) {
+      mostraMsg('cerca', '⚠️ Errore: ' + e.message, 'err');
+    }
+  }
+
+  async function salvaOffre() {
+    const nome = document.getElementById('offre-nome').value.trim();
+    const spec = document.getElementById('offre-spec').value.trim();
+    const zone = document.getElementById('offre-zone').value.trim();
+    const esperienza = document.getElementById('offre-esperienza').value.trim();
+    const tel = document.getElementById('offre-tel').value.trim();
+    const email = document.getElementById('offre-email').value.trim();
+
+    if (!nome || !spec || !zone) {
+      mostraMsg('offre', 'Compila i campi obbligatori (nome impresa, specializzazione, zone coperte).', 'err');
+      return;
+    }
+    // 24 ott 2026: l'email serve: li' arriva il link per modificare, chiudere o rinnovare l'annuncio
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      mostraMsg('offre', 'Scrivi la tua email: ti mandiamo il link per modificare o chiudere l\'annuncio.', 'err');
+      return;
+    }
+
+    const certIds = ['cert-soa','cert-iso9001','cert-iso14001','cert-iso45001','cert-durc','cert-altro'];
+    const certs = certIds.map(id => document.getElementById(id)).filter(el => el.checked).map(el => el.value);
+
+    let specializzazione = spec;
+    if (esperienza) specializzazione += '\n' + esperienza + ' anni di esperienza';
+    if (certs.length) specializzazione += '\nCertificazioni: ' + certs.join(', ');
+
+    // 24 ott 2026: chi e' iscritto ritrova l'annuncio nel suo pannello
+    let _uid = null;
+    try { const { data: _s } = await supabaseClient.auth.getSession(); _uid = (_s && _s.session && _s.session.user) ? _s.session.user.id : null; } catch (_) {}
+    const token = crypto.randomUUID();
+
+    try {
+      const { data: nuovo, error } = await supabaseClient.from('subappalti').insert({
+        tipo: 'offre',
+        nome_impresa: nome,
+        lavoro: specializzazione,
+        citta: zone,
+        telefono: tel || null,
+        email: email || null,
+        user_id: _uid,
+        token,
+        created_at: new Date().toISOString()
+      }).select('id').single();
+      if (error) throw error;
+      mostraMsg('offre', '✅ Disponibilità pubblicata con successo!', 'ok');
+      const linkGestione = `${location.origin}/subappalto-gestisci.html?id=${nuovo.id}&token=${token}`;
+      const aLink = document.getElementById('gestione-link-url-offre');
+      aLink.href = linkGestione;
+      aLink.textContent = linkGestione;
+      document.getElementById('gestione-link-offre').style.display = 'block';
+      // 24 ott 2026: il link arriva anche per email, cosi' non si perde
+      fetch('/.netlify/functions/subappalto-gestione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ azione: 'link', id: nuovo.id, token }) }).catch(() => {});
+      ['offre-nome','offre-spec','offre-zone','offre-esperienza','offre-tel','offre-email']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      certIds.forEach(id => { document.getElementById(id).checked = false; });
+      caricaLista('offre');
+    } catch(e) {
+      mostraMsg('offre', '⚠️ Errore: ' + e.message, 'err');
+    }
+  }
+
+  function mostraMsg(tipo, testo, classe) {
+    const msg = document.getElementById('msg-' + tipo);
+    msg.textContent = testo;
+    msg.className = 'form-msg ' + classe;
+    msg.style.display = 'block';
+  }
+
+  // Carica entrambe le liste al lancio
+  caricaLista('cerca');
+  caricaLista('offre');
+
+  // Scroll alla sezione in base al parametro URL tipo=
+  const tipoParam = new URLSearchParams(window.location.search).get('tipo');
+  if (tipoParam === 'cerca' || tipoParam === 'offre') {
+    window.addEventListener('load', () => {
+      const el = document.getElementById('col-' + tipoParam);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+</script>
+<script>
+  // 18 nov 2026: un clic solo. Il pulsante resta spento finche' il salvataggio non finisce,
+  // cosi' lo stesso annuncio non esce piu' volte (il 19 ott era uscito 10 volte uguale).
+  ['salvaCerca', 'salvaOffre'].forEach(function (nome) {
+    var vera = window[nome];
+    window[nome] = async function () {
+      var btn = document.querySelector('[onclick="' + nome + '()"]');
+      if (btn && btn.disabled) return;
+      if (btn) { btn.disabled = true; btn.style.opacity = '.6'; btn.style.cursor = 'wait'; }
+      try { await vera.apply(this, arguments); }
+      finally { if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = ''; } }
+    };
+  });
+</script>
+<script>
+(async function () {
+  const box = document.getElementById('sreg-imprese'); if (!box) return;
+  try {
+    const { data } = await supabaseClient.from('imprese_pubbliche')
+      .select('id,nome,nome_attivita,citta,mestiere,tipo').eq('regione', "Campania")
+      .in('tipo', ['impresa', 'artigiano']).order('created_at', { ascending: false }).limit(12);
+    if (!data || !data.length) { box.closest('section').querySelector('h2').style.display = 'none'; box.remove(); return; }
+    box.innerHTML = data.map(i => `<a href="/profilo-impresa?id=${i.id}"><b>${esc(i.nome_attivita || i.nome || 'Impresa')}</b><span>${esc(i.mestiere || '')}${i.citta ? ' · ' + esc(i.citta) : ''}</span></a>`).join('');
+  } catch (e) { box.remove(); }
+})();
+</script>
+<script src="/cookie-banner.js"></script>
+<footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
+  <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a><br>P.IVA 01285950570 |
+  <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> |
+  <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> |
+  <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> |
+  <a href="/contatti.html" style="color:#a9c9f5">Contatti</a>
+</footer>
+<script src="/js/modal-fullscreen.js" defer></script>
+<!-- 10 ott 2026: banda «Tutto GRATIS» (vedi js/banda-gratis.js) -->
+<script src="/js/banda-gratis.js?v=1" defer></script>
+<script src="/js/app-invito.js" defer></script>
+</body>
+</html>
