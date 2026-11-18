@@ -1195,7 +1195,8 @@ document.addEventListener("click",async e=>{
     const nomi=[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))];
     giorNuovi=[]; giorConferma=null; giorModifica=null; giorAggiungi=null; giorModK=g.k;
     giorProp=[{data:g.data,chi:new Set(nomi),dove:_gNomeLav(giorLavoro(g.lavoro_id)),cosa:g.nota||"",
-      mezza:new Set(g.ore.filter(o=>(+o.ore||0)===GIOR_ORE_GIORNO/2).map(o=>giorNomeOp(o.operatore_id)))}];
+      /* mezza = 4 ore e nessun altro cantiere quel giorno (4 ore con un altro cantiere sono una giornata DIVISA, non mezza) */
+      mezza:new Set(g.ore.filter(o=>(+o.ore||0)===GIOR_ORE_GIORNO/2&&!giorRighe.some(x=>x.k!==g.k&&x.data===g.data&&x.ore.some(y=>String(y.operatore_id)===String(o.operatore_id)))).map(o=>giorNomeOp(o.operatore_id)))}];
     giorDisegna();
     const sc=document.querySelector("#giornate .gprop"); if(sc&&sc.scrollIntoView) sc.scrollIntoView({block:"start",behavior:"smooth"});
     return;
