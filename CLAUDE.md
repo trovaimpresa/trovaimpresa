@@ -3432,5 +3432,10 @@ Da sapere:
 
 Aperto sulle Giornate:
 1. Rimettendo a posto dal Cestino una delle due mezze giornate, l'altra (tornata a 8) non si ridivide: 4 + 8.
-2. Proposte ad Alex (da decidere, foto fatte): **«Giornata intera / Mezza giornata»** per ogni persona nella scheda (oggi il capo non puo' segnare mezza giornata: l'AI sente «mezza giornata» e scrive 8 ore); **«modifica» completa** (giorno, cantiere, persone: oggi cambia solo il testo); **togliere una foto** dalla finestra Foto.
+2. (chiuso) Le tre funzioni proposte: Alex ha detto si' a tutte, vedi sotto.
 3. NON provati: la notifica della sera e il consulente del lavoro (sono le impostazioni vere di Alex), «Approva / Scarta» di una giornata mandata da un operaio (serve l'app operaio), «Fattura o bolla» fino al salvataggio (il modulo si apre col lavoro e la data giusti), il telefono vero.
+
+Funzioni nuove (ok di Alex il 18 nov):
+- **Giornata intera / Mezza giornata**: sotto i nomi accesi una riga per persona (`giorMezzeHTML`, azione `mz`, `c.mezza` = insieme dei nomi). `giorSalva` passa `mezze[]` a `giorScrivi`, che da' al massimo 4 ore. Se nel racconto c'e' «mezza giornata» l'AI la accende per quella scheda (`giorCompila`). «Parla» non la passa: resta 8.
+- **«modifica» completa** (`giorModK`, `giorModTutto`): apre la scheda piena e AGGIORNA il rapportino e le sue ore (non ne crea di nuovi): chi resta cambia giorno/cantiere/ore, chi entra ha una riga nuova, chi esce va nel Cestino. Le ore si dividono con gli altri cantieri del giorno; `giorRidaiOre` le rida' a chi resta nel giorno vecchio. ⚠️ Foto, spese e fatture NON si spostano con la giornata. Il vecchio riquadro col solo testo (`giorModifica`, `giorModSalva`) non si apre piu'.
+- **«togli» sotto ogni foto** nella finestra Foto (`gxFotoTogli`, secondo tocco «Sì, togli»): passa da `sb.from("gest_foto").delete()`, quindi va nel Cestino.

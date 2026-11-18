@@ -41,6 +41,7 @@ let giorUltima = null;   /* «Come ieri»: l'ultima giornata prima di oggi */
 let giorNuovi = [];        /* nomi detti che non sono in squadra */
 let giorOccupato = false;
 let giorConferma = null;   /* chiave della riga da cancellare */
+let giorModK = null;       /* 18 nov 2026: la giornata che si sta modificando PER INTERO nella scheda (giorno, cantiere, persone, testo) */
 let giorModifica = null;   /* chiave della riga di cui si cambia il testo */
 let giorVoce = "";
 let giorAggiungi = null;
@@ -193,6 +194,10 @@ const _gIc = {
 #giornate .gsera .gbig{font-size:21px}
 #giornate .gora{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:17px}
 #giornate .gora select{width:auto;min-width:120px}
+#giornate .gmz{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+#giornate .gmzr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:17px}
+#giornate .gmzr b{min-width:110px;color:var(--testo,#0f172a);overflow-wrap:anywhere}
+@media(max-width:560px){#giornate .gmzr b{flex-basis:100%}}
 #giornate .gvuoto{color:var(--testo-2,#475569);text-align:center;padding:8px 0}
 `;
   const st=document.createElement("style"); st.id="gior-stile"; st.textContent=css;
@@ -545,7 +550,7 @@ function giorDisegnaProp(){
     const o1=giorOps.find(x=>String(x.id)===String(io)), n=o1&&o1.nome; if(n) giorProp.forEach(c=>{ if(!c.chi.size||c.chi.has("IO")){ c.chi.delete("IO"); c.chi.add(n); } });
   }
   const serveIo=giorProp.some(c=>c.chi.has("IO"))&&!io;
-  let h=`<div class="gb gprop"><h4>Controlla e salva</h4>`;
+  let h=`<div class="gb gprop"><h4>${giorModK?"Modifica la giornata":"Controlla e salva"}</h4>`;
   if(serveIo){
     h+=`<div><div class="glab">Hai detto «io»: tu chi sei nella squadra?</div><select data-gior-io>
       <option value="">Scegli…</option>${giorOps.map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("")}
@@ -566,14 +571,26 @@ function giorDisegnaProp(){
         return `<button type="button" class="gchip ${on?"on":""} ${nuovo?"nuovo":""}" data-gior="chip" data-i="${i}" data-n="${esc(n)}">${nuovo?"+ ":""}${esc(n)}</button>`;}).join("")}
         <button type="button" class="gchip nuovo" data-gior="piu" data-i="${i}">+ nuovo</button></div>
         ${giorAggiungi===i?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-nuovo" placeholder="Nome"><button type="button" class="btn" data-gior="piu-ok" data-i="${i}" style="flex:0 0 auto">Aggiungi</button></div>`:""}
-        ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}</div>
+        ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}
+        ${giorMezzeHTML(c,i,nomi,io)}</div>
       <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" placeholder="Spese e note qui">${esc(c.cosa)}</textarea></div>
       ${giorProp.length>1?`<button type="button" class="glink rosso" data-gior="togli" data-i="${i}" style="align-self:flex-start">Togli questa</button>`:""}
     </div>`;
   });
   h+=`<div class="grow"><button type="button" class="gbig blu" data-gior="salva">Salva</button><button type="button" class="btn" data-gior="annulla" style="flex:0 0 auto">Annulla</button></div>
-    <div class="gnota">Una giornata intera vale ${GIOR_ORE_GIORNO} ore. Se una persona sta in due cantieri lo stesso giorno, le ore si dividono.</div></div>`;
+    <div class="gnota">Una giornata intera vale ${GIOR_ORE_GIORNO} ore, mezza giornata ${GIOR_ORE_GIORNO/2}. Se una persona sta in due cantieri lo stesso giorno, le ore si dividono.</div></div>`;
   return h;
+}
+/* 18 nov 2026 — GIORNATA INTERA O MEZZA (ok di Alex). Sotto i nomi, una riga
+   per ogni persona accesa: «Giornata intera» / «Mezza giornata». Prima il
+   capo non poteva segnare mezza giornata (e se la dettava, l'AI la scriveva
+   nel testo ma le ore restavano 8). c.mezza e' l'insieme dei nomi a mezza. */
+function _gMezza(c,n,io){ const m=c.mezza; if(!m) return false; return m.has(n)||(m.has("IO")&&io&&io!=="-"&&giorNomeOp(io)===n); }
+function giorMezzeHTML(c,i,nomi,io){
+  const accesi=nomi.filter(n=>c.chi.has(n)||(c.chi.has("IO")&&io&&io!=="-"&&giorNomeOp(io)===n));
+  if(!accesi.length) return "";
+  return `<div class="gmz">${accesi.map(n=>{ const mz=_gMezza(c,n,io);
+    return `<div class="gmzr"><b>${esc(n)}</b><button type="button" class="gchip ${mz?"":"on"}" data-gior="mz" data-i="${i}" data-n="${esc(n)}" data-v="0">Giornata intera</button><button type="button" class="gchip ${mz?"on":""}" data-gior="mz" data-i="${i}" data-n="${esc(n)}" data-v="1">Mezza giornata</button></div>`; }).join("")}</div>`;
 }
 
 /* le caselle delle schede si rileggono prima di ridisegnare */
@@ -636,7 +653,9 @@ async function giorCompila(){
     if(dove===dove.toLowerCase()) dove=dove.replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase());
     let cosa=String(g.cosa||"").trim().slice(0,2000);
     cosa=cosa.charAt(0).toUpperCase()+cosa.slice(1);
-    return {data:d,chi,dove,cosa};
+    /* 18 nov 2026: «mezza giornata» detta nel racconto accende «Mezza giornata» per chi sta in quella scheda (si vede e si cambia prima del Salva) */
+    const mezza=/mezza\s+giornata/i.test(cosa)?new Set(chi):new Set();
+    return {data:d,chi,dove,cosa,mezza};
   });
   giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});
 }
@@ -751,7 +770,8 @@ async function giorScrivi(schede){
     /* 5. le ore di chi c'era */
     const righe=c.nomi.map(n=>{
       const o=giorOps.find(x=>x.nome===n);
-      const ore=quota[n+"|"+c.data]||Math.round((GIOR_ORE_GIORNO/(quante[n+"|"+c.data]||1))*2)/2;
+      let ore=quota[n+"|"+c.data]||Math.round((GIOR_ORE_GIORNO/(quante[n+"|"+c.data]||1))*2)/2;
+      if(Array.isArray(c.mezze)&&c.mezze.includes(n)) ore=Math.min(ore,GIOR_ORE_GIORNO/2);   /* mezza giornata */
       return {user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,operatore_id:o.id,data:c.data,ore,rapportino_id:rid};
     });
     const ro=await sb.from("gest_ore").insert(righe).select("id");
@@ -762,11 +782,13 @@ async function giorScrivi(schede){
 }
 
 async function giorSalva(){
+  if(giorModK) return giorModTutto();
   giorLeggiProp();
   const io=_gIo();
   const schede=giorProp.map(c=>{
     const nomi=[...c.chi].map(n=>n==="IO"?(io&&io!=="-"?giorNomeOp(io):null):n).filter(Boolean);
-    return {...c,nomi:[...new Set(nomi)]};
+    const mezze=[...(c.mezza||[])].map(n=>n==="IO"?(io&&io!=="-"?giorNomeOp(io):null):n).filter(Boolean);
+    return {...c,nomi:[...new Set(nomi)],mezze};
   });
   if(giorProp.some(c=>c.chi.has("IO"))&&!io){ giorDisegna({t:"Dimmi chi sei tu nella squadra (la tendina in alto), poi premi «Salva».",k:"err"}); return; }
   for(const c of schede){
@@ -911,6 +933,109 @@ function giorSeraBox(){
   return c+`<div class="gmsg" id="gior-sera-msg"></div></div>`;
 }
 
+/* una persona esce da un giorno (giornata cancellata o spostata): se le sue
+   ore erano la parte uguale di una divisione, a quelle che restano tornano */
+async function giorRidaiOre(opId,data,ore){
+  try{
+    const mezzi=x=>Math.max(.5,Math.round(x*2)/2);
+    const q=+ore||0; if(!opId||q>=GIOR_ORE_GIORNO) return;
+    const rr=await sb.from("gest_ore").select("id,ore,lavoro_id").eq("user_id",sbUid).is("eliminato_il",null).eq("operatore_id",opId).eq("data",data);
+    let v=(!rr.error&&rr.data)||[]; if(!v.length) return;
+    const vivi=await giorLavoriVivi(v.map(x=>x.lavoro_id)); if(vivi) v=v.filter(x=>String(x.lavoro_id) in vivi);
+    if(!v.length||q!==mezzi(GIOR_ORE_GIORNO/(v.length+1))||!v.every(x=>(+x.ore||0)===q)) return;
+    await sb.from("gest_ore").update({ore:mezzi(GIOR_ORE_GIORNO/v.length)}).in("id",v.map(x=>x.id)).eq("user_id",sbUid).select("id");
+  }catch(e){}
+}
+
+/* ---------------------------------------------------------------------
+   18 nov 2026 — «MODIFICA» COMPLETA (ok di Alex). Prima si cambiava solo il
+   testo: per un giorno, un cantiere o un nome sbagliato bisognava cancellare
+   e rifare. Adesso «modifica» apre la stessa scheda di «scrivila a mano»,
+   gia' piena. Al Salva NON nasce una giornata nuova: si aggiorna il
+   rapportino (resta lo stesso, con i suoi materiali) e le sue ore.
+   · chi resta: la sua riga di ore cambia giorno, cantiere e ore;
+   · chi entra: una riga nuova; chi esce: la sua riga va nel Cestino;
+   · le ore si dividono con gli altri cantieri di quel giorno come al Salva.
+   ⚠️ Foto, spese e fatture stanno sul cantiere e sul giorno: se cambi
+      giorno o cantiere NON si spostano con la giornata.
+   --------------------------------------------------------------------- */
+async function giorModTutto(){
+  giorLeggiProp();
+  const g=giorRighe.find(x=>x.k===giorModK), c=giorProp&&giorProp[0];
+  if(!g||!g.rapportino_id||!c){ giorModK=null; giorProp=null; giorDisegna({t:"Questa giornata non c'è più: ricarica la pagina.",k:"err"}); return; }
+  const io=_gIo();
+  const pulisci=a=>[...new Set([...a].map(n=>n==="IO"?(io&&io!=="-"?giorNomeOp(io):null):n).filter(Boolean))];
+  const nomi=pulisci(c.chi), mezze=pulisci(c.mezza||[]);
+  if(!nomi.length){ giorDisegna({t:"Non c'è nessuno: tocca almeno un nome.",k:"err"}); return; }
+  if(!c.dove.trim()){ giorDisegna({t:"Manca il cantiere.",k:"err"}); return; }
+  const mezzi=x=>Math.max(.5,Math.round(x*2)/2);
+  try{
+    for(const n of nomi){
+      if(giorOps.some(o=>o.nome===n)) continue;
+      const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:_gMest(),nome:n}).select("id,nome,mestiere_id");
+      if(error||!data||!data.length) throw new Error("Non riesco ad aggiungere "+n+" alla squadra: "+((error&&error.message)||"nessuna riga")+".");
+      giorOps.push(data[0]);
+    }
+    const vecchio=giorLavoro(g.lavoro_id);
+    const lav=(vecchio&&_gNorm(_gNomeLav(vecchio))===_gNorm(c.dove))?vecchio:await giorTrovaLavoro(c.dove,c.data);
+    const mid=lav.mestiere_id||_gMest();
+    const idOp=n=>giorOps.find(x=>x.nome===n).id;
+    const mieId=new Set(g.ore.map(o=>String(o.id)));
+    const rg=await sb.from("gest_ore").select("id,ore,operatore_id,data,lavoro_id").eq("user_id",sbUid).is("eliminato_il",null).eq("data",c.data).in("operatore_id",nomi.map(idOp));
+    if(rg.error) throw new Error("Non riesco a leggere le altre giornate di quel giorno: "+rg.error.message+". Non ho cambiato niente.");
+    let altre=(rg.data||[]).filter(o=>!mieId.has(String(o.id)));
+    const vivi=await giorLavoriVivi(altre.map(o=>o.lavoro_id)); if(vivi) altre=altre.filter(o=>String(o.lavoro_id) in vivi);
+    for(const n of nomi){
+      if(altre.some(o=>String(o.operatore_id)===String(idOp(n))&&String(o.lavoro_id)===String(lav.id)))
+        throw new Error(n+" ha già un'altra giornata di "+_gData(c.data)+" a «"+_gNomeLav(lav)+"». Togli il suo nome, oppure cancella prima quella.");
+    }
+    /* quante ore a testa, e le altre giornate del giorno che si ridividono */
+    const oreDi={}, cambia=[];
+    nomi.forEach(n=>{
+      const v=altre.filter(o=>String(o.operatore_id)===String(idOp(n)));
+      let q=GIOR_ORE_GIORNO;
+      if(v.length){
+        const somma=v.reduce((a,o)=>a+(+o.ore||0),0), uguali=mezzi(GIOR_ORE_GIORNO/v.length);
+        const eraDivisa=mezzi(GIOR_ORE_GIORNO/(v.length+1));
+        if(v.every(o=>(+o.ore||0)===uguali)||v.every(o=>(+o.ore||0)===eraDivisa)){ q=eraDivisa; v.forEach(o=>{ if((+o.ore||0)!==q) cambia.push({id:o.id,ore:q}); }); }
+        else q=somma<GIOR_ORE_GIORNO?mezzi(GIOR_ORE_GIORNO-somma):.5;
+      }
+      oreDi[n]=mezze.includes(n)?Math.min(q,GIOR_ORE_GIORNO/2):q;
+    });
+    for(const u of cambia){
+      const ru=await sb.from("gest_ore").update({ore:u.ore}).eq("id",u.id).eq("user_id",sbUid).select("id");
+      if(ru.error||!ru.data||!ru.data.length) throw new Error("Non riesco a dividere le ore con l'altra giornata: "+((ru.error&&ru.error.message)||"nessuna riga")+".");
+    }
+    const rr=await sb.from("gest_rapportini").update({data:c.data,lavoro_id:lav.id,mestiere_id:mid,note:c.cosa.trim()||null}).eq("id",g.rapportino_id).eq("user_id",sbUid).select("id");
+    if(rr.error||!rr.data||!rr.data.length) throw new Error("Non salvato: "+((rr.error&&rr.error.message)||"nessuna riga")+".");
+    const nuove=[];
+    for(const n of nomi){
+      const mia=g.ore.find(o=>String(o.operatore_id)===String(idOp(n)));
+      if(mia){
+        const ru=await sb.from("gest_ore").update({data:c.data,lavoro_id:lav.id,mestiere_id:mid,ore:oreDi[n]}).eq("id",mia.id).eq("user_id",sbUid).select("id");
+        if(ru.error||!ru.data||!ru.data.length) throw new Error("Le ore di "+n+" non sono cambiate: "+((ru.error&&ru.error.message)||"nessuna riga")+". Controlla in «Il mese».");
+      } else nuove.push({user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,operatore_id:idOp(n),data:c.data,ore:oreDi[n],rapportino_id:g.rapportino_id});
+    }
+    if(nuove.length){
+      const ri=await sb.from("gest_ore").insert(nuove).select("id");
+      if(ri.error||!ri.data||ri.data.length!==nuove.length) throw new Error("Non tutte le persone nuove sono entrate: "+((ri.error&&ri.error.message)||"")+". Controlla in «Il mese».");
+    }
+    const tenuti=new Set(nomi.map(n=>String(idOp(n))));
+    const usciti=g.ore.filter(o=>!tenuti.has(String(o.operatore_id)));
+    if(usciti.length){
+      const rd=await sb.from("gest_ore").update({eliminato_il:new Date().toISOString()}).in("id",usciti.map(o=>o.id)).eq("user_id",sbUid).select("id");
+      if(rd.error) throw new Error("Chi hai tolto è ancora segnato: "+rd.error.message+". Controlla in «Il mese».");
+    }
+    /* chi non e' piu' in quel giorno: alle sue altre giornate di allora tornano le ore */
+    for(const o of g.ore){ if(g.data!==c.data||!tenuti.has(String(o.operatore_id))) await giorRidaiOre(o.operatore_id,g.data,o.ore); }
+  }catch(e){ giorDisegna({t:e.message,k:"err"}); return; }
+  giorProp=null; giorNuovi=[]; giorModK=null;
+  giorMese=c.data.slice(0,7);
+  await renderGiornate();
+  giorDisegna({t:"Giornata modificata ✔",k:"ok"});
+  if(typeof window.tiSpunta==="function") window.tiSpunta("Giornata modificata");
+}
+
 async function giorCancella(k){
   const g=giorRighe.find(x=>x.k===k); if(!g) return;
   const ora=new Date().toISOString();
@@ -924,17 +1049,7 @@ async function giorCancella(k){
      stesso giorno, a chi resta tornano: 4 + 4, ne cancelli una, l'altra
      torna 8. Solo se le ore rimaste sono proprio la parte uguale (se le ha
      scritte a mano l'operaio non si toccano). Se non riesce, non si ferma. */
-  try{
-    const mezzi=x=>Math.max(.5,Math.round(x*2)/2);
-    for(const o of g.ore){
-      const q=+o.ore||0; if(!o.operatore_id||q>=GIOR_ORE_GIORNO) continue;
-      const rr=await sb.from("gest_ore").select("id,ore,lavoro_id").eq("user_id",sbUid).is("eliminato_il",null).eq("operatore_id",o.operatore_id).eq("data",g.data);
-      let v=(!rr.error&&rr.data)||[]; if(!v.length) continue;
-      const vivi=await giorLavoriVivi(v.map(x=>x.lavoro_id)); if(vivi) v=v.filter(x=>String(x.lavoro_id) in vivi);
-      if(!v.length||q!==mezzi(GIOR_ORE_GIORNO/(v.length+1))||!v.every(x=>(+x.ore||0)===q)) continue;
-      await sb.from("gest_ore").update({ore:mezzi(GIOR_ORE_GIORNO/v.length)}).in("id",v.map(x=>x.id)).eq("user_id",sbUid).select("id");
-    }
-  }catch(e){}
+  for(const o of g.ore) await giorRidaiOre(o.operatore_id,g.data,o.ore);
   giorConferma=null;
   await renderGiornate();
   giorDisegna({t:"Cancellata. La ritrovi nel Cestino.",k:"ok"});
@@ -1015,11 +1130,18 @@ document.addEventListener("change",async e=>{
 document.addEventListener("click",async e=>{
   const b=e.target.closest&&e.target.closest("#giornate [data-gior]"); if(!b) return;
   const a=b.dataset.gior;
-  if(a==="prev"||a==="next"){ giorProp=null; giorConferma=null; giorModifica=null; giorMese=_gSposta(giorMese,a==="next"?1:-1); renderGiornate(); return; }
-  if(a==="compila") return giorCompila();
-  if(a==="ieri"&&giorUltima){ giorLeggiProp(); giorNuovi=[]; giorProp=giorUltima.schede.map(c=>({data:_gOggi(),chi:new Set(c.chi),dove:c.dove,cosa:""})); giorDisegna({t:"Stessa squadra e stesso cantiere, con la data di oggi. Controlla e premi «Salva».",k:"ok"}); return; }
-  if(a==="mano"){ giorLeggiProp(); giorNuovi=[]; giorProp=[{data:_gOggi(),chi:new Set(),dove:"",cosa:""}]; giorDisegna(); return; }
-  if(a==="annulla"){ giorProp=null; giorNuovi=[]; giorAggiungi=null; giorDisegna(); return; }
+  if(a==="prev"||a==="next"){ giorProp=null; giorModK=null; giorConferma=null; giorModifica=null; giorMese=_gSposta(giorMese,a==="next"?1:-1); renderGiornate(); return; }
+  if(a==="compila"){ giorModK=null; return giorCompila(); }
+  if(a==="ieri"&&giorUltima){ giorLeggiProp(); giorNuovi=[]; giorModK=null; giorProp=giorUltima.schede.map(c=>({data:_gOggi(),chi:new Set(c.chi),dove:c.dove,cosa:"",mezza:new Set()})); giorDisegna({t:"Stessa squadra e stesso cantiere, con la data di oggi. Controlla e premi «Salva».",k:"ok"}); return; }
+  if(a==="mano"){ giorLeggiProp(); giorNuovi=[]; giorModK=null; giorProp=[{data:_gOggi(),chi:new Set(),dove:"",cosa:"",mezza:new Set()}]; giorDisegna(); return; }
+  if(a==="annulla"){ giorProp=null; giorModK=null; giorNuovi=[]; giorAggiungi=null; giorDisegna(); return; }
+  if(a==="mz"){
+    giorLeggiProp(); const c=giorProp[+b.dataset.i]; const n=b.dataset.n; if(!c) return;
+    if(!c.mezza) c.mezza=new Set();
+    const io=_gIo(); if(io&&io!=="-"&&giorNomeOp(io)===n) c.mezza.delete("IO");
+    if(b.dataset.v==="1") c.mezza.add(n); else c.mezza.delete(n);
+    giorDisegna(giorMsgSchede); return;
+  }
   if(a==="togli"){ giorLeggiProp(); giorProp.splice(+b.dataset.i,1); giorDisegna(); return; }
   if(a==="chip"){
     giorLeggiProp(); const c=giorProp[+b.dataset.i]; const n=b.dataset.n; if(!c) return;
@@ -1067,7 +1189,17 @@ document.addEventListener("click",async e=>{
   if(a==="del"){ giorConferma=b.dataset.k; giorModifica=null; giorDisegna(); return; }
   if(a==="del-no"){ giorConferma=null; giorDisegna(); return; }
   if(a==="del-si"){ b.disabled=true; await giorCancella(b.dataset.k); return; }
-  if(a==="mod"){ giorModifica=b.dataset.k; giorConferma=null; giorDisegna(); return; }
+  if(a==="mod"){
+    /* 18 nov 2026: «modifica» apre la scheda piena (giorno, cantiere, persone, testo), non piu' solo il testo */
+    const g=giorRighe.find(x=>x.k===b.dataset.k); if(!g) return;
+    const nomi=[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))];
+    giorNuovi=[]; giorConferma=null; giorModifica=null; giorAggiungi=null; giorModK=g.k;
+    giorProp=[{data:g.data,chi:new Set(nomi),dove:_gNomeLav(giorLavoro(g.lavoro_id)),cosa:g.nota||"",
+      mezza:new Set(g.ore.filter(o=>(+o.ore||0)===GIOR_ORE_GIORNO/2).map(o=>giorNomeOp(o.operatore_id)))}];
+    giorDisegna();
+    const sc=document.querySelector("#giornate .gprop"); if(sc&&sc.scrollIntoView) sc.scrollIntoView({block:"start",behavior:"smooth"});
+    return;
+  }
   if(a==="mod-no"){ giorModifica=null; giorDisegna(); return; }
   if(a==="mod-salva"){ b.disabled=true; await giorModSalva(b.dataset.k); return; }
 });

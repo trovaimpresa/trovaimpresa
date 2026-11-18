@@ -5813,6 +5813,8 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .gx-si{ background:#DC2626; color:#fff; border:0; border-radius:8px; font:inherit; font-size:16px; font-weight:700; min-height:44px; padding:0 14px; cursor:pointer; }
 .gx-vuoto{ font-size:17px; color:var(--testo,#0b1220); margin:6px 0 0; }
 .gx-griglia{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.gx-foto{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+.gx-foto a{ display:block; width:100%; }
 .gx-griglia img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; border:1px solid var(--bordo,#e2e8f0); display:block; }
 @media(max-width:760px){
   #giornate .gx-btn{ grid-template-columns:1fr 1fr; }
