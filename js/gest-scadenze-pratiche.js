@@ -69,11 +69,11 @@
     if(!sb||!sbUid)return [];
     try{
       const {data:mz}=await sb.from("gest_mezzi")
-        .select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
+        .select("id,nome,tipo,categoria,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
         .eq("user_id",sbUid).or(_cliOr(mid||curMestiere())).is("eliminato_il",null);
       const out=[];
       (mz||[]).forEach(function(m){
-        const att=m.tipo==="attrezzatura";
+        const att=m.categoria==="attrezzatura"; /* 18 nov: era m.tipo, che e' testo libero («Trapano») */
         const base={_mezzo:true,_mzId:m.id,_tab:att?"attrezzature":"mezzi",_nome:m.nome||(att?"Attrezzatura":"Mezzo"),
                     tipo_pratica:att?"Attrezzatura":"Mezzo",stato:"aperta"};
         SCAD_MEZZO.forEach(function(t){

@@ -3583,3 +3583,11 @@ Aperto:
 4. Mezzi: l'elenco è in ordine di nome, non «ultimi in cima».
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+18 nov (sera, dopo il push →89be5816←) — provato dal vivo su computer e 375 px: stati dell'invito, «Nuovo invito» + QR con WhatsApp, «Accesso tolto», Controllo, pieni, linguette: tutto ✔. Poi, sì di Alex:
+- **Avviso «C'è già una persona che si chiama…»** in `squadraAdd` (js/gest-squadra.js), come per i clienti: avvisa e non blocca.
+- **Video**: un video solo `mezzi.mp4` / `mezzi-tel.mp4` che fa vedere tutte e due le linguette; tolti `attrezzature*.mp4` e il copione `attrezzature` (tools/tutorial/registra.py). ⚠️ `registra.py` scrive in `tools/tutorial/uscita/`: i file vanno copiati a mano in `video/tutorial/` e `elenco.json` NON si copia (quello in uscita contiene solo le voci rifatte).
+- ⛔ **Difetto vecchio trovato**: Scadenzario (`scadenzeMezzi`) e Calendario (`calAltreDate`) decidevano «attrezzatura» da `m.tipo`, che è testo libero («Trapano»): un'attrezzatura era sempre «Mezzo» e si apriva nella linguetta Mezzi. Adesso `m.categoria`.
+- `calVai` / `calTornaQuandoChiude` guardano la SEZIONE aperta (`section.active`), non la voce accesa del menu: con la voce unita le voci accese sono due. `mzUnisci` accende «Mezzi e attrezzature» anche entrando da `#attrezzature`.
+- ⚠️ Studio «puro» (voce sola «Strumenti») NON provabile col conto di Alex: con `?vedi=professionista` (`_facciaScelta()`) i Mezzi restano accesi e si vede «Mezzi e strumenti» con le linguette.
+- Deciso da Alex: **Agenda operatore + Squadra in una voce sola** → prossima sessione, foto prima.

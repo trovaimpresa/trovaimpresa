@@ -751,7 +751,7 @@
     calAltreDate._ko=false;
     const [rp,rm,rf,rff,rfo,raz]=await Promise.all([
       sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
-      sb.from("gest_mezzi").select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
+      sb.from("gest_mezzi").select("categoria,id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
         .eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null),
       sb.from("gest_fatture").select("id,numero,data,scadenza,cli_nome").eq("user_id",sbUid).eq("mestiere_id",mid)
         .eq("stato","emessa").is("eliminato_il",null).not("numero","is",null),
@@ -767,7 +767,7 @@
     /* le stesse quattro date della vista gest_mezzi_scadenze */
     const piuMesi=(d,n)=>{const x=new Date(d+"T12:00:00");const g=x.getDate();x.setMonth(x.getMonth()+n);if(x.getDate()<g)x.setDate(0);return ymd(x.getFullYear(),x.getMonth(),x.getDate());};
     ok(rm).forEach(m=>{
-      const tab=m.tipo==="attrezzatura"?"attrezzature":"mezzi";
+      const tab=m.categoria==="attrezzatura"?"attrezzature":"mezzi"; /* 18 nov: era m.tipo, che e' testo libero */
       [["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]].forEach(c=>{
         if(m[c[0]])out.push({id:m.id,titolo:c[1]+" · "+(m.nome||"mezzo"),data:m[c[0]],fatta:false,_az:vai(tab,"edit-mezzo",m.id)});
       });
@@ -796,8 +796,8 @@
     if(typeof closeSheet==="function")closeSheet();
     /* 18 nov 2026 — si torna DA DOVE si e' partiti: dallo Scadenzario si apre
        un mezzo o una fattura del fornitore, e chiudendo si finiva nel Calendario. */
-    const _daB=document.querySelector("nav.tabs button.active");
-    const _da=(_daB&&_daB.dataset.tab&&_daB.dataset.tab!==tab)?_daB.dataset.tab:"calendario";
+    const _daB=document.querySelector("section.active");
+    const _da=(_daB&&_daB.id&&_daB.id!==tab)?_daB.id:"calendario";
     const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"]'); if(b)b.click();
     for(let i=0;i<40;i++){
       const L=(CAL_PRONTO[azione]||(()=>null))();
@@ -816,7 +816,8 @@
   function calTornaQuandoChiude(tab,dove){
     if(_calTornaT)clearInterval(_calTornaT);
     let vista=false, giri=0;
-    const attiva=()=>{const b=document.querySelector("nav.tabs button.active");return b?b.dataset.tab:"";};
+    /* 18 nov: si guarda la SEZIONE aperta, non il menu (con «Mezzi e attrezzature» le voci accese sono due) */
+    const attiva=()=>{const x=document.querySelector("section.active");return x?x.id:"";};
     _calTornaT=setInterval(function(){
       giri++;
       const aperta=!!document.querySelector(".overlay.open");

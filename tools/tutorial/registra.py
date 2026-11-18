@@ -364,8 +364,9 @@ async def squadra(r):
     await r.aspetta(3)
 
 async def mezzi(r):
+    # 18 nov 2026: Mezzi e Attrezzature sono UNA voce con due linguette: un video solo.
     await entra(r)
-    await r.apri_voce("mezzi", "Apri «Tutto il resto» e premi «Mezzi».")
+    await r.apri_voce("mezzi", "Apri «Tutto il resto» e premi «Mezzi e attrezzature».")
     await r.dici("Qui tieni i mezzi, con assicurazione e revisione.")
     await r.aspetta(2.2)
     await nuovo(r, "mezzi", "new-mezzo", "Premi «+ Aggiungi il primo mezzo».")
@@ -377,19 +378,14 @@ async def mezzi(r):
     await r.data("#m-assic", 40)
     await r.data("#m-revis", 120)
     await salva(r, "save-mezzo", "Premi «Crea». Fatto!")
-    await r.aspetta(2.5)
-
-async def attrezzature(r):
-    await entra(r)
-    await r.apri_voce("attrezzature", "Apri «Tutto il resto» e premi «Attrezzature».")
-    await r.dici("Qui tieni ponteggi, betoniere e attrezzi.")
-    await r.aspetta(2.2)
+    await r.aspetta(2.0)
+    await r.dici("In alto tocca «Attrezzature»: ponteggi, betoniere e attrezzi.")
+    await r.clicca('section#mezzi .mz-ling [data-mz="attrezzature"]')
+    await r.aspetta(1.6)
     await nuovo(r, "attrezzature", "new-attrezzatura", "Premi «+ Aggiungi la prima attrezzatura».")
     await r.dici("Scrivi il nome e il tipo.")
     await r.scrivi("#m-nome", "Betoniera 350 litri")
     await r.scrivi("#m-tipo", "betoniera")
-    await r.dici("Nelle note scrivi dove si trova.")
-    await r.scrivi("#m-note", "In magazzino")
     await salva(r, "save-mezzo", "Premi «Crea». Fatto!")
     await r.aspetta(2.5)
 
@@ -513,7 +509,7 @@ async def assistenza(r):
     await r.aspetta(2.6)
 
 COPIONI = {f.__name__: f for f in [preventivi, computi, lavori, fatture, clienti, calendario,
-           giornate, dalsito, promemoria, scadenzario, agenda, squadra, mezzi, attrezzature, fisco,
+           giornate, dalsito, promemoria, scadenzario, agenda, squadra, mezzi, fisco,
            prezzario, sal, fornitori, carte, report, galleria, cestino, richieste, assistenza]}
 
 

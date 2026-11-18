@@ -130,6 +130,8 @@
     const bM=document.querySelector('nav.tabs button[data-tab="mezzi"]'),
           bA=document.querySelector('nav.tabs button[data-tab="attrezzature"]');
     if(bA)bA.classList.toggle("mz-dentro",uni);
+    /* 18 nov: entrando da #attrezzature il clic arriva prima di questa riga: la voce unita va accesa qui */
+    if(uni&&bA&&bM&&bA.classList.contains("active"))bM.classList.add("active");
     if(bM){ const s=bM.querySelector("span"); if(s){ const t=uni?tutto:"Mezzi"; if(s.textContent!==t)s.textContent=t; } }
     const nA=mezziCache.filter(m=>m.categoria==="attrezzatura").length, nM=mezziCache.length-nA;
     [["mezzi","Mezzi"],["attrezzature",nomeA]].forEach(function(x){

@@ -819,6 +819,20 @@ ${vecchi?`
        quali senza accesso. Poi bisogna capire quale eliminare.
        Adesso la persona appena creata si tiene da parte: al secondo
        tentativo non se ne fa un'altra, si riprova solo l'invito. */
+    /* 18 nov 2026 (voce Squadra) — IL DOPPIONE, come per i clienti (17 nov).
+       Due «Mario Bianchi» in squadra non si distinguono in Giornate e nelle
+       tendine «Chi ci va». Avvisa e non blocca: due persone con lo stesso
+       nome esistono davvero. Non si chiede al secondo tentativo dello stesso
+       salvataggio (_sqOpAppenaCreato). */
+    if(!_sqOpAppenaCreato&&typeof window.tiChiedi==="function"){
+      const _n=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+      const _gia=(typeof dipCache!=="undefined"?dipCache:[]).find(x=>_n(x.nome)===_n(nome));
+      if(_gia){
+        const _dove=_gia.telefono&&/\d/.test(_gia.telefono)?"Quella che hai già ha il telefono "+_gia.telefono+".\n":"";
+        if(!(await window.tiChiedi(_dove+"Se è la stessa persona, torna indietro e apri la sua scheda.",
+          {titolo:"C'è già una persona che si chiama «"+String(_gia.nome).slice(0,80)+"»",si:"È un'altra: aggiungila",no:"Torno indietro"})))return;
+      }
+    }
     let opId=_sqOpAppenaCreato;
     if(!opId){
       const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
