@@ -3485,8 +3485,10 @@ Da sapere:
 - Per provare il codice nuovo prima del push: le funzioni di `gest-promemoria.js` sono globali, si ridefiniscono nella pagina vera con `(0,eval)(String(funzione).replace(…))`.
 
 Aperto sui Promemoria:
-1. Proposta ad Alex (foto mandate): pulsante «Rimanda» (a domani / fra 3 giorni / fra una settimana). Aspetta il suo sì.
+1. (chiuso) «Rimanda»: Alex ha detto sì, vedi sotto.
 2. NON provati: l'email del mattino con dentro un promemoria (parte una volta al giorno), «Parla» e la Chat con AI che scrivono/leggono un promemoria (costano crediti), il Noleggio dal vivo (solo banco), il telefono vero.
 3. In `strumenti-comuni.js` restano le vecchie funzioni promemoria dei pannelli (`apriPromemoria`, `eliminaPromemoria`…): nessuna pagina le chiama più (cercato in tutti gli html e js). Codice morto, non toccato.
+
+Funzione nuova (sì di Alex il 18 nov, foto prima): **«Rimanda ▾»** in alto nella finestra del promemoria, dopo «Segna fatto»: A domani / Fra 3 giorni / Fra una settimana (`PROM_RIMANDA`, `promRimandaMetti`, `promRimanda`, azione `prom-rimanda` in `js/gest-promemoria.js`). Si conta da OGGI, non dalla data vecchia; azzera `inviato` (l'avviso riparte). Non c'è sul promemoria nuovo né su quello fatto. La mette `promForm` dopo `openSheetGrande` (un `<details class="sh-altro">` suo: stile e chiusura sono quelli di «Altro ▾»). Sul telefono è una riga larga sotto «Segna fatto». ⚠️ NON nel Noleggio: lì le schede hanno un'altra grafica, serve prima la foto.
 
 Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.

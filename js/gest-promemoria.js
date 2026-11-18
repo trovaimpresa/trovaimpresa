@@ -240,6 +240,47 @@
        <button class="btn-primary b-save" data-action="save-prom" data-id="${esc(String(p.id || ""))}">Salva</button>`);
     /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
     try{ if(typeof ctrAscolta==="function") ctrAscolta("promemoria"); }catch(e){}
+    /* 18 nov 2026 (ok di Alex, foto prima) — «Rimanda»: solo su un promemoria
+       che c'e' gia' e non e' fatto. Sta in alto, dopo «Segna fatto». */
+    if (!isNew && p.id != null && p.stato !== "fatto") promRimandaMetti(p.id);
+  }
+
+  /* I tre salti di «Rimanda». Si conta da OGGI, non dalla data vecchia: uno
+     che rimanda una cosa di tre giorni fa la vuole domani, non l'altro ieri. */
+  const PROM_RIMANDA = [[1, "A domani"], [3, "Fra 3 giorni"], [7, "Fra una settimana"]];
+
+  function promRimandaMetti(id) {
+    const testa = document.querySelector("#sheet .sh-head"); if (!testa) return;
+    let az = testa.querySelector(".sh-head-az");
+    if (!az) { az = document.createElement("div"); az.className = "sh-head-az"; testa.appendChild(az); }
+    const d = document.createElement("details");
+    d.className = "sh-altro prom-rimanda";
+    d.innerHTML = '<summary class="btn btn-sm">Rimanda ▾</summary><div class="sh-altro-pop">'
+      + PROM_RIMANDA.map(x => '<button class="btn btn-sm" data-chiudi="1" data-action="prom-rimanda" data-id="'
+          + esc(String(id)) + '" data-g="' + x[0] + '">' + x[1] + '</button>').join("") + '</div>';
+    const primo = az.querySelector(".az-prima");
+    if (primo) primo.after(d); else az.prepend(d);
+  }
+
+  function promFraGiorni(n) {
+    const [y, m, d] = todayStr().split("-").map(Number);
+    const dt = new Date(y, m - 1, d + (+n || 0));
+    return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0")
+           + "-" + String(dt.getDate()).padStart(2, "0");
+  }
+
+  async function promRimanda(id, giorni) {
+    const g = +giorni || 1;
+    const data = promFraGiorni(g);
+    /* la data cambia: l'avviso deve poter ripartire (come in salvaPromemoria) */
+    const q = await sb.from("promemoria").update({ data: data, inviato: false })
+      .eq("id", id).eq("user_id", sbUid).select("id");
+    if (q.error || !q.data || !q.data.length) {
+      toast("Non rimandato: " + ((q.error && q.error.message) || "nessuna riga scritta"));
+      return;
+    }
+    toast("Rimandato " + (g === 1 ? "a domani" : "al " + data.split("-").reverse().join("/")) + " ✔");
+    promRidisegna();
   }
 
   /* 18 nov 2026 — due tocchi veloci su «Salva» facevano nascere due promemoria
@@ -360,6 +401,7 @@
     if (a === "edit-prom")  { promForm(promCache.find(x => String(x.id) === String(id))); return; }
     if (a === "save-prom")  { salvaPromemoria(id || null); return; }
     if (a === "prom-stato") { promStato(id, t.dataset.v); return; }
+    if (a === "prom-rimanda") { promRimanda(id, t.dataset.g); return; }
     if (a === "del-prom")   { promButta(id); return; }
     if (a === "prom-vista") { promVista = t.dataset.v; renderPromemoria(); return; }
   });
