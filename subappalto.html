@@ -232,6 +232,15 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
 </div>
 
+<!-- 18 nov 2026: subappalti per mestiere -->
+<section style="max-width:1200px;margin:0 auto;padding:34px 20px 40px;box-sizing:border-box">
+  <h2 style="font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:800;color:#0a2a4d;margin:0 0 14px">Subappalti per mestiere</h2>
+  <div class="smest-altri" style="display:flex;flex-wrap:wrap;gap:10px">
+    <a href="/subappalto-muratura">Muratura</a><a href="/subappalto-cartongesso">Cartongesso</a><a href="/subappalto-impianti">Impianti elettrici e idraulici</a><a href="/subappalto-carpenteria">Carpenteria e cemento armato</a><a href="/subappalto-cappotto-termico">Cappotto termico</a>
+  </div>
+</section>
+<style>.smest-altri a{background:#eaf2ff;color:#0047b3;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:10px;font-size:1.02rem}.smest-altri a:hover{background:#d6e6ff}</style>
+
 <!-- MODAL CERCA -->
 <div class="modal-overlay" id="modal-cerca" onclick="if(event.target===this)chiudiModal('cerca')">
   <div class="modal">
@@ -557,6 +566,20 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
+</script>
+<script>
+  // 18 nov 2026: un clic solo. Il pulsante resta spento finche' il salvataggio non finisce,
+  // cosi' lo stesso annuncio non esce piu' volte (il 19 ott era uscito 10 volte uguale).
+  ['salvaCerca', 'salvaOffre'].forEach(function (nome) {
+    var vera = window[nome];
+    window[nome] = async function () {
+      var btn = document.querySelector('[onclick="' + nome + '()"]');
+      if (btn && btn.disabled) return;
+      if (btn) { btn.disabled = true; btn.style.opacity = '.6'; btn.style.cursor = 'wait'; }
+      try { await vera.apply(this, arguments); }
+      finally { if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = ''; } }
+    };
+  });
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">

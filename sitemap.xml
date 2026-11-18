@@ -537,7 +537,32 @@
   </url>
   <url>
     <loc>https://trovaimpresa.com/subappalto</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-11-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/subappalto-muratura</loc>
+    <lastmod>2026-11-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/subappalto-cartongesso</loc>
+    <lastmod>2026-11-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/subappalto-impianti</loc>
+    <lastmod>2026-11-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/subappalto-carpenteria</loc>
+    <lastmod>2026-11-18</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/subappalto-cappotto-termico</loc>
+    <lastmod>2026-11-18</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
