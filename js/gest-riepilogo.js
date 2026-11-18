@@ -819,7 +819,7 @@
     }));
 
     if(!tabNascosto("agenda"))C.push(rieCard({
-      tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
+      tab:"agenda", titolo:"Agenda", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
       lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
       vuoto:"Nessun lavoro assegnato",
       righe: opeOrd.slice(0,2).map(k=>({

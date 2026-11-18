@@ -406,7 +406,7 @@
     if (!b || b.hidden) return null;
     /* 18 nov 2026: «attrezzature» sta dentro «Mezzi e attrezzature» (.mz-dentro): non si vede nel menu ma ci si va */
     /* 18 nov 2026: «promemoria» sta dentro «Scadenze e promemoria» (.sp-dentro), come sopra */
-    if (getComputedStyle(b).display === 'none' && !b.classList.contains('mz-dentro') && !b.classList.contains('sp-dentro')) return null;
+    if (getComputedStyle(b).display === 'none' && !b.classList.contains('mz-dentro') && !b.classList.contains('sp-dentro') && !b.classList.contains('ag-dentro')) return null;
     return b;
   }
   function pulsanteVai(tutto, sez, vista) {

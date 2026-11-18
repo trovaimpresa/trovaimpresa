@@ -3633,3 +3633,12 @@ Come «Mezzi e attrezzature»: `spUnito()` / `spUnisci()` in `js/gest-promemoria
 - Studio tecnico: stessa cosa (lo Scadenzario dello studio ha anche le pratiche). Noleggio: NON toccato.
 - Nomi aggiornati: MANUALE di `chat-gestionale.mjs`, `js/aiuti.js`, `js/gest-tutorial.js`, card «Scadenze» del Riepilogo (`js/gest-riepilogo.js`), avviso delle integrazioni (`js/gest-scadenze-pratiche.js`), titolo della sezione. Il banco adesso misura 24 sezioni: la linguetta Promemoria si guarda a mano.
 - ⚠️ Il video `promemoria.mp4` non ha più una voce sua: il ▶ fa vedere quello dello Scadenzario.
+
+# 18 NOVEMBRE 2026 — SQUADRA E AGENDA: UNA VOCE SOLA (deciso da Alex, foto approvata)
+
+Come «Mezzi e attrezzature» e «Scadenze e promemoria»: `agUnito()` / `agUnisci()` in `js/gest-squadra.js`, stile `.ag-dentro` in `css/gestionale-stile.css` (`?v=34`), linguette con la classe `.mz-ling` + `.ag-ling`.
+- ⛔ Non è stato cancellato niente: `#squadra` e `#agenda` restano, e resta il pulsante `agenda` del menu con la classe `.ag-dentro` (non si vede). Chi lo «preme» da fuori (Riepilogo, Chat `[vai:agenda]`, `#agenda`) funziona come prima; nel menu si accende «Squadra e agenda» (`js/gest-finestre-eventi.js`, e `js/gest-chat.js` lo accetta).
+- Linguette «Squadra (n)» = persone del reparto, «Agenda (n)» = lavori da fare. Li scrivono `renderDip` / `renderAgenda` in `window._sqN` (col reparto: `sqMid`, `agMid`).
+- Nella linguetta Agenda «Lavori / Ore fatte» (`#ag-vista`) scende sotto le linguette; se la voce non è unita torna nel titolo.
+- ⛔ STUDIO TECNICO: NON unito (deciso da Alex: lo studio si guarda nel suo giro). `agUnito()` è falso per `professionista`: restano «Collaboratori» e «Agenda» separate. Noleggio: non toccato.
+- Nomi: MANUALE di `chat-gestionale.mjs`, `js/aiuti.js`, `js/gest-tutorial.js`, card «Agenda» del Riepilogo. ⚠️ Video: il ▶ di «Squadra e agenda» fa vedere `squadra.mp4` (non c'è un video che mostra le due linguette).

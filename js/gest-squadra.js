@@ -37,6 +37,70 @@
    prove-claude/banchi-fissi/smontaggio/banco-fette.js
    ═══════════════════════════════════════════════════════════════════════ */
 
+  /* ============================================================
+     18 nov 2026 — SQUADRA E AGENDA: UNA VOCE SOLA, DUE LINGUETTE
+     (deciso da Alex, foto approvata). Come «Mezzi e attrezzature» e
+     «Scadenze e promemoria»: non si cancella niente. Le sezioni #squadra e
+     #agenda restano, e resta il pulsante «agenda» del menu, solo che non si
+     vede (classe .ag-dentro): chi lo «preme» da fuori (Riepilogo, Chat
+     [vai:agenda], #agenda) funziona come prima.
+     ⛔ Lo STUDIO TECNICO resta com'era (voci «Collaboratori» e «Agenda»
+        separate): Alex lo guarda quando si fa il giro dello studio.
+     I numeri: Squadra = persone del reparto, Agenda = lavori da fare.
+     Li scrivono renderDip e renderAgenda in window._sqN. */
+  function agUnito(){
+    try{
+      if(ruoloUtente==='professionista')return false;
+      if(!document.querySelector('nav.tabs button[data-tab="agenda"]'))return false;
+      return !(typeof tabNascosto==="function"&&(tabNascosto("squadra")||tabNascosto("agenda")));
+    }catch(e){ return false; }
+  }
+  function agUnisci(){
+    const uni=agUnito(), tutto="Squadra e agenda";
+    const bS=document.querySelector('nav.tabs button[data-tab="squadra"]'),
+          bA=document.querySelector('nav.tabs button[data-tab="agenda"]');
+    if(bA)bA.classList.toggle("ag-dentro",uni);
+    if(uni&&bA&&bS&&bA.classList.contains("active"))bS.classList.add("active");
+    if(bS&&ruoloUtente!=='professionista'){const s=bS.querySelector("span");const t=uni?tutto:"Squadra";if(s&&s.textContent!==t)s.textContent=t;}
+    const N=window._sqN||{};
+    let mid=null;try{mid=typeof curMestiere==="function"?curMestiere():null;}catch(e){}
+    const nS=(N.sq!=null&&N.sqMid===mid)?N.sq:null, nA=(N.ag!=null&&N.agMid===mid)?N.ag:null;
+    const lab=(t,n)=>t+(n!=null?" ("+n+")":"");
+    [["squadra","Squadra"],["agenda","Agenda operatore"]].forEach(function(x){
+      const sec=document.getElementById(x[0]);if(!sec)return;
+      const sh=sec.querySelector(".sec-head");if(!sh)return;
+      const h=sh.querySelector("h2");
+      if(ruoloUtente!=='professionista'){const t=uni?tutto:x[1];if(h&&h.textContent!==t)h.textContent=t;}
+      let g=sec.querySelector(".ag-ling");
+      const vista=x[0]==="agenda"?document.getElementById("ag-vista"):null;
+      if(!uni){
+        if(g)g.remove();
+        if(vista&&vista.parentNode!==sh){vista.style.margin="";sh.appendChild(vista);}
+        return;
+      }
+      if(!g){g=document.createElement("div");g.className="segm mz-ling ag-ling";sh.after(g);}
+      const html='<button type="button" data-ag="squadra"'+(x[0]==="squadra"?' class="on"':'')+'>'+lab("Squadra",nS)+'</button>'
+        +'<button type="button" data-ag="agenda"'+(x[0]==="agenda"?' class="on"':'')+'>'+lab("Agenda",nA)+'</button>';
+      if(g.innerHTML!==html)g.innerHTML=html;
+      /* «Lavori / Ore fatte» scende sotto le linguette */
+      if(vista&&vista.previousElementSibling!==g){g.after(vista);vista.style.margin="0 0 16px";}
+    });
+    if(!uni)return;
+    if(nS==null&&!window._sqCaricoS&&typeof sb!=="undefined"&&sb&&sbUid&&typeof cur!=="undefined"&&cur){
+      window._sqCaricoS=1;Promise.resolve(renderDip()).catch(function(){}).then(function(){window._sqCaricoS=0;});
+    }else if(nA==null&&!window._sqCaricoA&&typeof renderAgenda==="function"&&typeof sb!=="undefined"&&sb&&sbUid&&typeof cur!=="undefined"&&cur){
+      window._sqCaricoA=1;Promise.resolve(renderAgenda()).catch(function(){}).then(function(){window._sqCaricoA=0;});
+    }
+  }
+  if(!window.__agAscolto){
+    window.__agAscolto=1;
+    document.addEventListener("click",function(e){
+      const b=e.target.closest&&e.target.closest("[data-ag]");if(!b||b.classList.contains("on"))return;
+      const v=document.querySelector('nav.tabs button[data-tab="'+b.getAttribute("data-ag")+'"]');
+      if(v)v.click();
+    });
+  }
+
   async function renderDip(){
     const box=$("#dip-list");if(!box)return;
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
@@ -53,6 +117,9 @@
     /* 12 nov 2026 — regola 20: senza rete non si dice «Chi lavora con te» vuoto */
     if(letturaKo(_rD[0])){listaNonLetta(box,"la squadra","squadra");return;}
     const [{data:ops},{data:membri},{data:docsAll},{data:msgNuovi}]=_rD;
+    /* 18 nov 2026 — il numero della linguetta «Squadra» */
+    window._sqN=window._sqN||{};window._sqN.sq=(ops||[]).length;window._sqN.sqMid=curMestiere();
+    try{agUnisci();}catch(e){}
     const nB={};(msgNuovi||[]).forEach(function(m){nB[m.operatore_id]=(nB[m.operatore_id]||0)+1;});
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     const dB={};(docsAll||[]).forEach(function(d){(dB[d.operatore_id]=dB[d.operatore_id]||[]).push(d);});

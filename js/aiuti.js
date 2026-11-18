@@ -34,7 +34,7 @@
     agenda:       'Cosa deve fare la squadra giorno per giorno. È quello che gli operai vedono sul telefono.',
     mezzi:        'Furgoni e macchine con bollo, assicurazione e revisione. Nella linguetta «Attrezzature»: betoniere, ponteggi, utensili.',
     attrezzature: 'Betoniere, ponteggi, utensili: cosa hai e a chi è in mano.',
-    squadra:      'Le persone che lavorano con te: contatti, ruolo e documenti.',
+    squadra:      'Le persone che lavorano con te. In alto la linguetta «Agenda»: i lavori di ognuno e le ore fatte.',
     carte:        'Le carte aziendali e le spese fatte con ognuna.',
     clienti:      'Privati, aziende e condomini. Una volta inserito un cliente lo scegli dal menu, senza riscrivere ogni volta indirizzo e dati.',
     scadenzario:  'Le scadenze da non dimenticare e i tuoi promemoria, con l’avviso prima che arrivino.',

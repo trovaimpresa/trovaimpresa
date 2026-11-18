@@ -40,7 +40,7 @@
     promemoria:  "Qui scrivi le cose da ricordare. Ti arriva l'avviso al momento giusto.",
     scadenzario: "Qui ci sono le scadenze (revisioni, DURC, visite mediche, assicurazioni) e, nella linguetta Promemoria, le cose da ricordare.",
     agenda:      "Qui vedi i lavori di ogni operaio.",
-    squadra:     "Qui metti i tuoi operai e decidi cosa possono vedere dal telefono.",
+    squadra:     "Qui metti i tuoi operai. In alto, «Agenda»: i lavori di ognuno.",
     mezzi:       "Qui ci sono i tuoi mezzi e le attrezzature, in due linguette, con revisioni e verifiche.",
     attrezzature:"Qui ci sono le attrezzature e dove si trovano.",
     fisco:       "Qui vedi le tasse da mettere da parte e le date da non dimenticare.",

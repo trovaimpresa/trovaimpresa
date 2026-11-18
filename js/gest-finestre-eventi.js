@@ -1117,6 +1117,8 @@
       if(b.classList.contains("mz-dentro")){const _mzb=$('nav.tabs button[data-tab="mezzi"]');if(_mzb)_mzb.classList.add("active");}
       /* 18 nov 2026 — Promemoria sta dentro «Scadenze e promemoria»: nel menu si accende quella */
       if(b.classList.contains("sp-dentro")){const _spb=$('nav.tabs button[data-tab="scadenzario"]');if(_spb)_spb.classList.add("active");}
+      /* 18 nov 2026 — Agenda sta dentro «Squadra e agenda» */
+      if(b.classList.contains("ag-dentro")){const _agb=$('nav.tabs button[data-tab="squadra"]');if(_agb)_agb.classList.add("active");}
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
       /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
          rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si

@@ -307,6 +307,8 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 /* 18 nov 2026 — SCADENZE E PROMEMORIA: una voce sola, due linguette (js/gest-promemoria.js, spUnisci).
    Le linguette usano la stessa classe di Mezzi e attrezzature (.mz-ling). */
 #appview nav.tabs button.sp-dentro{display:none!important}
+/* 18 nov 2026 — SQUADRA E AGENDA: una voce sola, due linguette (js/gest-squadra.js, agUnisci) */
+#appview nav.tabs button.ag-dentro{display:none!important}
 #appview .wrap section .sp-nota{margin:-6px 0 14px;font-size:16px;color:var(--testo-2,#475569)}
 #appview .wrap section .segm.mz-ling{display:flex;width:100%;max-width:560px;margin:0 0 16px;padding:4px}
 #appview .wrap section .segm.mz-ling button{flex:1;height:48px;font-size:18px;font-weight:700}
