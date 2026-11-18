@@ -549,7 +549,10 @@
       +  '<div class="lav-media" id="co-sal">'+(isNew
           ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti gli stati di avanzamento.</div>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
-      +  '<div class="sh-nota">'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Serve per certificare i lavori fatti fin qui: conti quello che è stato eseguito e l'impresa può chiedere l'acconto.":"Serve per farsi pagare a pezzi mentre il lavoro va avanti: conti quello che hai fatto e chiedi un acconto.")+'</div>'
+      /* 18 nov 2026 (collaudo SAL) — per impresa e artigiano la riga sotto il
+         pulsante ripeteva, attaccata al pulsante, quello che dice gia' la
+         scritta «Nessun acconto…». Resta solo per lo studio tecnico. */
+      +  ((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?'<div class="sh-nota">Serve per certificare i lavori fatti fin qui: conti quello che è stato eseguito e l\'impresa può chiedere l\'acconto.</div>':'')
       +'</div>'
 
       +'</div>'   /* <- fine pagina 5 */

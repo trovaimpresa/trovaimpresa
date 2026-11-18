@@ -63,7 +63,8 @@
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
 
     const [rs,rt]=await Promise.all([
-      sb.from("gest_sal").select("*").eq("user_id",sbUid).eq("computo_id",computoId).order("numero"),
+      /* 18 nov 2026 — in cima l'ultimo acconto (regola di Alessio: in ogni elenco le cose nuove stanno sopra) */
+      sb.from("gest_sal").select("*").eq("user_id",sbUid).eq("computo_id",computoId).order("numero",{ascending:false}),
       sb.from("gest_sal_totali").select("*").eq("user_id",sbUid).eq("computo_id",computoId)
     ]);
 
@@ -208,7 +209,7 @@
        nel cestino): un SAL il cui computo e' nel cestino non compare qui. */
     const [rc,rs,rt,rcl]=await Promise.all([
       sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
-      sb.from("gest_sal").select("*").eq("user_id",sbUid).order("data",{ascending:false}),
+      sb.from("gest_sal").select("*").eq("user_id",sbUid).order("data",{ascending:false}).order("numero",{ascending:false}),
       sb.from("gest_sal_totali").select("*").eq("user_id",sbUid),
       _sbTutto("gest_clienti").select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
@@ -377,9 +378,14 @@
          avanzamento aperto OGGI nasceva con la data di IERI — ed e' un
          documento contabile che si firma. E' la correzione dell'11 agosto:
          questi due punti erano rimasti indietro perche' stanno in un altro file. */
+      /* 18 nov 2026 (collaudo) — la ritenuta di garanzia e' quella del
+         contratto: vale per tutti gli acconti. Il secondo acconto ripartiva
+         da 0 anche se il primo aveva 0,5%: si riprende quella dell'ultimo. */
+      const _ult=salCache.slice().sort((a,b)=>(+b.numero||0)-(+a.numero||0))
+        .find(x=>x.ritenuta_perc!=null);
       s={ numero: salCache.reduce((m,x)=>Math.max(m,+x.numero||0),0)+1,
           data: todayStr(),
-          ritenuta_perc: (comp.tipo==="pubblico"?0.5:0),
+          ritenuta_perc: _ult?(+_ult.ritenuta_perc||0):(comp.tipo==="pubblico"?0.5:0),
           stato:"bozza" };
     }
     salApertoId=s.id||null;
@@ -558,16 +564,20 @@
       +'<div class="qe-r"><span>'+_sa('Questo stato di avanzamento','Questo acconto')+'</span><b>'+eur2(k.lordo)+'</b></div>'
       +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>'+(k.ritenuta>0?'−'+eur2(k.ritenuta):eur2(-k.ritenuta))+'</b></div>':'')
       +'<div class="qe-r qe-r--tot"><span><b>Da chiedere adesso</b></span><b>'+eur2(k.netto)+'</b></div>'
-      +(oltre?'<div class="sh-nota" style="color:var(--err,#c0392b)">Ci sono <b>'+oltre+'</b> lavorazioni contate oltre il computo. Non è vietato — i lavori cambiano — ma controlla che sia voluto.</div>':'')
+      +(oltre?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+(oltre===1?'C\'è <b>1</b> lavorazione contata':'Ci sono <b>'+oltre+'</b> lavorazioni contate')+' oltre il computo. Non è vietato — i lavori cambiano — ma controlla che sia voluto.</div>':'')
       +(k.lordo<0?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+_sa('Questo SAL viene <b>negativo</b>: hai contato meno del SAL precedente.','Questo acconto viene <b>negativo</b>: hai contato meno dell\'acconto prima.')+' Ricorda che le quantità sono quelle fatte <b>dall\'inizio</b>.</div>':'');
   }
 
   /* legge un numero scritto a mano (virgola o punto), senza passare dal DOM */
+  /* ⛔ 18 nov 2026 (collaudo SAL) — prima cambiava solo la PRIMA virgola in
+     punto: «1.200,5» diventava «1.200.5» e parseFloat leggeva 1,2. Un acconto
+     da 1.200 metri usciva da 22 €. Adesso passa dalla regola unica
+     _numeroIt (js/gest-computo.js): l'ultimo fra virgola e punto e' quello
+     dei decimali. La usa anche gest-computo-pdf.js (quantita' e prezzi). */
   function _numDa(v){
-    const s=String(v==null?"":v).trim().replace(/\s/g,"").replace(",",".");
-    if(!s)return 0;
-    const n=parseFloat(s);
-    return isFinite(n)?n:0;
+    const n=(typeof _numeroIt==="function")?_numeroIt(v)
+      :parseFloat(String(v==null?"":v).trim().replace(/\s/g,"").replace(",","."));
+    return (n!=null&&isFinite(n))?n:0;
   }
 
   async function salSalva(id){
@@ -630,14 +640,14 @@
        salva un SAL, apre «Stati di avanzamento» e trova ancora i numeri di
        prima. */
     rinfresca("computi","sal");
-    if(!id){ salCache.push({id:salId,numero:numero}); toast(_sa("SAL creato ✔","Acconto creato ✔")); await salForm(salId); return; }
+    if(!id){ salCache.push({id:salId,numero:numero,ritenuta_perc:testa.ritenuta_perc}); toast(_sa("SAL creato ✔","Acconto creato ✔")); await salForm(salId); return; }
     toast(_sa("SAL salvato ✔","Acconto salvato ✔"));
     await salTorna();
   }
 
   async function salElimina(id){
     /* 13 nov 2026 (quarto giro) — la domanda dice QUALE stato di avanzamento */
-    const _sl=salCache.find(x=>String(x.id)===String(id));
+    const _sl=salCache.find(x=>String(x.id)===String(id))||salTuttiCache.find(x=>String(x.id)===String(id));
     if(!(await window.chiediVia(_sa("lo stato di avanzamento","l'acconto")+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const res=await sb.from("gest_sal").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}

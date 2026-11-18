@@ -3658,3 +3658,17 @@ Difetti trovati e sistemati:
 8. Tendina «Prezzario» del computo e «Prendi i prezzi dal prezzario»: una tariffa appena importata non c'era (contavano solo le 500 voci più usate). Ora `ppCaricaFonti()` le chiede al database (si azzera con `ppFontiDb=null` dove si azzera `ppTutte`). «mio» non è una tariffa.
 
 Nuovo (sì di Alex, foto approvata): «€ Prendi dal prezzario» dentro il preventivo, sotto «+ Aggiungi voce». `prevPzApri` / `prevPzCerca` / `prevPzUsa` in js/gest-preventivi.js (ricerca come il computo: `_ppFiltra` + `_ppCercaDb`). La voce entra con descrizione, unità e prezzo, quantità 1 da correggere (il cursore va lì); se l'ultima riga è vuota la riempie. Conta +1 su `usata_volte`. Provato dal vivo: 12 × 24,50 = 294,00 €, salvato giusto; 375 px a posto.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: STATI DI AVANZAMENTO (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta»: computo «PROVA CONTROLLORE» con 2 lavorazioni e ribasso 10%, acconto 1 (60 + 40,25, ritenuta 0,5%) e acconto 2 (tutto). Conti a schermo = vista `gest_sal_totali` = PDF (1.814,00 e 1.823,12). Poi cancellato tutto con `sb.raw`: 0 righe.
+
+Difetti trovati e sistemati:
+1. `_numDa` (js/gest-sal-prezzario.js) cambiava solo la prima virgola: «1.200,5» = 1,2 (22 € invece di 22.000). Ora passa da `_numeroIt`. Vale anche per gest-computo-pdf.js, che la usa.
+2. Il secondo acconto ripartiva con ritenuta 0 anche se il primo aveva 0,5%: ora riprende quella dell'ultimo.
+3. Ordine: nel computo l'acconto 1 stava sopra; ora in cima l'ultimo. Nell'elenco, a parità di data, il numero più alto sopra.
+4. Telefono: una scheda con NOTA e due pulsanti si stringeva a 13 px (parola per parola). Regola in css/gestionale-stile.css con la zona «nota» (v=35). Vale per tutte le sezioni.
+5. Sotto «+ Nuovo acconto» una riga ripeteva il messaggio vuoto: tolta per impresa e artigiano (resta allo studio).
+6. «Ci sono 1 lavorazioni» → «C'è 1 lavorazione». La domanda «Mettere nel cestino l'acconto n. …» trova il numero anche dall'elenco.
+
+Errore 400 all'apertura: non si ripete (3 aperture, 0 errori). Nei registri Supabase del 18 nov l'unico 400 su una lettura è `gest_preventivi?computo_id=…` (colonna che non esiste) alle 20:49: NON sta in nessun file del sito, era una prova scritta a mano in un'altra sessione.

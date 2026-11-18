@@ -239,6 +239,11 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 @media(max-width:760px){
   .wrap section .griglia-schede > .job:has(.job-actions > :nth-child(2)){grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"top" "stati" "meta" "az"!important}
   .wrap section .griglia-schede > .job:has(.job-actions > :nth-child(2)) .job-actions{flex-wrap:wrap;margin-top:8px!important}
+  /* 18 nov 2026 (collaudo SAL) — una scheda con la NOTA e due pulsanti, sul
+     telefono, si stringeva a 13 px e andava a capo parola per parola: la riga
+     qui sopra toglieva la zona «nota» dalla griglia, la nota finiva in una
+     colonna inventata. Qui la zona «nota» c'e' (prima dei pulsanti). */
+  .wrap section .griglia-schede > .job:has(.job-actions > :nth-child(2)):has(> .job-note){grid-template-areas:"top" "stati" "meta" "nota" "az"!important}
   .wrap section .griglia-schede > .job .job-top{flex-wrap:wrap}
   .wrap section .griglia-schede > .job .job-cli{flex:1 1 auto;min-width:60%}
 }
