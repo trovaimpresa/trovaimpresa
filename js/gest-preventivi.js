@@ -892,12 +892,12 @@
           const dw=String(x.descrizione).toLowerCase();
           const comuni=w.filter(a=>dw.indexOf(_rad(a))>=0).length;
           const sc=comuni/w.length;
-          const mio=(x.fonte==="mio");
+          const mio=(x.fonte==="mio"||!x.fonte);   /* 18 nov 2026: senza fonte = prezzo suo */
           const pt=sc+(mio?0.5:0)-String(x.descrizione).length/5000;   /* a parità, la voce tua e la più corta */
           if(sc>=(w.length>=2?0.8:1)&&pt>bs){bs=pt;best=x;}
         });
         if(!best)continue;
-        const mio=(best.fonte==="mio"), rapp=(+r.prezzo)/(+best.prezzo_unitario);
+        const mio=(best.fonte==="mio"||!best.fonte), rapp=(+r.prezzo)/(+best.prezzo_unitario);
         const lo=mio?0.6:0.5, hi=mio?1.7:2;
         if(rapp<lo||rapp>hi){
           strani++;

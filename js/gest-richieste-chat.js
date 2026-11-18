@@ -184,7 +184,8 @@
       const parole=[...new Set(String([_dsCosa(r),r.descrizione].filter(Boolean).join(" ").toLowerCase()
         .replace(/[^a-zà-ú0-9 ]/g," ").split(/\s+/)))].filter(w=>w.length>=5&&!stop.has(w)).slice(0,6);
       const cols="descrizione,unita,prezzo_unitario,fonte";
-      const mie=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).eq("fonte","mio").is("eliminato_il",null).order("usata_volte",{ascending:false}).limit(25);
+      /* 18 nov 2026: anche le voci scritte a mano nel Prezzario prima di oggi, rimaste senza fonte */
+      const mie=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).or("fonte.eq.mio,fonte.is.null").is("eliminato_il",null).order("usata_volte",{ascending:false}).limit(25);
       let altre={data:[]};
       if(parole.length){
         const rad=parole.map(w=>w.length>6?w.slice(0,w.length-1):w);   /* pittura/pitture, piastrella/piastrelle */

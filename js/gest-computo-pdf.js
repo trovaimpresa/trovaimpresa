@@ -1150,6 +1150,9 @@
         : ("Non riesco a leggere il prezzario: "+errP.message));
       return;
     }
+    /* 18 nov 2026: le tariffe vere dal database, non solo quelle delle 500
+       voci piu' usate (una tariffa appena importata non c'era) */
+    if(ppFontiDb===null) await ppCaricaFonti();
     const fonti=ppFonti();
     const dich=String(comp.prezzario||"").trim();
     /* stessa regola della ricerca dentro la lavorazione: nome uguale, oppure

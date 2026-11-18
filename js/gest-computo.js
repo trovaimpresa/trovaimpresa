@@ -417,6 +417,7 @@
        resta indietro. Banco: prove-claude/banchi-fissi/velocita/
        banco-prezzario-memoria.js */
     if(!ppTutte.length) await ppCarica();
+    if(ppFontiDb===null) await ppCaricaFonti();   /* 18 nov 2026: le tariffe vere, non solo quelle delle 500 voci */
     const _fonti=ppFonti();
     const _scritto=(c.prezzario||"");
     const _daTendina=(_fonti.indexOf(_scritto)>=0);
@@ -2892,7 +2893,7 @@
      IL LIMITE: si tengono in memoria le 500 voci piu' usate. Se il prezzario
      fosse piu' grande, per le altre si va a chiedere al database. Meglio dirlo
      che far finta che il limite non ci sia. */
-  let ppCache=[], ppTutte=[], ppTimer=null, ppTetto=false, ppFonteScelta=null;
+  let ppCache=[], ppTutte=[], ppTimer=null, ppTetto=false, ppFonteScelta=null, ppGiro=0;
   const PP_MAX=500;
 
   /* ⚠️ LA TARIFFA GIUSTA. 10 agosto 2026.
@@ -2905,6 +2906,10 @@
   function ppFonti(){
     const s=new Set();
     ppTutte.forEach(x=>{ if(x.fonte)s.add(x.fonte); });
+    (ppFontiDb||[]).forEach(f=>{ if(f)s.add(f); });   /* 18 nov 2026: anche quelle fuori dalle 500 */
+    /* «mio» non e' una tariffa: sono i prezzi suoi. Nella tendina del
+       computo sarebbe finito stampato sul PDF come «Prezzi da mio». */
+    s.delete("mio");
     return Array.from(s).sort((a,b)=>a.localeCompare(b,"it"));
   }
   /* la tariffa del computo e quella del prezzario non si chiamano mai uguali
@@ -2966,6 +2971,57 @@
       return parole.every(p=>testo.indexOf(p)>=0);
     });
   }
+  /* ============================================================
+     ⛔ 18 nov 2026 — collaudo della voce Prezzario: IL DATABASE SI
+     INTERROGA CON TUTTE LE PAROLE, NON CON LA PRIMA.
+     ============================================================
+     In memoria ci stanno le voci piu' usate (500 qui, 1000 nel Prezzario),
+     ma il prezzario vero ne ha 12.762. Due difetti trovati dal vivo:
+       - nella sezione Prezzario «parquet» trovava 4 voci su 30, e una voce
+         appena creata (usata 0 volte, in mezzo a 12.000 voci a zero) a
+         volte non si trovava proprio;
+       - dentro il computo la ricerca di riserva usava SOLO LA PRIMA PAROLA:
+         «prova controllore intonaco» proponeva le prove penetrometriche.
+     Adesso: ogni parola (ridotta alla radice) deve stare nella descrizione
+     o nel codice o nella categoria — le parole in AND, i tre campi in OR,
+     come _ppFiltra() qui sopra. Un .or() per parola: PostgREST li mette in
+     AND fra loro. */
+  async function _ppCercaDb(q,fonte,quante){
+    if(!sb||!sbUid)return [];
+    const parole=_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean).map(_ppRadice)
+      .map(w=>w.replace(/[^a-z0-9.]/g,"")).filter(w=>w.length>=2).slice(0,6);
+    if(!parole.length)return [];
+    let qy=sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null);
+    if(fonte)qy=qy.eq("fonte",fonte);
+    parole.forEach(function(p){
+      qy=qy.or("descrizione.ilike.%"+p+"%,codice.ilike.%"+p+"%,categoria.ilike.%"+p+"%");
+    });
+    const {data,error}=await qy.order("usata_volte",{ascending:false})
+      .order("created_at",{ascending:false}).limit(quante||200);
+    return error?[]:(data||[]);
+  }
+  /* ⛔ 18 nov 2026 — LE TARIFFE SI CHIEDONO AL DATABASE, NON ALLA MEMORIA.
+     ppFonti() le prende dalle 500 voci piu' usate: una tariffa appena
+     importata (tutte le voci usate 0 volte) non c'era, e nella tendina
+     «Prezzario» del computo non si poteva scegliere. Provato dal vivo.
+     Supabase non ha il «distinct»: si chiede UNA voce di una tariffa che
+     non si conosce ancora, finche' non ne resta nessuna (le tariffe sono
+     poche: una richiesta per tariffa). */
+  let ppFontiDb=null;
+  async function ppCaricaFonti(){
+    if(!sb||!sbUid){ppFontiDb=null;return;}
+    const viste=[];
+    for(let i=0;i<40;i++){
+      let qy=sb.from("gest_prezzi_propri").select("fonte").eq("user_id",sbUid)
+        .is("eliminato_il",null).not("fonte","is",null);
+      if(viste.length)qy=qy.not("fonte","in","("+viste.map(f=>'"'+String(f).replace(/"/g,'\\"')+'"').join(",")+")");
+      const {data,error}=await qy.limit(1);
+      if(error){ppFontiDb=null;return;}
+      if(!data||!data.length)break;
+      viste.push(data[0].fonte);
+    }
+    ppFontiDb=viste;
+  }
   async function ppCarica(){
     if(!sb||!sbUid){ppTutte=[];return null;}
     const {data,error}=await sb.from("gest_prezzi_propri").select("*")
@@ -2994,24 +3050,17 @@
     let trovate=_ppFiltra(base,q);
     /* prezzario piu' grande di quanto ne teniamo in memoria: le altre si
        cercano dove stanno davvero, invece di dire "non c'e'" a vanvera */
-    if(!trovate.length && q && ppTetto){
-      const rad=_ppRadice(_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean)[0]||"");
-      if(rad){
-        /* ===== 12 agosto 2026 (sera) — LA RICERCA DI RISERVA CAMBIAVA TARIFFA =====
-           Il riquadro sopra dice, testuale: «Cerco dentro Tariffa Regione Lazio,
-           la tariffa di questo computo». Poi, quando in memoria non trovava
-           niente, questa ricerca andava a chiedere al database SENZA il filtro
-           della tariffa: proponeva voci della Regione Umbria, dell'anno prima,
-           di qualunque altro prezzario. Le cliccavi e finivano dentro un computo
-           che dichiara un'altra tariffa — su una gara e' un errore che si paga.
-           Adesso cerca dentro la tariffa dichiarata, come promette. */
-        let qy=sb.from("gest_prezzi_propri").select("*")
-          .eq("user_id",sbUid).is("eliminato_il",null);
-        if(ppFonteScelta)qy=qy.eq("fonte",ppFonteScelta);
-        const {data}=await qy.ilike("descrizione","%"+rad+"%")
-          .order("usata_volte",{ascending:false}).limit(8);
-        trovate=data||[];
-      }
+    if(q && ppTetto){
+      /* 18 nov 2026: con TUTTE le parole (vedi _ppCercaDb), non con la prima;
+         e anche quando in memoria qualcosa c'e' (parquet: 4 in memoria, 30
+         nel prezzario). Le voci del database si aggiungono in coda. */
+      const _giro=++ppGiro;
+      const db=await _ppCercaDb(q,ppFonteScelta||null,40);
+      if(_giro!==ppGiro)return;   /* nel frattempo ha scritto altro */
+      const _ids=new Set(trovate.map(x=>String(x.id)));
+      db.forEach(x=>{ if(!_ids.has(String(x.id))){_ids.add(String(x.id));trovate.push(x);} });
+      /* (12 agosto 2026 sera: la ricerca di riserva cerca DENTRO la tariffa
+         dichiarata dal computo, non in tutte: _ppCercaDb riceve ppFonteScelta) */
     }
     ppCache=trovate.slice(0,8);
     if(!ppCache.length){

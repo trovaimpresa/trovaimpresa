@@ -3642,3 +3642,19 @@ Come «Mezzi e attrezzature» e «Scadenze e promemoria»: `agUnito()` / `agUnis
 - Nella linguetta Agenda «Lavori / Ore fatte» (`#ag-vista`) scende sotto le linguette; se la voce non è unita torna nel titolo.
 - ⛔ STUDIO TECNICO: NON unito (deciso da Alex: lo studio si guarda nel suo giro). `agUnito()` è falso per `professionista`: restano «Collaboratori» e «Agenda» separate. Noleggio: non toccato.
 - Nomi: MANUALE di `chat-gestionale.mjs`, `js/aiuti.js`, `js/gest-tutorial.js`, card «Agenda» del Riepilogo. ⚠️ Video: il ▶ di «Squadra e agenda» fa vedere `squadra.mp4` (non c'è un video che mostra le due linguette).
+
+# 18 NOVEMBRE 2026 — COLLAUDO DEL PREZZARIO (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta», righe «PROVA CONTROLLORE», poi cancellate tutte (anche dal Cestino, con `sb.raw`): 0 righe, prezzario di nuovo a 12.764 voci.
+
+Difetti trovati e sistemati:
+1. Ricerca: guardava solo le 1000 voci più usate su 12.764 («parquet» 4 su 30, una voce nuova a volte introvabile). Ora `_ppCercaDb()` (js/gest-computo.js) chiede al database con TUTTE le parole (codice, descrizione, categoria). La usano il Prezzario e la ricerca dentro la lavorazione del computo (prima usava solo la PRIMA parola).
+2. Numeri falsi: «Hai 1000 voci», «Ne vedi 60 su 1000». Ora `pzTot` = numero vero. «Mostra altre» va oltre le 1000. A parità di uso, le voci più nuove in cima.
+3. Doppio tocco su «Crea la voce» = 2 voci; doppio tocco su «Importa» = importa 2 volte. Chiavistelli `pzSalvo`, `pzInCorso`.
+4. Unità fuori tendina (cm/mq, dmc, ha, mq/mm) diventavano vuote salvando. Ora si aggiungono alla tendina.
+5. Voce scritta a mano senza fonte: restava `null` e l'AI delle richieste (fonte = «mio») non la vedeva. Ora vuoto = «mio» (sulla scheda «prezzo tuo»); la chat e il controllo del preventivo trattano anche `null` come prezzo suo.
+6. CSV in UTF-8: «mÂ²» e accenti storti. Stessa cura del computo (16 nov).
+7. Importa: il confronto con la tariffa vecchia leggeva 999 voci su 12.762 (tetto 1000 del database). Ora a pezzi da 1000. «mio» non compare più fra le tariffe da aggiornare (col cestino buttava i prezzi suoi).
+8. Tendina «Prezzario» del computo e «Prendi i prezzi dal prezzario»: una tariffa appena importata non c'era (contavano solo le 500 voci più usate). Ora `ppCaricaFonti()` le chiede al database (si azzera con `ppFontiDb=null` dove si azzera `ppTutte`). «mio» non è una tariffa.
+
+Non c'è: scegliere una voce del prezzario DENTRO il preventivo (oggi ci arriva solo passando dal computo). Proposto ad Alex con la foto, aspetta il sì.

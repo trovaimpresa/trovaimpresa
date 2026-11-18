@@ -1100,9 +1100,28 @@
   const PZ_MAX=1000;
   /* 6 nov 2026 — si disegnano 60 schede alla volta, poi «Mostra altre».
      Prima uscivano tutte e mille insieme: una pagina alta 130.000 pixel,
-     pesante sul telefono. La ricerca guarda sempre TUTTE le voci. */
+     pesante sul telefono. */
   const PZ_PASSO=60;
   let pzMostra=PZ_PASSO;
+  /* ⛔ 18 nov 2026 — collaudo della voce Prezzario. IL PREZZARIO VERO HA
+     12.762 VOCI, IN MEMORIA NE STAVANO 1000, E LA PAGINA FACEVA FINTA CHE
+     FOSSERO TUTTE. Trovato dal vivo:
+       - «parquet» trovava 4 voci su 30: la ricerca guardava solo le 1000
+         in memoria, mentre la nota diceva «Cerca una parola per trovare le
+         altre»;
+       - una voce appena creata a volte NON si trovava: usata 0 volte, finiva
+         in mezzo a 12.000 voci a zero, fuori dalle prime 1000;
+       - «Hai 1000 voci nel prezzario» e «Ne vedi 60 su 1000»: erano 12.762.
+     Adesso: pzTot e' il numero vero (contato dal database); a parita' di
+     uso le voci piu' nuove stanno in cima (regola di Alessio: le ultime
+     salvate in cima); la ricerca, se il prezzario e' piu' grande della
+     memoria, chiede al database con TUTTE le parole (_ppCercaDb in
+     gest-computo.js); «Mostra altre» va avanti oltre le 1000.
+     pzVisti tiene le voci arrivate dal database, cosi' «Apri» le trova. */
+  let pzTot=0, pzQ="", pzDb=[], pzVisti={}, pzGiro=0, pzDbTetto=false;
+  const PZ_DB=300;
+  function _pzOrdina(qy){ return qy.order("usata_volte",{ascending:false}).order("created_at",{ascending:false}).order("id"); }
+  function _pzRicorda(arr){ (arr||[]).forEach(function(x){ pzVisti[String(x.id)]=x; }); }
 
   async function renderPrezzario(daCache){
     filoMetti("prezzario","prezzario");
@@ -1112,9 +1131,11 @@
     /* 6 nov 2026 — «Mostra altre» e la ricerca non rileggono le mille voci
        dal database: usano quelle gia' lette (daCache===true) */
     if(!(daCache===true&&pzCache.length)){
-      const {data,error}=await sb.from("gest_prezzi_propri").select("*")
-        .eq("user_id",sbUid).is("eliminato_il",null)
-        .order("usata_volte",{ascending:false}).limit(PZ_MAX);
+      const [r1,r2]=await Promise.all([
+        _pzOrdina(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null)).limit(PZ_MAX),
+        sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true}).eq("user_id",sbUid).is("eliminato_il",null)
+      ]);
+      const error=r1.error;
       if(error){
         /* 12 nov 2026 — regola 20 */
         if(!_compManca(error)){box.innerHTML=nonLettaHTML("il prezzario","prezzario");return;}
@@ -1123,12 +1144,39 @@
           : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
         return;
       }
-      pzCache=data||[];
-      pzMostra=PZ_PASSO;
+      pzCache=r1.data||[];
+      pzTot=Math.max(pzCache.length,(r2&&!r2.error&&r2.count)||0);
+      pzVisti={};_pzRicorda(pzCache);
+      pzMostra=PZ_PASSO;pzQ="";pzDb=[];
     }
     if(cnt)cnt.textContent="";   /* 12 nov 2026 (terzo giro): «1000» accanto a Prezzario sembrava mille cose da fare */
     const q=String(($("#pz-cerca")&&$("#pz-cerca").value)||"").trim();
-    const L=_ppFiltra(pzCache,q);
+    const tutte=(pzTot<=pzCache.length);   /* in memoria c'e' tutto il prezzario */
+
+    /* la ricerca nel database, solo quando la memoria non basta */
+    if(q&&!tutte&&q!==pzQ){
+      const giro=++pzGiro;
+      box.innerHTML='<p class="fatt-empty">Cerco «'+esc(q)+'» in tutte le '+pzTot.toLocaleString("it-IT")+' voci…</p>';
+      const db=await _ppCercaDb(q,null,PZ_DB);
+      if(giro!==pzGiro)return;            /* nel frattempo ha scritto altro */
+      pzQ=q;pzDb=db;pzDbTetto=(db.length>=PZ_DB);_pzRicorda(db);
+    }
+    if(!q){pzQ="";pzDb=[];pzDbTetto=false;}
+    let L=_ppFiltra(pzCache,q);
+    if(q&&!tutte){
+      const ids=new Set(L.map(x=>String(x.id)));
+      pzDb.forEach(function(x){ if(!ids.has(String(x.id))){ids.add(String(x.id));L.push(x);} });
+    }
+    /* senza ricerca, «Mostra altre» va avanti anche oltre le prime 1000 */
+    if(!q&&pzMostra>pzCache.length&&pzCache.length<pzTot){
+      const {data:altre}=await _pzOrdina(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null))
+        .range(pzCache.length,pzCache.length+PZ_MAX-1);
+      const ids=new Set(pzCache.map(x=>String(x.id)));
+      (altre||[]).forEach(function(x){ if(!ids.has(String(x.id))){ids.add(String(x.id));pzCache.push(x);} });
+      _pzRicorda(altre);
+      L=pzCache.slice();
+    }
+    const nTot=pzTot.toLocaleString("it-IT");
 
     if(!pzCache.length){
       box.innerHTML=tabVuoto("Il prezzario è vuoto",
@@ -1138,25 +1186,17 @@
       return;
     }
     if(!L.length){
-      box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola. Hai '+pzCache.length+' voci nel prezzario.</p>';
+      box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola. Hai '+nTot+' voci nel prezzario.</p>';
       return;
     }
-    /* niente tagli silenziosi: se il prezzario e' piu' grande di quanto ne
-       tiriamo giu', si dice invece di far credere che siano tutte */
-    const avviso=(pzCache.length>=PZ_MAX)
-      ? '<div class="sh-nota">Il prezzario ha più di '+PZ_MAX+' voci: ne vedi '+PZ_PASSO+' alla volta, le più usate prima. Cerca una parola per trovare le altre.</div>' : "";
     /* ===== 18 agosto 2026 — LE VOCI DIVENTANO SCHEDE =====
-       Prima erano righe sottili prese in prestito dalle spese: il PREZZO —
-       cioe' la sola cosa che cerchi quando apri il prezzario — stava in
-       fondo a una riga grigia piccola, in mezzo all'unita', alla categoria
-       e al «mai usata». Adesso ogni voce e' una scheda come nei Preventivi,
-       e il prezzo sta grande e da solo.
-       ⚠️ Il pulsante × resta DENTRO la scheda: il gestore dei clic prende
-       il `data-action` piu' interno, quindi cliccare la × cestina e non
-       apre la voce. */
+       Ogni voce e' una scheda come nei Preventivi, e il prezzo sta grande e
+       da solo. ⚠️ Il pulsante resta DENTRO la scheda: il gestore dei clic
+       prende il `data-action` piu' interno. */
     const Lv=L.slice(0,pzMostra);
-    const resto=L.length-Lv.length;
-    box.innerHTML=avviso+'<div class="pz-griglia">'+Lv.map(x=>
+    const totL=q?L.length:pzTot;
+    const resto=totL-Lv.length;
+    box.innerHTML='<div class="pz-griglia">'+Lv.map(x=>
       '<div class="pz-card" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">'
       +  '<div class="pz-testa">'
       +    (x.codice?'<span class="pz-cod">'+esc(x.codice)+'</span>':'<span class="pz-cod pz-cod--no">senza codice</span>')
@@ -1167,29 +1207,39 @@
       +  '<div class="pz-prezzo">'+eur2(x.prezzo_unitario)+(x.unita?'<small> / '+esc(x.unita)+'</small>':'')+'</div>'
       +  '<div class="pz-meta">'
       +    (x.categoria?esc(x.categoria)+' · ':'')
-      +    (x.fonte?esc(x.fonte)+' · ':'')
+      /* 18 nov 2026: «mio» non dice niente a chi legge: e' il prezzo suo */
+      +    (x.fonte?((x.fonte==="mio"?"prezzo tuo":esc(x.fonte))+' · '):'')
       +    ((+x.usata_volte)?("usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"mai usata")
       +  '</div>'
       +'</div>').join("")
       +'</div>'
       +(resto>0?'<div style="text-align:center;margin:18px 0 6px"><button type="button" class="btn-primary" id="pz-altre" style="font-size:19px;font-weight:700;padding:14px 26px">Mostra altre '+Math.min(resto,PZ_PASSO)+' voci</button>'
-        +'<div class="sh-nota" style="margin-top:8px">Ne vedi '+Lv.length+' su '+L.length+'. Per trovarne una in fretta, scrivi una parola nella ricerca qui sopra.</div></div>'
-        :'<div class="sh-nota">'+L.length+(L.length===1?" voce":" voci")+(q?(" su "+pzCache.length):"")+'. Clicca una voce per correggerla.</div>');
+        +'<div class="sh-nota" style="margin-top:8px">Ne vedi '+Lv.length+' su '+totL.toLocaleString("it-IT")+(q?'':', le più usate prima')+'. Per trovarne una in fretta, scrivi una parola nella ricerca qui sopra.</div></div>'
+        :'<div class="sh-nota">'+totL.toLocaleString("it-IT")+(totL===1?" voce":" voci")+(q?(" su "+nTot):"")+'. Clicca una voce per correggerla.</div>')
+      +((q&&pzDbTetto)?'<div class="sh-nota">Con questa parola ce ne sono più di '+PZ_DB+': aggiungi una parola per restringere.</div>':'');
     const pa=$("#pz-altre");
     if(pa)pa.onclick=function(){pzMostra+=PZ_PASSO;renderPrezzario(true);};
     const ce=$("#pz-cerca");
     if(ce&&!ce._agganciato){
       ce._agganciato=true;
-      ce.oninput=function(){clearTimeout(pzTimer);pzMostra=PZ_PASSO;pzTimer=setTimeout(function(){renderPrezzario(true);},250);};
+      ce.oninput=function(){clearTimeout(pzTimer);pzMostra=PZ_PASSO;pzTimer=setTimeout(function(){renderPrezzario(true);},350);};
     }
   }
 
   /* ---- la scheda di una voce del prezzario ---- */
   function prezzoForm(id){
-    const x=(id?pzCache.find(v=>String(v.id)===String(id)):null)||{};
+    const x=(id?(pzVisti[String(id)]||pzCache.find(v=>String(v.id)===String(id))):null)||{};
     const isNew=!x.id;
+    /* ⛔ 18 nov 2026 — L'UNITA' CHE NON STA NELLA TENDINA SPARIVA SALVANDO.
+       Nel prezzario vero ci sono «cm/mq», «dmc», «ha», «mq/mm»: la tendina
+       non le aveva, si apriva su «— unità —» e premendo Salva (anche solo
+       per cambiare il prezzo) l'unita' diventava vuota. Provato dal vivo.
+       Adesso l'unita' della voce si aggiunge alla tendina, come fa gia'
+       _uniMetti() dentro la lavorazione del computo. */
+    const _uni=String(x.unita||"").trim();
     const uniOpts='<option value="">— unità —</option>'+UNITA.map(u=>
-      '<option value="'+u+'"'+(u===(x.unita||"")?" selected":"")+'>'+u+'</option>').join("");
+      '<option value="'+u+'"'+(u===_uni?" selected":"")+'>'+u+'</option>').join("")
+      +((_uni&&UNITA.indexOf(_uni)<0)?('<option value="'+esc(_uni)+'" selected>'+esc(_uni)+'</option>'):"");
     openSheetGrande(isNew?"Nuova voce del prezzario":"Voce del prezzario",
        '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">La voce</div>'
@@ -1203,7 +1253,7 @@
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Per ritrovarla</div>'
       +  '<div class="field"><label>Categoria</label><input id="pz-cat"'+_noAuto()+' value="'+esc(x.categoria||"")+'" placeholder="Es. Demolizioni, Intonaci, Pavimenti"></div>'
-      +  '<div class="field"><label>Da dove viene questo prezzo</label><input id="pz-fonte"'+_noAuto()+' value="'+esc(x.fonte||"")+'" placeholder="Es. Tariffa Regione Lazio 2023, listino mio"></div>'
+      +  '<div class="field"><label>Da dove viene questo prezzo</label><input id="pz-fonte"'+_noAuto()+' value="'+esc((x.fonte&&x.fonte!=="mio")?x.fonte:"")+'" placeholder="Vuoto = è un prezzo tuo"></div>'
       +  '<div class="sh-nota">La fonte serve quando fra sei mesi ti chiedi perché quel prezzo era proprio quello.</div>'
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
@@ -1222,8 +1272,10 @@
     try{ if(typeof ctrAscolta==="function") ctrAscolta("prezzo"); }catch(e){}
   }
 
+  let pzSalvo=false;   /* 18 nov 2026: due tocchi su «Crea la voce» facevano DUE voci (provato dal vivo) */
   async function savePrezzo(id){
     if(!sbUid){toast("Devi essere loggato");return;}
+    if(pzSalvo)return;
     const desc=String(($("#pz-desc")&&$("#pz-desc").value)||"").trim();
     if(!desc){campoManca("#pz-desc","Manca la descrizione della voce: scrivila qui.");return;}   /* 12 nov 2026 — regola 21 */
     const riga={
@@ -1232,24 +1284,34 @@
       unita:($("#pz-uni")&&$("#pz-uni").value)||null,
       prezzo_unitario:_numIt("#pz-prezzo")||0,
       categoria:String(($("#pz-cat")&&$("#pz-cat").value)||"").trim()||null,
-      fonte:String(($("#pz-fonte")&&$("#pz-fonte").value)||"").trim()||null,
+      /* 18 nov 2026: senza fonte e' un prezzo SUO, e si scrive «mio» come fa
+         «Salva nel mio prezzario» del computo. Con la fonte vuota la voce
+         restava invisibile per chi cerca i prezzi tuoi (l'AI delle richieste
+         dal sito prende fonte = «mio»), e il controllo del preventivo non la
+         trattava come prezzo tuo. */
+      fonte:String(($("#pz-fonte")&&$("#pz-fonte").value)||"").trim()||"mio",
       incidenza_manodopera:_numIt("#pz-mano")
     };
     let res;
-    if(id)res=await sb.from("gest_prezzi_propri").update(riga).eq("id",id).eq("user_id",sbUid).select("id");
-    else  res=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid},riga)).select("id");
+    pzSalvo=true;
+    const _bs=document.querySelector('#sheet [data-action="save-prezzo"]');
+    if(_bs)_bs.disabled=true;
+    try{
+      if(id)res=await sb.from("gest_prezzi_propri").update(riga).eq("id",id).eq("user_id",sbUid).select("id");
+      else  res=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid},riga)).select("id");
+    }finally{ pzSalvo=false; if(_bs)_bs.disabled=false; }
     if(res.error){
       toast(_compManca(res.error)?("Per il prezzario serve l'aggiornamento del database: "+COMP_SQL_TESTO):("Errore: "+res.error.message));
       return;
     }
     if(!res.data||!res.data.length){toast("Non salvata: nessuna riga scritta. Riprova.");return;}
     closeSheet();
-    ppTutte=[];                 /* la ricerca dentro il computo si rifa' */
+    ppTutte=[];ppFontiDb=null;  /* la ricerca dentro il computo si rifa' */
     rinfresca("prezzario");
     toast(id?"Voce aggiornata ✔":"Voce creata ✔");
   }
   async function delPrezzo(id){
-    const x=pzCache.find(v=>String(v.id)===String(id))||{};
+    const x=pzVisti[String(id)]||pzCache.find(v=>String(v.id)===String(id))||{};
     if(!(await gconfirm((_cestOn()?"Mettere nel cestino «":"Eliminare per sempre «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano.")))return;
     const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
@@ -1379,7 +1441,18 @@
     try{
       const buf=await file.arrayBuffer();
       const u8=new Uint8Array(buf);
-      const wb=XLSX.read(u8,{type:"array"});
+      /* ⛔ 18 nov 2026 — un CSV in UTF-8 (Google Fogli, LibreOffice) letto «a
+         byte» scriveva le unita' «mÂ²» e «mÂ³» e storpiava gli accenti di
+         tutte le descrizioni. Provato dal vivo. Il computo lo aveva gia'
+         sistemato il 16 nov (js/gest-computo-pdf.js, compImporta); qui era
+         rimasto indietro. Stessa regola: se NON e' un Excel vero e si legge
+         pulito come UTF-8, si passa come testo. */
+      let wb=null;
+      const eExcel=(u8[0]===0x50&&u8[1]===0x4B)||(u8[0]===0xD0&&u8[1]===0xCF);
+      if(!eExcel){
+        try{ const txt=new TextDecoder("utf-8",{fatal:true}).decode(u8); wb=XLSX.read(txt.replace(/^\uFEFF/,""),{type:"string"}); }catch(_e){ wb=null; }
+      }
+      if(!wb)wb=XLSX.read(u8,{type:"array"});
       const sh=wb.Sheets[wb.SheetNames[0]];
       righe=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,defval:""});
       crude=_pzCrude(sh,u8);
@@ -1452,12 +1525,24 @@
     const senzaPrezzo=voci.length-conPrezzo;
 
     /* quello che c'e' gia' nel prezzario, per il confronto e per i doppioni */
-    const {data:vecchie}=await sb.from("gest_prezzi_propri")
-      .select("id,codice,descrizione,prezzo_unitario,fonte")
-      .eq("user_id",sbUid).is("eliminato_il",null).limit(20000);
+    /* ⛔ 18 nov 2026 — il database ne restituisce al massimo 1000 per volta:
+       il confronto diceva «Rispetto a Tariffa Regione Lazio (999 voci)» su
+       12.762, e i doppioni si cercavano solo fra quelle 1000. Si leggono a
+       pezzi da 1000 finche' finiscono. */
+    const vecchie=[];
+    for(let da=0;da<40000;da+=1000){
+      const {data:pz,error:ev}=await sb.from("gest_prezzi_propri")
+        .select("id,codice,descrizione,prezzo_unitario,fonte")
+        .eq("user_id",sbUid).is("eliminato_il",null).order("id").range(da,da+999);
+      if(ev||!pz)break;
+      pz.forEach(x=>vecchie.push(x));
+      if(pz.length<1000)break;
+    }
     pzPend={file:file.name, voci:voci, saltate:saltate, tagliate:Math.max(0,dati.length-PZ_IMP_MAX), vecchie:(vecchie||[])};
 
-    const fonti=Array.from(new Set(pzPend.vecchie.map(x=>x.fonte).filter(Boolean))).sort((a,b)=>a.localeCompare(b,"it"));
+    /* 18 nov 2026: «mio» non e' una tariffa da aggiornare: sono i prezzi suoi.
+       Sceglierla con «Mettila nel cestino» li buttava tutti. */
+    const fonti=Array.from(new Set(pzPend.vecchie.map(x=>x.fonte).filter(f=>f&&f!=="mio"))).sort((a,b)=>a.localeCompare(b,"it"));
     $("#pz-esito").innerHTML=
       '<div class="sh-b" style="border-left:4px solid var(--acc,#1f6f5c)">'
       +'<div class="sh-tit">Ho letto '+voci.length+' voci da '+esc(file.name)+'</div>'
@@ -1509,8 +1594,8 @@
     const codiciNuovi=new Set(pzPend.voci.map(chi).filter(Boolean));
     const sparite=V.filter(x=>chi(x)&&!codiciNuovi.has(chi(x))).length;
     box.innerHTML='<div class="sh-nota" style="border-left:3px solid var(--bordo);padding-left:10px">'
-      +'<b>Rispetto a «'+esc(vecchia)+'»</b> ('+V.length+' voci):<br>'
-      +cambiati+' prezzi cambiati · '+uguali+' uguali · '+nuove+' voci nuove · '+sparite+' non ci sono più'
+      +'<b>Rispetto a «'+esc(vecchia)+'»</b> ('+V.length.toLocaleString("it-IT")+' voci):<br>'
+      +cambiati.toLocaleString("it-IT")+' prezzi cambiati · '+uguali.toLocaleString("it-IT")+' uguali · '+nuove.toLocaleString("it-IT")+' voci nuove · '+sparite.toLocaleString("it-IT")+' non ci sono più'
       +(esempi.length?('<br><small>'+esempi.join(' · ')+'</small>'):'')
       +'</div>'
       +'<div class="field"><label>E della vecchia che ne faccio?</label><div class="seg" id="pz-vecchia">'
@@ -1524,7 +1609,16 @@
     _pzEsito("Importazione annullata. Non ho toccato niente.");
   }
 
+  /* 18 nov 2026: due tocchi su «Importa le N voci» importavano DUE volte
+     (provato dal vivo: 3 voci nel file, 6 nel prezzario) */
+  let pzInCorso=false;
   async function pzEsegui(){
+    if(pzInCorso)return;
+    pzInCorso=true;
+    const _b=document.querySelector('[data-action="pz-vai"]'); if(_b)_b.disabled=true;
+    try{ await _pzEsegui(); }finally{ pzInCorso=false; if(_b&&document.body.contains(_b))_b.disabled=false; }
+  }
+  async function _pzEsegui(){
     if(!pzPend){toast("Scegli prima un file");return;}
     const nome=String(($("#pz-nome")&&$("#pz-nome").value)||"").trim();
     if(!nome){toast("Dai un nome a questa tariffa");return;}
@@ -1560,13 +1654,13 @@
       const {error}=await sb.from("gest_prezzi_propri").insert(pezzo);
       if(error){
         _pzEsito("Importate "+messe+" voci, poi il database si è fermato: "+esc(error.message),"err");
-        ppTutte=[];pzPend=null;rinfresca("prezzario");
+        ppTutte=[];ppFontiDb=null;pzPend=null;rinfresca("prezzario");
         return;
       }
       messe+=pezzo.length;
       _pzEsito("Sto caricando… "+messe+" di "+nuove.length);
     }
-    ppTutte=[];pzPend=null;
+    ppTutte=[];ppFontiDb=null;pzPend=null;
     _pzEsito("<b>Importate "+messe+" voci</b> nella tariffa «"+esc(nome)+"»."
       +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):"")
       +(inCestino?(_cestOn()?(" La tariffa «"+esc(vecchia)+"» è nel Cestino: se serve la rimetti a posto da lì."):(" La tariffa «"+esc(vecchia)+"» è stata eliminata per sempre: il cestino non era attivo.")):"")
