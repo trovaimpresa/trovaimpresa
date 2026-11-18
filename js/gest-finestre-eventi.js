@@ -208,6 +208,7 @@
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);
     if(a==="ds-prev")return dsCreaPreventivo(id);
+    if(a==="ds-prev-apri"){const _r=dsCache.find(x=>String(x.id)===String(id));if(!_r||!_r._prevId){toast("Non trovo il preventivo di questa richiesta");return;}closeSheet();return window.apriCosa("prev",_r._prevId);}
     if(a==="ds-chiudi")return dsChiudi(id,false);
     if(a==="ds-riapri")return dsChiudi(id,true);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));

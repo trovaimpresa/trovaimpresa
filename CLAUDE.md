@@ -3455,7 +3455,7 @@ Sistemato (da pubblicare):
 - «Quando gli servirebbe» scritto 2026-12-10 → 10/12/2026 (`fdate`).
 - Senza telefono il cliente si ritrova per email (no doppioni). «WhatsApp» della risposta alto 44 px.
 
-Chiesto ad Alex (funzione nuova): pulsante «Apri il preventivo» nella richiesta già trasformata (`_prevId` adesso c'è).
+Funzione nuova (sì di Alex, foto prima): pulsante **«Apri il preventivo»** nella richiesta già trasformata (`dsVoci` in js/gest-carte-documenti.js, azione `ds-prev-apri` in js/gest-finestre-eventi.js → `apriCosa("prev", _prevId)`). C'è solo se `gest_dalsito.preventivo_creato_id` è scritto: le richieste trasformate prima del 18 nov non ce l'hanno.
 
 Da sapere: in `gest_dalsito` di Alex ci sono →3← righe vecchie (richieste →16, 42, 43←, di prima dell'8 nov, non sue): non si vedono, non toccate. Le Giornate del 18 nov erano ancora in lavorazione in un'altra sessione: su GitHub non c'erano.
 
