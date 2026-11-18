@@ -3334,7 +3334,72 @@ Funzioni nuove (ok di Alex, foto prima, online con →d93ee8e←):
 
 Provato dal vivo anche: «Invia» documento per email (mandato ad Alex, consegnato su Resend), «Mappa» (indirizzo giusto), fattura in bozza nella scheda, «Compila con AI».
 
-Aperto sui Clienti:
-1. ⛔ **«Compila con AI» riempie solo 4 caselle** (nome, referente, telefono, via): email, CAP, citta', partita IVA, codice SDI detti nel testo si perdono e una Srl resta «Privato». La causa e' il prompt `dati_cliente` in `supabase/functions/ai-generate/index.ts` (JSON di 4 chiavi) + `riempiCliente` in `js/ai-integrazione.js`. Chiesto ad Alex se sistemarlo: tocca la funzione AI che fa anche i preventivi. NON provati: «Chiama» fino alla telefonata, il telefono vero, l'Excel del backup aperto.
-2. Visto fuori dalla voce: la riga del LAVORO non scrive il nome del cliente quando il cliente e' nel Cestino (il preventivo scrive «(nel cestino)»).
-3. «Unire due clienti doppi»: Alex non sa; consigliato di NO per ora (il doppione si ferma alla nascita).
+Chiuso la sera del 17 nov (commit 59443af, provato dal vivo, computer e 375 px):
+- **«Compila con AI» del cliente riempie tutte le caselle**: funzione nuova `netlify/functions/ai-cliente.mjs` (Haiku, 1 credito, stampo di ai-pratica) + `AI.cliente(testo)` in `js/ai-integrazione.js`. ⛔ `ai-generate` NON toccata. Caselle in «campi» di `js/gest-ai-moduli.js` (13 + il tipo, messo da «extra»); `riempiCliente` e `compila_cliente` / `MODULI.cliente` della Chat allargati uguale.
+- **Lavori**: nella riga (tabella e scheda) si legge il nome del cliente; se e' nel Cestino «(nel cestino)» (`cliVista` in `renderJobs`, settimo parametro `cliNome` di `jobCardSupa`).
+- **Excel della copia dei dati**: foglio «Clienti» con 16 colonne e la Nota, aperto dal vivo.
+- ⛔ **«Unire due clienti doppi»: NO**, deciso da Alex il 17 nov («lasciamoli doppi, potrebbe essere un lavoro differente con lo stesso cliente»). Non riproporlo.
+- Resta: la telefonata di «Chiama» e il telefono vero li prova solo Alex; il banco della Chat con AI non e' stato girato dopo aver allargato `MODULI.cliente`.
+
+# 17 NOVEMBRE 2026 (sera, 3) — UNA VOCE PER VOLTA: IL CALENDARIO
+
+Collaudo dal vivo nel reparto «ferramenta» (10 lavori, 3 scadenze, 1 promemoria, 1 mezzo, 1 fornitore + 1 sua fattura, 1 operaio, 2 note «PROVA CONTROLLORE»: tutto cancellato, 0 righe; il reparto e' tornato a 1 lavoro e 2 clienti).
+
+Dove sta il codice: `renderCal`, `caricaNote`, `calAltreDate`, `calVai`, `calListaTelefono`, `openDay` in `js/gest-schede-clienti.js`; i clic (`open-day`, `save-note`, `cal-prev/next/today`, `cal-ritardo`, `new-job-date`) in `js/gest-finestre-eventi.js`; la pagina in `gestionale-app.html` (`#calendario`); lo stile in `css/gestionale.css` (ultimo blocco «17 nov 2026 — COLLAUDO DEL CALENDARIO»).
+
+Sistemato (banco `tools/banco-gestionale.js app`: ZERO difetti):
+- **Note e rete**: un errore di RETE in `caricaNote` veniva preso per «manca la tabella»: da li' le note si salvavano solo nel browser. Adesso «manca la tabella» e' solo l'errore vero (`_notaTabellaManca`); `noteCache` non si svuota piu' prima di rileggere.
+- **Regola 20**: se lavori si' ma scadenze / promemoria / note no, riga ambra `#cal-parz` («Non riesco a leggere tutte le scadenze e le note… Tocca per riprovare»; `calAltreDate._ko`). Senza rete l'elenco del telefono non dice piu' «Niente in programma» sotto il riquadro rosso.
+- **Riquadro del giorno** (`openDay`): «Niente in programma» solo se il giorno e' vuoto davvero (usciva sopra le scadenze); un lavoro in ritardo dice «In ritardo» (diceva «Da fare» col pallino rosso); la scadenza ha il pallino della legenda (`.dot.scad`, `.stato.scad`); righe a 17 px, stato a 14.
+- **«Salva nota» a vuoto** in un giorno senza nota non dice piu' «Nota eliminata».
+- «Oggi» non sta piu' in un quadrato da 46 px; la puntina della nota e' grande (26 px, blu); sul telefono «Salva nota» e' largo e «+ Lavoro in questa data» va a capo.
+
+Da sapere:
+- «Salva nota» passa dal correttore (`js/correggi-giornata.js`, gratis): se corregge si ferma e chiede di premere Salva un'altra volta. NON e' un difetto.
+- Nella casella stanno 3 righe in tutto (lavori prima, poi scadenze), il resto e' «+N».
+- I promemoria sono della persona: si vedono in tutti i reparti. `promemoria.id` e' un numero messo dal database (non passare l'id).
+- Esc non chiude nessuna finestra del gestionale (non e' del Calendario).
+
+Funzioni nuove (ok di Alex il 17 nov, foto prima):
+- **La nota scritta nella casella** sul computer (`.cal-lav.nota` in `renderCal`, 80 caratteri, 2 righe; non conta nei 3 posti; sul telefono e' spenta dal CSS perche' c'e' gia' nell'elenco).
+- **Si torna al Calendario** dopo aver chiuso un mezzo / promemoria / fattura aperti da li' (`calTornaQuandoChiude(tab)` in coda a `calVai`): guarda ogni 300 ms; se intanto cambi sezione tu, non ti sposta.
+
+Aperto sul Calendario: il pulsante «Parla» copre l'angolo della domenica in alto (vale per tutte le sezioni). NON provati: telefono vero, studio tecnico, fatture «Da incassare».
+
+Provato dal vivo dopo il push 3a3d355, computer e 375 px: tutto ✔
+
+# 17 NOVEMBRE 2026 (sera, 4) — UNA VOCE PER VOLTA: LA CHAT CON AI
+
+Collaudo dal vivo nel reparto «ferramenta» (1 cliente, 1 lavoro, 3 segnature di ore, 1 preventivo, 1 fattura in bozza, 1 scadenza «PROVA CONTROLLORE» creati con SQL; 7 chat di prova: tutto cancellato, 0 righe). Computer (1400) e 375 px.
+
+Dove sta il codice: `netlify/functions/chat-gestionale.mjs` (attrezzi, moduli, istruzioni), `js/gest-chat.js` (la sezione), `js/ai-integrazione.js` (`riempi*`, `compila*DaChat`), `js/gest-ricerca.js` (`apriCosa`). Stile: `css/gestionale-stile.css` (`#chat …`).
+
+Funziona (provato): numeri uguali al database (fattura in bozza 1.082,10 €, ore 15 in 3 segnature, preventivo 470,50 + IVA), lavori in ritardo, agenda, i 5 moduli (lavoro, cliente con tutte e 14 le caselle, scadenza, fornitore, preventivo coi SUOI prezzi), i 4 pulsanti «Apri», «Vai a…», Copia, Ferma, chat nuova pulita, archivio riaperto in ordine, foto letta giusta, altra lingua, «sei in un altro reparto».
+
+Sistemato (da pubblicare; banco nuovo `banco-collaudo-17nov.mjs`, 36 prove):
+- **Recapiti del cliente**: `ATTREZZI.clienti` leggeva solo nome, tipo, citta'. A «che telefono ha Rossi?» diceva «non è segnato», ed era segnato. Adesso anche telefono, email, indirizzo, referente, note.
+- **Giorno della settimana** (`giornoGiusto`): «giovedì prossimo» finiva nel modulo di VENERDI' (il calendario nelle istruzioni non basta). Se nella domanda c'e' UN solo giorno e la data cade in un altro, il server la sposta al giorno detto piu' vicino (max 3 giorni) e lo dice al modello (`data_corretta`). Vale per i moduli nuovi e per `modifica_lavoro`.
+- **Fornitore**: la categoria e' una TENDINA: elenco chiuso `FORN_CATS_OK` (uguale a `FORN_CATS` di js/gest-fornitori.js: se cambia, in DUE posti) + `riempiTendina`. Prima restava «— scegli —» e la chat diceva di averla messa.
+- **Scadenza**: casella `tipo` (parole della tendina); se non combacia → «Altro». Prima restava «DURC» anche per la revisione del furgone.
+- **«premi Salva»**: nei moduli NUOVI «Salva» non esiste («Crea», «Crea lavoro», «Aggiungi», «Crea preventivo»). Il server dice il nome vero (`bottoneDi`), l'avviso lo legge dal pulsante `.b-save` (`nomeSalva`).
+- **Segnalino sconosciuto**: `[apri:scadenze:id]` restava scritto col codice. Si toglie (js/gest-chat.js) e le istruzioni dicono di usare [vai:…].
+- **Allegato rifiutato**: il motivo (tipo sbagliato, oltre 3 MB) spariva subito: `scordaAllegato()` svuotava la riga rossa appena scritta. Adesso `scordaAllegato(true)`.
+- «Foto» alto come «Parla» e «Manda» (38 → 44 px).
+
+L'errore «400» all'apertura: NON e' del gestionale. Aperto 4 volte (computer e 375 px, elenco reparti e dentro il reparto): tutte le richieste 200. Nel registro di Supabase i 400 del 17 nov sono solo le prove dei collaudi (file `.exe` rifiutato, insert sbagliati apposta, una password sbagliata al login). La console del pannello Browser tiene gli errori vecchi anche dopo aver ricaricato: per questo «c'era già».
+
+Da sapere:
+- L'archivio delle chat e' dell'ACCOUNT, non del reparto (`chat_elenco` non filtra `mestiere_id`): in «ferramenta» si vedono anche le chat fatte in «giardiniere». Chiesto ad Alex se dividerle.
+- Una scadenza non si apre dalla chat (`apriCosa` conosce lav, prev, fatt, cli, comp). Chiesto ad Alex.
+- La chat riprende l'ultima conversazione dopo aver ricaricato (`sessionStorage ti_chat_conv`).
+- I banchi della chat stanno sul PC (`prove-claude/banchi-fissi/assistenza-ai/`); il PC puo' essere indietro rispetto a GitHub: si portano nella nuvola e si girano sul clone.
+
+NON provati: telefono vero, microfono («Parla»), PDF vero allegato, studio tecnico, «Manda su WhatsApp», «Segna come pagata» (non si emettono fatture di prova), computo con l'AI (provato il 16 nov).
+
+18 nov 2026 — chiesto da Alex dopo il collaudo:
+- **Archivio per reparto**: `chat_elenco(p_quante, p_mestiere)` (`sql/2026-11-18-chat-elenco-reparto.sql`, migrazione `chat_elenco_reparto_18nov2026`, riga in PROVE). La chat aperta si ricorda PER REPARTO (`sessionStorage ti_chat_conv:<reparto>`, `chiaveConv`); tornando nella chat da un altro reparto si rilegge (`controllaReparto`).
+- **Una data per ogni chat**: nell'archivio «18 nov 2026, 06:28» = quando e' stata fatta (`iniziata`, il primo messaggio; `dataChat`); dentro la chat una riga col giorno sopra i messaggi (`rigaGiorno`, classe `.asst-giorno`).
+- **«Apri la scadenza»**: segnalino `[apri:scad:id]` (anche `scadenze` viene accettato), `apriCosa('scad',id)` → `edit-scad` (js/gest-ricerca.js).
+- Provato dal vivo dopo il push →29a782f← (computer e 375 px): archivio per reparto ✔, data ✔, «Apri la scadenza» ✔, telefono letto ✔, giorno della settimana ✔, categoria del fornitore ✔, «premi «Crea lavoro»» ✔, allegato rifiutato che lo dice ✔, «Foto» alto come gli altri ✔.
+- ⛔ Trovato dal vivo: dopo un modulo chiuso, la scadenza chiesta alla chat si apriva VUOTA (`quandoCompare` riempiva la casella della finestra vecchia, nascosta, mentre `scadForm` async costruiva la nuova). Adesso aspetta la casella VISIBILE. E una volta la chat ha scritto un telefono inventato: istruzione nuova «telefoni, email, importi, date solo se letti con un attrezzo in questa risposta».
+

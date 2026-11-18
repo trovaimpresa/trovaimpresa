@@ -192,6 +192,8 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #chat .chat-giorno,#chat .chat-vuoto{font-size:15px}
 #chat .chat-butta{width:36px;height:36px;font-size:18px}
 #chat #chat-piu{font-size:17px;white-space:nowrap}
+/* 17 nov 2026 (collaudo Chat) — «Foto» alto come «Parla» e «Manda» (era 38 px contro 44) */
+#chat #chat-piu{height:auto!important;min-height:44px;align-self:stretch;display:flex;align-items:center;justify-content:center}
 @media(max-width:880px){
   #chat .chat-archivio{width:auto;flex:0 0 auto}
 }

@@ -189,7 +189,8 @@
       if(tipo==="prev"){ ctApriPrev(id); return true; }
       if(tipo==="fatt"){ ctApriFatt(id); return true; }
       if(tipo==="comp"){ ctApriComp(id); return true; }   /* 10 nov 2026 */
-      const AZ={cli:"apri-cli",lav:"edit-job"};
+      /* 18 nov 2026: anche la scadenza (edit-scad la rilegge col proprio user_id) */
+      const AZ={cli:"apri-cli",lav:"edit-job",scad:"edit-scad"};
       const a=AZ[tipo]; if(!a)return false;
       const b=document.createElement("button");
       b.type="button"; b.setAttribute("data-action",a); b.setAttribute("data-id",String(id));
