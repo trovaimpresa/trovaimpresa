@@ -267,11 +267,12 @@
       meta:[cat, m.targa?"🔖 "+esc(m.targa):"", carbTesto, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[
-        {lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
+        /* 18 nov 2026 — i rifornimenti sono dei mezzi: sulla betoniera non si offrono (come gia' nella tabella) */
+        m.categoria==="attrezzatura"?null:{lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
         {lab:"＋ Scadenza",action:"mezzo-scad",data:{id:m.id}},
         {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
         {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
-      ]});
+      ].filter(Boolean)});
   }
   function mezzoForm(m,catIniziale){
     const isNew=!m;m=m||{};
@@ -377,5 +378,8 @@
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderMezzi();renderAttrezzature();
     const _pro=(ruoloUtente==='professionista');
+    /* 18 nov 2026 — spostato da una parte all'altra: spariva dall'elenco senza dire dove andava */
+    const _era=id?((mezziCache.find(x=>String(x.id)===String(id))||{}).categoria==="attrezzatura"?"attrezzatura":"mezzo"):null;
+    if(id&&!_pro&&_era!==categoria){toast(categoria==="attrezzatura"?"Aggiornato — adesso sta fra le Attrezzature":"Aggiornato — adesso sta fra i Mezzi");return;}
     toast(id?"Aggiornato":(categoria==="attrezzatura"?(_pro?"Strumento aggiunto ✔":"Attrezzatura aggiunta ✔"):"Mezzo aggiunto ✔"));
   }

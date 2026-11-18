@@ -1301,12 +1301,12 @@
 
   /* una scadenza sola, la stessa regola per tutte: scaduta = rosso,
      vicina = arancio, lontana = niente. Scritta una volta, non cinque. */
-  function _ctrScad(sel,cosa,perche,preavviso){
+  function _ctrScad(sel,cosa,perche,preavviso,maschile){
     const el=$(sel); if(!el||!el.value) return null;
     const g=_giorniA(el.value);
     if(g==null) return null;
     if(g<0) return {el:el,grave:"rosso",
-      dice:cosa+" è scaduta da "+(-g===1?"1 giorno":(-g)+" giorni")+". "+perche};
+      dice:cosa+(maschile?" è scaduto da ":" è scaduta da ")+(-g===1?"1 giorno":(-g)+" giorni")+". "+perche};
     if(g<=(preavviso||CTR_PREAVVISO)) return {el:el,grave:"arancio",
       dice:cosa+(g===0?" scade oggi. ":(g===1?" scade domani. ":" scade fra "+g+" giorni. "))+"Muoviti adesso: dopo si fa in fretta a scordarsene."};
     return null;
@@ -1329,6 +1329,9 @@
     const tel=$("#d-tel");
     if(tel&&!tel.value.trim()) out.push({el:tel,grave:"arancio",
       dice:"Nessun telefono: dal cantiere non lo chiami, e il messaggio col lavoro assegnato non parte."});
+    /* 18 nov 2026 — «abc» passava: come per il cliente, un telefono senza cifre si segna */
+    else if(tel&&!/\d/.test(tel.value)) out.push({el:tel,grave:"arancio",
+      dice:"In questo telefono non c'è nessun numero: dal cantiere non lo chiami."});
 
     /* ⚠️ il costo orario non e' un dato dell'anagrafica: e' quello che fa
        il margine. Senza, ogni lavoro conta ZERO di manodopera e il
@@ -1347,8 +1350,8 @@
     /* le scadenze che fermano un cantiere */
     [ _ctrScad("#d-visita","La visita medica","Se arriva un controllo, questa persona in cantiere non ci può stare."),
       _ctrScad("#d-formazione","La formazione sulla sicurezza","Senza, in cantiere non ci può stare e la sanzione è a carico tuo."),
-      _ctrScad("#d-doc-scad","Il documento d'identità","Serve per il tesserino di riconoscimento."),
-      _ctrScad("#d-permesso","Il permesso di soggiorno","Senza permesso valido non può lavorare: è la cosa più grave di questo elenco.",CTR_PREAVVISO_PERM)
+      _ctrScad("#d-doc-scad","Il documento d'identità","Serve per il tesserino di riconoscimento.",undefined,true),
+      _ctrScad("#d-permesso","Il permesso di soggiorno","Senza permesso valido non può lavorare: è la cosa più grave di questo elenco.",CTR_PREAVVISO_PERM,true)
     ].forEach(function(s){ if(s)out.push(s); });
 
     const cf=$("#d-cf");
@@ -1386,6 +1389,12 @@
       if(gia) out.push({el:targa,grave:"rosso",
         dice:"Questa targa è già su un altro mezzo: uno dei due è stato inserito due volte, e i costi si dividono fra due schede."});
     }
+    /* 18 nov 2026 (voce Mezzi) — una data gia' passata scritta nel modulo passava
+       con «non c'è niente da segnalare», come se fosse in regola */
+    [ _ctrScad("#m-assic","L'assicurazione","Senza assicurazione il mezzo non può uscire."),
+      _ctrScad("#m-revis","La revisione","Con la revisione scaduta il mezzo non può circolare."),
+      _ctrScad("#m-collaudo","Il collaudo","Controlla se va rifatto prima di usarlo.",undefined,true)
+    ].forEach(function(s){ if(s)out.push(s); });
     const stato=$("#m-stato"), note=$("#m-note");
     if(stato&&(stato.value==="manutenzione"||stato.value==="fuori_uso")&&note&&!note.value.trim())
       out.push({el:note,grave:"arancio",

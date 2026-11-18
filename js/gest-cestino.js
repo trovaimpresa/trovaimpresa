@@ -801,7 +801,7 @@
         const st=rm&&rm.data&&rm.data.stato;
         if(st==="revocato"){
           _avvisoAccesso=" — ma dal telefono NON entra: quando l'hai eliminata "
-            +"le è stato tolto l'accesso. Apri la sua scheda e rimandale il link d'invito.";
+            +"le è stato tolto l'accesso. In Squadra, sulla sua scheda, premi «Nuovo invito».";
         }
       }catch(e){}
     }

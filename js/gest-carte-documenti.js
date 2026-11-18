@@ -238,6 +238,9 @@
       <div id="rf-lista" style="font-size:1.05rem"></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`);
     const sel=$("#rf-pag");
+    /* 18 nov 2026 — senza nessuna carta registrata partiva su «Carta aziendale»
+       e il primo «Registra il pieno» rispondeva «Scegli con quale carta» */
+    if(sel&&!rifCarte.length)sel.value="contanti";
     if(sel)sel.addEventListener("change",rifMostraCarta);
     rifMostraCarta();
     renderRifornimenti();
@@ -278,7 +281,7 @@
     lista.innerHTML=rifCache.map(r=>{
       const p=RIF_PAG[r.pagamento]||RIF_PAG.contanti;
       const sotto=[fmtData(r.data),p.ic+" "+p.lab,r.distributore?esc(r.distributore):"",chi(r.operatore_id)?"👷 "+esc(chi(r.operatore_id)):""].filter(Boolean).join(" · ");
-      const extra=[r.litri?String(r.litri).replace(".",",")+" litri":"", r.km?Number(r.km).toLocaleString("it-IT")+" km":""].filter(Boolean).join(" · ");
+      const extra=[r.litri?String(r.litri).replace(".",",")+" litri":"", r.km?String(Math.round(+r.km)).replace(/\B(?=(\d{3})+(?!\d))/g,".")+" km":""].filter(Boolean).join(" · ");
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
         <div style="min-width:0">
           <div style="font-weight:600;color:#0a2a4d">${eur2(r.importo)}${extra?' <span style="font-weight:400;color:var(--testo-2)">— '+extra+'</span>':''}</div>
@@ -303,6 +306,17 @@
     const _km=_numIt("#rf-km");
     const km=(_km==null)?null:Math.round(_km);
     const mezzoNome=(mezziCache.find(x=>String(x.id)===String(rifMezzoId))||{}).nome||"Mezzo";
+    /* 18 nov 2026 — chilometri piu' bassi di un pieno di prima: quasi sempre un
+       dito scivolato, e sballa i «km con un litro». Si chiede, non si blocca. */
+    if(km!=null&&typeof window.tiChiedi==="function"){
+      const _prima=(rifCache||[]).filter(r=>r.km!=null&&r.data<=data).reduce((mx,r)=>Math.max(mx,+r.km||0),0);
+      if(_prima&&km<_prima){
+        const _p=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,".");
+        if(!(await window.tiChiedi("Hai scritto "+_p(km)+" km, ma un pieno di prima ne aveva "+_p(_prima)+".",{titolo:"I chilometri sono giusti?",si:"Sì, sono giusti",no:"No, li correggo"}))){
+          const _ek=$("#rf-km"); if(_ek){ try{_ek.focus();_ek.select();}catch(_){} } return;
+        }
+      }
+    }
 
     /* se ha pagato con la carta, la carta si scala qui: un posto solo */
     let movimento_id=null;

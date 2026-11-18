@@ -204,6 +204,9 @@ if(!document.getElementById("chat-stile")){
     +".ch-n{font-size:14px;font-weight:700;color:#334155;margin-bottom:2px}.ch-n span{font-weight:500;color:#64748b;margin-left:4px}"
     +".ch-t{white-space:pre-wrap;word-break:break-word;color:#0b1220}"
     +".ch-comp{display:flex;gap:8px;align-items:stretch}"
+    /* 18 nov 2026 — il microfono avvolge la casella in uno span (.dt-box): senza
+       questa riga sul telefono «Invia» usciva dallo schermo */
+    +".ch-comp>.dt-box{flex:1;min-width:0}.ch-comp>.dt-box textarea{width:100%}"
     +".ch-comp textarea{flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:18px;padding:10px;border:1.5px solid #9aa7b5;border-radius:10px;resize:vertical}"
     +".ch-invia{flex:none;min-width:84px;border:0;border-radius:10px;background:#1c7a43;color:#fff;font:inherit;font-size:18px;font-weight:800;cursor:pointer}"
     +".ch-invia:disabled{opacity:.6}"

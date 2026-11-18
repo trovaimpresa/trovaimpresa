@@ -51,14 +51,15 @@
     });
     return _qrPronto;
   }
-  async function mostraQrInvito(link,nome){
+  async function mostraQrInvito(link,nome,wa){
     if(!link){toast("Questa persona non ha ancora un codice d'invito");return;}
     openSheet('<h3 style="margin:6px 0 4px">Il QR di '+esc(nome||"questa persona")+'</h3>'
       +'<p style="margin:0 0 14px;color:var(--muted);font-size:var(--f-base)">Faglielo inquadrare con la fotocamera del telefono: si apre la sua app e non deve scrivere niente.</p>'
       +'<div id="qr-box" style="display:flex;justify-content:center;padding:14px;background:#fff;border:1px solid var(--linea,#e3e8ef);border-radius:12px;min-height:200px;align-items:center">Sto preparando il QR…</div>'
       +'<p style="margin:12px 0 0;font-size:13px;color:var(--muted);word-break:break-all">'+esc(link)+'</p>'
       +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
-      +'<button class="btn" data-action="sq-copy" data-link="'+esc(link)+'">🔗 Copia il link</button></div>');
+      +'<button class="btn" data-action="sq-copy" data-link="'+esc(link)+'">🔗 Copia il link</button>'
+      +(wa?'<button class="btn" data-action="sq-wa" data-wa="'+esc(wa)+'">💬 Invia su WhatsApp</button>':'')+'</div>');
     const ok=await _caricaQr();
     const box=document.getElementById("qr-box");
     if(!box)return;               /* la finestra e' gia' stata chiusa */
