@@ -53,8 +53,15 @@ async function caricaContattoSbloccato(prevId) {
     });
     if (!res.ok) throw new Error(await res.text());
     const c = await res.json();
-    const telPulito = (c.telefono || '').replace(/[\s\-+]/g, '').replace(/^39/, '');
-    const waUrl = telPulito ? `https://wa.me/39${telPulito}` : '';
+    /* 18 nov 2026: prima si toglieva un «39» davanti a qualunque numero, e un
+       cellulare 392…/393… perdeva le prime due cifre. Si toglie solo il
+       prefisso vero (+39 / 0039); un fisso (0…) non ha WhatsApp. */
+    let telPulito = String(c.telefono || '').trim();
+    const _intl = /^(\+|00)/.test(telPulito);
+    telPulito = telPulito.replace(/\D/g, '');
+    if (_intl) telPulito = telPulito.replace(/^00/, ''); else if (/^3/.test(telPulito)) telPulito = '39' + telPulito;
+    if (/^(39)?0/.test(telPulito)) telPulito = '';
+    const waUrl = telPulito ? `https://wa.me/${telPulito}` : '';
     const el = document.getElementById('ric-contatto');
     if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25d366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
   } catch (e) {

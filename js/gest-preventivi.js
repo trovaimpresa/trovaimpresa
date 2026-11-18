@@ -709,6 +709,8 @@
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const titolo=$("#pv-tit").value.trim();if(!titolo){campoManca($("#pv-tit"),"Manca il titolo del preventivo: scrivilo qui.");return;}
+    /* 18 nov 2026: il modulo aperto da «Richieste dal sito» porta il numero della richiesta */
+    const _daSito=(!id&&$("#pv-tit").dataset.dalsito)||"";
     const righe=[];
     $$("#prev-righe [data-riga]").forEach((d,i)=>{
       const el=d.querySelector(".pr-desc");
@@ -788,6 +790,7 @@
       const {error:eDelP}=await sb.from("gest_preventivo_righe").delete().in("id",vecchieVoci).eq("user_id",sbUid);
       if(eDelP){toast("Le voci nuove sono salvate, ma le vecchie non si sono cancellate: adesso sono doppie. Riapri e salva di nuovo.");return;}
     }
+    if(_daSito&&typeof window.dsPrevSalvato==="function"){ try{ await window.dsPrevSalvato(_daSito,pid); }catch(e){} }
     closeSheet();rinfresca("preventivi","riepilogo");
     toast(persiSez?AVVISO_SEZIONI:(_prevUnitaPersa?"Preventivo salvato, ma le unità di misura no: riprova fra qualche minuto.":(avvisoParcella||(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"))));
   }

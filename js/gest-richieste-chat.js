@@ -122,7 +122,7 @@
         <div class="sh-tit">Cosa chiede</div>
         ${riga("Lavoro",_dsCosa(r))}
         ${riga("Descrizione",r.descrizione)}
-        ${riga("Quando gli servirebbe",r.data_preferita)}
+        ${riga("Quando gli servirebbe",r.data_preferita?fdate(String(r.data_preferita).slice(0,10)):"")}
         ${riga("Urgenza",r.urgenza)}
         ${riga("Budget",r.budget)}
         ${riga("Metri quadri",r.mq)}
@@ -152,8 +152,23 @@
       if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,"_blank");
     });
     if(r._stato==="nuova"){
-      if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}
+      /* 18 nov 2026: dietro la finestra le schede restavano «Nuova» anche
+         dopo averla aperta (il pallino del menu scendeva, la scheda no). */
+      if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();rinfresca("dalsito");}
     }
+  }
+
+  /* 18 nov 2026 — il numero per WhatsApp. Prima si toglieva un «39» davanti
+     a QUALUNQUE numero: un cellulare 392…, 393…, 391… perdeva le prime due
+     cifre e WhatsApp apriva un numero sbagliato. Adesso lo pulisce
+     waCleanTel (js/gest-riepilogo-schede.js), la stessa dei Lavori. Un fisso
+     (0746…) non ha WhatsApp: torna "" e il pulsante non si mostra. */
+  function dsTelWa(t){
+    const raw=String(t||"").trim(), d=raw.replace(/\D/g,"");
+    /* «39 333 1234567» scritto senza il +: il prefisso c'e' gia' (un cellulare da solo ha 9-10 cifre) */
+    const n=(!/^(\+|00)/.test(raw)&&/^393\d{8,9}$/.test(d))?d:((typeof waCleanTel==="function")?waCleanTel(raw):d);
+    if(!n||/^(39)?0/.test(n))return "";
+    return n;
   }
 
   /* 9 ott 2026 \u2014 \u00abRISPOSTA PRONTA\u00bb. L'AI scrive la prima risposta al cliente
@@ -232,17 +247,17 @@
       const body=await res.json().catch(()=>({}));
       if(res.status===402)throw new Error(body.reason==="no_credits"?"Hai finito i crediti AI di questo mese.":"Questa funzione \u00e8 nel piano con assistenza AI.");
       if(!res.ok)throw new Error(body.error||"L'assistente non ha risposto. Riprova.");
-      const tel=String(c.telefono||"").replace(/[\s\-+]/g,"").replace(/^39/,"");
+      const tel=dsTelWa(c.telefono);
       box.innerHTML=
         '<textarea id="ds-risp-txt" style="width:100%;min-height:210px;font:20px/1.45 system-ui;padding:12px;border:1px solid #cfd6df;border-radius:10px;box-sizing:border-box">'+esc(String(body.result||""))+'</textarea>'
         +'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">'
-        +(tel?'<button class="btn-primary" type="button" id="ds-risp-wa" style="background:#1fa855;border-color:#1fa855">WhatsApp</button>':"")
+        +(tel?'<button class="btn-primary" type="button" id="ds-risp-wa" style="background:#1fa855;border-color:#1fa855;min-height:44px">WhatsApp</button>':"")
         +(c.email?'<button class="btn" type="button" id="ds-risp-em">Email</button>':"")
         +'<button class="btn" type="button" id="ds-risp-cp">Copia</button>'
         +'<button class="btn" type="button" id="ds-risp-ri">\u21bb Riscrivi (1 credito)</button></div>'
-        +(!tel&&!c.email?'<p style="margin:8px 0 0;font-size:15px">Il cliente non ha lasciato email n\u00e9 telefono: usa Copia.</p>':"");
+        +(!tel&&!c.email?'<p style="margin:8px 0 0;font-size:15px">'+(c.telefono?"Il numero del cliente \u00e8 un fisso, senza WhatsApp: usa Copia.":"Il cliente non ha lasciato email n\u00e9 telefono: usa Copia.")+'</p>':"");
       const T=()=>$("#ds-risp-txt").value;
-      const wa=$("#ds-risp-wa"); if(wa)wa.onclick=()=>window.open("https://wa.me/39"+tel+"?text="+encodeURIComponent(T()),"_blank","noopener");
+      const wa=$("#ds-risp-wa"); if(wa)wa.onclick=()=>window.open("https://wa.me/"+tel+"?text="+encodeURIComponent(T()),"_blank","noopener");
       const em=$("#ds-risp-em"); if(em)em.onclick=()=>{location.href="mailto:"+encodeURIComponent(c.email)+"?subject="+encodeURIComponent("Re: "+(_dsCosa(r)||"la sua richiesta"))+"&body="+encodeURIComponent(T());};
       $("#ds-risp-cp").onclick=async()=>{try{await navigator.clipboard.writeText(T());toast("Copiato \u2714");}catch(e){const t=$("#ds-risp-txt");t.select();document.execCommand("copy");toast("Copiato \u2714");}};
       $("#ds-risp-ri").onclick=()=>dsRisposta(r);
@@ -273,11 +288,11 @@
       if(!res.ok)throw new Error(await res.text());
       c=await res.json();
       }
-      const tel=(c.telefono||"").replace(/[\s\-+]/g,"").replace(/^39/,"");
+      const tel=dsTelWa(c.telefono);
       box.innerHTML=
         (c.email?`<div><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>`:"")
         +(c.telefono?`<div><a href="tel:${esc(c.telefono)}">${esc(c.telefono)}</a>`
-          +(tel?` · <a href="https://wa.me/39${esc(tel)}" target="_blank" rel="noopener">WhatsApp</a>`:"")+`</div>`:"")
+          +(tel?` · <a href="https://wa.me/${esc(tel)}" target="_blank" rel="noopener">WhatsApp</a>`:"")+`</div>`:"")
         +((!c.email&&!c.telefono)?"Nessun recapito nella richiesta":"");
     }catch(e){
       box.innerHTML='<span style="color:var(--err)">Non riesco a mostrarli: '+esc(e.message||"riprova")+"</span>";
@@ -302,6 +317,13 @@
         .select("id,telefono").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
       const trovato=(gia||[]).find(c=>String(c.telefono||"").replace(/\D/g,"")===telSec);
       if(trovato)cliId=trovato.id;
+    }else if(contatti.email){
+      /* 18 nov 2026: senza telefono (incarichi) ogni clic rifaceva il cliente */
+      const {data:giaE}=await sb.from("gest_clienti")
+        .select("id,email").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
+      const em=String(contatti.email).trim().toLowerCase();
+      const trovE=(giaE||[]).find(c=>String(c.email||"").trim().toLowerCase()===em);
+      if(trovE)cliId=trovE.id;
     }
     if(!cliId){
       const {data:nuovo,error:eC}=await sb.from("gest_clienti").insert({
@@ -324,9 +346,25 @@
       titolo:_dsCosa(r),
       note:(r._inc?"Richiesta di incarico arrivata da TrovaImpresa il ":"Richiesta arrivata da TrovaImpresa il ")+fdate(_dsData(r))+".\n"+(desc||"")
     });
-    if(await dsSegna(r.id,"preventivo")){r._stato="preventivo";}
-    rinfresca("dalsito","clienti");
+    /* 18 nov 2026 — «Preventivo fatto» SOLO quando il preventivo e' salvato.
+       Prima lo stato cambiava appena si apriva il modulo: premendo Annulla la
+       richiesta restava «Preventivo fatto» senza nessun preventivo, e il
+       pulsante «Crea il preventivo» spariva. Adesso il modulo porta con se'
+       il numero della richiesta (sulla casella del titolo: se il modulo si
+       chiude o si rifa', il segno se ne va con lui) e savePrev, a preventivo
+       scritto, chiama dsPrevSalvato. */
+    const _tit=$("#pv-tit"); if(_tit)_tit.dataset.dalsito=String(r.id);
+    rinfresca("clienti");
   }
+  async function dsPrevSalvato(pid,prevId){
+    if(!pid)return;
+    if(await dsSegna(pid,"preventivo",prevId?{preventivo_creato_id:prevId}:null)){
+      const r=dsCache.find(x=>String(x.id)===String(pid));
+      if(r){r._stato="preventivo";r._prevId=prevId||null;}
+    }
+    rinfresca("dalsito");
+  }
+  window.dsPrevSalvato=dsPrevSalvato;
 
   async function dsChiudi(pid,riapri){
     if(await dsSegna(pid,riapri?"vista":"chiusa")){

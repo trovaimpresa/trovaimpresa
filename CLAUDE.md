@@ -3439,3 +3439,24 @@ Funzioni nuove (ok di Alex il 18 nov):
 - **Giornata intera / Mezza giornata**: sotto i nomi accesi una riga per persona (`giorMezzeHTML`, azione `mz`, `c.mezza` = insieme dei nomi). `giorSalva` passa `mezze[]` a `giorScrivi`, che da' al massimo 4 ore. Se nel racconto c'e' «mezza giornata» l'AI la accende per quella scheda (`giorCompila`). «Parla» non la passa: resta 8.
 - **«modifica» completa** (`giorModK`, `giorModTutto`): apre la scheda piena e AGGIORNA il rapportino e le sue ore (non ne crea di nuovi): chi resta cambia giorno/cantiere/ore, chi entra ha una riga nuova, chi esce va nel Cestino. Le ore si dividono con gli altri cantieri del giorno; `giorRidaiOre` le rida' a chi resta nel giorno vecchio. ⚠️ Foto, spese e fatture NON si spostano con la giornata. Il vecchio riquadro col solo testo (`giorModifica`, `giorModSalva`) non si apre piu'.
 - **«togli» sotto ogni foto** nella finestra Foto (`gxFotoTogli`, secondo tocco «Sì, togli»): passa da `sb.from("gest_foto").delete()`, quindi va nel Cestino.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: RICHIESTE DAL SITO
+
+Collaudo dal vivo (computer 1440 e 375 px). ⚠️ Le richieste NON sono di un reparto: sono della SCHEDA dell'account (`preventivi.impresa_id` → `imprese` di Alex, id →36←). Per provarle si inseriscono con SQL →3← righe in `preventivi` con `impresa_id=36` e nome «PROVA CONTROLLORE …»; alla fine si cancellano `preventivi`, `gest_dalsito` (stato), il cliente e il preventivo creati in «ferramenta». Fatto: →0← righe.
+
+Dove sta il codice: `js/gest-carte-documenti.js` (elenco, `dsCarica`, `dsSegna`, `dsVoci`), `js/gest-richieste-chat.js` (`dsApri`, `dsContatti`, `dsRisposta`, `dsCreaPreventivo`), azioni `ds-*` in `js/gest-finestre-eventi.js`. Lo stato sta in `gest_dalsito` («nuova» = nessuna riga).
+
+Funziona (provato): elenco e le 3 viste coi numeri, pallino nel menu e riga nell'Assistente, apertura = «Vista», contatti (email, telefono), nomi con `<b>` e virgolette scritti puliti, richiesta quasi vuota, «Segna chiusa» / «Riapri», «Risposta pronta» con l'AI (1 credito: usa quello che ha scritto il cliente), «Crea il preventivo» (cliente in rubrica senza doppioni, titolo e note già scritti), telefono 375 px senza niente tagliato né sotto 13 px, console pulita.
+
+Sistemato (da pubblicare):
+- **«Preventivo fatto» senza preventivo**: lo stato cambiava appena si apriva il modulo. Con «Annulla» la richiesta restava «Preventivo fatto» e «Crea il preventivo» spariva. Adesso il modulo porta il numero della richiesta (`#pv-tit` `data-dalsito`) e `savePrev`, a preventivo scritto, chiama `window.dsPrevSalvato(pid, idPreventivo)`: stato + `gest_dalsito.preventivo_creato_id` (prima mai scritto).
+- **WhatsApp col numero sbagliato**: si toglieva «39» davanti a qualunque numero, quindi un cellulare 392…/393…/391… perdeva due cifre. `dsTelWa()` usa `waCleanTel` (js/gest-riepilogo-schede.js); un fisso (0…) non mostra WhatsApp. Stesso difetto nei pannelli (`js/pannelli-preventivi.js`): sistemato uguale.
+- **Schede ferme su «Nuova»** dopo averle aperte (il pallino scendeva, la scheda no): `rinfresca("dalsito")` in `dsApri`.
+- «Quando gli servirebbe» scritto 2026-12-10 → 10/12/2026 (`fdate`).
+- Senza telefono il cliente si ritrova per email (no doppioni). «WhatsApp» della risposta alto 44 px.
+
+Chiesto ad Alex (funzione nuova): pulsante «Apri il preventivo» nella richiesta già trasformata (`_prevId` adesso c'è).
+
+Da sapere: in `gest_dalsito` di Alex ci sono →3← righe vecchie (richieste →16, 42, 43←, di prima dell'8 nov, non sue): non si vedono, non toccate. Le Giornate del 18 nov erano ancora in lavorazione in un'altra sessione: su GitHub non c'erano.
+
+NON provati: una richiesta vera mandata dalla scheda pubblica (email di avviso comprese), gli incarichi dello studio tecnico (`incarichi_richieste`), la foto allegata, «Email» e «Copia» della risposta, il clic vero su WhatsApp, telefono vero.
