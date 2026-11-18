@@ -325,6 +325,7 @@
     "2026-11-16-tecnico-firma.sql": "gest_azienda.tecnico_firma",
     "2026-11-17-fatture-resto.sql": "gest_fatture_totali.resto gest_fatture_totali.gia_ricevuto",
     "2026-11-17-fattura-regime-suo.sql": "gest_fattura_conti()",
+    "2026-11-18-chat-elenco-reparto.sql": "chat_elenco()",
     "2026-11-10-sconto-preventivi-e-ricevute.sql": "gest_preventivi.sconto gest_preventivi.sconto_perc gest_preventivi_totali.sconto gest_preventivi_totali.totale_voci gest_ricevute_pagamento"
   };
 

@@ -156,17 +156,30 @@
 
   /* una chiacchierata per volta: se ricarichi la pagina resta la stessa,
      cosi' la chat si ricorda di cosa stavate parlando */
+  /* ⛔ 18 nov 2026 — L'ARCHIVIO E' DEL REPARTO (chiesto da Alex).
+     La chat che resta aperta si ricorda per reparto: cambiando reparto non
+     ti ritrovi davanti la chiacchierata dell'altro. */
+  function chiaveConv() { return 'ti_chat_conv:' + (reparto() || '-'); }
+  var repartoVisto = null;
+  function controllaReparto() {
+    var r = reparto();
+    if (r === repartoVisto || inCorso) return;
+    repartoVisto = r;
+    conversazione = null;
+    apriChiacchierata(chiacchierata(), true);   /* rilegge anche l'archivio */
+  }
+
   function chiacchierata() {
     if (conversazione) return conversazione;
     try {
-      conversazione = sessionStorage.getItem('ti_chat_conv');
+      conversazione = sessionStorage.getItem(chiaveConv());
       if (!conversazione) {
         conversazione = (crypto && crypto.randomUUID) ? crypto.randomUUID()
           : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
               var r = Math.random() * 16 | 0;
               return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
-        sessionStorage.setItem('ti_chat_conv', conversazione);
+        sessionStorage.setItem(chiaveConv(), conversazione);
       }
     } catch (e) { conversazione = String(Date.now()); }
     return conversazione;
@@ -190,7 +203,10 @@
       .replace(/\n{3,}/g, '\n\n');
   }
   function testoRisposta(t) {
-    return esc(pulisciMarkdown(t)).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
+    return esc(pulisciMarkdown(t)).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      /* 18 nov 2026 — la chat a volte scrive «scadenze» invece di «scad» */
+      .replace(/\[apri:scadenze:/g, '[apri:scad:')
+      .replace(SEGNALINO, pulsanteApri)
       /* 17 nov 2026 (collaudo Chat) — un [apri:…] di un tipo che qui non si
          sa aprire (visto dal vivo: [apri:scadenze:id]) restava scritto con
          tutto il codice. Si toglie: meglio niente pulsante che una riga di sigle. */
@@ -359,8 +375,8 @@
      diventa un pulsante che porta chissa' dove.
      ⚠️ I tipi sono quattro e non di piu': sono quelli che il gestionale
      sa gia' aprire da soli. */
-  var TIPI_APRIBILI = { lav:'Aprilo', prev:'Apri il preventivo', fatt:'Apri la fattura', cli:'Apri il cliente', comp:'Apri il computo' };
-  var SEGNALINO = /\[apri:(lav|prev|fatt|cli|comp):([0-9a-fA-F-]{36})\]/g;
+  var TIPI_APRIBILI = { lav:'Aprilo', prev:'Apri il preventivo', fatt:'Apri la fattura', cli:'Apri il cliente', comp:'Apri il computo', scad:'Apri la scadenza' };
+  var SEGNALINO = /\[apri:(lav|prev|fatt|cli|comp|scad):([0-9a-fA-F-]{36})\]/g;
 
   /* ============================================================
      ⛔ 10 nov 2026 — «VAI A…»: LA CHAT TI CI PORTA, NON TE LO SPIEGA.
@@ -587,8 +603,13 @@
       var riga = e.target.closest('[data-conv]');
       if (riga) return apriChiacchierata(riga.getAttribute('data-conv'));
     });
-    caricaArchivio();
+    repartoVisto = reparto();
     apriChiacchierata(chiacchierata(), true);
+    /* quando torni nella chat da un altro reparto, si rilegge */
+    try {
+      new MutationObserver(function () { if (sez.classList.contains('active')) controllaReparto(); })
+        .observe(sez, { attributes: true, attributeFilter: ['class'] });
+    } catch (_) {}
   }
 
   function righe() { return document.getElementById('chat-righe'); }
@@ -736,11 +757,35 @@
     } catch (e) { return ''; }
   }
 
+  /* 18 nov 2026 — ogni chat ha la sua DATA: quando e' stata fatta
+     (il primo messaggio), scritta per intero: «17 nov 2026, 21:02». */
+  function dataChat(iso) {
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
+        + ', ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
+  }
+  /* dentro la chat aperta: una riga col giorno sopra i messaggi di quel giorno */
+  function rigaGiorno(iso) {
+    var box = righe(); if (!box) return;
+    var d = new Date(iso || Date.now()); if (isNaN(d.getTime())) return;
+    var g = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    var tutte = box.querySelectorAll('.asst-giorno');
+    var ultima = tutte.length ? tutte[tutte.length - 1].getAttribute('data-g') : null;
+    if (ultima === g) return;
+    var div = document.createElement('div');
+    div.className = 'asst-giorno';
+    div.setAttribute('data-g', g);
+    div.textContent = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    box.appendChild(div);
+  }
+
   async function caricaArchivio() {
     var box = document.getElementById('chat-elenco');
     if (!box || !window._gc || !window._gc.rpc) return;
     try {
-      var r = await window._gc.rpc('chat_elenco', { p_quante: 40 });
+      var r = await window._gc.rpc('chat_elenco', { p_quante: 40, p_mestiere: reparto() });
       if (r && r.error) throw r.error;
       var righe = r.data || [];
       if (!righe.length) { box.innerHTML = '<div class="chat-vuoto">Qui compaiono le chat di prima.</div>'; return; }
@@ -748,7 +793,7 @@
       box.innerHTML = righe.map(function (c) {
         return '<div class="chat-riga' + (c.conversazione_id === qui ? ' aperta' : '') + '" data-conv="' + esc(c.conversazione_id) + '">'
           + '<span class="ct"><span class="cn">' + esc(c.titolo) + '</span>'
-          + '<span class="cq">' + esc(quandoInParole(c.quando)) + ' &middot; ' + (c.messaggi || 0) + ((c.messaggi || 0) === 1 ? ' messaggio' : ' messaggi') + '</span></span>'
+          + '<span class="cq">' + esc(dataChat(c.iniziata || c.quando)) + ' &middot; ' + (c.messaggi || 0) + ((c.messaggi || 0) === 1 ? ' messaggio' : ' messaggi') + '</span></span>'
           + '<button class="chat-butta" type="button" title="Butta questa chat" data-butta="' + esc(c.conversazione_id) + '">&times;</button>'
           + '</div>';
       }).join('');
@@ -761,7 +806,7 @@
   async function apriChiacchierata(conv, zitto) {
     if (!conv) return;
     conversazione = conv;
-    try { sessionStorage.setItem('ti_chat_conv', conv); } catch (e) {}
+    try { sessionStorage.setItem(chiaveConv(), conv); } catch (e) {}
     var r = righe(); if (r) r.innerHTML = '';
     if (!window._gc) return;
     try {
@@ -780,6 +825,7 @@
       if (res && !res.error && res.data) {
         res.data.forEach(function (m) {
           if (!m.testo) return;
+          rigaGiorno(m.created_at);
           scrivi(m.ruolo === 'ai' ? 'ai' : 'utente',
                  m.ruolo === 'ai' ? testoRisposta(m.testo) : esc(m.testo),
                  null, m.ruolo === 'ai');
@@ -791,7 +837,7 @@
 
   function nuovaChat() {
     conversazione = null;
-    try { sessionStorage.removeItem('ti_chat_conv'); } catch (e) {}
+    try { sessionStorage.removeItem(chiaveConv()); } catch (e) {}
     chiacchierata();
     var r = righe(); if (r) r.innerHTML = '';
     caricaArchivio();
@@ -856,6 +902,7 @@
     /* ⛔ NON si spegne piu': mentre risponde deve restare cliccabile,
        se no non c'e' niente da premere per fermarla. */
     bottoneManda.textContent = 'Ferma';
+    rigaGiorno();
     scrivi('utente', esc(domanda)
       + (allegatoDaMandare ? '<br><span class="chip">' + esc(allegatoDaMandare.nome) + '</span>' : ''));
     /* si svuota subito: una foto per messaggio, e se ne manda un secondo

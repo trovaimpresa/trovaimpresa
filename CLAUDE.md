@@ -3396,3 +3396,8 @@ Da sapere:
 
 NON provati: telefono vero, microfono («Parla»), PDF vero allegato, studio tecnico, «Manda su WhatsApp», «Segna come pagata» (non si emettono fatture di prova), computo con l'AI (provato il 16 nov).
 
+18 nov 2026 — chiesto da Alex dopo il collaudo:
+- **Archivio per reparto**: `chat_elenco(p_quante, p_mestiere)` (`sql/2026-11-18-chat-elenco-reparto.sql`, migrazione `chat_elenco_reparto_18nov2026`, riga in PROVE). La chat aperta si ricorda PER REPARTO (`sessionStorage ti_chat_conv:<reparto>`, `chiaveConv`); tornando nella chat da un altro reparto si rilegge (`controllaReparto`).
+- **Una data per ogni chat**: nell'archivio «18 nov 2026, 06:28» = quando e' stata fatta (`iniziata`, il primo messaggio; `dataChat`); dentro la chat una riga col giorno sopra i messaggi (`rigaGiorno`, classe `.asst-giorno`).
+- **«Apri la scadenza»**: segnalino `[apri:scad:id]` (anche `scadenze` viene accettato), `apriCosa('scad',id)` → `edit-scad` (js/gest-ricerca.js).
+
