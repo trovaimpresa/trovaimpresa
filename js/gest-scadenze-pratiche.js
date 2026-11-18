@@ -86,6 +86,33 @@
       return out;
     }catch(_){ return []; }
   }
+  /* ============================================================
+     18 nov 2026 (si' di Alex, foto prima) — LE FATTURE DEI FORNITORI DA PAGARE.
+     Stavano in Fornitori, nel Calendario e nell'email, ma non qui: proprio
+     dove uno guarda cosa scade. Stessa idea di persone e mezzi: sola lettura,
+     il dato resta in un posto solo, si apre e si segna pagata dalla fattura.
+     Solo quelle NON pagate e con la data di scadenza scritta.
+     ============================================================ */
+  async function scadenzeFornitori(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const m=mid||curMestiere();
+      const [rff,rfo]=await Promise.all([
+        sb.from("gest_fatture_fornitori").select("id,numero,scadenza,stato,importo,fornitore_id").eq("user_id",sbUid).eq("mestiere_id",m),
+        sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",m)
+      ]);
+      if(rff.error)return [];
+      const nomi={};((rfo&&rfo.data)||[]).forEach(function(f){nomi[String(f.id)]=f.nome;});
+      const out=[];
+      (rff.data||[]).forEach(function(x){
+        if(!x.scadenza||x.stato==="pagata")return;
+        out.push({id:"ff:"+x.id,_forn:true,_ffId:x.id,_nome:nomi[String(x.fornitore_id)]||"Fornitore",
+          titolo:"Fattura"+(x.numero?" n. "+x.numero:"")+((+x.importo||0)?" — "+eur2(+x.importo):""),
+          tipo_pratica:"Da pagare",data_scadenza:x.scadenza,stato:"aperta"});
+      });
+      return out;
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -112,15 +139,20 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const [scadPersone,scadMezzi]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid)]);
-    const scadTutte=scadCache.concat(scadPersone,scadMezzi).sort(function(a,b){
+    const [scadPersone,scadMezzi,scadForn]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid)]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
                       :v==="prossime"?A.filter(s=>s.stato!=="fatta"&&(!s.data_scadenza||s.data_scadenza>=oggi))
                       :v==="fatte"?A.filter(s=>s.stato==="fatta"):A.slice();
     const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadTutte,v.k).length);
-    const L=filtra(scadTutte,scadVista);
+    let L=filtra(scadTutte,scadVista);
+    /* 18 nov 2026 — collaudo dello Scadenzario: in «Tutte» una scadenza fatta
+       stava in mezzo a quelle ancora da fare (ordine per data): adesso le fatte
+       vanno in fondo. In «Fatte» in cima sta l'ultima, non la piu' vecchia. */
+    if(scadVista==="fatte") L.reverse();
+    else if(scadVista==="tutte") L=L.filter(s=>s.stato!=="fatta").concat(L.filter(s=>s.stato==="fatta").reverse());
     renderTabella({
       id:"scad", box:"#scad-list",
       viste:"#scad-viste", visteDef:SCAD_VISTE, vista:scadVista, conta:conta, azioneVista:"scad-vista",
@@ -137,6 +169,20 @@
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._forn){
+          const apriF={action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}};
+          return {
+            id:s.id,
+            click:apriF,
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `🏭 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"🏭 Apri la fattura del fornitore",action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}}]
+          };
+        }
         if(s._mezzo){
           const apri={action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}};
           return {
@@ -190,6 +236,17 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    if(s._forn){
+      let bgF="var(--sfondo)",fgF="var(--testo-2)",labF="In tempo",tonoF="t-neutro";
+      if(s.data_scadenza<oggi){bgF="var(--err-bg)";fgF="var(--err)";labF="Scaduta";tonoF="t-err";}
+      else if(s.data_scadenza<=lim){bgF="var(--attesa-bg)";fgF="var(--attesa)";labF="In scadenza";tonoF="t-attesa";}
+      return schedaJob({
+        tono:tonoF, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgF};color:${fgF}">${labF}</span>`,
+        meta:["🏭 "+esc(s._nome)+" (fornitore)", "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri",action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}}]
+      });
+    }
     if(s._mezzo){
       let bgM="var(--sfondo)",fgM="var(--testo-2)",labM="In tempo",tonoM="t-neutro";
       if(s.data_scadenza<oggi){bgM="var(--err-bg)";fgM="var(--err)";labM="Scaduta";tonoM="t-err";}
@@ -264,7 +321,13 @@
         .eq("user_id",sbUid).eq("mestiere_id",mid).order("data_prevista",{ascending:false}).limit(100);
       lv=dl||[];
     }
-    const tipoOpts=tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
+    /* 18 nov 2026 — collaudo dello Scadenzario: una scadenza NUOVA nasceva col
+       tipo «DURC» gia' scelto. Chi scriveva «Revisione furgone» e non toccava
+       la tendina si ritrovava «DURC» sulla scheda; chi lasciava il titolo vuoto
+       salvava una scadenza chiamata «DURC» senza volerlo. Adesso la nuova parte
+       da «— scegli —». Una gia' salvata tiene il suo tipo. */
+    const tipoVuoto=(isNew&&!s.tipo_pratica)?'<option value="" selected>— scegli —</option>':"";
+    const tipoOpts=tipoVuoto+tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     const opeOpts=(dipCache||[]).map(o=>`<option value="${o.id}" ${String(o.id)===String(s.operatore_id||"")?"selected":""}>${esc(o.nome)}</option>`).join("");
     const mezOpts=mz.map(m=>`<option value="${m.id}" ${m.id===s.mezzo_id?"selected":""}>${esc(m.nome)}${m.targa?" ("+esc(m.targa)+")":""}</option>`).join("");
@@ -283,7 +346,7 @@
       +`<label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:2px 0 10px;cursor:pointer"><input type="checkbox" id="s-avvisa" ${avvisaOn?"checked":""} style="width:20px;height:20px"><span>Avvisami per email</span></label>`
       +`<div class="field"><label>Si ripete</label><select id="s-ripeti">`
       +  SCAD_RIPETI.map(r=>'<option value="'+r[0]+'"'+((+s.ripeti_mesi||0)===r[0]?' selected':'')+'>'+r[1]+'</option>').join("")
-      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola. Prima dovevi ricordartene tu.</div></div>`
+      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola.</div></div>`
       +'<p class="sh-nota">Ti arriva una email 30 giorni prima, 7 giorni prima e il giorno prima, all\'indirizzo con cui entri qui. Una sola email al giorno con tutte le scadenze vicine, non una per ognuna.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -307,7 +370,15 @@
       +`<button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button>`);
     ctrAscolta('scadenza');
   }
+  /* 18 nov 2026 — collaudo dello Scadenzario: due tocchi veloci su «Crea»
+     facevano DUE scadenze uguali (visto dal vivo). Stesso freno dei Promemoria. */
+  let _scadSalvo=false;
   async function saveScad(id){
+    if(_scadSalvo)return;
+    _scadSalvo=true;
+    try{ await _saveScad(id); } finally{ _scadSalvo=false; }
+  }
+  async function _saveScad(id){
     /* 11 nov 2026 — collaudo 3.11: se il titolo e' vuoto ma il tipo e'
        scelto (DURC, Revisione…) il titolo e' il tipo: una casella in meno.
        Quello che manca davvero si segna sulla casella (campoManca). */
@@ -488,7 +559,20 @@
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
-    const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
+    /* 18 nov 2026 — collaudo dell'Agenda operatore: se chi ci va non e' piu' in
+       squadra (e' nel Cestino) la tendina restava su «— nessuno —» e premendo
+       Salva il lavoro PERDEVA la persona, in silenzio. Adesso la sua voce resta
+       («… (nel cestino)») e salvando non cambia niente. */
+    const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("")
+      +((id&&!dipCache.some(d=>d.id===id))?`<option value="${esc(id)}" data-fuori="1" selected>Persona nel cestino</option>`:"");
+    if(job.assegnatoId&&!dipCache.some(d=>d.id===job.assegnatoId)&&sb&&typeof sb.raw==="function"){
+      const _idF=job.assegnatoId;
+      (async()=>{try{
+        const r=await sb.raw("gest_operatori").select("nome,eliminato_il").eq("id",_idF).maybeSingle();
+        const o=document.querySelector('#j-dip option[data-fuori]');
+        if(o&&r&&r.data&&r.data.nome)o.textContent=r.data.nome+(r.data.eliminato_il?" (nel cestino)":"");
+      }catch(e){}})();
+    }
     /* Modulo lungo -> modale grande. A sinistra il lavoro in se' (cosa, dove,
        quando, chi, com'e' andata), a destra gli allegati e i soldi. */
     openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",

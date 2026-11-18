@@ -84,9 +84,23 @@
      ritardo, il giro dopo non slitta. */
   function promProssima(dataISO, mesi) {
     const [y, m, d] = String(dataISO).split("-").map(Number);
-    const dt = new Date(y, m - 1 + (+mesi || 0), d);
+    /* 18 nov 2026 — il 31 gennaio «ogni mese» saltava febbraio e finiva al
+       3 marzo (il 31 febbraio non esiste, e JavaScript va avanti di tre
+       giorni). Adesso si ferma all'ultimo giorno del mese: 28 febbraio. */
+    const primo = new Date(y, m - 1 + (+mesi || 0), 1);
+    const ultimo = new Date(primo.getFullYear(), primo.getMonth() + 1, 0).getDate();
+    const dt = new Date(primo.getFullYear(), primo.getMonth(), Math.min(d, ultimo));
     return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0")
            + "-" + String(dt.getDate()).padStart(2, "0");
+  }
+
+  /* 18 nov 2026 — dopo ogni scrittura si ridisegna con rinfresca(): cosi' si
+     aggiornano anche il pallino nel menu, la riga «promemoria passati»
+     dell'Assistente e il Calendario. Prima si ridisegnava solo l'elenco e il
+     pallino restava fermo fino a quando non si ricaricava la pagina. */
+  function promRidisegna() {
+    if (typeof rinfresca === "function") rinfresca("promemoria", "calendario", "riepilogo");
+    else renderPromemoria();
   }
 
   // ---------------------------------------------------------------------
@@ -117,6 +131,8 @@
     const conta = {};
     PROM_VISTE.forEach(v => { conta[v.k] = filtra(promCache, v.k).length; });
     const L = filtra(promCache, promVista);
+    /* 18 nov 2026 — nei «Fatti» in cima sta l'ultimo, non il piu' vecchio */
+    if (promVista === "fatti") L.reverse();
 
     renderTabella({
       id: "prom", box: "#prom-list",
@@ -216,7 +232,7 @@
           <select id="p-avvisa">${opz(PROM_AVVISI, p.avvisa_giorni || 0)}</select></div>
         <div class="field"><label>Si ripete</label>
           <select id="p-ripeti">${opz(PROM_RIPETI, p.ripeti_mesi || "")}</select></div>
-        <div class="sh-nota">L'email ti arriva la mattina alle <b>7:30</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
+        <div class="sh-nota">L'email ti arriva <b>la mattina presto</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
       </div>
 
       </div></div>`,
@@ -224,9 +240,58 @@
        <button class="btn-primary b-save" data-action="save-prom" data-id="${esc(String(p.id || ""))}">Salva</button>`);
     /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
     try{ if(typeof ctrAscolta==="function") ctrAscolta("promemoria"); }catch(e){}
+    /* 18 nov 2026 (ok di Alex, foto prima) — «Rimanda»: solo su un promemoria
+       che c'e' gia' e non e' fatto. Sta in alto, dopo «Segna fatto». */
+    if (!isNew && p.id != null && p.stato !== "fatto") promRimandaMetti(p.id);
   }
 
+  /* I tre salti di «Rimanda». Si conta da OGGI, non dalla data vecchia: uno
+     che rimanda una cosa di tre giorni fa la vuole domani, non l'altro ieri. */
+  const PROM_RIMANDA = [[1, "A domani"], [3, "Fra 3 giorni"], [7, "Fra una settimana"]];
+
+  function promRimandaMetti(id) {
+    const testa = document.querySelector("#sheet .sh-head"); if (!testa) return;
+    let az = testa.querySelector(".sh-head-az");
+    if (!az) { az = document.createElement("div"); az.className = "sh-head-az"; testa.appendChild(az); }
+    const d = document.createElement("details");
+    d.className = "sh-altro prom-rimanda";
+    d.innerHTML = '<summary class="btn btn-sm">Rimanda ▾</summary><div class="sh-altro-pop">'
+      + PROM_RIMANDA.map(x => '<button class="btn btn-sm" data-chiudi="1" data-action="prom-rimanda" data-id="'
+          + esc(String(id)) + '" data-g="' + x[0] + '">' + x[1] + '</button>').join("") + '</div>';
+    const primo = az.querySelector(".az-prima");
+    if (primo) primo.after(d); else az.prepend(d);
+  }
+
+  function promFraGiorni(n) {
+    const [y, m, d] = todayStr().split("-").map(Number);
+    const dt = new Date(y, m - 1, d + (+n || 0));
+    return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0")
+           + "-" + String(dt.getDate()).padStart(2, "0");
+  }
+
+  async function promRimanda(id, giorni) {
+    const g = +giorni || 1;
+    const data = promFraGiorni(g);
+    /* la data cambia: l'avviso deve poter ripartire (come in salvaPromemoria) */
+    const q = await sb.from("promemoria").update({ data: data, inviato: false })
+      .eq("id", id).eq("user_id", sbUid).select("id");
+    if (q.error || !q.data || !q.data.length) {
+      toast("Non rimandato: " + ((q.error && q.error.message) || "nessuna riga scritta"));
+      return;
+    }
+    toast("Rimandato " + (g === 1 ? "a domani" : "al " + data.split("-").reverse().join("/")) + " ✔");
+    promRidisegna();
+  }
+
+  /* 18 nov 2026 — due tocchi veloci su «Salva» facevano nascere due promemoria
+     uguali. Finche' il primo salvataggio non ha risposto, il secondo aspetta. */
+  let _promSalvo = false;
   async function salvaPromemoria(id) {
+    if (_promSalvo) return;
+    _promSalvo = true;
+    try { await _salvaPromemoria(id); } finally { _promSalvo = false; }
+  }
+  async function _salvaPromemoria(id) {
     if (!sbUid) { toast("Devi essere loggato"); return; }
     const v = s => { const e = $(s); return e ? String(e.value || "").trim() : ""; };
 
@@ -267,7 +332,7 @@
     }
     closeSheet();
     toast(id ? "Promemoria aggiornato ✔" : "Promemoria creato ✔");
-    renderPromemoria();
+    promRidisegna();
   }
 
   /* Segna fatto / riapri. Se si ripete, segnarlo fatto NON lo chiude: lo
@@ -296,12 +361,20 @@
     } else {
       toast(stato === "fatto" ? "Segnato fatto ✔" : "Riaperto");
     }
-    renderPromemoria();
+    promRidisegna();
   }
 
   /* Butta = scrivi la data in eliminato_il. La riga resta e si recupera dal
      Cestino, come tutto il resto del gestionale. */
   async function promButta(id) {
+    /* 18 nov 2026 — «Butta» partiva al primo tocco, senza chiedere niente
+       (regola 22: la domanda dice QUALE cosa). Stessa domanda dello Scadenzario. */
+    const _p = promCache.find(x => String(x.id) === String(id));
+    const _nm = _p && _p.testo ? "«" + String(_p.testo).slice(0, 80) + "»" : "questo promemoria";
+    const _ok = (typeof window.tiChiedi === "function")
+      ? await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.", { titolo: "Mettere nel cestino " + _nm + "?", si: "Sì, nel cestino", no: "No", rosso: true })
+      : confirm("Mettere nel cestino " + _nm + "?");
+    if (!_ok) return;
     const q = await sb.from("promemoria")
       .update({ eliminato_il: new Date().toISOString() })
       .eq("id", id).eq("user_id", sbUid).select("id");
@@ -310,7 +383,7 @@
       return;
     }
     toast("Buttato nel cestino");
-    renderPromemoria();
+    promRidisegna();
   }
 
   // ---------------------------------------------------------------------
@@ -328,6 +401,7 @@
     if (a === "edit-prom")  { promForm(promCache.find(x => String(x.id) === String(id))); return; }
     if (a === "save-prom")  { salvaPromemoria(id || null); return; }
     if (a === "prom-stato") { promStato(id, t.dataset.v); return; }
+    if (a === "prom-rimanda") { promRimanda(id, t.dataset.g); return; }
     if (a === "del-prom")   { promButta(id); return; }
     if (a === "prom-vista") { promVista = t.dataset.v; renderPromemoria(); return; }
   });

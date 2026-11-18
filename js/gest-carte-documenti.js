@@ -637,6 +637,8 @@
   function dsVoci(r){
     const v=[];
     if(r._stato!=="preventivo")v.push({lab:"🧾 Crea il preventivo",action:"ds-prev",data:{id:r.id},top:true,prima:true});
+    /* 18 nov 2026 (si' di Alex): dalla richiesta gia' trasformata si apre il SUO preventivo */
+    else if(r._prevId)v.push({lab:"🧾 Apri il preventivo",action:"ds-prev-apri",data:{id:r.id},top:true,prima:true});
     v.push({lab:"📇 Vedi i contatti",action:"ds-apri",data:{id:r.id}});
     v.push({sep:true});
     if(r._stato==="chiusa")v.push({lab:"↩ Riapri",action:"ds-riapri",data:{id:r.id}});

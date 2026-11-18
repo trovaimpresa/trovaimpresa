@@ -794,6 +794,10 @@
     "edit-fatt":()=>typeof fattCache!=="undefined"&&fattCache,"edit-fattf":()=>typeof fattfCache!=="undefined"&&fattfCache};
   async function calVai(tab,azione,id){
     if(typeof closeSheet==="function")closeSheet();
+    /* 18 nov 2026 — si torna DA DOVE si e' partiti: dallo Scadenzario si apre
+       un mezzo o una fattura del fornitore, e chiudendo si finiva nel Calendario. */
+    const _daB=document.querySelector("nav.tabs button.active");
+    const _da=(_daB&&_daB.dataset.tab&&_daB.dataset.tab!==tab)?_daB.dataset.tab:"calendario";
     const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"]'); if(b)b.click();
     for(let i=0;i<40;i++){
       const L=(CAL_PRONTO[azione]||(()=>null))();
@@ -802,14 +806,14 @@
     }
     const x=document.createElement("button");x.type="button";x.style.display="none";
     x.dataset.action=azione;x.dataset.id=id;document.body.appendChild(x);x.click();x.remove();
-    calTornaQuandoChiude(tab);
+    calTornaQuandoChiude(tab,_da);
   }
   /* 17 nov 2026 (ok di Alex) — aperto dal Calendario un mezzo, un promemoria
      o una fattura (stanno in un'altra sezione), chiudendo si restava li'.
      Adesso, quando la finestra si chiude e sei ancora in quella sezione,
      torni al Calendario. Se intanto hai cambiato sezione tu, non ti sposta. */
   let _calTornaT=null;
-  function calTornaQuandoChiude(tab){
+  function calTornaQuandoChiude(tab,dove){
     if(_calTornaT)clearInterval(_calTornaT);
     let vista=false, giri=0;
     const attiva=()=>{const b=document.querySelector("nav.tabs button.active");return b?b.dataset.tab:"";};
@@ -820,7 +824,7 @@
       if(attiva()!==tab||(!vista&&giri>20)||giri>12000){clearInterval(_calTornaT);_calTornaT=null;return;}
       if(!vista)return;
       clearInterval(_calTornaT);_calTornaT=null;
-      const b=document.querySelector('nav.tabs button[data-tab="calendario"]');if(b)b.click();
+      const b=document.querySelector('nav.tabs button[data-tab="'+(dove||"calendario")+'"]');if(b)b.click();
     },300);
   }
   document.addEventListener("click",function(e){

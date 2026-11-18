@@ -75,6 +75,22 @@
     t.click();
   });
 
+  /* 18 nov 2026 — LE AZIONI DELLA SCHEDA GIUSTA.
+     «Apri» su una scheda mette da parte le altre sue azioni (_azPendenti) e la
+     finestra che si apre se le prende. Lo faceva l'ascoltatore qui sotto. Ma i
+     Promemoria hanno un ascoltatore LORO (js/gest-promemoria.js), che e'
+     caricato prima e quindi parte prima: la finestra si apriva con le azioni
+     del promemoria aperto LA VOLTA PRIMA. Aprivi A, poi B, premevi «Butta» e
+     nel Cestino finiva A; e dopo, «Nuovo cliente» si apriva con «Segna fatto»
+     e «Butta» di un promemoria.
+     Adesso lo fa questo ascoltatore, che lavora «in discesa» (capture) e
+     quindi parte prima di TUTTI gli altri, in qualunque file stiano. */
+  document.addEventListener("click",function(e){
+    const t=e.target&&e.target.closest?e.target.closest("[data-action]"):null;if(!t)return;
+    const a=String(t.dataset.action||""),id=t.dataset.id;
+    if(AZ_APERTURA.test(a)) _azPendenti=AZ_APRI[a+":"+String(id==null?"":id)]||null;
+  },true);
+
   document.addEventListener("click",async e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
@@ -83,7 +99,8 @@
     if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
     /* «Apri» su una scheda: le altre azioni di quella scheda aspettano qui,
        e se le prende la finestra appena si apre (vedi openSheetGrande). */
-    if(AZ_APERTURA.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
+    /* 18 nov 2026 — questa riga adesso sta nell'ascoltatore qui sopra, che
+       parte PRIMA di tutti gli altri (vedi «LE AZIONI DELLA SCHEDA GIUSTA»). */
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){
@@ -208,6 +225,7 @@
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);
     if(a==="ds-prev")return dsCreaPreventivo(id);
+    if(a==="ds-prev-apri"){const _r=dsCache.find(x=>String(x.id)===String(id));if(!_r||!_r._prevId){toast("Non trovo il preventivo di questa richiesta");return;}closeSheet();return window.apriCosa("prev",_r._prevId);}
     if(a==="ds-chiudi")return dsChiudi(id,false);
     if(a==="ds-riapri")return dsChiudi(id,true);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
@@ -857,7 +875,10 @@
          cliccare due volte, o riaprire la scheda) per ritrovarsi due, tre
          scadenze future identiche. Cosi' invece il database non tocca niente e
          non nasce niente. */
-      const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).neq("stato",v).select("id");
+      /* 18 nov 2026 — si chiede indietro TUTTA la riga: la prossima si fa da
+         quella, non dalla memoria dell'elenco (che dal Calendario puo' essere
+         vuota: e allora la prossima non nasceva, senza dirlo). */
+      const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).neq("stato",v).select("*");
       if(error){toast("Errore: "+error.message);return;}
       if(!okSc||!okSc.length){
         const _g=scadCache.find(x=>String(x.id)===String(id));
@@ -874,19 +895,43 @@
       let _rip="";
       if(v==="fatta"){
         try{
-          const vecchia=scadCache.find(x=>String(x.id)===String(id));
+          const vecchia=(okSc&&okSc[0]&&okSc[0].titolo!==undefined)?okSc[0]:scadCache.find(x=>String(x.id)===String(id));
           const n=vecchia?(+vecchia.ripeti_mesi||0):0;
           if(n>0&&vecchia.data_scadenza){
             const nuovaData=_mesiDopo(vecchia.data_scadenza,n);
-            const {error:e2}=await sb.from("gest_scadenze").insert({
-              user_id:sbUid, mestiere_id:vecchia.mestiere_id||curMestiere(),
-              titolo:vecchia.titolo, tipo_pratica:vecchia.tipo_pratica||null,
-              cliente_id:vecchia.cliente_id||null, mezzo_id:vecchia.mezzo_id||null,
-              lavoro_id:vecchia.lavoro_id||null, note:vecchia.note||null,
-              avvisa:vecchia.avvisa!==false, ripeti_mesi:n,
-              data_scadenza:nuovaData, stato:"aperta"});
-            if(e2)_rip=" — ma la prossima non è stata creata: "+e2.message;
-            else  _rip=" — la prossima è il "+fdate(nuovaData);
+            const _rep=vecchia.mestiere_id||curMestiere();
+            /* 18 nov 2026 — collaudo dello Scadenzario: «Segna fatta», «Riapri»,
+               «Segna fatta» di nuovo faceva DUE prossime uguali (visto dal vivo).
+               Se la prossima c'e' gia' (stesso nome, stesso giorno, ancora
+               aperta) non se ne fa un'altra. Se non si riesce a guardare, si
+               crea lo stesso: meglio un doppione che una scadenza persa. */
+            let _giaC=false;
+            try{
+              const {data:gia}=await sb.from("gest_scadenze").select("id")
+                .eq("user_id",sbUid).eq("mestiere_id",_rep).eq("titolo",vecchia.titolo)
+                .eq("data_scadenza",nuovaData).neq("stato","fatta").limit(1);
+              _giaC=!!(gia&&gia.length);
+            }catch(_){}
+            if(_giaC) _rip=" — la prossima c'è già: è il "+fdate(nuovaData);
+            else{
+              /* la persona: prima la prossima la perdeva (il patentino di Mario
+                 rinasceva senza Mario). Se la colonna non c'e', si riprova senza. */
+              const _nuova={
+                user_id:sbUid, mestiere_id:_rep,
+                titolo:vecchia.titolo, tipo_pratica:vecchia.tipo_pratica||null,
+                cliente_id:vecchia.cliente_id||null, mezzo_id:vecchia.mezzo_id||null,
+                lavoro_id:vecchia.lavoro_id||null, note:vecchia.note||null,
+                operatore_id:vecchia.operatore_id||null,
+                avvisa:vecchia.avvisa!==false, ripeti_mesi:n,
+                data_scadenza:nuovaData, stato:"aperta"};
+              let {error:e2}=await sb.from("gest_scadenze").insert(_nuova);
+              if(e2&&String(e2.message||"").indexOf("operatore_id")>=0){
+                delete _nuova.operatore_id;
+                ({error:e2}=await sb.from("gest_scadenze").insert(_nuova));
+              }
+              if(e2)_rip=" — ma la prossima non è stata creata: "+e2.message;
+              else  _rip=" — la prossima è il "+fdate(nuovaData);
+            }
           }
         }catch(e){}
       }

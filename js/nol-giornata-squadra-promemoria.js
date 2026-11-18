@@ -232,7 +232,12 @@
      slitta. */
   function promProssima(d,mesi){
     const [y,m,g]=String(d).split("-").map(Number);
-    const dt=new Date(y,m-1+(+mesi||0),g);
+    /* 18 nov 2026 — il 31 gennaio «ogni mese» saltava febbraio (finiva al
+       3 marzo): adesso si ferma all'ultimo giorno del mese. Uguale a
+       js/gest-promemoria.js. */
+    const primo=new Date(y,m-1+(+mesi||0),1);
+    const ultimo=new Date(primo.getFullYear(),primo.getMonth()+1,0).getDate();
+    const dt=new Date(primo.getFullYear(),primo.getMonth(),Math.min(g,ultimo));
     return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
   }
 
@@ -305,12 +310,19 @@
       <div class="field"><label>Ora</label><input type="time" id="p-ora" value="${esc(promOra(p.ora))}"></div>
       <div class="field"><label>Avvisami</label><select id="p-avvisa">${opz(PROM_AVVISI,p.avvisa_giorni||0)}</select></div>
       <div class="field"><label>Si ripete</label><select id="p-ripeti">${opz(PROM_RIPETI,p.ripeti_mesi||"")}</select></div>
-      <div class="sh-nota">L'email ti arriva la mattina alle <b>7:30</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
+      <div class="sh-nota">L'email ti arriva <b>la mattina presto</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-prom" data-id="${p.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
 
+  /* 18 nov 2026 — due tocchi veloci su «Salva» facevano due promemoria uguali */
+  let _promSalvo=false;
   async function salvaPromemoria(id){
+    if(_promSalvo)return;
+    _promSalvo=true;
+    try{ await _salvaPromemoria(id); }finally{ _promSalvo=false; }
+  }
+  async function _salvaPromemoria(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const v=s=>{const e=$(s);return e?String(e.value||"").trim():"";};
     const testo=v("#p-testo"); if(!testo){nolCampoManca("#p-testo","Manca cosa ti devo ricordare: scrivilo qui.");return;}

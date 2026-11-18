@@ -3439,3 +3439,117 @@ Funzioni nuove (ok di Alex il 18 nov):
 - **Giornata intera / Mezza giornata**: sotto i nomi accesi una riga per persona (`giorMezzeHTML`, azione `mz`, `c.mezza` = insieme dei nomi). `giorSalva` passa `mezze[]` a `giorScrivi`, che da' al massimo 4 ore. Se nel racconto c'e' «mezza giornata» l'AI la accende per quella scheda (`giorCompila`). «Parla» non la passa: resta 8.
 - **«modifica» completa** (`giorModK`, `giorModTutto`): apre la scheda piena e AGGIORNA il rapportino e le sue ore (non ne crea di nuovi): chi resta cambia giorno/cantiere/ore, chi entra ha una riga nuova, chi esce va nel Cestino. Le ore si dividono con gli altri cantieri del giorno; `giorRidaiOre` le rida' a chi resta nel giorno vecchio. ⚠️ Foto, spese e fatture NON si spostano con la giornata. Il vecchio riquadro col solo testo (`giorModifica`, `giorModSalva`) non si apre piu'.
 - **«togli» sotto ogni foto** nella finestra Foto (`gxFotoTogli`, secondo tocco «Sì, togli»): passa da `sb.from("gest_foto").delete()`, quindi va nel Cestino.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: RICHIESTE DAL SITO
+
+Collaudo dal vivo (computer 1440 e 375 px). ⚠️ Le richieste NON sono di un reparto: sono della SCHEDA dell'account (`preventivi.impresa_id` → `imprese` di Alex, id →36←). Per provarle si inseriscono con SQL →3← righe in `preventivi` con `impresa_id=36` e nome «PROVA CONTROLLORE …»; alla fine si cancellano `preventivi`, `gest_dalsito` (stato), il cliente e il preventivo creati in «ferramenta». Fatto: →0← righe.
+
+Dove sta il codice: `js/gest-carte-documenti.js` (elenco, `dsCarica`, `dsSegna`, `dsVoci`), `js/gest-richieste-chat.js` (`dsApri`, `dsContatti`, `dsRisposta`, `dsCreaPreventivo`), azioni `ds-*` in `js/gest-finestre-eventi.js`. Lo stato sta in `gest_dalsito` («nuova» = nessuna riga).
+
+Funziona (provato): elenco e le 3 viste coi numeri, pallino nel menu e riga nell'Assistente, apertura = «Vista», contatti (email, telefono), nomi con `<b>` e virgolette scritti puliti, richiesta quasi vuota, «Segna chiusa» / «Riapri», «Risposta pronta» con l'AI (1 credito: usa quello che ha scritto il cliente), «Crea il preventivo» (cliente in rubrica senza doppioni, titolo e note già scritti), telefono 375 px senza niente tagliato né sotto 13 px, console pulita.
+
+Sistemato (da pubblicare):
+- **«Preventivo fatto» senza preventivo**: lo stato cambiava appena si apriva il modulo. Con «Annulla» la richiesta restava «Preventivo fatto» e «Crea il preventivo» spariva. Adesso il modulo porta il numero della richiesta (`#pv-tit` `data-dalsito`) e `savePrev`, a preventivo scritto, chiama `window.dsPrevSalvato(pid, idPreventivo)`: stato + `gest_dalsito.preventivo_creato_id` (prima mai scritto).
+- **WhatsApp col numero sbagliato**: si toglieva «39» davanti a qualunque numero, quindi un cellulare 392…/393…/391… perdeva due cifre. `dsTelWa()` usa `waCleanTel` (js/gest-riepilogo-schede.js); un fisso (0…) non mostra WhatsApp. Stesso difetto nei pannelli (`js/pannelli-preventivi.js`): sistemato uguale.
+- **Schede ferme su «Nuova»** dopo averle aperte (il pallino scendeva, la scheda no): `rinfresca("dalsito")` in `dsApri`.
+- «Quando gli servirebbe» scritto 2026-12-10 → 10/12/2026 (`fdate`).
+- Senza telefono il cliente si ritrova per email (no doppioni). «WhatsApp» della risposta alto 44 px.
+
+Funzione nuova (sì di Alex, foto prima): pulsante **«Apri il preventivo»** nella richiesta già trasformata (`dsVoci` in js/gest-carte-documenti.js, azione `ds-prev-apri` in js/gest-finestre-eventi.js → `apriCosa("prev", _prevId)`). C'è solo se `gest_dalsito.preventivo_creato_id` è scritto: le richieste trasformate prima del 18 nov non ce l'hanno.
+
+Da sapere: in `gest_dalsito` di Alex ci sono →3← righe vecchie (richieste →16, 42, 43←, di prima dell'8 nov, non sue): non si vedono, non toccate. Le Giornate del 18 nov erano ancora in lavorazione in un'altra sessione: su GitHub non c'erano.
+
+Provato dal vivo dopo il push 44fa9dd, computer e 375 px: tutto ✔
+
+NON provati: una richiesta vera mandata dalla scheda pubblica (email di avviso comprese), gli incarichi dello studio tecnico (`incarichi_richieste`), la foto allegata, «Email» e «Copia» della risposta, il clic vero su WhatsApp, telefono vero.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: I PROMEMORIA
+
+Collaudo dal vivo (computer 1440 e 375 px). ⚠️ I promemoria NON sono di un reparto: sono dell'account (tabella `promemoria`, niente `mestiere_id`). La tabella era a →0← righe: le prove «PROVA CONTROLLORE …» si scrivono dal modulo vero e alla fine si cancellano con SQL (`delete … where testo ilike 'PROVA CONTROLLORE%'`). Fatto: →0← righe. Per non finire nell'email del mattino (parte alle 5:30 UTC) le prove hanno date del 2027 e si cancellano in giornata.
+
+Dove sta il codice: `js/gest-promemoria.js` (elenco `renderPromemoria`, scheda `promCard`, modulo `promForm`, `salvaPromemoria`, `promStato`, `promButta`, i clic in un ascoltatore SUO). Il pallino lo conta `renderContatori` (js/gest-riepilogo-schede.js), il Calendario li legge in `calAltreDate`, l'email in `netlify/functions/promemoria-mattina.js`. Il Noleggio ha la sua copia in `js/nol-giornata-squadra-promemoria.js`.
+
+Sistemato:
+- ⛔ **I pulsanti in alto erano del promemoria aperto LA VOLTA PRIMA.** Aprivi A, poi B, premevi «Butta» (o «Segna fatto») e toccava ad A. Alla prima apertura non c'erano proprio. E dopo, «Nuovo cliente» si apriva con «Segna fatto / Butta» di un promemoria. Causa: l'ascoltatore dei Promemoria è caricato prima di quello della pagina, che è quello che metteva da parte le azioni (`_azPendenti`). Adesso lo fa un ascoltatore «capture» in `js/gest-finestre-eventi.js`, che parte prima di tutti. ⚠️ Chi fa un file nuovo con un ascoltatore suo e un'azione `edit-…` / `apri-…` è coperto da quello.
+- **Due tocchi su «Salva» = due promemoria**: fermato (`_promSalvo`). Anche nel Noleggio.
+- **«Ogni mese» dal 31 gennaio saltava febbraio** (andava al 3 marzo): `promProssima` si ferma all'ultimo giorno del mese (28 febbraio). Anche nel Noleggio.
+- **Il pallino nel menu, l'Assistente e il Calendario** non si aggiornavano dopo Salva / Segna fatto / Butta: `promRidisegna()` → `rinfresca("promemoria","calendario","riepilogo")`.
+- **«Butta» senza domanda**: adesso chiede «Mettere nel cestino «…»?» (`tiChiedi`, come lo Scadenzario). Il banco non lo vedeva perché alla prima apertura i pulsanti in alto mancavano.
+- Nei «Fatti» in cima c'è l'ultimo. La nota del modulo diceva «alle 7:30»: d'inverno arriva alle 6:30 → «la mattina presto» (anche nel Noleggio).
+
+Da sapere:
+- Nelle prove, dopo un'azione aspettare che l'elenco si ridisegni prima di cliccare un'altra scheda; e i pulsanti in alto si cercano dentro `#sheet` (la finestra chiusa resta nella pagina).
+- «Salva» passa dal correttore delle parole (come le Giornate): se corregge, va premuto due volte. Ha cambiato «aggiunta una nota» in «Aggiunte una nota»: è il correttore generale, NON toccato.
+- Un promemoria «fatto» aperto dal Calendario mentre l'elenco è su «Da fare» prende i pulsanti dall'ultimo disegno che lo conteneva.
+- Uno che si ripete, segnato fatto in forte ritardo, va alla data dopo anche se è ancora passata (scelta del 14 set: si parte dalla SUA data).
+- Per provare il codice nuovo prima del push: le funzioni di `gest-promemoria.js` sono globali, si ridefiniscono nella pagina vera con `(0,eval)(String(funzione).replace(…))`.
+
+Aperto sui Promemoria:
+1. (chiuso) «Rimanda»: Alex ha detto sì, vedi sotto.
+2. NON provati: l'email del mattino con dentro un promemoria (parte una volta al giorno), «Parla» e la Chat con AI che scrivono/leggono un promemoria (costano crediti), il Noleggio dal vivo (solo banco), il telefono vero.
+3. In `strumenti-comuni.js` restano le vecchie funzioni promemoria dei pannelli (`apriPromemoria`, `eliminaPromemoria`…): nessuna pagina le chiama più (cercato in tutti gli html e js). Codice morto, non toccato.
+
+Funzione nuova (sì di Alex il 18 nov, foto prima): **«Rimanda ▾»** in alto nella finestra del promemoria, dopo «Segna fatto»: A domani / Fra 3 giorni / Fra una settimana (`PROM_RIMANDA`, `promRimandaMetti`, `promRimanda`, azione `prom-rimanda` in `js/gest-promemoria.js`). Si conta da OGGI, non dalla data vecchia; azzera `inviato` (l'avviso riparte). Non c'è sul promemoria nuovo né su quello fatto. La mette `promForm` dopo `openSheetGrande` (un `<details class="sh-altro">` suo: stile e chiusura sono quelli di «Altro ▾»). Sul telefono è una riga larga sotto «Segna fatto». ⚠️ NON nel Noleggio: lì le schede hanno un'altra grafica, serve prima la foto.
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: LO SCADENZARIO
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 5 scadenze e 1 persona «PROVA CONTROLLORE» (più una chiamata «Bollo», nata dal titolo vuoto), tutto cancellato anche dal Cestino: →0← righe, conti delle tabelle uguali a prima.
+
+Dove sta il codice: `js/gest-scadenze-pratiche.js` (elenco `renderScadenze`, scheda `scadCard`, modulo `scadForm`, `saveScad` → `_saveScad`, le righe in sola lettura `scadenzePersone` / `scadenzeMezzi`, il riquadro dentro il lavoro `renderLavScadenze`); i clic (`new-scad`, `edit-scad`, `scad-stato`, `del-scad`, `scad-persona`) in `js/gest-finestre-eventi.js`; i tipi `tipiScadenza` e `scadCache` in `js/gest-richieste-chat.js`; il controllo `ctrRegoleScadenza` in `js/gest-ai-moduli.js`; l'email in `netlify/functions/promemoria-mattina.js`.
+
+Sistemato e ONLINE (→d69f526←, Netlify riuscito, riprovato dal vivo dopo il push su computer e 375 px: tutto ✔, compreso `ctrRegoleScadenza`; banco `tools/banco-gestionale.js app`: ZERO difetti):
+- **Due tocchi su «Crea» = due scadenze** (visto dal vivo): freno `_scadSalvo`, come i Promemoria.
+- **La prossima perdeva la persona**: una scadenza che si ripete, segnata fatta, rinasceva senza `operatore_id` (il patentino di Mario senza Mario).
+- **«Segna fatta», «Riapri», «Segna fatta» = due prossime uguali**: adesso se la prossima c'è già (stesso nome, stesso giorno, aperta) non se ne fa un'altra, e lo dice.
+- La prossima si fa dalla riga che torna dal database (`.select("*")`), non da `scadCache`: dal Calendario la memoria può essere vuota e la prossima non nasceva.
+- **Una scadenza nuova nasceva col tipo «DURC»**: adesso parte da «— scegli —» (solo le NUOVE). Titolo vuoto + tipo scelto = il titolo è il tipo (regola dell'11 nov), titolo vuoto + nessun tipo = casella rossa.
+- **Ordine**: in «Tutte» le fatte vanno in fondo (stavano in mezzo alle aperte); in «Fatte» in cima c'è l'ultima.
+- Il controllo diceva «DA CORREGGERE: manca il titolo» anche quando il Salva lo accetta; e «data passata: il promemoria non ti arriverà più» (non vero: torna nell'email del lunedì).
+- Tolta dal modulo la frase «Prima dovevi ricordartene tu».
+
+Funziona (provato): crea, modifica, scaduta in rosso, pallino nel menu, Riepilogo, Calendario (si apre da lì e chiudendo si torna lì), pulsanti in alto della scadenza giusta, cestino → rimetti a posto, note con `<b>` e virgolette scritte pulite, 375 px senza niente fuori né sotto 13 px, console pulita.
+
+Da sapere:
+- Le correzioni sono state provate PRIMA del push rimettendo le funzioni nella pagina vera (`(0,eval)(String(fn).replace(…))`); `scad-stato` sta dentro l'ascoltatore grande: per provarlo si mette un ascoltatore «capture» con la copia del pezzo. `ctrRegoleScadenza` invece NON si riesce a sostituire così (il controllore tiene la funzione vecchia): si prova dopo il push.
+- Lo Scadenzario del Noleggio (`js/nol-giornata-squadra-promemoria.js`) è spento (la sezione non c'è nel menu): non toccato.
+- Nelle prove: le date nel 2027 o passate da più di un giorno non entrano nell'email del mattino.
+
+Aperto sullo Scadenzario:
+1. (chiuso) Le fatture dei fornitori nello Scadenzario: Alex ha detto sì, vedi sotto.
+2. Nel Cestino due scadenze con lo stesso nome non si distinguono (manca la data nella riga).
+3. NON provati: l'email del mattino con dentro una scadenza (parte una volta al giorno), Chat con AI e «Parla» che riempiono la scadenza col tipo nuovo «— scegli —» (costano crediti; `riempiTendina('s-tipo', …, 'Altro')` non è cambiata), lo studio tecnico, il telefono vero.
+
+Funzione nuova (sì di Alex il 18 nov, foto prima): **le fatture dei fornitori da pagare nello Scadenzario** (`scadenzeFornitori(mid)` in `js/gest-scadenze-pratiche.js`, righe con `_forn:true`, in sola lettura come mezzi e persone). Solo quelle NON pagate e con la scadenza scritta, del reparto. «Apri» passa da `cal-vai` → Fornitori → `edit-fattf`. E `calVai` (js/gest-schede-clienti.js) adesso riporta DA DOVE si è partiti (`_da`): dallo Scadenzario, chiuso un mezzo o una fattura, si finiva nel Calendario.
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
+
+# 18 NOVEMBRE 2026 — UNA VOCE PER VOLTA: L'AGENDA OPERATORE
+
+Collaudo dal vivo nel reparto «ferramenta» (computer 1440 e 375 px): 3 persone «PROVA CONTROLLORE» (una nel Cestino), 5 lavori, 4 righe di ore, 12 timbrature create con SQL. Tutto cancellato: →0← righe, conti delle tabelle uguali a prima.
+
+Dove sta il codice: linguetta «Lavori» = `renderAgenda`, `agVoci` in `js/gest-elimina-reparto.js`; linguetta «Ore fatte» = `renderOre`, `oreMettiUscita`, `oreScaricaCsv` in `js/gest-ore-spese.js`; i clic (`ag-stato`, `ag-vista`, `ore-mese`, `ore-fix`, `ore-apri`, `ore-csv`) in `js/gest-finestre-eventi.js`; la pagina in `gestionale-app.html` (`#agenda`). «Ore fatte» conta TUTTA l'azienda, non il reparto.
+
+Sistemato (provato sulla pagina vera PRIMA del push; banco `tools/banco-gestionale.js app`: ZERO difetti):
+- ⛔ **«Metti l'uscita» non faceva niente.** Il pulsante stava dentro uno `<span class="fix" onclick="event.stopPropagation()">`: il clic non arrivava all'ascoltatore della pagina. Tolto lo stop (la riga del giorno non sta dentro la riga della persona).
+- **Il mese delle timbrature si tagliava sull'ora di Greenwich**: chi timbrava fra mezzanotte e l'una del primo del mese finiva nel mese prima, come «giornata rimasta aperta», e le sue ore sparivano. Adesso i confini sono `new Date(anno, mese, 1).toISOString()`.
+- **Ore scritte senza nome**: si buttavano via e il totale «Ore scritte a mano» era più basso del vero (14 invece di 17). Adesso hanno la riga «Ore senza nome» (`_senza_nome`, non conta in «Chi ha timbrato»).
+- **Persona nel Cestino**: in «Ore fatte» era «Persona non in elenco», nei Lavori la riga non diceva nessun nome. Adesso «Nome (nel cestino)» (letto con `sb.raw`).
+- ⛔ **Il lavoro di una persona nel Cestino la PERDEVA col Salva** (`jobForm`: la tendina «Chi ci va» restava su «— nessuno —»). Adesso la sua voce resta nella tendina (`option[data-fuori]`).
+- **«Tutti»**: i lavori fatti stavano in cima. Adesso in fondo, l'ultimo per primo.
+- Se le ore scritte non si leggono lo dice (prima: 0 in silenzio).
+
+Funziona (provato): filtro per persona, «Da fare / Tutti», «Apri» → modifica → Salva e l'Agenda si aggiorna, «Segna fatto» dall'alto, mese prima / dopo, differenza timbrate-scritte, file per Excel (letto il contenuto), 375 px senza niente fuori né sotto 13 px, console pulita.
+
+Da sapere:
+- Sul computer E sul telefono i lavori sono schede `.job` (`cards` di `renderTabella`); `display:none` scritto a mano su una scheda sul computer non la nasconde.
+- Le foto del pannello Browser arrivano in ritardo: una foto presa nello stesso giro del comando mostra lo stato di PRIMA.
+- Per provare prima del push: `(0,eval)(String(renderOre).replace(…))` funziona per `renderOre` e `renderAgenda`.
+
+Aperto sull'Agenda operatore:
+1. (chiuso) Funzione nuova, sì di Alex il 18 nov (foto prima): nella tendina «Operatore» la voce **«Nessuno assegnato»** (`agFilter.op=="_nessuno"`) e il numero dei lavori accanto a ogni nome (`_agN`, conta quelli che si stanno guardando: «Da fare» o «Tutti»). La tendina adesso si riempie DOPO aver letto i lavori (`renderAgenda`).
+2. La linguetta viola «F» a sinistra copre la prima lettera di «Mostra» sul telefono (vale per tutte le sezioni, come «Parla»).
+3. NON provati: l'app dell'operaio che timbra davvero (le timbrature sono state scritte con SQL), lo studio tecnico, il telefono vero. La correzione di `jobForm` va riprovata dal vivo dopo il push (non si riesce a sostituire nella pagina).
+
+Dopo il giro del menu di impresa e artigiano (deciso da Alex il 18 nov): si riparte dal GESTIONALE DEL PROFESSIONISTA (studio tecnico, `?vedi=professionista`), stesse regole, una voce per volta. Prima le voci che ha solo lui (Pratiche, Computo metrico, Parcella, Crediti formativi, Collaboratori…), poi quelle in comune guardando solo cosa cambia per lo studio. All'ultima voce del menu: scrivere ad Alex l'elenco delle voci dello studio nell'ordine del suo menu e dargli il prompt per la prima.
