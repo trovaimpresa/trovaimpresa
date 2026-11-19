@@ -23,7 +23,7 @@
   var CSS =
     '.ti-reel{box-sizing:border-box;max-width:1100px;margin:44px auto;padding:34px 40px;border-radius:22px;color:#fff;font-family:inherit;text-align:left;' +
       'background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);' +
-      'background-size:40px 40px;border:3px solid #ff8800 !important;box-shadow:0 12px 30px rgba(0,0,0,.25) !important;' +
+      'background-size:40px 40px;border:0 !important;box-shadow:0 12px 30px rgba(0,0,0,.25) !important;' +
       'display:flex;align-items:center;justify-content:space-between;gap:28px}' +
     '.ti-reel *{box-sizing:border-box}' +
     '.ti-reel > div,.ti-reel .trl-su,.ti-reel .trl-h,.ti-reel .trl-p{border:0 !important;background:none !important;box-shadow:none !important;padding-left:0;padding-right:0}' +
