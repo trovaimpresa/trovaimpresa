@@ -3728,3 +3728,24 @@ Nuovo (sì di Alex, foto approvata): 3 riquadri del mese (incassato, spese, util
 Differenza voluta, NON toccata: Tasse e fisco conta solo le fatture pagate (di tutti i reparti + noleggio); il Report conta il reparto e, senza fatture, i lavori pagati. Per le tasse vale la fattura.
 Non c'è un filtro (periodo/cliente) nel Report: non chiesto.
 ⬜ Non provati dal vivo: noleggio interno (serve il gestionale Noleggio), un reparto CON fatture pagate (vietato emetterle), telefono vero.
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: GALLERIA (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta»: 2 lavori «PROVA CONTROLLORE» (bagno, cucina), 5 foto e 1 video caricati dal modulo vero (foto da 4000 px → 1600 px, 1,65 MB → 0,32 MB), filtri, foto grande, Cestino e ritorno, «Guarda in Galleria» dal lavoro. Poi cancellato tutto, anche dal deposito dei file: conti tornati a prima (5 foto, 1 video, 5 lavori di Alex; nel deposito 7 + 2 file, di cui 2 vecchi senza riga: `video-di-prova.mp4` del 1 ago e `prova-claude.jpg` del 10 nov, NON toccati).
+
+Dove sta il codice: `js/gest-galleria-mappa.js` (`renderGalleria`, `galUploadForm`, `galCarica`, `galDelFoto`/`galDelVideo`, la foto grande `galVedi` / `galMostra` / `galSposta` / `galScarica` / `galChiudiVedi`), i clic in `js/gest-finestre-eventi.js` (`gal-*`, `close-lb`), il contenitore `#lightbox` in `gestionale-app.html`, lo stile in `css/gestionale.css` (`#lightbox …`).
+
+Difetti trovati e sistemati:
+1. Nessun ordine: le foto uscivano come capitava (e cambiavano posto dopo un ritorno dal Cestino). Ora in cima l'ultima caricata, foto e video mescolati per data; il cantiere con la cosa più nuova sta sopra.
+2. Nel Cestino foto e video della Galleria erano «(senza nome)» (non hanno `nome_file`; `gest_video` la colonna non ce l'ha). Ora «Foto prima del lavoro — <lavoro>» (`cestNomeMedia`, e `cestNomiLavori` legge anche i lavori di foto e video).
+3. Un file sbagliato (video .avi, un .txt fra le foto) dava il messaggio del deposito in inglese («mime type … is not supported»). Ora si controlla prima e lo dice in italiano; se una parte va e una no, il messaggio dice QUALE (prima «qualcosa non è andato»). «1 foto caricato» → «caricata».
+4. La foto grande stava SOTTO «Parla» e la linguetta viola (z-index 80 contro 800): ora 999990, e la linguetta si nasconde. Esc la chiude (prima no).
+5. Con un cantiere scelto nel filtro, «Carica foto o video» apre col lavoro già scelto.
+6. Report (sessione di prima): le 3 scritte «Novembre · incassato/spese/utile» a 13 px → 14 (il banco le dava rosse).
+
+Nuovo (sì di Alex, foto prima): la foto grande della Galleria ha in alto il lavoro · Prima/Finito, «⬇ Scarica» e «✕ Chiudi»; le frecce ‹ › (anche tastiera ← → e dito che scorre sul telefono); sotto «2 di 6 · data · chi». I video si guardano lì dentro (prima si aprivano in un'altra pagina). «Scarica» chiede un indirizzo firmato con `download` (nome tipo `lavoro-prima-2026-11-19-2.jpg`): il file si salva invece di aprirsi. ⚠️ Le foto aperte da altre parti (scheda del lavoro, Giornate) usano ancora `view-foto`: la foto e basta.
+
+Da sapere:
+- Provare nella pagina vera con `(0,eval)`: le `let` dentro un eval restano chiuse lì dentro (non diventano globali). Per provare `galVedi` & co. bisogna dichiarare `var galLista, galPos, galInfo` fuori. E `RENDER_TAB` tiene la `renderGalleria` VECCHIA: si chiama a mano.
+- Le miniature scaricano la foto intera ridotta (≈300 KB l'una, `loading="lazy"`): le miniature vere di Supabase costano a parte, non usate.
+⬜ Non provati: un video vero da iPhone (.mov), «Scarica» sul telefono vero, una persona della squadra che carica (in ferramenta c'è solo «Capo»), lo studio tecnico.

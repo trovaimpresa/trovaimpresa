@@ -49,6 +49,108 @@
      Ogni sezione fa il suo mestiere: le foto e i video sono mestiere di qui.
      ============================================ */
 
+  /* 19 nov 2026 — la foto a tutto schermo si chiude anche col tasto Esc.
+     «capture» e stop: se la foto e' stata aperta da dentro un lavoro, Esc
+     chiude la foto e basta, non anche la finestra del lavoro sotto. */
+  document.addEventListener("keydown",function(e){
+    const lb=document.getElementById("lightbox");
+    if(!lb||!lb.classList.contains("open"))return;
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();galChiudiVedi();return;}
+    /* le frecce della tastiera: foto prima / dopo, solo se aperta dalla Galleria */
+    if(lb.classList.contains("lb-gal")&&(e.key==="ArrowLeft"||e.key==="ArrowRight")){
+      e.preventDefault();e.stopPropagation();galSposta(e.key==="ArrowLeft"?-1:1);
+    }
+  },true);
+
+  /* ===== 19 nov 2026 — LA FOTO GRANDE: SCARICA, CHIUDI, FRECCE (sì di Alex) =====
+     Prima la foto a tutto schermo era solo l'immagine: niente pulsanti, per
+     chiudere si toccava lo sfondo, per vedere la dopo si chiudeva e si
+     riapriva, e non si poteva scaricare. I video si aprivano in un'altra pagina.
+     Adesso dalla Galleria si apre «galVedi»: barra in alto con il lavoro,
+     «Scarica» e «Chiudi»; frecce ‹ › (anche tastiera e dito che scorre); sotto
+     «2 di 6 · data · chi». I video si guardano qui dentro.
+     ⚠️ Le foto aperte da altre parti (scheda del lavoro, Giornate) usano
+     ancora «view-foto», la foto e basta: non toccate. */
+  let galInfo={};         /* id -> {kind,lav,tag,op,quando,path}: lo scrive renderGalleria */
+  let galLista=[], galPos=0;
+  function galVedi(id){
+    /* l'ordine e' quello che si vede a schermo, filtri compresi */
+    galLista=Array.from(document.querySelectorAll('#gal-body [data-action="gal-vedi"]'))
+      .map(el=>el.dataset.id).filter(x=>galInfo[x]);
+    galPos=Math.max(0,galLista.indexOf(String(id)));
+    if(!galLista.length)return;
+    galMostra();
+  }
+  function galSposta(d){
+    if(galLista.length<2)return;
+    galPos=(galPos+d+galLista.length)%galLista.length;
+    galMostra();
+  }
+  async function galMostra(){
+    const lb=$("#lightbox");if(!lb)return;
+    const id=galLista[galPos], g=galInfo[id];if(!g)return;
+    lb.querySelectorAll(".lb-x").forEach(e=>e.remove());
+    const img=$("#lb-img");
+    if(img){img.removeAttribute("src");img.style.display="none";}
+    const n=galLista.length;
+    const giorno=g.quando?fdate(String(g.quando).slice(0,10)):"";
+    lb.insertAdjacentHTML("beforeend",
+       '<div class="lb-x lb-bar"><span class="lb-t">'+esc(g.lav)+' · '+esc(g.tag)+'</span>'
+      +'<button type="button" class="lb-b" data-action="gal-scarica">⬇ Scarica</button>'
+      +'<button type="button" class="lb-b lb-scuro" data-action="close-lb">✕ Chiudi</button></div>'
+      +(n>1?'<button type="button" class="lb-x lb-fr lb-sx" data-action="gal-prec" aria-label="Foto prima">‹</button>'
+           +'<button type="button" class="lb-x lb-fr lb-dx" data-action="gal-succ" aria-label="Foto dopo">›</button>':"")
+      +'<div class="lb-x lb-sotto">'+(galPos+1)+' di '+n+(giorno?' · '+esc(giorno):"")+(g.op?' · '+esc(g.op):"")+'</div>');
+    lb.classList.add("open","lb-gal");
+    if(g.kind==="foto"){
+      if(!fotoCache[id])await galFirma("gestionale-foto",[{id,storage_path:g.path}],fotoCache);
+      if(galLista[galPos]!==id)return;               /* nel frattempo si e' passati a un'altra */
+      if(img&&fotoCache[id]){img.src=fotoCache[id];img.style.display="";}
+    }else{
+      if(!galVideoCache[id])await galFirma("gestionale-video",[{id,storage_path:g.path}],galVideoCache);
+      if(galLista[galPos]!==id)return;
+      if(!galVideoCache[id]){toast("Video non ancora pronto, riprova tra un attimo");return;}
+      /* data-action="gal-nulla": toccare il video (play, volume) non deve chiudere */
+      lb.insertAdjacentHTML("beforeend",'<video class="lb-x lb-video" data-action="gal-nulla" controls playsinline preload="metadata" src="'+esc(galVideoCache[id])+'"></video>');
+    }
+  }
+  function galChiudiVedi(){
+    const lb=$("#lightbox");if(!lb)return;
+    lb.querySelectorAll("video").forEach(v=>{try{v.pause();}catch(e){}});
+    lb.querySelectorAll(".lb-x").forEach(e=>e.remove());
+    const img=$("#lb-img");if(img)img.style.display="";
+    lb.classList.remove("open","lb-gal");
+  }
+  /* Scarica: un indirizzo firmato col nome del file, cosi' il telefono e il
+     computer lo salvano invece di aprirlo (vale anche su iPhone). */
+  async function galScarica(){
+    const id=galLista[galPos], g=galInfo[id];if(!g||!g.path)return;
+    const est=(String(g.path).match(/\.([a-z0-9]{2,5})$/i)||["",g.kind==="foto"?"jpg":"mp4"])[1];
+    const pulito=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50);
+    const nome=[pulito(g.lav)||"lavoro",pulito(g.tag).toLowerCase(),String(g.quando||"").slice(0,10),String(galPos+1)].filter(Boolean).join("-")+"."+est;
+    try{
+      const {data,error}=await sb.storage.from(g.kind==="foto"?"gestionale-foto":"gestionale-video")
+        .createSignedUrl(g.path,600,{download:nome});
+      if(error||!data||!data.signedUrl){toast("Non riesco a scaricarla: "+traduciErrore(String((error&&error.message)||"riprova")));return;}
+      const a=document.createElement("a");a.href=data.signedUrl;a.download=nome;a.rel="noopener";
+      document.body.appendChild(a);a.click();a.remove();
+      toast((g.kind==="foto"?"Foto":"Video")+" in arrivo nei download");
+    }catch(e){toast("Non riesco a scaricarla: controlla la connessione");}
+  }
+  /* il dito che scorre sulla foto, sul telefono */
+  (function(){
+    let x0=null;
+    document.addEventListener("touchstart",function(e){
+      const lb=document.getElementById("lightbox");
+      x0=(lb&&lb.classList.contains("lb-gal")&&lb.contains(e.target)&&e.touches.length===1)?e.touches[0].clientX:null;
+    },{passive:true});
+    document.addEventListener("touchend",function(e){
+      if(x0==null||!e.changedTouches.length)return;
+      const dx=e.changedTouches[0].clientX-x0;x0=null;
+      if(Math.abs(dx)>60)galSposta(dx>0?-1:1);
+    },{passive:true});
+  })();
+
   let galVideoCache={};   /* id riga gest_video -> url firmato, per aprire il video */
   let galRigheFoto={};    /* id -> riga: serve per eliminare (storage_path) */
   let galRigheVideo={};
@@ -81,8 +183,11 @@
       galVuoto(box);return;
     }
     const _rG=await Promise.all([
-      sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
-      sb.from("gest_video").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
+      /* 19 nov 2026 — created_at: in cima le ULTIME caricate (regola di Alex).
+         Prima non c'era nessun ordine: le foto uscivano come capitava, e dopo
+         un «Rimetti a posto» dal Cestino cambiavano di posto. */
+      sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore,created_at").eq("user_id",sbUid),
+      sb.from("gest_video").select("id,lavoro_id,storage_path,tipo,operatore,created_at").eq("user_id",sbUid),
       sb.from("gest_lavori").select("id,descrizione,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
     /* 12 nov 2026 — regola 20: senza rete non si dice «Nessuna foto» */
@@ -143,10 +248,16 @@
     if(!F.length&&!V.length){galVuoto(box);return;}
 
     /* raggruppo per cantiere */
+    /* 19 nov 2026 — l'ultima caricata va in cima: foto e video mescolati per
+       data, e il cantiere con la cosa piu' nuova sta sopra agli altri (la Map
+       tiene l'ordine in cui i cantieri compaiono). */
     const gruppi=new Map();
     const metti=(x,kind)=>{const k=x.lavoro_id||"";if(!gruppi.has(k))gruppi.set(k,[]);gruppi.get(k).push({x,kind});};
-    F.forEach(f=>metti(f,"foto"));V.forEach(v=>metti(v,"video"));
+    F.map(f=>({x:f,kind:"foto"})).concat(V.map(v=>({x:v,kind:"video"})))
+      .sort((a,b)=>String(b.x.created_at||"").localeCompare(String(a.x.created_at||"")))
+      .forEach(o=>metti(o.x,o.kind));
 
+    galInfo={};
     let html="";
     gruppi.forEach((arr,k)=>{
       const nF=arr.filter(a=>a.kind==="foto").length, nV=arr.length-nF;
@@ -156,13 +267,14 @@
       arr.forEach(({x,kind})=>{
         const q=quando(x), tag=q==="prima"?"Prima":"Finito", tcls=q==="prima"?"prima":"dopo";
         const op=galNomeOp(x.operatore);
+        galInfo[x.id]={kind,lav:lavName[k]||"",tag,op,quando:x.created_at||"",path:x.storage_path||""};
         if(kind==="foto"){
-          html+='<div class="thumb"><img data-gfoto="'+esc(x.id)+'" loading="lazy" decoding="async" width="150" height="150" data-action="view-foto" data-id="'+esc(x.id)+'" alt="">'
+          html+='<div class="thumb"><img data-gfoto="'+esc(x.id)+'" loading="lazy" decoding="async" width="150" height="150" data-action="gal-vedi" data-id="'+esc(x.id)+'" alt="">'
               + '<span class="thtag '+tcls+'">'+tag+'</span>'
               + (op?'<span class="thop">'+esc(op)+'</span>':"")
               + '<button class="thdel" data-action="gal-del-foto" data-id="'+esc(x.id)+'" title="Elimina">×</button></div>';
         }else{
-          html+='<div class="thumb thumb-video" data-action="gal-play" data-id="'+esc(x.id)+'">'
+          html+='<div class="thumb thumb-video" data-action="gal-vedi" data-id="'+esc(x.id)+'">'
               + '<div class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>Video</span></div>'
               + '<span class="thtag '+tcls+'">'+tag+'</span>'
               + (op?'<span class="thop">'+esc(op)+'</span>':"")
@@ -561,7 +673,10 @@
   /* ---- finestra "Carica foto o video" ---- */
   function galUploadForm(){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
-    const lavOpts=(galLavCache||[]).map(l=>'<option value="'+esc(l.id)+'">'+esc(l.descrizione||"Lavoro")+'</option>').join("");
+    /* 19 nov 2026 — se in Galleria stai guardando un cantiere solo, il lavoro
+       e' gia' scelto: prima andava cercato di nuovo nella tendina. */
+    const lavPre=String(galFilter&&galFilter.lav||"");
+    const lavOpts=(galLavCache||[]).map(l=>'<option value="'+esc(l.id)+'"'+(String(l.id)===lavPre?" selected":"")+'>'+esc(l.descrizione||"Lavoro")+'</option>').join("");
     const dipOpts=dipCache.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.nome)+'</option>').join("");
     /* 10 agosto 2026 — era rimasta l'ultima finestrella piccola su un modulo.
        Convertita a finestra grande a due colonne come tutte le altre. */
@@ -620,6 +735,12 @@
       let i=0;
       for(const file of fotoFiles){
         i++;dice("Foto "+i+" di "+fotoFiles.length+"…");
+        /* 19 nov 2026 — un file che non e' una foto il deposito lo rifiuta con
+           un messaggio in inglese («mime type … is not supported»): si dice
+           prima, in italiano. */
+        if(!/^image\//i.test(file.type||"")&&!/\.(jpe?g|png|webp|heic)$/i.test(file.name||"")){
+          errori.push("«"+file.name+"» non è una foto");continue;
+        }
         const pr=await preparaFileUpload(file);
         if(pr.errore){errori.push(pr.errore);continue;}
         const safe=pr.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -631,7 +752,11 @@
         nF++;
       }
       if(vidFile){
-        if(vidFile.size>52428800){errori.push("Il video supera i 50 MB");}
+        /* 19 nov 2026 — il deposito prende solo MP4, MOV e WEBM: gli altri
+           tornavano con un messaggio in inglese. */
+        const vidOk=/^video\/(mp4|quicktime|webm)$/i.test(vidFile.type||"")||(!vidFile.type&&/\.(mp4|mov|webm)$/i.test(vidFile.name||""));
+        if(vidFile.size>52428800){errori.push("Il video pesa più di 50 MB: fanne uno più corto (circa un minuto)");}
+        else if(!vidOk){errori.push("Questo video non si può caricare: va bene MP4 o MOV, quelli fatti col telefono");}
         else{
           dice("Sto caricando il video…");
           const safe=vidFile.name.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -646,10 +771,13 @@
       }
     }catch(e){errori.push(String(e&&e.message||e));}
     if(btn){btn.disabled=false;btn.textContent="Carica";}
-    if(errori.length&&!nF&&!nV){dice(errori[0]);toast(errori[0]);return;}
+    if(errori.length&&!nF&&!nV){dice(errori.join(" · "));toast(errori[0]);return;}
     closeSheet();
     const pezzi=[];if(nF)pezzi.push(nF===1?"1 foto":nF+" foto");if(nV)pezzi.push(nV===1?"1 video":nV+" video");
-    toast(pezzi.join(" e ")+" caricat"+((nF+nV)===1?"o":"i")+" ✔"+(errori.length?" (qualcosa non è andato)":""));
+    /* 19 nov 2026 — se una parte non e' andata si dice QUALE, non «qualcosa» */
+    /* 19 nov 2026 — diceva «1 foto caricato»: foto e' femminile */
+    const _fin=nV?((nF+nV)===1?"o":"i"):(nF===1?"a":"e");
+    toast(pezzi.join(" e ")+" caricat"+_fin+" ✔"+(errori.length?" — non caricato: "+errori.join("; "):""));
     renderGalleria();renderRiepilogo();
   }
 

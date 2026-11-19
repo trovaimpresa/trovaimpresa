@@ -70,8 +70,14 @@
     {t:"gest_sal",         lab:"Stati di avanzamento", campo:"numero",       ic:"📈",
      nome:function(r){ return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(r.numero||"?")+" del "+fdate(r.data); }},
     {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
-    {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
-    {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true}
+    /* 19 nov 2026 — le foto e i video caricati dalla Galleria non hanno
+       nome_file (e gest_video quella colonna non ce l'ha proprio): nel Cestino
+       erano «(senza nome)», tutti uguali. Adesso «Foto prima del lavoro —
+       <lavoro>». Il nome del lavoro lo prende cestNomiLavori(). */
+    {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true,
+     nome:function(r){ return String(r.nome_file||"").trim()||cestNomeMedia("Foto",r); }},
+    {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true,
+     nome:function(r){ return cestNomeMedia("Video",r); }}
     /* gest_note NON c'e': e' stata tolta dal cestino il 9/8/2026 (vedi
        js/cestino.js). Lasciarla qui voleva dire una richiesta in piu' a ogni
        apertura, per una categoria che non si riempie mai. */
@@ -191,11 +197,19 @@
      piu' capire cosa si sta rimettendo a posto.
      ============================================================ */
   let CEST_LAV={};
+  /* 19 nov 2026 — il nome di una foto o di un video della Galleria */
+  function cestNomeMedia(cosa,r){
+    const q=CEST_LAV[String((r&&r.lavoro_id)||"")];
+    const t=String((r&&r.tipo)||"");
+    const quando=(t==="da_fare")?" prima del lavoro":((t==="fatto"||t==="lavoro")?" a lavoro finito":"");
+    if(!q&&!quando)return "";
+    return cosa+quando+(q?(" — "+q):"");
+  }
   async function cestNomiLavori(risposte){
     CEST_LAV={};
     const ids={};
     (risposte||[]).forEach(function(x){
-      if(x.c.t!=="gest_rapportini")return;
+      if(["gest_rapportini","gest_foto","gest_video"].indexOf(x.c.t)<0)return;
       (x.righe||[]).forEach(function(r){ if(r.lavoro_id)ids[String(r.lavoro_id)]=true; });
     });
     const elenco=Object.keys(ids);
