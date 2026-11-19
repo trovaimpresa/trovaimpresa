@@ -3820,3 +3820,15 @@ Difetti trovati e sistemati:
 
 ⚠️ Rimasto: →1← file di prova da →70← byte in `supporto-allegati` (`1119cf1e…/1795094826025-prova-controllore.png`): il messaggio è cancellato ma il file non si toglie senza la chiave del server.
 Banco `tools/banco-gestionale.js app`: ZERO difetti.
+
+# 19 NOVEMBRE 2026 — LE VOCI DEL MENU SI PARLANO (impresa e artigiano)
+
+Mappa fatta leggendo tutti i js + prova dal vivo (reparto «ferramenta», «PROVA CONTROLLORE», poi 0 righe): cliente → preventivo → lavoro (786 €) → giornata, spesa, fattura fornitore, ore → guadagno 476 € uguale nel lavoro e nel Report → Calendario, Scadenze.
+
+Si parlano già: sito → cliente → preventivo; cliente → preventivo/lavoro; preventivo → lavoro (voci visibili nel lavoro); lavoro ↔ giornate, spese, fornitori, ore, mezzi, galleria, mappa, calendario; prezzario ↔ preventivo e computo; computo → preventivo; acconto → fattura.
+Si interrompevano (sistemato, decisione lasciata a Claude da Alex: «fai tu il meglio»):
+1. **Fattura dal lavoro** (`fattDaUnLavoro`, js/gest-fatture.js): se il lavoro ha UN preventivo accettato con lo stesso totale (`_prevDelLavoro`), la fattura nasce con le sue voci (`fattDaPreventivoId(id,{dedurre,daLavoro})`); se no la riga sola di sempre. In tutti e due i casi gli acconti GIÀ EMESSI (col numero) nati da un SAL del lavoro o di un computo collegato (`_accontiDelLavoro`) diventano righe «A dedurre: acconto già fatturato (fattura n. … del …)» col prezzo in meno e la loro IVA. Provato: 306 + 480 − 300 + 2 bollo = 488,00; file XML con PrezzoUnitario −300.00 e riepilogo 486,00; il controllo non dà rossi.
+2. **Scadenze**: `scadenzeIncassi(mid)` (js/gest-scadenze-pratiche.js) — fatture dei clienti emesse e non pagate, data come il Calendario (scadenza o data + giorni di pagamento), cifra = `resto` della vista (tolti gli acconti), «Apri» → la fattura. Il pallino del menu NON le conta (le Fatture hanno il loro).
+Difetti sistemati: la tendina dei clienti della fattura non si rileggeva (un cliente aggiunto dopo l'apertura → fattura su «— nessuno —»): `fattForm` la rilegge sempre. Nel lavoro «Rapportini di giornata» → «Giornate di questo lavoro» (lo studio resta com'era).
+Non fatti, idee per dopo: carta → lavoro (la colonna `gest_carte_movimenti.lavoro_id` c'è ma nessuno la scrive); scheda del mezzo → in quali lavori è stato usato.
+⚠️ `_accontiDelLavoro` è stato provato con una BOZZA (il filtro «col numero» tolto nella copia di prova): con una fattura emessa vera non provato, per regola.

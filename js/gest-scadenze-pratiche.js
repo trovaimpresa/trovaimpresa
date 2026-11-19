@@ -113,6 +113,44 @@
       return out;
     }catch(_){ return []; }
   }
+  /* 19 nov 2026 (le voci si parlano) — LE FATTURE DEI CLIENTI DA INCASSARE.
+     Le fatture dei fornitori da pagare c'erano gia', quelle dei clienti no:
+     si vedevano solo nel Calendario. Sola lettura come le altre: si apre e si
+     segna pagata dalla fattura. Solo quelle EMESSE (col numero) e non pagate.
+     La data e' la stessa del Calendario: «Da pagare entro» se c'e', se no la
+     data della fattura + i giorni di pagamento di Dati azienda. La cifra e'
+     quello che MANCA (vista gest_fatture_totali, colonna resto: tolti gli
+     acconti), come in «Farsi pagare». */
+  async function scadenzeIncassi(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const m=mid||curMestiere();
+      const [rf,raz]=await Promise.all([
+        sb.from("gest_fatture").select("id,numero,data,scadenza,cli_nome").eq("user_id",sbUid).eq("mestiere_id",m)
+          .eq("stato","emessa").is("eliminato_il",null).not("numero","is",null),
+        sb.from("gest_azienda").select("giorni_pagamento").eq("user_id",sbUid).maybeSingle()
+      ]);
+      if(rf.error||!(rf.data||[]).length)return [];
+      const gg=(raz&&raz.data&&+raz.data.giorni_pagamento)||30;
+      let resto={};
+      try{
+        const rt=await sb.from("gest_fatture_totali").select("fattura_id,resto,totale").in("fattura_id",rf.data.map(x=>x.id));
+        if(!rt.error)(rt.data||[]).forEach(t=>{resto[String(t.fattura_id)]=(t.resto!=null?+t.resto:+t.totale);});
+      }catch(_){}
+      const out=[];
+      rf.data.forEach(function(x){
+        if(!x.data&&!x.scadenza)return;
+        let d=x.scadenza;
+        if(!d){const t=new Date(x.data+"T12:00:00");t.setDate(t.getDate()+gg);d=t.toISOString().slice(0,10);}
+        const r=resto[String(x.id)];
+        if(r!=null&&!(r>0.004))return;           /* gia' tutta incassata con gli acconti */
+        out.push({id:"fc:"+x.id,_incassa:true,_fcId:x.id,_nome:x.cli_nome||"Cliente",
+          titolo:"Da incassare: fattura n. "+x.numero+(r!=null?" — "+eur2(r):""),
+          tipo_pratica:"Da incassare",data_scadenza:d,stato:"aperta"});
+      });
+      return out;
+    }catch(_){ return []; }
+  }
   /* 19 nov 2026 (si' di Alex, foto prima) — LA SCADENZA DELLE CARTE AZIENDALI.
      Sola lettura, come mezzi e fornitori: il dato sta nella carta, si apre da li'.
      Se la colonna non c'e' ancora (sql/2026-11-19-carte-scadenza.sql) non esce niente. */
@@ -151,8 +189,8 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const [scadPersone,scadMezzi,scadForn,scadCarte]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid),scadenzeCarte(mid)]);
-    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn,scadCarte).sort(function(a,b){
+    const [scadPersone,scadMezzi,scadForn,scadCarte,scadInc]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid),scadenzeCarte(mid),scadenzeIncassi(mid)]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn,scadCarte,scadInc).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
@@ -196,6 +234,19 @@
               {h:q.testo,cls:q.classe}
             ],
             menu:[{lab:"💳 Apri la carta",action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}}]
+          };
+        }
+        if(s._incassa){
+          return {
+            id:s.id,
+            click:{action:"cal-vai",data:{tab:"fatture",azione:"edit-fatt",id:s._fcId}},
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `👤 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"🧾 Apri la fattura",action:"cal-vai",data:{tab:"fatture",azione:"edit-fatt",id:s._fcId}}]
           };
         }
         if(s._forn){
@@ -274,6 +325,17 @@
         destra:`<span class="stato" style="background:${bgC};color:${fgC}">${labC}</span>`,
         meta:["💳 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
         azioni:[{lab:"Apri",action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}}]
+      });
+    }
+    if(s._incassa){
+      let bgI="var(--sfondo)",fgI="var(--testo-2)",labI="In tempo",tonoI="t-neutro";
+      if(s.data_scadenza<oggi){bgI="var(--err-bg)";fgI="var(--err)";labI="Scaduta";tonoI="t-err";}
+      else if(s.data_scadenza<=lim){bgI="var(--attesa-bg)";fgI="var(--attesa)";labI="In scadenza";tonoI="t-attesa";}
+      return schedaJob({
+        tono:tonoI, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgI};color:${fgI}">${labI}</span>`,
+        meta:["👤 "+esc(s._nome)+" (cliente)", "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri",action:"cal-vai",data:{tab:"fatture",azione:"edit-fatt",id:s._fcId}}]
       });
     }
     if(s._forn){
@@ -706,7 +768,7 @@
              rifaceva a mano. Il pulsante compare solo quando delle ore ci
              sono davvero (lo accende renderOreBlock). -->
         <button type="button" class="btn quick-add" id="ore-in-parcella" data-action="ore-parcella" style="display:none;margin-top:10px">💶 Porta le ore nella parcella</button></div>
-      <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>Rapportini di giornata</label>
+      <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>${ruoloUtente==='professionista'?"Rapportini di giornata":"Giornate di questo lavoro"}</label>
         <div class="spese-list" id="rap-list"></div>
         <!-- 13 nov 2026 (lista «MANCA», n. 6) — il rapportino da far firmare al cliente -->
         <button type="button" class="btn quick-add" data-action="rapf-nuovo" style="margin-top:8px">＋ Rapportino da far firmare</button>

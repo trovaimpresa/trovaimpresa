@@ -1020,10 +1020,15 @@
     fattBolloAuto=isNew&&fattForfettario()&&!(+f.bollo);
     let righe=[];
     if(sb&&sbUid){
-      if(!fattCliCache.length){
-        const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
-        fattCliCache=data||[];
-      }
+      /* 19 nov 2026 (le voci si parlano) — la rubrica si rilegge SEMPRE.
+         Prima si leggeva solo se era vuota: un cliente aggiunto dopo
+         l'apertura della pagina (o un altro reparto) non c'era, e la fattura
+         fatta da un lavoro o da un acconto di quel cliente nasceva su
+         «— nessuno —» senza dirlo. Se la lettura non riesce resta quella di prima. */
+      try{
+        const {data,error}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
+        if(!error&&data)fattCliCache=data;
+      }catch(_){}
       if(!fattAzienda){
         const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
         fattAzienda=data||null;
@@ -1687,7 +1692,8 @@
      dice "va bene", non si poteva fare: bisognava ricordarsi la strada lunga.
      Ora il corpo di quella funzione sta qui, prende un id, e lo chiamano tutti
      e due i punti: una sola strada, gli stessi conti. */
-  async function fattDaPreventivoId(pid){
+  async function fattDaPreventivoId(pid,opz){
+    opz=opz||{};
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const [{data:p,error:eP},{data:rr,error:eR}]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("id",pid).eq("user_id",sbUid).maybeSingle(),
@@ -1750,8 +1756,71 @@
            conferma d'ordine) deve arrivare uguale in fattura: prima partiva
            sempre dal 10% di default anche se il preventivo diceva 22 o 4. */
         iva:fattForfettario()?0:((p.iva_perc!=null&&p.iva_perc!=="")?(+p.iva_perc||0):ivaDefault()), ordine:i
-      }))
+      })).concat((opz.dedurre||[]).map((r,k)=>Object.assign({},r,{ordine:(rr||[]).length+k})))
     });
+    /* 19 nov 2026 (le voci si parlano) — da «Crea fattura» del lavoro si arriva
+       qui: si dice da dove vengono le voci e cosa e' stato tolto */
+    if(opz.daLavoro){
+      const n=(opz.dedurre||[]).length;
+      toast("Voci prese dal preventivo N. "+(p.numero||"")+(n?(n===1?" · tolto l'acconto che hai già fatturato":" · tolti i "+n+" acconti che hai già fatturato"):""));
+    }
+  }
+
+  /* ===== 19 nov 2026 (le voci si parlano) — LAVORO -> FATTURA =====
+     «Crea fattura» dal lavoro faceva UNA riga sola (descrizione + importo):
+     le voci del preventivo accettato si perdevano, e gli acconti gia'
+     fatturati da un computo collegato a quel lavoro non si toglievano
+     (il cliente li avrebbe pagati due volte).
+     _prevDelLavoro: il preventivo accettato collegato, SOLO se e' uno e il
+     suo totale (scontato, IVA esclusa) e' l'importo del lavoro. Se no si
+     torna alla riga sola di sempre.
+     _accontiDelLavoro: le fatture GIA' EMESSE (col numero) nate da un acconto
+     (gest_sal.fattura_id) di questo lavoro, o di un computo collegato a lui.
+     Diventano righe in meno, con la loro stessa IVA. Se una lettura non
+     riesce si torna a come era prima: niente righe in meno. */
+  async function _prevDelLavoro(l){
+    try{
+      const {data:pp,error}=await sb.from("gest_preventivi").select("*")
+        .eq("user_id",sbUid).eq("lavoro_id",l.id).eq("stato","accettato").is("eliminato_il",null);
+      if(error||!pp||pp.length!==1)return null;
+      const p=pp[0];
+      const {data:rr,error:e2}=await sb.from("gest_preventivo_righe").select("qta,prezzo,sezione").eq("preventivo_id",p.id);
+      if(e2||!rr||!rr.length)return null;
+      const somma=rr.filter(r=>!_rigaSezione(r)).reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0);
+      const sc=(typeof prevSconto==="function")?(prevSconto(somma,p)||0):0;
+      const tot=_cent2(somma-sc);
+      return Math.abs(tot-(+l.importo||0))<0.005?p:null;
+    }catch(_){return null;}
+  }
+  async function _accontiDelLavoro(lavId){
+    try{
+      const [r1,r2]=await Promise.all([
+        sb.from("gest_sal").select("fattura_id,computo_id").eq("user_id",sbUid).eq("lavoro_id",lavId).not("fattura_id","is",null).is("eliminato_il",null),
+        sb.from("gest_computi").select("id").eq("user_id",sbUid).eq("lavoro_id",lavId).is("eliminato_il",null)
+      ]);
+      if(r1.error||r2.error)return [];
+      let sal=r1.data||[];
+      const comp=(r2.data||[]).map(c=>c.id);
+      if(comp.length){
+        const r3=await sb.from("gest_sal").select("fattura_id,computo_id").eq("user_id",sbUid).in("computo_id",comp).not("fattura_id","is",null).is("eliminato_il",null);
+        if(r3.error)return [];
+        sal=sal.concat(r3.data||[]);
+      }
+      const ids=[...new Set(sal.map(s=>String(s.fattura_id)))];
+      if(!ids.length)return [];
+      const [rf,rr]=await Promise.all([
+        sb.from("gest_fatture").select("id,numero,data").eq("user_id",sbUid).in("id",ids).not("numero","is",null).is("eliminato_il",null),
+        sb.from("gest_fattura_righe").select("fattura_id,qta,prezzo,iva").in("fattura_id",ids)
+      ]);
+      if(rf.error||rr.error)return [];
+      return (rf.data||[]).sort((a,b)=>String(a.data||"").localeCompare(String(b.data||""))).map(function(f){
+        const R=(rr.data||[]).filter(r=>String(r.fattura_id)===String(f.id));
+        const imp=_cent2(R.reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0));
+        if(!(imp>0))return null;
+        return {descrizione:"A dedurre: acconto già fatturato (fattura n. "+f.numero+" del "+fdate(f.data)+")",
+          qta:1, prezzo:-imp, iva:fattForfettario()?0:(R.length?(+R[0].iva||0):ivaDefault())};
+      }).filter(Boolean);
+    }catch(_){return [];}
   }
 
 
@@ -1799,6 +1868,9 @@
     }
     const {data:l}=await sb.from("gest_lavori").select("*").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();
     if(!l){toast("Lavoro non trovato");return;}
+    const _dedurre=await _accontiDelLavoro(l.id);
+    const _pv=await _prevDelLavoro(l);
+    if(_pv){ closeSheet(); return fattDaPreventivoId(_pv.id,{dedurre:_dedurre,daLavoro:true}); }
     closeSheet();
     /* 9 agosto 2026 — l'aliquota promessa al cliente. Se quel lavoro nasce da
        un preventivo accettato, l'IVA è quella che il cliente ha firmato nella
@@ -1811,7 +1883,9 @@
       _lavori:[l.id],
       _righe:[{descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
                qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:ivaLav, ordine:0}]
+        .concat(_dedurre.map((r,k)=>Object.assign({},r,{ordine:k+1})))
     });
+    if(_dedurre.length)toast(_dedurre.length===1?"Tolto l'acconto che hai già fatturato":"Tolti i "+_dedurre.length+" acconti che hai già fatturato");
   }
 
   /* ---------- il PDF ----------
