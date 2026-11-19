@@ -113,9 +113,17 @@
       /* la fascia dei negozi: la disegna marchi-citta.js (stesso elenco ovunque) */
       if (!document.getElementById('ti-marchi') && !document.querySelector('script[src*="marchi-citta"]')) {
         var m = document.createElement('script');
-        m.src = '/js/marchi-citta.js?v=9';
+        m.src = '/js/marchi-citta.js?v=11';
         m.defer = true;
         document.head.appendChild(m);
+      }
+      /* 19 nov 2026 (Alex): una carta di un marchio anche DENTRO la pagina,
+         a meta' del testo, su tutte le pagine pubbliche (js/marchio-in-guida.js) */
+      if (!document.querySelector('script[src*="marchio-in-guida"]')) {
+        var mg = document.createElement('script');
+        mg.src = '/js/marchio-in-guida.js?v=1';
+        mg.defer = true;
+        document.head.appendChild(mg);
       }
     } catch (e) { /* la pagina non si rompe mai per questo riquadro */ }
   }
