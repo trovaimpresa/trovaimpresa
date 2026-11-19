@@ -289,6 +289,7 @@
     if(a==="prev-ordine")return ordineForm(id);
     if(a==="ordine-pdf")return ordinePdf(id);
     if(a==="report-csv")return reportCsv();
+    if(a==="report-pdf")return reportPdf();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
     /* un solo menu "..." per tutte le sezioni: le voci le ha già preparate
        renderTabella, qui si legge solo il registro. */

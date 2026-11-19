@@ -6328,3 +6328,15 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .cal-lav-bar.nota{ background:#94a3b8; }
 #calendario .cal-lav.nota .cal-lav-t{ font-weight:500!important; color:#334155!important; -webkit-line-clamp:2!important; }
 @media(max-width:760px){ #calendario .cal-lav.nota{ display:none!important; } }
+/* 19 nov 2026 — Report sul telefono: 12 mesi in 375 px, i nomi si attaccavano
+   («dicgenfeb…»). Si scrive un mese sì e uno no, sempre compreso il mese di adesso. */
+@media (max-width:560px){ #report .rep-bar-lab.rep-lab-alt{visibility:hidden} }
+/* 19 nov 2026 (sì di Alex) — Report: i numeri del mese e le spese in grigio
+   (prima blu scuro e nero, quasi uguali). Il grigio è quello degli zeri. */
+#report .rep-mese{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 14px}
+#report .rep-mese>div{flex:1 1 150px;border:1px solid var(--bordo,#E2E8F0);border-radius:12px;padding:10px 12px;background:#fff}
+#report .rep-mese small{display:block;font-size:13px;color:#5f6b7a;font-weight:600}
+#report .rep-mese b{font-size:20px;color:var(--testo)}
+#report .rep-mese b.rep-ok{color:var(--ok)} #report .rep-mese b.rep-err{color:var(--err)}
+#report .rep-bar.sp,#report .mlav-bar.sp,#report .rep-legend i.rep-i-sp{background:#5f6b7a}
+#report .sec-head{flex-wrap:wrap;gap:8px}

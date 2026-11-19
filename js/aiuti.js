@@ -144,6 +144,7 @@
     'mp-ricalcola':      'Ricalcola quanto distano i cantieri. Serve dopo che hai cambiato indirizzi o aggiunto lavori.',
     'gal-carica':        'Carica foto e video del cantiere: restano attaccati al lavoro e li ritrovi anche fra due anni.',
     'report-csv':        'Scarica i numeri di questa schermata in un foglio di calcolo.',
+    'report-pdf':        'Scarica i numeri di questa schermata in un PDF da stampare o mandare al commercialista.',
 
     /* --- documenti e invii --- */
     'doc-cli':           'I documenti attaccati a questo cliente: verbali, preventivi firmati, capitolati, permessi.',

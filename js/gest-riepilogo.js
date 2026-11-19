@@ -390,8 +390,14 @@
        usciva gonfiato di tutta l'IVA — che non è tua, la giri allo Stato.
        Il Report usa la stessa formula (fattImponibile), così le due
        schermate smettono di dare due utili diversi sugli stessi dati. */
-    const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
-                       .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0);
+    /* 19 nov 2026 — STESSA REGOLA DEL REPORT: chi non ha NESSUNA fattura in
+       questo reparto segna l'incasso sul lavoro («pagata» + data fatto). Prima
+       il Report diceva novembre +1.200,50 e il Riepilogo «0,00 € incassati» e
+       un utile di −410,50: due numeri per lo stesso mese. */
+    const incMese  = FT.length
+      ? FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
+          .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0)
+      : L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
     /* anche le spese delle carte entrano nel conto: prima erano invisibili
@@ -442,7 +448,7 @@
        carta, un pieno, una fattura di un fornitore. Non basta l'utile del mese:
        un'impresa che ha incassato a maggio e a giugno niente deve continuare a
        vedere la sua scheda Report. */
-    const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || SP.length>0 || CM.length>0
+    const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || L.some(l=>l.fatt_stato==="pagata") || SP.length>0 || CM.length>0
                        || RIFR.length>0 || FFO.length>0 || NOLR.some(nolReale);
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede

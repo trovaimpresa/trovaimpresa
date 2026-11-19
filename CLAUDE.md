@@ -3689,3 +3689,42 @@ Funziona e NON toccato: cestino (rimette a posto anche il fornitore della fattur
 Nuovo (sì di Alex, foto approvata): la ricerca in alto trova anche i FORNITORI e le FATTURE DA PAGARE (`CT_CAMPI.fornitori` / `fattforn` in js/gest-ricerca.js). Tutte e due le righe aprono la scheda del fornitore (`forn-scheda`, tipo `forn`): la fattura non si apre da `fattfCache`, che è vuota se in Fornitori non ci sei mai entrato. Se le due tabelle non si leggono, la ricerca resta quella di prima.
 Tolto (deciso da Alex): il riquadro «Collegamento TrovaImpresa» nel modulo del fornitore. Cercava solo `tipo='negozio'` e di negozi veri iscritti ce ne sono 0. Al suo posto la colonna «Altri dati» (P.IVA, indirizzo, note). `#fo-tid` resta nascosto: un collegamento già salvato non si perde. `fornTiCerca` / `fornTiScegli` restano nel file, non chiamate.
 ⬜ Non provato dal vivo: «Fotografa una fattura» (AI, crediti a 0) e il margine del lavoro collegato (il lavoro in ferramenta è un dato di Alex).
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: LE CARTE (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta» con carte e movimenti «PROVA CONTROLLORE». Poi cancellato tutto, anche dal Cestino: 0 righe.
+
+Difetti trovati e sistemati (7):
+1. Doppio tocco su «Aggiungi» della carta e del movimento = 2 righe. Ora chiavistello.
+2. Il Riepilogo non si aggiornava dopo un movimento sulla carta.
+3. Le note dicevano «numero carta» (che non si salva): tolto.
+4. Il «pulsante Movimenti» citato nell'aiuto non c'era con quel nome: testo allineato.
+5. Saldo della carta senza rete: se la lettura falliva restava vuoto. Ora avviso.
+6. Spesa pagata con la carta: si bloccava salvando. Sistemato.
+7. Icona 💳 che spariva/diversa: allineata.
+
+Nuovo (sì di Alex, foto approvata):
+- Scadenza della carta: colonna `gest_carte.scadenza` (mese/anno). Compare nello Scadenzario (`scadenzeCarte`), col pallino, e nell'email del mattino insieme ai mezzi. Tendine mese/anno in `_cartaScadHTML` (mese flex:3, anno flex:2, min-width:0 — sul telefono «novembre» era tagliato).
+- Casella «Quando» (il giorno) nel movimento della carta.
+
+Commit online cbad526 (+ tendine allargate nel push del Report).
+⬜ Non provato dal vivo: email del mattino con una carta, app operaio, telefono vero.
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: REPORT (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta»: cliente, operatore (20 €/h, 5 ore), 2 lavori, spese, carta con movimento, fattura fornitore, mezzo con pieno in contanti, tutto «PROVA CONTROLLORE». Conti a schermo giusti: 1.200,50 − 550,35 − 50 − 60,40 − 200 − 100 = 239,75. Poi cancellato tutto con `sb.raw`: 0 righe. Il lavoro di Alex in ferramenta non toccato.
+Fatture pagate di prova NON fatte (regola): l'incassato è provato col lavoro segnato «pagata» (reparto senza fatture). Le fatture vere di Alex: `fattImponibile` = vista `gest_fatture_totali` su tutte e 3.
+
+Difetti trovati e sistemati:
+1. Carta nel Cestino: il Report toglieva le sue spese (margine più alto), il Riepilogo no. Ora anche il Report legge le carte con `sb.raw`.
+2. Reparto senza fatture: il Report contava l'incasso dai lavori, il Riepilogo no → «Novembre 0,00 € incassati», utile −410,50 contro +790,00. Ora `incMese` del Riepilogo usa la stessa regola (se non c'è NESSUNA fattura, lavori «pagata» + data fatto). Anche `_ciSonoSoldi`.
+3. File per Excel: margine «800,4000000000001» (ora `_cent2`); ore 0 con le righe di ore (ora come lo schermo); colonna Fattura «none» (ora vuota / Emessa / Pagata).
+4. Barra grigia del lavoro = solo spese, mentre il guadagno toglie anche fornitori e manodopera. Ora è tutto quello che esce.
+5. Telefono: i nomi dei mesi attaccati («dicgenfeb…»). Ora un mese sì e uno no (sempre il mese di adesso).
+6. Frase sbagliata «Il margine conta solo i soldi già incassati»: le spese le conta tutte. Ora «soldi incassati meno tutte le spese».
+
+Nuovo (sì di Alex, foto approvata): 3 riquadri del mese (incassato, spese, utile = stesso utile del Riepilogo); Spese in grigio #5f6b7a (prima blu scuro e nero quasi uguali); «⬇ Scarica PDF» (`reportPdf`, stessa forma del PDF delle Giornate, numeri da `repData`); Totali e mese in fondo al file per Excel. Il pulsante CSV ora si chiama «⬇ File per Excel» (gest-reparti.js).
+
+Differenza voluta, NON toccata: Tasse e fisco conta solo le fatture pagate (di tutti i reparti + noleggio); il Report conta il reparto e, senza fatture, i lavori pagati. Per le tasse vale la fattura.
+Non c'è un filtro (periodo/cliente) nel Report: non chiesto.
+⬜ Non provati dal vivo: noleggio interno (serve il gestionale Noleggio), un reparto CON fatture pagate (vietato emetterle), telefono vero.

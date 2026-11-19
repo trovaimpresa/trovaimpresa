@@ -92,8 +92,8 @@
     if(a&&!anni.includes(a))anni.unshift(a);
     return `<div class="field"><label>Scade il (mese e anno scritti sulla carta)</label>
       <div style="display:flex;gap:10px">
-        <select id="ct-scad-m" style="flex:1"><option value="">— mese —</option>${_MESI_CARTA.map((n,i)=>`<option value="${i+1}" ${m===i+1?"selected":""}>${String(i+1).padStart(2,"0")} - ${n}</option>`).join("")}</select>
-        <select id="ct-scad-a" style="flex:1"><option value="">— anno —</option>${anni.map(y=>`<option value="${y}" ${a===y?"selected":""}>${y}</option>`).join("")}</select>
+        <select id="ct-scad-m" style="flex:3;min-width:0"><option value="">— mese —</option>${_MESI_CARTA.map((n,i)=>`<option value="${i+1}" ${m===i+1?"selected":""}>${String(i+1).padStart(2,"0")} - ${n}</option>`).join("")}</select>
+        <select id="ct-scad-a" style="flex:2;min-width:0"><option value="">— anno —</option>${anni.map(y=>`<option value="${y}" ${a===y?"selected":""}>${y}</option>`).join("")}</select>
       </div>
       <small style="color:var(--testo-2);font-size:14px">La trovi anche nelle Scadenze, e un mese prima te la ricorda l\u2019email del mattino.</small></div>`;
   }
