@@ -26,7 +26,7 @@ const H = {
 };
 const risposta = (code, obj) => ({ statusCode: code, headers: H, body: JSON.stringify(obj) });
 
-const CAMPI_LETTI = 'id,tipo,nome_impresa,descrizione,lavoro,citta,telefono,email,regione,categoria,mestiere,created_at,attivo,scade_il';
+const CAMPI_LETTI = 'id,tipo,nome_impresa,descrizione,lavoro,citta,telefono,email,regione,categoria,mestiere,created_at,attivo,scade_il,visite,contatti';
 // cosa si puo' modificare, e quanto puo' essere lungo
 const MODIFICABILI = { nome_impresa: 120, descrizione: 3000, lavoro: 3000, citta: 200, telefono: 30, email: 160, regione: 60, mestiere: 80 };
 

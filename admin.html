@@ -614,6 +614,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 <meta name="apple-mobile-web-app-title" content="TrovaImpresa">
 <style>
 /* 18 nov 2026: Subappalti nel pannello admin, descrizione corta */
+.sa-num{margin-top:8px;font-size:.85rem;font-weight:600;color:#33475b;white-space:nowrap;line-height:1.5}
 .sa-descr{min-width:320px;max-width:460px;word-break:break-word;line-height:1.45}
 .sa-descr .sa-resto{color:#5a6b80;font-size:.9rem;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .sa-descr.aperto .sa-resto{display:block;-webkit-line-clamp:unset}
@@ -5660,6 +5661,8 @@ async function caricaNumeriLavoro() {
   }
 }
 
+/* 19 nov 2026: visite e contatti di ogni annuncio (js/conta-subappalto.js) */
+function _q(n, uno, tanti) { n = Number(n) || 0; return n + ' ' + (n === 1 ? uno : tanti); }
 async function caricaSubappalti() {
   const tbody = document.getElementById('table-subappalti');
   tbody.innerHTML = '<tr><td colspan="9" class="loading">Caricamento...</td></tr>';
@@ -5706,7 +5709,7 @@ async function caricaSubappalti() {
       <td>📍 ${esc(s.citta) || '–'}</td>
       <td class="sa-descr"><strong>${esc(descrTit)}</strong>${descrResto ? `<div class="sa-resto">${esc(descrResto)}</div><a href="#" class="sa-tutto" onclick="this.parentNode.classList.toggle('aperto');this.textContent=this.parentNode.classList.contains('aperto')?'Chiudi':'Leggi tutto';return false">Leggi tutto</a>` : ''}</td>
       <td style="font-size:0.82rem">${contatti}</td>
-      <td>${s.attivo === false ? '<span class="badge badge-rig">Nascosto</span>' : '<span class="badge badge-v">Online</span>'}</td>
+      <td>${s.attivo === false ? '<span class="badge badge-rig">Nascosto</span>' : '<span class="badge badge-v">Online</span>'}<div class="sa-num" title="Persone che hanno aperto l'annuncio / che hanno toccato telefono o email (una volta al giorno a testa, dal 19 nov 2026)">👁 ${_q(s.visite, 'visita', 'visite')}<br>📞 ${_q(s.contatti, 'contatto', 'contatti')}</div></td>
       <td>${s.user_id ? '<span class="badge badge-v">Iscritto</span>' : '<span class="badge badge-att">Non iscritto</span>'}</td>
       <td style="white-space:nowrap;font-size:0.78rem;color:var(--light)">${data_fmt}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaSubappalto('${s.id}')">🗑️ Elimina</button></td>
