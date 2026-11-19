@@ -3900,3 +3900,22 @@ Sistemato:
 Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: «Email con PDF» (manda un'email vera), firma SMS (5 crediti), firma col dito del cliente.
 Da guardare (non fatti): sul telefono i 4 pulsanti in testa al preventivo occupano mezzo schermo; in forfettario la riga «Imponibile IVA» si legge anche senza IVA; il bollo da 2 € non è nel totale della parcella (si aggiunge in fattura, e lo dice).
 ⚠️ Durante la prova un'ALTRA sessione ha creato e cestinato «PROVA ACCONTO — da cancellare» (n. 7, reparto edile): non è di questa prova, è rimasta nel Cestino.
+
+# 19 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: FATTURE
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE» srl azienda + Mario privato, 1440 e 375): fattura vuota con cassa e spese anticipate 150 + rimborso 50 (forfettario: bollo 2 € automatico, 1.462 €), parcella 2.300,50 in ordinario messo SOLO in memoria (2.636,85 netto, uguale alla parcella di ieri), fattura dal preventivo accettato e dalla pratica finita, nota di credito, «Manda al cliente», PDF letto dal blob, file per lo SDI costruito su copia (numero finto, niente invio), telefono. Nessuna fattura emessa. Poi cancellato tutto: conteggi uguali a prima (fatture 3, clienti 2, lavori 5, preventivi 5, file 16).
+
+Sistemato:
+1. ⛔ Regime della bozza: PDF, controllo e file SDI leggevano `f.regime_fiscale||azienda`, i conti `fattForfDi` (regime della fattura SOLO col numero). Bozza salvata in ordinario e aperta in forfettario → PDF con colonna IVA 22%, riepilogo 0%, senza dicitura; file SDI righe 22% + riepilogo N2.2 (scarto). Ora tutti `fattForfDi(f)`, `<RegimeFiscale>` da `fattRegimeDi(f)`, ed **Emetti scrive sulla fattura il regime di oggi** (`fattCambiaStato`, provato con un finto database: patch `regime_fiscale:'RF19'`).
+2. Ritenuta e tipo del cliente anche in fattura (`ctrRegoleFattura`, solo studio, non in forfettario): privato con ritenuta → «non è sostituto d'imposta»; azienda/condominio senza → «di norma 20%». Caselle ascoltate anche `#fa-rit`, `#fa-cassa-tipo`.
+3. Cassa diversa dall'albo dei Dati azienda (geometri TC03, ingegneri/architetti TC04, periti TC17): avviso arancio. L'ultima cassa usata passa da sola alla fattura dopo: uno sbaglio (TC02 commercialisti) si ripeteva.
+4. Preventivo già fatturato: nell'elenco «Da un preventivo accettato» c'è «Già in fattura: n. …/bozza»; sceglierlo apre quella fattura (`_fattDeiLavori`, controllo in `fattDaPreventivoId`).
+5. Dal preventivo in forfettario la ritenuta non passa più.
+6. Parole dello studio scritte alla fonte: «Da una o più pratiche finite», «aspetta di essere fatturata. La spunti», «clicca per fatturarla», finestra «Quali pratiche metto in fattura».
+7. PDF: «Contributo Cassa Geometri 5%» (prima solo «Cassa previdenziale»).
+8. «Manda al cliente» con ritenuta: «La ritenuta d'acconto di X € è già tolta: la versa lei all'Erario col modello F24» (il PDF dice il totale, il messaggio il netto).
+
+Provato sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione, perché `sb` è `const`). Banco `tools/banco-gestionale.js app`: ZERO difetti.
+⬜ Non provati per regola: Emetti vero, invio SDI, «Acconto ricevuto» (serve una emessa), controllo con l'AI.
+Proposte con foto (in attesa del sì): «Fai la nota di credito» da una fattura emessa (voci copiate + riferimento); sul telefono i 4 pulsanti in testa su 2 righe (vale per tutte le finestre `.sh-head-az`).
+Da guardare: con spese anticipate in ordinario «Totale imponibile» comprende le spese fuori IVA (l'IVA è su un numero più piccolo); la nota di credito non dice quale fattura storna nel file SDI (`DatiFattureCollegate`).

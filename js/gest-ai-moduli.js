@@ -693,7 +693,7 @@
       regole:ctrRegolePreventivo
     },
     fattura:{
-      caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto,#fa-iban",
+      caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto,#fa-iban,#fa-rit,#fa-cassa-tipo",   /* 19 nov: + ritenuta e cassa */
       dentro:["#fatt-righe"],
       regole:ctrRegoleFattura
     },
@@ -935,6 +935,36 @@
         dice:"La ritenuta è una percentuale fra 0 e 100 (di solito 4 per il condominio, 20 per lo studio). Così il netto da pagare va sotto zero."});
       else if(rv>0&&typeof fattForfettario==="function"&&fattForfettario()) out.push({el:frt,grave:"arancio",
         dice:"Sei in forfettario: di norma la ritenuta d'acconto non si applica. Fattelo confermare dal commercialista prima di emetterla."});
+    }
+
+    /* --- 19 nov 2026 (studio, voce Fatture): la ritenuta e il tipo del
+       cliente. Nel preventivo c'era, in fattura no: a un privato si poteva
+       trattenere il 20% senza un avviso (il privato non e' sostituto
+       d'imposta: quei soldi non li versa nessuno). Il tipo si legge dalla
+       rubrica gia' caricata dal modulo (fattCliCache). --- */
+    if(ruoloUtente==='professionista'&&frt&&cli&&cli.value&&!(typeof fattForfettario==="function"&&fattForfettario())){
+      const _c=(typeof fattCliCache!=="undefined"?fattCliCache:[]).find(x=>String(x.id)===String(cli.value));
+      const _t=_c&&_c.tipo?String(_c.tipo):"";
+      const _rv=_numIt("#fa-rit")||0;
+      if(_t==='privato'&&_rv>0) out.push({el:frt,grave:"arancio",
+        dice:"Il cliente è un privato: non è sostituto d'imposta, la ritenuta d'acconto non si applica. Lascia la casella vuota."});
+      if((_t==='azienda'||_t==='condominio')&&!(_rv>0)) out.push({el:frt,grave:"arancio",
+        dice:(_t==='condominio'?"Il cliente è un condominio":"Il cliente è un'azienda")
+             +": è sostituto d'imposta, di norma la ritenuta del 20% va applicata."});
+    }
+
+    /* --- 19 nov 2026: la cassa scelta non e' quella dell'albo scritto nei
+       Dati azienda. La tendina riprende l'ultima cassa usata: se una volta
+       si e' sbagliato (TC02 commercialisti invece di TC03 geometri), lo
+       sbaglio passava da sola a tutte le fatture dopo. --- */
+    const fct=$("#fa-cassa-tipo");
+    if(fct&&fct.value&&typeof fattAzienda!=="undefined"&&fattAzienda){
+      const al=String(fattAzienda.albo_nome||"").toLowerCase();
+      const giusta=/geometr/.test(al)?["TC03","Cassa Geometri"]
+        :/ingegner|architett/.test(al)?["TC04","Inarcassa"]
+        :/periti industriali|perito industriale/.test(al)?["TC17","EPPI"]:null;
+      if(giusta&&fct.value!==giusta[0]&&fct.value!=="TC22") out.push({el:fct,grave:"arancio",
+        dice:"Nei Dati azienda sei iscritto a «"+String(fattAzienda.albo_nome).trim()+"»: la cassa di solito è "+giusta[0]+" — "+giusta[1]+", qui c'è "+fct.value+". Controlla."});
     }
 
     /* --- il bollo del forfettario: 2 € sopra i 77,47 € --- */

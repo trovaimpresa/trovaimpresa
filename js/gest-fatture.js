@@ -127,6 +127,16 @@
   function fattForfDi(f){
     return (f&&f.numero&&f.regime_fiscale)?(f.regime_fiscale==="RF19"):fattForfettario();
   }
+  /* 19 nov 2026 (studio, voce Fatture) — IL REGIME DA SCRIVERE NEL FILE.
+     PDF, controllo e file per lo SDI leggevano «regime della fattura, se no
+     quello di oggi», mentre i conti (fattBasi) leggono «regime della fattura
+     SOLO se ha il numero». Una bozza salvata in ordinario e riaperta da
+     forfettario usciva nel PDF con la colonna IVA 22%, il riepilogo a 0% e
+     senza la dicitura del forfettario; nel file per lo SDI righe al 22% e
+     riepilogo N2.2: scarto sicuro. Adesso la regola e' UNA, quella dei conti. */
+  function fattRegimeDi(f){
+    return (f&&f.numero&&f.regime_fiscale)?f.regime_fiscale:(((fattAzienda||{}).regime_fiscale)||"");
+  }
 
   /* i conti della fattura. Sono gli stessi della vista gest_fatture_totali su
      Supabase: qui li rifaccio in locale perché le righe le ho già lette per
@@ -616,7 +626,7 @@
          che questa scheda usa gia' piu' sotto per il dettaglio. */
       /* 7 nov 2026 — sotto l'importo si dice cos'e': nei Preventivi c'e' «IVA esclusa» */
       destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare-(f.stato==="emessa"?fattGia(f,c):0))
-            +'<small class="fatt-imp-et">'+((f.stato==="emessa"&&fattGia(f,c)>0)?("resta da incassare · già ricevuti "+eur2(fattGia(f,c))):((+c.ritenuta>0)?"netto da incassare":(((f.regime_fiscale||(fattAzienda||{}).regime_fiscale)==="RF19")?"totale fattura":"IVA compresa")))+'</small></span>',
+            +'<small class="fatt-imp-et">'+((f.stato==="emessa"&&fattGia(f,c)>0)?("resta da incassare · già ricevuti "+eur2(fattGia(f,c))):((+c.ritenuta>0)?"netto da incassare":(fattForfDi(f)?"totale fattura":"IVA compresa")))+'</small></span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -804,7 +814,9 @@
     if(sum)sum.innerHTML=
         box(eur2(tInc),"Da incassare",emesse.length+(emesse.length===1?" fattura emessa":" fatture emesse"),scadute.length?"err":"attesa")
       + box(eur2(tFatt),"Da fatturare",
-            fattLavLiberi.length?(fattLavLiberi.length+(fattLavLiberi.length===1?" lavoro finito · clicca per fatturarlo":" lavori finiti · clicca per fatturarli")):"niente in attesa",
+            fattLavLiberi.length?(fattLavLiberi.length+(ruoloUtente==='professionista'
+              ?(fattLavLiberi.length===1?" pratica finita · clicca per fatturarla":" pratiche finite · clicca per fatturarle")
+              :(fattLavLiberi.length===1?" lavoro finito · clicca per fatturarlo":" lavori finiti · clicca per fatturarli"))):"niente in attesa",
             "info", fattLavLiberi.length?'data-action="fatt-da-lavori"':"")
       /* 13 agosto 2026 — questo riquadro e quello del Report si chiamavano
          tutti e due «Incassato 2026» e davano due numeri diversi: su una
@@ -1543,11 +1555,15 @@
       }
       patch.numero=_nuovoNum;
       patch.anno=+((f.data||todayStr()).slice(0,4));
+      /* 19 nov 2026 — una bozza segue il regime di oggi: emettendola, quel
+         regime si scrive sulla fattura e da li' non cambia piu'. Prima restava
+         quello del giorno in cui era stata salvata la bozza. */
+      if(fattAzienda&&fattAzienda.regime_fiscale)patch.regime_fiscale=fattAzienda.regime_fiscale;
     }
     const {data:okSt,error}=await sb.from("gest_fatture").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okSt||!okSt.length){toast("Non salvata: nessuna riga modificata. Riprova.");return;}
-    if(_nuovoNum!=null){f.numero=_nuovoNum;f.anno=patch.anno;}
+    if(_nuovoNum!=null){f.numero=_nuovoNum;f.anno=patch.anno;if(patch.regime_fiscale)f.regime_fiscale=patch.regime_fiscale;}
     await fattSincronizzaLavori(id,v);
     rinfresca("fatture","riepilogo","lavori");
     if(v==="pagata"&&typeof window.tiSpunta==="function")window.tiSpunta("Fattura pagata");
@@ -1607,7 +1623,7 @@
      1. da uno o più lavori finiti  2. da un preventivo accettato  3. vuota */
 
   function fattDaLavoriScegli(){
-    if(!fattLavLiberi.length){toast("Non ci sono lavori finiti da fatturare");return;}
+    if(!fattLavLiberi.length){toast(ruoloUtente==='professionista'?"Non ci sono pratiche finite da fatturare":"Non ci sono lavori finiti da fatturare");return;}
     /* raggruppo per cliente: fatturare insieme tre lavori di clienti diversi
        non ha senso, e mostrarli mischiati invita a sbagliare */
     const perCli={};
@@ -1615,9 +1631,13 @@
     const nomeCli=k=>{const c=fattCliCache.find(x=>String(x.id)===k);return c?c.nome:"Senza cliente";};
     const gruppi=Object.keys(perCli).sort((a,b)=>nomeCli(a).localeCompare(nomeCli(b)));
 
-    openSheetGrande("Quali lavori metto in fattura",
-      '<div class="sh-b"><div class="sh-tit">Lavori finiti non ancora fatturati</div>'
-      + '<div class="sh-nota">Spunta i lavori dello <b>stesso cliente</b>: diventano le voci di una fattura sola. È così che tre lavori per lo stesso condominio smettono di essere tre fatture.</div>'
+    /* 19 nov 2026 — allo studio questa finestra parlava solo di «lavori» */
+    const _st=(ruoloUtente==='professionista');
+    openSheetGrande(_st?"Quali pratiche metto in fattura":"Quali lavori metto in fattura",
+      '<div class="sh-b"><div class="sh-tit">'+(_st?'Pratiche finite non ancora fatturate':'Lavori finiti non ancora fatturati')+'</div>'
+      + '<div class="sh-nota">'+(_st
+          ?'Spunta le pratiche dello <b>stesso cliente</b>: diventano le voci di una fattura sola. È così che tre pratiche per lo stesso cliente smettono di essere tre fatture.'
+          :'Spunta i lavori dello <b>stesso cliente</b>: diventano le voci di una fattura sola. È così che tre lavori per lo stesso condominio smettono di essere tre fatture.')+'</div>'
       + '<div id="fl-lista">'
       + gruppi.map(k=>
           '<div class="fl-gruppo"><div class="fl-cli">'+esc(nomeCli(k))+'</div>'
@@ -1634,9 +1654,10 @@
 
   async function fattDaLavoriConferma(){
     const ck=Array.from($$("#fl-lista .fl-ck:checked"));
-    if(!ck.length){toast("Spunta almeno un lavoro");return;}
+    const _st=(ruoloUtente==='professionista');
+    if(!ck.length){toast(_st?"Spunta almeno una pratica":"Spunta almeno un lavoro");return;}
     const cli=new Set(ck.map(c=>c.dataset.cli));
-    if(cli.size>1){toast("Scegli lavori di un cliente solo: una fattura va a un cliente solo");return;}
+    if(cli.size>1){toast(_st?"Scegli pratiche di un cliente solo: una fattura va a un cliente solo":"Scegli lavori di un cliente solo: una fattura va a un cliente solo");return;}
     const ids=ck.map(c=>c.value);
     const lavori=fattLavLiberi.filter(l=>ids.includes(String(l.id)));
     const clienteId=[...cli][0]||null;
@@ -1667,6 +1688,11 @@
     const P=data||[];
     if(!P.length){toast("Non ci sono preventivi accettati");return;}
     const cliNome=id=>{const c=fattCliCache.find(x=>String(x.id)===String(id));return c?c.nome:"";};
+    /* 19 nov 2026 (studio, voce Fatture) — IL PREVENTIVO GIA' FATTURATO.
+       L'elenco mostrava tutti gli accettati, anche quelli la cui pratica/lavoro
+       sta gia' dentro una fattura: si poteva fare la seconda fattura per la
+       stessa parcella senza un avviso. Adesso accanto c'e' scritto. */
+    const _gia=await _fattDeiLavori(P.map(p=>p.lavoro_id).filter(Boolean));
     openSheetGrande("Da quale preventivo accettato",
       '<div class="sh-b"><div class="sh-tit">Preventivi accettati</div>'
       + '<div class="sh-nota">La fattura si porta dietro tutte le righe del preventivo, con quantità e prezzi. Non devi riscrivere niente.</div>'
@@ -1674,12 +1700,29 @@
       + P.map(p=>'<label class="fl-riga"><input type="radio" name="fp" class="fp-ck" value="'+esc(p.id)+'">'
           + '<span class="fl-t">N. '+esc(String(p.numero||"—"))+' — '+esc(p.titolo||"Preventivo")
           + (cliNome(p.cliente_id)?'<span class="fl-d">'+esc(cliNome(p.cliente_id))+'</span>':"")
+          + (p.lavoro_id&&_gia[String(p.lavoro_id)]?'<span class="fl-d" style="color:var(--attesa)">Già in fattura: '+esc(_gia[String(p.lavoro_id)])+'</span>':'')
           + '</span><span class="fl-i">'+fdate(p.data)+'</span></label>').join("")
       + '</div></div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="fatt-da-prev-ok">Continua</button>');
   }
 
+  /* lavoro_id -> «n. 3/2026» (o «bozza») delle fatture vive che lo contengono */
+  async function _fattDeiLavori(lavIds){
+    const m={};
+    try{
+      if(!lavIds.length)return m;
+      const {data:fl}=await sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("lavoro_id",lavIds);
+      const fids=[...new Set((fl||[]).map(x=>x.fattura_id))];
+      if(!fids.length)return m;
+      const {data:ff}=await sb.from("gest_fatture").select("id,numero,anno,data").eq("user_id",sbUid).in("id",fids).is("eliminato_il",null);
+      (fl||[]).forEach(x=>{
+        const f=(ff||[]).find(y=>String(y.id)===String(x.fattura_id));
+        if(f)m[String(x.lavoro_id)]=f.numero?("n. "+f.numero+"/"+(f.anno||String(f.data||"").slice(0,4))):"bozza";
+      });
+    }catch(_){}
+    return m;
+  }
   async function fattDaPreventivoConferma(){
     const sel=document.querySelector("#fp-lista .fp-ck:checked");
     if(!sel){toast("Scegli un preventivo");return;}
@@ -1702,6 +1745,18 @@
     if(eP||eR){toast("Non riesco a leggere il preventivo: "+((eP||eR).message||"il database non risponde"));return;}
     if(!p){toast("Preventivo non trovato");return;}
     if(!(rr||[]).length){toast("Questo preventivo non ha voci: aprilo, aggiungile e riprova.");return;}
+    /* 19 nov 2026 — la pratica/il lavoro di questo preventivo sta gia' in una
+       fattura: si apre quella, come fa «Crea fattura» dal lavoro */
+    if(p.lavoro_id&&!opz.daLavoro){
+      try{
+        const {data:gia}=await sb.from("gest_fattura_lavori").select("fattura_id").eq("user_id",sbUid).eq("lavoro_id",p.lavoro_id);
+        const ids=(gia||[]).map(g=>g.fattura_id);
+        if(ids.length){
+          const {data:ff}=await sb.from("gest_fatture").select("*").eq("user_id",sbUid).in("id",ids).is("eliminato_il",null).limit(1);
+          if(ff&&ff.length){closeSheet();await fattForm(ff[0]);toast("Questo preventivo è già in una fattura: te l'ho aperta");return;}
+        }
+      }catch(_){}
+    }
     /* la percentuale della cassa passa SEMPRE intera, qualunque sia. Quale
        cassa sia lo dice la fattura: se non l'hai mai scritta, il modulo la
        propone in bianco e il controllo del file elettronico te la chiede
@@ -1730,7 +1785,9 @@
       /* la parcella arriva INTERA: cassa, spese e ritenuta sono gli stessi tre
          concetti che ora esistono anche in fattura, quindi i conti coincidono
          al centesimo con quelli firmati nella lettera d'incarico. */
-      ritenuta_perc: p.ritenuta ? (+p.ritenuta_perc||20) : 0,
+      /* 19 nov 2026 — in forfettario la ritenuta non si applica: non la si
+         porta in fattura nemmeno se il preventivo e' nato in ordinario */
+      ritenuta_perc: (p.ritenuta&&!fattForfettario()) ? (+p.ritenuta_perc||20) : 0,
       cassa_perc: +p.cassa_perc||0,
       /* 12 agosto 2026 (sera) — prima si cercava la cassa in base alla sola
          percentuale: col 2% non trovava niente e la cassa restava vuota, e con
@@ -1828,13 +1885,18 @@
   /* Il pulsante "+ Nuova": prima creava un lavoro con la fattura già emessa.
      Ora chiede da dove nasce la fattura, perché le strade sono tre. */
   function fattNuovaScegli(){
-    const nLav=fattLavLiberi.length;
+    const nLav=fattLavLiberi.length, _st=(ruoloUtente==='professionista');
     openSheetGrande("Da dove nasce questa fattura",
       '<div class="sh-b"><div class="sh-tit">Scegli come partire</div>'
       + '<div class="fn-scelte">'
       +   '<button type="button" class="fn-s" data-action="fatt-da-lavori">'
-      +     '<span class="fn-t">Da uno o più lavori finiti</span>'
-      +     '<span class="fn-d">'+(nLav?(nLav+(nLav===1?" lavoro finito aspetta di essere fatturato. Lo spunti e diventa la voce.":" lavori finiti aspettano di essere fatturati. Li spunti e diventano le voci.")):"Al momento non ci sono lavori finiti da fatturare.")+'</span></button>'
+      /* 19 nov 2026 — allo studio il traduttore faceva «Da uno o più pratiche
+         finite» e «1 pratica finita aspetta di essere fatturato. Lo spunti»:
+         le frasi dello studio si scrivono qui, al femminile */
+      +     '<span class="fn-t">'+(_st?'Da una o più pratiche finite':'Da uno o più lavori finiti')+'</span>'
+      +     '<span class="fn-d">'+(nLav?(nLav+(_st
+              ?(nLav===1?" pratica finita aspetta di essere fatturata. La spunti e diventa la voce.":" pratiche finite aspettano di essere fatturate. Le spunti e diventano le voci.")
+              :(nLav===1?" lavoro finito aspetta di essere fatturato. Lo spunti e diventa la voce.":" lavori finiti aspettano di essere fatturati. Li spunti e diventano le voci."))):(_st?"Al momento non ci sono pratiche finite da fatturare.":"Al momento non ci sono lavori finiti da fatturare."))+'</span></button>'
       +   '<button type="button" class="fn-s" data-action="fatt-da-prev">'
       +     '<span class="fn-t">Da un preventivo accettato</span>'
       +     '<span class="fn-d">Si porta dietro tutte le righe con quantità e prezzi. Non riscrivi niente.</span></button>'
@@ -1901,7 +1963,7 @@
     const R=(fattRighe[f.id]||[]).slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
     if(!R.length){toast("Questa fattura non ha voci");return;}
     const az=fattAzienda||{};
-    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const forf=fattForfDi(f);   /* 19 nov 2026 — la stessa regola dei conti */
     const c=fattConti(f);
 
     const {jsPDF}=window.jspdf;
@@ -2029,7 +2091,12 @@
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
     if(_extra){
       riga(ruoloUtente==='professionista'?"Compenso":"Imponibile voci",eurPdf(c.compenso));
-      if(c.cassa)riga("Cassa previdenziale "+_pct(f.cassa_perc)+"%",eurPdf(c.cassa));
+      /* 19 nov 2026 — si scrive QUALE cassa (era solo «Cassa previdenziale»):
+         il commercialista e il cliente la leggono sul PDF, non nel file */
+      if(c.cassa){
+        const _ct=FATT_CASSE_TIPI.find(x=>x[0]===f.cassa_tipo);
+        riga("Contributo "+(_ct?_ct[1].replace(/^TC\d+ — /,"").replace(/ \(.*\)$/,""):"cassa previdenziale")+" "+_pct(f.cassa_perc)+"%",eurPdf(c.cassa));
+      }
       if(c.speseIva)riga("Rimborso spese",eurPdf(c.speseIva));
       /* le spese anticipate vanno scritte per quello che sono: il cliente deve
          capire perche' su quei soldi non c'e' l'IVA */
@@ -2152,7 +2219,7 @@
     const az=fattAzienda||{};
     const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id))||{};
     const R=fattRighe[f.id]||[];
-    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const forf=fattForfDi(f);   /* 19 nov 2026 — la stessa regola dei conti */
     const m=[];
 
     if(!f.numero) m.push("La fattura è ancora una bozza: prima va emessa, così prende il numero.");
@@ -2279,7 +2346,7 @@
     const az=fattAzienda||{};
     const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id))||{};
     const R=(fattRighe[f.id]||[]).slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
-    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const forf=fattForfDi(f);   /* 19 nov 2026 — la stessa regola dei conti */
     const c=fattConti(f);
 
     /* ⚠️ 21 agosto 2026 — LA PARTITA IVA SI PULISCE ANCHE QUI, NON SOLO NEL
@@ -2348,7 +2415,7 @@
     x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(xpul(az.piva))+'</IdCodice>\n        </IdFiscaleIVA>\n';
     if(xpul(az.cod_fiscale)) x+='        <CodiceFiscale>'+xesc(xpul(az.cod_fiscale))+'</CodiceFiscale>\n';
     x+='        <Anagrafica>\n          <Denominazione>'+xesc(xtaglia(az.nome,80))+'</Denominazione>\n        </Anagrafica>\n';
-    x+='        <RegimeFiscale>'+xesc(az.regime_fiscale||"RF01")+'</RegimeFiscale>\n';
+    x+='        <RegimeFiscale>'+xesc(fattRegimeDi(f)||"RF01")+'</RegimeFiscale>\n';
     x+='      </DatiAnagrafici>\n      <Sede>\n'+sede(az,"")+'      </Sede>\n    </CedentePrestatore>\n';
 
     x+='    <CessionarioCommittente>\n      <DatiAnagrafici>\n';

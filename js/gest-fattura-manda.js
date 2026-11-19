@@ -36,6 +36,10 @@
       r.push("Importo della fattura: "+eur2(c.daPagare)+".");
       r.push("Già ricevuti: "+eur2(gia)+". Resta da pagare: "+eur2(c.daPagare-gia)+".");
     }else r.push("Importo"+(f.stato==="pagata"?"":" da pagare")+": "+eur2(c.daPagare)+".");
+    /* 19 nov 2026 (studio) — col netto nel messaggio e il totale sul PDF il
+       cliente legge due numeri diversi: si dice perche' */
+    if((+c.ritenuta||0)>0&&f.tipo!=="nota_credito")
+      r.push("La ritenuta d'acconto di "+eur2(c.ritenuta)+" è già tolta: la versa lei all'Erario col modello F24.");
     if(f.stato!=="pagata"&&f.tipo!=="nota_credito"){
       const gg=(+az.giorni_pagamento)||30, sc=fattScadenza(f,gg), mo=fattModo(f), ib=fattIban(f);
       if(sc)r.push("Da pagare entro il "+fdate(sc)+".");
