@@ -372,6 +372,20 @@
      ⚠️ PriMus scrive «DEMOLIZIONI (SpCat 1)»: la parentesi non conta. */
   /* 16 nov 2026 — il nome del file che si scarica. Senza numero usciva
      «computo--titolo.pdf», con due trattini. */
+  /* 19 nov 2026 — il titolo nel nome del file: al massimo 40 lettere, ma
+     tagliato fra due parole («…-ristrutturazione-scuol.pdf» non si legge) */
+  /* 19 nov 2026 — sopra la riga della firma si scrive CHI firma, come nel PDF
+     del computo: «IL TECNICO» per lo studio, «L'IMPRESA» per gli altri.
+     Prima era «TIMBRO E FIRMA», senza dire di chi. */
+  function _compChiFirma(){
+    return (typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"IL TECNICO":"L'IMPRESA";
+  }
+  function _compSlug(t){
+    const p=String(t||"").replace(/[^a-z0-9]+/gi,"-").toLowerCase().replace(/^-+|-+$/g,"");
+    if(p.length<=40)return p||"computo";
+    const c=p.slice(0,41), k=c.lastIndexOf("-");
+    return (k>10?c.slice(0,k):p.slice(0,40)).replace(/-+$/,"");
+  }
   function _compNomeFile(tipo,numero){
     const n=String(numero==null?"":numero).replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
     return tipo+"-"+(n?n+"-":"");
@@ -382,7 +396,14 @@
      e' un titolo anche se non e' in maiuscolo. «Parziale … (SbCat 1) euro …»
      e' il totale del gruppo, non un titolo. */
   function _cpTitoloPrimus(t){
-    const m=String(t==null?"":t).replace(/\s+/g," ").trim().match(/^(.{3,90}?)\s*\((?:SpCat|SbCat|Cat)\s*\d+\)\s*$/i);
+    const s0=String(t==null?"":t).replace(/\s+/g," ").trim();
+    /* ⛔ 19 nov 2026 — IL NOSTRO PDF. Il computo stampato da questo gestionale
+       scrive i capitoli «1 - Demolizioni e rimozioni», «S - Oneri della
+       sicurezza»: ricaricato, finiva tutto «Senza capitolo» (la regola sotto
+       vuole le MAIUSCOLE). Numero (o S), trattino, titolo; niente importi. */
+    const n=s0.match(/^(\d{1,3}|S)\s+[-–—]\s+([A-Za-zÀ-ÖØ-öø-ÿ'’].{1,80})$/);
+    if(n&&!/\d[.,]\d/.test(n[2])&&!/€/.test(n[2])&&n[2].split(" ").length<=10&&!/^(sommano|totale|riepilogo|parziale)\b/i.test(n[2]))return n[2].trim();
+    const m=s0.match(/^(.{3,90}?)\s*\((?:SpCat|SbCat|Cat)\s*\d+\)\s*$/i);
     if(!m)return "";
     if(/^parziale\b/i.test(m[1]))return "";
     return m[1].trim();
@@ -418,7 +439,10 @@
       if(gia){ ids.push(gia.id); continue; }
       ord++;
       const r=await sb.from("gest_computo_capitoli").insert({
-        user_id:sbUid, computo_id:cid, ordine:ord, numero:String(ord), titolo:capitoli[i]}).select("id");
+        user_id:sbUid, computo_id:cid, ordine:ord, numero:String(ord), titolo:capitoli[i],
+        /* 19 nov 2026: un capitolo che si chiama «Oneri della sicurezza» nasce
+           col segno «non si ribassa», come quando lo crei a mano con la spunta */
+        sicurezza:/^(oneri|costi)\s+(della|per la)\s+sicurezza$/i.test(String(capitoli[i]||"").trim())}).select("id");
       const riga=r.data&&(Array.isArray(r.data)?r.data[0]:r.data);
       if(r.error||!riga||!riga.id){
         toast("Non riesco a creare il capitolo «"+capitoli[i]+"»: "+((r.error&&r.error.message)||"nessuna riga scritta")+". Non ho messo dentro niente.");
@@ -1157,7 +1181,12 @@
     const dich=String(comp.prezzario||"").trim();
     /* stessa regola della ricerca dentro la lavorazione: nome uguale, oppure
        le parole in comune. Una regola sola, in un posto solo. */
-    const fonte=(fonti.indexOf(dich)>=0)?dich:_ppSceltaAuto(fonti,[dich,(comp.prezzario_anno||"")].join(" "));
+    let fonte=(fonti.indexOf(dich)>=0)?dich:_ppSceltaAuto(fonti,[dich,(comp.prezzario_anno||"")].join(" "));
+    /* 19 nov 2026 — collaudo da geometra: computo senza prezzario scritto e UNA
+       sola tariffa nel prezzario: «Non so dove cercare» era una domanda inutile.
+       Se il computo non dice niente e la tariffa e' una, si cerca li' (il
+       resoconto dice il nome). Con due o piu' tariffe si chiede, come prima. */
+    if(!fonte&&!dich&&fonti.length===1)fonte=fonti[0];
     if(!fonte){
       compPrzEsitoId=cid;
       compPrzEsito='<div class="sh-nota" style="border-left:4px solid var(--err,#c0392b);padding-left:10px;margin-top:14px">'
@@ -1552,6 +1581,26 @@
     doc.setFont("helvetica","normal");doc.setFontSize(8.5);
     const dic=doc.splitTextToSize("(diconsi euro "+euroInLettere(totale)+")",R-M);
     doc.text(dic,X[1]+1.5,y);y+=dic.length*4+4;
+    /* ⛔ 19 nov 2026 — collaudo da geometra: il ribasso del concorrente si
+       applica solo ai lavori. Gli oneri della sicurezza (capitolo marcato o
+       casella vecchia) stavano dentro il TOTALE senza dirlo: chi offre un
+       ribasso sul totale ribassava anche la sicurezza. Adesso, se ci sono,
+       due righe dicono quanto e' la sicurezza e su quanto si fa il ribasso.
+       Il conto e' quello del computo (compRiepilogo), non uno nuovo. */
+    {
+      const _rp=(typeof compRiepilogo==="function")?compRiepilogo(voci,c,capitoli):null;
+      const _sic=_rp?Math.round((+_rp.sicurezza||0)*100)/100:0;
+      if(_sic>0){
+        spazio(14);
+        doc.setFont("helvetica","normal");doc.setFontSize(9);
+        doc.text("di cui oneri della sicurezza, non soggetti a ribasso",X[1]+1.5,y);
+        doc.text(_eur(_sic),R,y,{align:"right"});y+=5.4;
+        doc.setFont("helvetica","bold");
+        doc.text("Importo dei lavori soggetto a ribasso",X[1]+1.5,y);
+        doc.text(_eur(Math.round((totale-_sic)*100)/100),R,y,{align:"right"});y+=8;
+        doc.setFont("helvetica","normal");
+      }
+    }
 
     /* ⚠️ queste tre le riempie l'impresa a penna: sono dichiarazioni sue */
     doc.setFontSize(9);
@@ -1562,7 +1611,9 @@
       .forEach(function(r){ doc.text(r[0],M,y); y+=6.4; });
 
     y+=6; spazio(26);
-    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(c.data||todayStr()),M,y);
+    /* 19 nov 2026 — luogo e data li scrive il CONCORRENTE, come il ribasso:
+       prima uscivano quelli del computo («via Prova 1, 19/11/2026») */
+    doc.text("______________________, lì ______________",M,y);
     y+=14;
     doc.setFont("helvetica","bold");
     doc.text("IL CONCORRENTE",R-30,y,{align:"center"});
@@ -1580,7 +1631,7 @@
       doc.setTextColor(0);
     }
     doc.save(_compNomeFile("lista-gara",c.numero)+
-      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+      _compSlug(c.titolo||"computo")+".pdf");
     toast("Lista per la gara scaricata ✅");
   }
 
@@ -1623,7 +1674,11 @@
     const misDi={};(mis||[]).forEach(m=>{(misDi[m.voce_id]=misDi[m.voce_id]||[]).push(m);});
 
     const pubblico=(c.tipo==="pubblico");
-    const rp=compRiepilogo(voci,c);
+    /* ⛔ 19 nov 2026 — i capitoli di QUESTO computo, non quelli in memoria
+       (compCapCache e' del computo aperto per ultimo): scaricando il PDF di un
+       computo con un altro aperto prima, il capitolo «Oneri della sicurezza»
+       non si riconosceva e il ribasso toccava anche la sicurezza. */
+    const rp=compRiepilogo(voci,c,capitoli);
 
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
 
@@ -2012,7 +2067,11 @@
       const _cx=R-42;
       y+=8; spazioFuoriTabella(_albo?44:40);
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(0);
-      doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(c.data||todayStr()),M,y);
+      /* 19 nov 2026 — il luogo della firma e' la citta' di chi firma (Dati
+         azienda), come nel SAL. Prima si prendeva l'ultimo pezzo del luogo dei
+         lavori: «Rieti, via Prova 1» dava «via Prova 1, 19/11/2026». */
+      const _dove=(az&&az.citta)?String(az.citta).trim():(c.luogo?String(c.luogo).split(",").pop().trim():"");
+      doc.text((_dove?_dove+", ":"")+fdate(c.data||todayStr()),M,y);
       y+=8;
       doc.setFont("helvetica","bold");doc.setFontSize(9);
       doc.text(_pro?"IL TECNICO":"L'IMPRESA",_cx,y,{align:"center"});y+=4.6;
@@ -2044,7 +2103,7 @@
       doc.setTextColor(0);
     }
     doc.save(_compNomeFile("computo",c.numero)+
-      (c.titolo||"metrico").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+      _compSlug(c.titolo||"metrico")+".pdf");
     toast("PDF del computo scaricato ✅");
   }
 
@@ -2262,16 +2321,16 @@
 
     spazioFuoriTabella(14);
     doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
-    const nota=doc.splitTextToSize("I giorni indicati sono giorni di lavoro: sabato e domenica non si contano. Ogni fase comincia quando finisce quella precedente; le fasi in blu scuro cominciano insieme alla precedente e si svolgono in parallelo.",R-M);
+    const nota=doc.splitTextToSize("I giorni indicati sono giorni di lavoro: sabato, domenica e feste nazionali non si contano. Ogni fase comincia quando finisce quella precedente; le fasi in blu scuro cominciano insieme alla precedente e si svolgono in parallelo.",R-M);
     nota.forEach(function(riga){ if(y+3.9>FONDO+14){doc.addPage();y=16;} doc.text(riga,M,y);y+=3.9; });
     doc.setTextColor(0);y+=6;
 
     spazioFuoriTabella(24);
     doc.setFontSize(9);
-    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    doc.text(((az&&az.citta)?String(az.citta).trim()+", ":(c.luogo?String(c.luogo).split(",").pop().trim()+", ":""))+fdate(todayStr()),M,y);   /* 19 nov 2026: la citta' di chi firma */
     y+=14;
     doc.setFont("helvetica","bold");
-    doc.text("TIMBRO E FIRMA",R-40,y,{align:"center"});
+    doc.text(_compChiFirma(),R-40,y,{align:"center"});
     doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
     doc.text("____________________________",R-40,y+4.6,{align:"center"});
     doc.setTextColor(0);
@@ -2285,7 +2344,7 @@
       doc.setTextColor(0);
     }
     doc.save(_compNomeFile("cronoprogramma",c.numero)+
-      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+      _compSlug(c.titolo||"computo")+".pdf");
     toast("Cronoprogramma scaricato ✅");
   }
 
@@ -2563,11 +2622,11 @@
     /* le due firme: una variante la accettano in due */
     spazioFuoriTabella(28);
     doc.setFontSize(9);
-    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    doc.text(((az&&az.citta)?String(az.citta).trim()+", ":(c.luogo?String(c.luogo).split(",").pop().trim()+", ":""))+fdate(todayStr()),M,y);   /* 19 nov 2026: la citta' di chi firma */
     y+=14;
     doc.setFont("helvetica","bold");
     doc.text("IL COMMITTENTE",M+35,y,{align:"center"});
-    doc.text("TIMBRO E FIRMA",R-35,y,{align:"center"});
+    doc.text(_compChiFirma(),R-35,y,{align:"center"});
     doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
     doc.text("____________________________",M+35,y+4.6,{align:"center"});
     doc.text("____________________________",R-35,y+4.6,{align:"center"});
@@ -2582,7 +2641,7 @@
       doc.setTextColor(0);
     }
     doc.save(_compNomeFile("variante",c.numero)+
-      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+      _compSlug(c.titolo||"computo")+".pdf");
     toast(_cpar("Computo di variante scaricato ✅","Foglio delle modifiche scaricato ✅"));
   }
 
@@ -3046,19 +3105,19 @@
     /* ---- in fondo: la data e le firme ---- */
     fuoriTabella(30);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(0);
-    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    doc.text(((az&&az.citta)?String(az.citta).trim()+", ":(c.luogo?String(c.luogo).split(",").pop().trim()+", ":""))+fdate(todayStr()),M,y);   /* 19 nov 2026: la citta' di chi firma */
     y+=14;
     doc.setFont("helvetica","bold");
     /* sui lavori pubblici l'analisi la approva il Direttore dei Lavori e
        l'impresa l'accetta: due firme. Su un privato il foglio e' dell'impresa */
     if(c.tipo==="pubblico"){
       doc.text("IL DIRETTORE DEI LAVORI",M+38,y,{align:"center"});
-      doc.text("TIMBRO E FIRMA",R-38,y,{align:"center"});
+      doc.text(_compChiFirma(),R-38,y,{align:"center"});
       doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
       doc.text("____________________________",M+38,y+4.6,{align:"center"});
       doc.text("____________________________",R-38,y+4.6,{align:"center"});
     }else{
-      doc.text("TIMBRO E FIRMA",R-40,y,{align:"center"});
+      doc.text(_compChiFirma(),R-40,y,{align:"center"});
       doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
       doc.text("____________________________",R-40,y+4.6,{align:"center"});
     }
@@ -3073,6 +3132,6 @@
       doc.setTextColor(0);
     }
     doc.save(_compNomeFile("analisi-prezzi",c.numero)+
-      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+      _compSlug(c.titolo||"computo")+".pdf");
     toast("Analisi dei prezzi scaricata ✅");
   }

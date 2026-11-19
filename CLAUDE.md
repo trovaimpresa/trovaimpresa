@@ -3863,3 +3863,23 @@ Idee per dopo (funzioni nuove, NON fatte, da chiedere ad Alex con la foto): scad
 - **Filtro «A che punto sta»** sotto le viste delle Pratiche (`lavPstati`, `filter.pstato`, azione `lav-pstato`): solo per lo studio, solo gli stati che ci sono, col numero; «Integrazioni richieste» in rosso.
 - **Scadenze cliccabili nella pratica**: «Apri» su ogni scadenza (`scad-da-pratica-apri`), si apre la scadenza e chiudendo si torna nella pratica.
 - Provato dal vivo (1440 e 375) iniettando il codice nella pagina vera; dati di prova cancellati (0 righe, ferramenta tornata a 1 lavoro e 1 cliente, 7 file nel deposito).
+
+# 19 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: COMPUTO METRICO
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): computo nuovo, 3 capitoli (uno sicurezza), misure con vuoti, prezzario, AI (lavorazioni e prezzi), ribasso 12,5%, lavori pubblici, costo del personale, quadro economico, SAL + fattura d'acconto in BOZZA, variante, cronoprogramma, tutti i PDF (letti intercettando `jsPDF.API.save`, niente scaricato), Excel e PDF importati. Poi cancellato tutto: conteggi uguali a prima (resta solo la riga automatica di `gest_accessi`), `usata_volte` del prezzario rimesso com'era.
+
+Sistemato:
+1. ⛔ PDF del computo e «Crea il preventivo»: i capitoli della sicurezza si leggevano da `compCapCache` (computo aperto per ULTIMO) → con un altro computo aperto prima il PDF ribassava anche la sicurezza. Ora `compRiepilogo(voci,c,capitoli)`.
+2. Traduttore dello studio: il testo del prezzario diventava «della pratica» (ricerca nella lavorazione, pagina Prezzi). Classe nuova **`.ti-orig`** + `.pz-desc`, `.cp-d`, `.cp-cap` in `_SKIP_UTENTE`. «manodopera» si scrive `<span class="ti-orig">manodopera</span>` (non più con la maiuscola).
+3. «Aggiungi con l'AI»: `compila_computo` ha `codice` e `capitolo`; la pagina rimette codice + descrizione VERA del prezzario (stessa unità) e il capitolo (riusa quello col titolo uguale). ⬜ La parte server si prova solo dopo il push.
+4. Ricerca nel prezzario della lavorazione: prima le voci con le parole nei primi 60 caratteri.
+5. Pagina Prezzi: tendina del prezzario si salva da sola; con una sola tariffa e nessun prezzario scritto si usa quella; allo studio anche «Metti i prezzi con l'AI».
+6. SAL: righe per capitolo (schermo e PDF); PDF dello studio firmato dal Direttore dei lavori (`tecnico_firma`); «dello 0,5%» (`_salDelPct`); sul telefono «PDF» e × non escono più (`.sal-el`).
+7. Lista per la gara: righe «oneri della sicurezza non soggetti a ribasso» e «importo soggetto a ribasso»; luogo e data in bianco per il concorrente.
+8. PDF: luogo della firma = città dei Dati azienda (era l'ultimo pezzo del luogo dei lavori); sopra la firma «IL TECNICO»/«L'IMPRESA» (`_compChiFirma`); nome file tagliato fra due parole (`_compSlug`).
+9. Cronoprogramma: le feste nazionali non sono giorni di lavoro (`_cgFesta`, Pasquetta col calcolo di Gauss).
+10. Variante: «Cosa è cambiato» si ridisegna con le lavorazioni (era vecchia dopo una cancellazione); messaggio «Variante creata».
+11. Importa PDF: il PDF fatto dal gestionale ricaricato tiene i capitoli («1 - Demolizioni…», `_cpTitoloPrimus`); un capitolo «Oneri della sicurezza» nasce con la spunta sicurezza.
+12. Quadro economico: «− 1.371,59 €» come nel riquadro del ribasso.
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Idee per dopo (da chiedere ad Alex): il capitolo della sicurezza nel cronoprogramma (oggi è una fase con i giorni); «Questo pezzo vale 5 messaggi» anche per il fondatore senza limite.

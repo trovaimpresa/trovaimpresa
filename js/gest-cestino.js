@@ -1470,7 +1470,10 @@
 
     await renderComputi();
     rinfresca("riepilogo");
-    toast("Computo duplicato ✔  "+(conMisure?"misure comprese":"senza le misure"));
+    /* 19 nov 2026: per una variante il messaggio diceva «Computo duplicato» */
+    toast((variante
+      ? ((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Variante creata ✔  ":"Copia con le modifiche creata ✔  ")
+      : "Computo duplicato ✔  ")+(conMisure?"misure comprese":"senza le misure"));
     /* si apre subito la copia: la prima cosa che si fa è cambiarle il titolo */
     const copia=compCache.find(x=>String(x.id)===String(nid));
     if(copia)computoForm(copia);

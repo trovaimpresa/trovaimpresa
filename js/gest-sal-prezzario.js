@@ -85,7 +85,7 @@
     } else {
       salCache.forEach(s=>{
         const k=salConti(salTot[String(s.id)],comp);
-        h+='<div class="spesa-row" data-action="sal-apri" data-id="'+esc(String(s.id))+'" style="cursor:pointer;align-items:flex-start">'
+        h+='<div class="spesa-row sal-el" data-action="sal-apri" data-id="'+esc(String(s.id))+'" style="cursor:pointer;align-items:flex-start">'
           +'<span><b>'+_sa('SAL','Acconto')+' n. '+esc(String(s.numero))+'</b>'+(s.stato==="bozza"?' · bozza':'')
           +  '<small class="sp-forn">'+fdate(s.data)
           +    ' · fatto finora '+eur2(k.maturato)
@@ -360,6 +360,13 @@
   }
 
   /* ---- la scheda di un SAL ---- */
+  /* 19 nov 2026 — «del 0,5%» si dice «dello 0,5%» (e «dell'1%», «dell'8%») */
+  function _salDelPct(p){
+    const t=_pct(p);
+    if(/^0/.test(t))return "dello "+t;
+    if(/^(1|8|11|18|8\d|8\d\d)([,.]|$)/.test(t))return "dell'"+t;
+    return "del "+t;
+  }
   async function salForm(salId){
     if(!salComputoId){toast("Apri prima il computo");return;}
     const computoId=salComputoId;
@@ -425,10 +432,27 @@
        (gest_computo_capitoli.sicurezza), non solo dalla casella vecchia: il
        conto a schermo li ribassava. Stessa regola di compRiepilogo. */
     const capSic={};
+    let salCaps=[];
     try{
-      const rk=await sb.from("gest_computo_capitoli").select("id").eq("user_id",sbUid).eq("computo_id",computoId).eq("sicurezza",true);
-      (rk.data||[]).forEach(k=>{capSic[String(k.id)]=true;});
+      /* 19 nov 2026 — tutti i capitoli (non solo quelli della sicurezza): le
+         righe del SAL vanno in fila COME NEL COMPUTO, capitolo per capitolo */
+      const rk=await sb.from("gest_computo_capitoli").select("id,numero,titolo,ordine,sicurezza").eq("user_id",sbUid).eq("computo_id",computoId).order("ordine");
+      salCaps=rk.data||[];
+      salCaps.forEach(k=>{if(k.sicurezza)capSic[String(k.id)]=true;});
     }catch(_e){}
+    /* ⛔ 19 nov 2026 — collaudo da geometra: le righe uscivano nell'ordine in cui
+       erano state scritte, non per capitolo (la recinzione della sicurezza in
+       mezzo alle opere murarie, il massetto dopo la tinteggiatura). Adesso:
+       capitoli nell'ordine del computo, ognuno col suo titolo, e in fondo le
+       lavorazioni senza capitolo. Lo stesso ordine dell'elenco del computo. */
+    const _capIds=new Set(salCaps.map(k=>String(k.id)));
+    const salGruppi=salCaps.map(k=>({cap:k,voci:salVociCache.filter(v=>String(v.capitolo_id||"")===String(k.id))}))
+      .filter(g=>g.voci.length);
+    const _senza=salVociCache.filter(v=>!v.capitolo_id||!_capIds.has(String(v.capitolo_id)));
+    if(_senza.length)salGruppi.push({cap:null,voci:_senza});
+    const _soloSenza=salGruppi.length===1&&!salGruppi[0].cap;
+    const titoloCap=g=>_soloSenza?"":('<div class="sal-cap ti-orig" style="font-weight:700;font-size:15px;padding:12px 2px 4px;border-bottom:2px solid var(--bordo,#e6e9ee)">'
+      +(g.cap?((g.cap.numero?esc(String(g.cap.numero))+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")):"Senza capitolo")+'</div>');
     const rigaVoce=v=>{
       const fatto=salRigheCache[String(v.id)];
       const prima=salPrec[String(v.id)];
@@ -466,7 +490,7 @@
       +'<div class="sh-b"><div class="sh-tit">Quello che hai fatto</div>'
       +  '<div class="sh-nota">In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non dall\'ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.</div>'
       +  '<div id="sal-voci">'+(salVociCache.length
-          ? salVociCache.map(rigaVoce).join("")
+          ? salGruppi.map(g=>titoloCap(g)+g.voci.map(rigaVoce).join("")).join("")
           : '<div class="lm-vuoto">Questo computo non ha ancora lavorazioni.</div>')+'</div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -796,7 +820,7 @@
       +  '<button type="button" class="fn-s" data-action="sal-fatt-netto">'
       +    '<span class="fn-t">Al netto della ritenuta · '+eur2(k.netto)+'</span>'
       +    '<span class="fn-d">'+(k.ritenuta
-             ? 'La ritenuta di garanzia del '+_pct(k.perc)+'% ('+eur2(k.ritenuta)+') la togli tu dalla fattura. La riavrai a fine lavori, a collaudo fatto, con una fattura a parte.'
+             ? 'La ritenuta di garanzia '+_salDelPct(k.perc)+'% ('+eur2(k.ritenuta)+') la togli tu dalla fattura. La riavrai a fine lavori, a collaudo fatto, con una fattura a parte.'
              : 'Su questo '+_sa('SAL','acconto')+' la ritenuta di garanzia è 0, quindi la cifra è la stessa di sopra.')+'</span></button>'
       +'</div>'
       +'<div class="sh-nota">Non salvo niente adesso: si apre la fattura già scritta, la controlli tu e la salvi tu.</div>'
@@ -823,7 +847,7 @@
       +(comp.titolo?" — "+comp.titolo:"")
       +periodo
       +((modo==="netto"&&k.ritenuta)
-        ? " (importo al netto della ritenuta di garanzia del "+_pct(k.perc)+"%, pari a "+eur2(k.ritenuta)+")"
+        ? " (importo al netto della ritenuta di garanzia "+_salDelPct(k.perc)+"%, pari a "+eur2(k.ritenuta)+")"
         : "");
 
     closeSheet();
@@ -872,6 +896,14 @@
     const t=rt.data;
     if(!t){toast("I totali di questo "+_sa("SAL","acconto")+" non si trovano. Se hai appena eseguito sql/gest-sal.sql, riapri il computo e riprova.");return;}
     const righe=rr.data||[];
+    /* 19 nov 2026 — le righe in fila come nel computo: capitolo per capitolo
+       (ordine dei capitoli), dentro il capitolo per «ordine». Senza capitolo in fondo. */
+    try{
+      const rk=await sb.from("gest_computo_capitoli").select("id,ordine").eq("user_id",sbUid).eq("computo_id",comp.id);
+      const _oc={}; (rk.data||[]).forEach(function(k){_oc[String(k.id)]=+k.ordine||0;});
+      const _k=function(r){const o=r.capitolo_id!=null?_oc[String(r.capitolo_id)]:undefined;return o==null?1e9:o;};
+      righe.sort(function(a,b){return (_k(a)-_k(b))||((+a.ordine||0)-(+b.ordine||0));});
+    }catch(_e){}
     if(!righe.length){toast("Questo "+_sa("stato di avanzamento","acconto")+" non ha nessuna lavorazione contata: scrivi almeno una quantità, salva, e poi scarica il PDF.");return;}
 
     const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
@@ -1072,7 +1104,14 @@
     y+=6;doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     doc.text((az.citta?az.citta+", ":"")+"li "+fdate(s.data||todayStr()),M,y);doc.setTextColor(0);
     if(typeof pdfFirme==="function"){
-      y=pdfFirme(doc,y,M,R,[{etichetta:"L'Impresa",nome:az.nome||""},{etichetta:"Il Direttore dei lavori"},{etichetta:"Il Committente",nome:cli.nome||""}]);
+      /* 19 nov 2026 — collaudo da geometra: allo STUDIO il SAL lo redige il
+         direttore dei lavori. Prima il nome dello studio usciva sotto
+         «L'Impresa» e la riga del direttore restava vuota. Il nome e' quello
+         del tecnico che firma (Dati azienda), se no quello dello studio. */
+      const _studio=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+      y=pdfFirme(doc,y,M,R,_studio
+        ? [{etichetta:"Il Direttore dei lavori",nome:(az.tecnico_firma||az.nome||"")},{etichetta:"L'Impresa"},{etichetta:"Il Committente",nome:cli.nome||""}]
+        : [{etichetta:"L'Impresa",nome:az.nome||""},{etichetta:"Il Direttore dei lavori"},{etichetta:"Il Committente",nome:cli.nome||""}]);
     }
 
     /* la nota in fondo e il numero di pagina, su ogni foglio */
@@ -1834,7 +1873,7 @@
     });
     if(!righe.filter(r=>!_rigaSezione(r)).length){_libera();toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
 
-    const rp=compRiepilogo(voci,c);
+    const rp=compRiepilogo(voci,c,capitoli);   /* 19 nov 2026: i capitoli di questo computo, non quelli in memoria */
     if(rp.perc&&rp.ribasso){
       /* ⛔ 4 settembre 2026 — «sezione:false» ANCHE QUI. Questa riga e' nata
          dopo la regola del 19 agosto (tutte le righe con le stesse chiavi) e

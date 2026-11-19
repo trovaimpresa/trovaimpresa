@@ -74,8 +74,9 @@
         +  '<div class="field"><label>Quantità</label><input class="cai-qta" inputmode="decimal" value="'+esc(caiTesto(v.quantita))+'" placeholder="la metti tu" autocomplete="off"></div>'
         +  '<div class="field"><label>Prezzo unitario</label><input class="cai-prz" inputmode="decimal" value="'+esc(haPrezzo?caiTesto(v.prezzo_unitario):"")+'" placeholder="lo metti tu" autocomplete="off"></div>'
         +'</div>'
+        +(v.capitolo?'<div class="cp-orig">Capitolo: <b>'+esc(v.capitolo)+'</b></div>':'')
         +(haPrezzo
-            ? '<div class="cp-orig">Prezzo preso dal tuo prezzario'+(v.prezzo_da?(': «'+esc(v.prezzo_da)+'»'):'')+'</div>'
+            ? '<div class="cp-orig">Prezzo preso dal tuo prezzario'+(v.codice?(' (<b>'+esc(v.codice)+'</b>)'):'')+(v.prezzo_da?(': «'+esc(v.prezzo_da)+'»'):'')+'</div>'
             : '<div class="cp-orig cai-manca">Senza prezzo: nel tuo prezzario non l\'ho trovato. Scrivilo qui sopra, oppure dopo.</div>')
         +'</div>';
     };
@@ -114,10 +115,43 @@
         unita:String((r.querySelector(".cai-um")||{}).value||"").trim()||null,
         quantita_manuale:true,
         quantita:(q!=null)?q:0,
-        prezzo_unitario:(p!=null)?p:0
+        prezzo_unitario:(p!=null)?p:0,
+        _codAi:String(d.codice||"").trim(),
+        _capAi:String(d.capitolo||"").trim()
       });
     });
     if(!voci.length){toast("Non hai segnato nessuna riga: non entra niente.");return;}
+    /* ⛔ 19 nov 2026 — collaudo del computo da geometra. Prima la riga entrava
+       col RIASSUNTO dell'AI («Intonaco civile su pareti nuove (Opere murarie)»),
+       senza codice e «Senza capitolo». In un computo la lavorazione presa dal
+       prezzario si scrive col SUO codice e la SUA descrizione per intero: col
+       codice letto dall'AI si rilegge la voce vera (stessa unita' di misura,
+       se no si lascia la riga com'era). Il prezzo resta quello della casella. */
+    const _cods=[...new Set(voci.map(function(v){return v._codAi;}).filter(Boolean))];
+    if(_cods.length){
+      try{
+        const rp=await sb.from("gest_prezzi_propri").select("codice,descrizione,unita")
+          .eq("user_id",sbUid).is("eliminato_il",null).in("codice",_cods.slice(0,60));
+        const _um=function(u){return String(u||"").toLowerCase().replace(/\s+/g,"").replace("mq","m²").replace("m2","m²").replace("mc","m³").replace("m3","m³");};
+        (rp.data||[]).forEach(function(x){
+          voci.forEach(function(v){
+            if(v._codAi===x.codice&&!v.codice&&_um(v.unita)===_um(x.unita)&&String(x.descrizione||"").trim()){
+              v.codice=x.codice; v.descrizione=String(x.descrizione).trim();
+            }
+          });
+        });
+      }catch(_e){/* senza rete la riga entra come l'ha scritta l'AI */}
+    }
+    /* il capitolo: si riusa quello col titolo uguale (_compScriviCapitoli), se no nasce */
+    const _caps=[];
+    voci.forEach(function(v){
+      if(v._capAi){
+        let k=_caps.findIndex(function(t){return t.toLowerCase()===v._capAi.toLowerCase();});
+        if(k<0){_caps.push(v._capAi);k=_caps.length-1;}
+        v._cap=k;
+      }
+      delete v._codAi; delete v._capAi;
+    });
     if(btn){btn.disabled=true;btn.textContent="Un attimo…";}
     try{
       let c=null;
@@ -140,7 +174,7 @@
       /* le lavorazioni che ci sono già vanno lette PRIMA di scrivere: da lì
          _compScriviVoci prende l'ordine da cui ripartire */
       await renderCompVoci(c.id);
-      const messe=await _compScriviVoci(c.id,voci);
+      const messe=await _compScriviVoci(c.id,voci,_caps);
       if(messe==null)return;
       const senza=voci.filter(function(v){return !(+v.prezzo_unitario);}).length;
       toast(messe+(messe===1?" lavorazione aggiunta ✔":" lavorazioni aggiunte ✔")+(senza?("  ·  "+senza+" senza prezzo"):""));

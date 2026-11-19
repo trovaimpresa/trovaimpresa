@@ -734,9 +734,25 @@
     qeAggiorna();
     compRibConto();
     const _ps=$("#co-prz-sel");
-    if(_ps)_ps.onchange=function(){
+    if(_ps)_ps.onchange=async function(){
       const box=$("#co-prz-mio");
       if(box)box.style.display=(_ps.value==="__mio__")?"":"none";
+      /* 19 nov 2026 — collaudo da geometra: scelto il prezzario nella tendina
+         e premuto subito «Prendi i prezzi dal prezzario», la risposta era «Non
+         so dove cercare»: la scelta valeva solo dopo «Salva». Adesso si salva da
+         sola, come il ribasso (solo un computo che esiste gia', e non «lo scrivo
+         io»: quello si salva col nome scritto). */
+      if(!c.id||_ps.value==="__mio__"||!sb||!sbUid)return;
+      const nuovo=_ps.value||null;
+      if(String(c.prezzario||"")===String(nuovo||""))return;
+      try{
+        const r=await sb.from("gest_computi").update({prezzario:nuovo}).eq("id",c.id).eq("user_id",sbUid).select("id");
+        if(r.error||!r.data||!r.data.length){toast("Il prezzario non si è salvato: premi «Salva» in fondo.");return;}
+        c.prezzario=nuovo;
+        const cc=compCache.find(function(x){return String(x.id)===String(c.id);});
+        if(cc)cc.prezzario=nuovo;
+        toast("Prezzario salvato \u2714");
+      }catch(e){}
     };
     compCapNuovo=false;compCapEdit=null;compSelModo=false;compSel.clear();
     /* la pagina di partenza si accende da qui e NON dall'html: una pagina e'
@@ -748,7 +764,7 @@
     const _ci=$("#co-inizio");
     if(_ci)_ci.addEventListener("change",function(){ cronoAnteprima(); });
     if(!isNew){renderCompVoci(c.id);renderSalList(c.id);renderCrono(c.id);
-               if(c.variante_di)renderVariante(c);}
+               /* la pagina «Cosa è cambiato» la ridisegna renderCompVoci (19 nov 2026) */}
   }
 
   /* ============================================================
@@ -1231,7 +1247,8 @@
     const rp=qeBaseA();
     const q=qeCalcola(qeLetto(),rp.netto);
     /* ---- A: i numeri del computo, senza scrivere niente ---- */
-    const riga=(et,v,cls)=>'<div class="qe-r'+(cls?" "+cls:"")+'"><span>'+esc(et)+'</span><b>'+eur2(v)+'</b></div>';
+    /* 19 nov 2026: il meno come nel riquadro del ribasso qui sotto («− 1.371,59 €»), non «-1.371,59 €» */
+    const riga=(et,v,cls)=>'<div class="qe-r'+(cls?" "+cls:"")+'"><span>'+esc(et)+'</span><b>'+(v<0?'− '+eur2(-v):eur2(v))+'</b></div>';
     let a=riga("Lavori a corpo e a misura",Math.round((rp.lordo-rp.sicurezza)*100)/100);
     if(rp.sicurezza)a+=riga("Oneri della sicurezza, non soggetti a ribasso",rp.sicurezza);
     if(rp.perc&&rp.ribasso)a+=riga("Ribasso d'asta "+_pct(rp.perc)+"% sulla parte ribassabile",-rp.ribasso);
@@ -1590,11 +1607,32 @@
      scritta da un capomastro vuol dire una settimana, non «lunedi' a
      venerdi' contando il weekend». Se il cantiere comincia di sabato,
      comincia davvero il lunedi'. */
-  function _cgFeriale(d){ const g=d.getDay(); return g!==0&&g!==6; }
+  /* ⛔ 19 nov 2026 — collaudo da geometra: le FESTE nazionali si contavano come
+     giorni di lavoro. Un cronoprogramma dal 1° dicembre faceva lavorare l'8
+     dicembre, Natale e Santo Stefano. Adesso non si contano: 1 e 6 gennaio,
+     Pasquetta, 25 aprile, 1 maggio, 2 giugno, 15 agosto, 1 novembre, 8, 25 e
+     26 dicembre. Il santo patrono no: cambia da Comune a Comune. */
+  const _cgPasquetta={};
+  function _cgFesta(d){
+    const m=d.getMonth()+1, g=d.getDate(), y=d.getFullYear();
+    const k=m*100+g;
+    if([101,106,425,501,602,815,1101,1208,1225,1226].indexOf(k)>=0)return true;
+    if(!(y in _cgPasquetta)){
+      /* Pasqua col calcolo di Gauss (calendario gregoriano), poi +1 giorno */
+      const a=y%19,b=Math.floor(y/100),c=y%100,dd=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),
+            gg=Math.floor((b-f+1)/3),h=(19*a+b-dd-gg+15)%30,i=Math.floor(c/4),kk=c%4,
+            l=(32+2*e+2*i-h-kk)%7,mm=Math.floor((a+11*h+22*l)/451),
+            mese=Math.floor((h+l-7*mm+114)/31),giorno=((h+l-7*mm+114)%31)+1;
+      const pq=new Date(y,mese-1,giorno+1);
+      _cgPasquetta[y]=(pq.getMonth()+1)*100+pq.getDate();
+    }
+    return k===_cgPasquetta[y];
+  }
+  function _cgFeriale(d){ const g=d.getDay(); return g!==0&&g!==6&&!_cgFesta(d); }
   function _cgPrimoLav(d){
     const x=new Date(d.getTime());
     let giri=0;
-    while(!_cgFeriale(x)&&giri<10){ x.setDate(x.getDate()+1); giri++; }
+    while(!_cgFeriale(x)&&giri<15){ x.setDate(x.getDate()+1); giri++; }
     return x;
   }
   function _cgDopo(d){ const x=new Date(d.getTime()); x.setDate(x.getDate()+1); return _cgPrimoLav(x); }
@@ -1910,7 +1948,7 @@
          banco — il banco leggeva la pagina 6 da sola. */
       +  '<button type="button" class="btn" data-action="crono-pdf">📄 '+_cpar('Scarica il cronoprogramma','Scarica il calendario')+'</button>'
       +'</div>'
-      +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato e domenica non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
+      +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato, domenica e feste nazionali non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
     box.innerHTML=h;
 
     /* si ridisegna mentre si scrive, senza salvare: cosi' si vede subito
@@ -2110,8 +2148,11 @@
     /* 16 nov 2026 — per impresa e artigiano i pulsanti dei prezzi hanno lo
        STESSO nome in tutte e due le pagine (qui si chiamava «Riempi i vuoti
        dal prezzario»), e c'e' anche quello dell'AI. */
-    if(zeri)h+='<div class="cp-azioni"><button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">'+_cpar('€ Riempi i vuoti dal prezzario','€ Prendi i prezzi dal prezzario')+'</button>'
-      +(ruoloUtente==='professionista'?'':'<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai-prezzi">Metti i prezzi con l\'AI</button>')+'</div>';
+    /* 19 nov 2026 — anche lo studio: stesso nome della pagina Lavorazioni e il
+       pulsante dell'AI (prima allo studio c'era solo «Riempi i vuoti…», e l'AI
+       dei prezzi stava soltanto nella pagina 1) */
+    if(zeri)h+='<div class="cp-azioni"><button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+      +'<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai-prezzi">Metti i prezzi con l\'AI</button></div>';
     if(compPrzEsito&&String(compPrzEsitoId||"")===String(compVociCompId))h+=compPrzEsito;
     h+='<div class="cp-tab"><div class="cp-r cp-h"><span>Lavorazione</span><span>Quantità</span><span>Prezzo €</span><span>Importo</span></div>';
     gruppi.forEach(function(g){
@@ -2210,6 +2251,12 @@
     if(senzaCap.length||!compCapCache.length)gruppi.push({cap:null, voci:senzaCap});
 
     const compQui=compCache.find(x=>String(x.id)===String(computoId))||{};
+    /* ⛔ 19 nov 2026 — collaudo della variante: tolta una lavorazione, la
+       pagina «Cosa è cambiato» continuava a dire «6 righe uguali» e non la
+       elencava fra le tolte, finche' non si chiudeva e riapriva il computo.
+       Si ridisegnava solo all'apertura. Adesso ogni volta che si ridisegnano
+       le lavorazioni (aggiunta, misura, cancellazione, spostamento). */
+    if(compQui.variante_di&&typeof renderVariante==="function"){ try{ renderVariante(compQui); }catch(e){ console.warn("[computo] variante:",e); } }
     const rp=compRiepilogo(compVociCache,compQui);
 
     /* ⚠️ 11 agosto 2026 — LE FRECCE PER SPOSTARE UNA LAVORAZIONE.
@@ -2771,9 +2818,9 @@
          c'e' l'anagrafica della lavorazione, che si compila una volta
          sola; queste due si guardano insieme e si toccano di continuo.
          ============================================================ */
-      +'<div class="sh-b"><div class="sh-tit">Come è fatto il prezzo</div>'
+      +'<div class="sh-b"><div class="sh-tit">'+_cpar('Analisi del prezzo','Come è fatto il prezzo')+'</div>'
       +  '<div class="lav-media" id="cv-analisi">'+(isNew
-          ? '<div class="lm-vuoto" style="margin-bottom:10px">Se il prezzo non sta nel prezzario, qui lo costruisci: materiali, manodopera, noli.</div>'
+          ? '<div class="lm-vuoto" style="margin-bottom:10px">Se il prezzo non sta nel prezzario, qui lo costruisci: materiali, <span class="ti-orig">manodopera</span>, noli.</div>'
             +'<button type="button" class="btn" id="cv-prima-analisi">+ Costruisci il prezzo</button>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
       +'</div>'
@@ -3065,16 +3112,26 @@
       /* (12 agosto 2026 sera: la ricerca di riserva cerca DENTRO la tariffa
          dichiarata dal computo, non in tutte: _ppCercaDb riceve ppFonteScelta) */
     }
+    /* 19 nov 2026 — collaudo del computo (studio): «tramezzatura» metteva in
+       cima «Elementi di completamento in lamiera… raccordo alle tramezzature»,
+       solo perche' era fra le voci in memoria. Prima le voci che hanno TUTTE le
+       parole cercate all'inizio della descrizione (primi 60 caratteri); per il
+       resto l'ordine resta quello di prima (le piu' usate). */
+    if(q){
+      const _pr=_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean).map(_ppRadice);
+      const _testa=x=>{const t=_ppPiatto(x.descrizione||"").slice(0,60);return _pr.every(p=>t.indexOf(p)>=0)?0:1;};
+      trovate=trovate.map((x,i)=>[x,_testa(x),i]).sort((a,b)=>(a[1]-b[1])||(a[2]-b[2])).map(z=>z[0]);
+    }
     ppCache=trovate.slice(0,8);
     if(!ppCache.length){
       box.innerHTML='<p class="fatt-empty">'+(q?"Nessuna voce con questa parola.":"Il prezzario è ancora vuoto: la prima voce la salvi da qui sotto.")+'</p>';
       return;
     }
     /* niente tagli silenziosi: se ce ne sono più di otto, si dice */
-    const _extra=(trovate.length>ppCache.length)?('<div class="sh-nota">Ne ho trovate '+trovate.length+': qui sotto le 8 che usi di più. Scrivi una parola in più per restringere.</div>'):"";
+    const _extra=(trovate.length>ppCache.length)?('<div class="sh-nota">Ne ho trovate '+trovate.length+': qui sotto le prime 8. Scrivi una parola in più per restringere.</div>'):"";
     box.innerHTML=ppCache.map(x=>
       '<div class="spesa-row" data-action="pp-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
-      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
+      +'<span><span class="ti-orig">'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")+'</span>'
       +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(_umSchermo(x.unita)):"")
       +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
       /* la provenienza si vede SEMPRE quando non e' quella dichiarata dal
@@ -3544,7 +3601,7 @@
       +'<button type="button" class="btn-primary quick-add" data-action="an-add" data-id="'+esc(String(voceId))+'">'
       + (inCorr?"Salva la riga":"+ Aggiungi al prezzo")+'</button>'
       + (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="an-annulla">Annulla la correzione</button>':'')
-      +'<div class="sh-nota">Per la Manodopera la quantità sono le <b>ore</b>: 0,85 ore di muratore per '+esc(perUno)+', non otto ore di giornata.</div>'
+      +'<div class="sh-nota">Per la <span class="ti-orig">manodopera</span> la quantità sono le <b>ore</b>: 0,85 ore di muratore per '+esc(perUno)+', non otto ore di giornata.</div>'
       +'</div>';
 
     box.innerHTML=h;

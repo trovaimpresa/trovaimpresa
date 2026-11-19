@@ -69,7 +69,11 @@
      chiusa qui sopra (una parola si cambia solo se e' intera), ma questi due
      restano nell'elenco lo stesso: sono contenuto dell'utente e non vanno
      toccati nemmeno per caso. */
-  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,.cai-desc,.cp-orig,#co-qe-a,textarea';
+  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,.cai-desc,.cp-orig,#co-qe-a,.ti-orig,.pz-desc,.cp-d,.cp-cap,textarea';
+  /* 19 nov 2026 — «.ti-orig» e «.pz-desc»: il testo del PREZZARIO non e' nostro.
+     Nella ricerca della lavorazione lo studio leggeva «nell'ambito della pratica»
+     al posto di «del cantiere». Chi mette a schermo testo del prezzario o una
+     parola di legge (manodopera) la chiude in <span class="ti-orig">. */
   /* 16 nov 2026 — «#co-qe-a»: nel quadro economico dei lavori pubblici «costo
      della manodopera» e' la parola della legge: allo studio usciva «di cui
      costo del tempo speso». */

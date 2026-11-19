@@ -6414,3 +6414,14 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .lav-pstati .vista.on{background:var(--blu,#0066ff);border-color:var(--blu,#0066ff);color:#fff}
 .lav-pstati .vista.on .v-cnt{background:#fff;color:var(--blu,#0066ff)}
 @media (max-width:700px){ .lav-pstati .lav-pstati-t{width:100%} }
+
+/* 19 nov 2026 — collaudo del computo sul telefono: nella pagina «Acconti (SAL)»
+   la riga del SAL non andava a capo e il pulsante «PDF» (largo 100% sotto i
+   768 px) usciva dallo schermo, la × non si vedeva proprio. Sul telefono:
+   prima riga il SAL, sotto la cifra, «PDF» e la × affiancati. */
+@media (max-width:768px){
+  #sheet .spesa-row.sal-el{ flex-wrap:wrap; row-gap:8px; }
+  #sheet .spesa-row.sal-el > span:first-child{ flex:1 1 100%; min-width:0; }
+  #sheet .spesa-row.sal-el > b{ margin-right:auto; align-self:center; }
+  #sheet .spesa-row.sal-el > .quick-add{ width:auto; flex:0 0 auto; }
+}

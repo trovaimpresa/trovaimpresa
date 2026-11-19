@@ -610,6 +610,16 @@ function pulisciVoci(lista, conFonte) {
     if (conFonte && voce.prezzo_unitario !== undefined) {
       const da = String(v.prezzo_da == null ? '' : v.prezzo_da).trim().slice(0, 160);
       if (da) voce.prezzo_da = da;
+      /* 19 nov 2026 — il CODICE della voce letta: col codice il browser rimette
+         nel computo la descrizione VERA del prezzario (non il riassunto dell'AI) */
+      const cod = String(v.codice == null ? '' : v.codice).trim().slice(0, 40);
+      if (cod) voce.codice = cod;
+    }
+    /* 19 nov 2026 — il CAPITOLO («nel capitolo Opere murarie»): prima finiva
+       dentro la descrizione e la riga entrava «Senza capitolo» */
+    if (conFonte) {
+      const cap = String(v.capitolo == null ? '' : v.capitolo).trim().slice(0, 80);
+      if (cap) voce.capitolo = cap;
     }
     voci.push(voce);
   });
@@ -1362,7 +1372,9 @@ const STRUMENTI = [
               unita:           { type:'string', description:'m², m, cad, ore, a corpo…' },
               quantita:        { type:'number' },
               prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' },
-              prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene il prezzo, come sta scritta (corta)' }
+              prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene il prezzo, come sta scritta (corta)' },
+              codice:          { type:'string', description:'il `codice` della voce del suo prezzario da cui hai preso il prezzo, come l\'hai letto con miei_prezzi' },
+              capitolo:        { type:'string', description:'il capitolo del computo in cui va la riga, se te lo dice («nel capitolo Opere murarie» → «Opere murarie»). NON scriverlo dentro la descrizione' }
             },
             required: ['descrizione']
           }
@@ -1613,7 +1625,7 @@ function istruzioniFisse() {
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
-    'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
+    'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo` (se il prezzo viene da una sua voce passa anche il suo `codice`; se ti dice il capitolo passalo in `capitolo`, mai dentro la descrizione). ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
     'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (20 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
