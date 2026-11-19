@@ -135,6 +135,8 @@ async function costruisci(dati, firmatario) {
     filo();
     (dati.totali || []).forEach(t => { if (Array.isArray(t)) riga2(T(t[0]), T(t[1])); });
     if (Array.isArray(dati.totale)) { y -= 2; riga2(T(dati.totale[0]), T(dati.totale[1]), { size: 13, bold: true }); }
+    /* 19 nov 2026 — acconto alla firma e saldo, sotto il totale */
+    (dati.dopo || []).forEach(t => { if (Array.isArray(t)) riga2(T(t[0]), T(t[1])); });
     if (T(dati.totale_nota)) testo(T(dati.totale_nota), { size: 9, colore: GRIGIO });
     if (T(dati.nota_iva)) testo(T(dati.nota_iva), { size: 9, colore: GRIGIO });
     if (T(dati.note)) { y -= 6; testo('Note', { size: 11, bold: true }); testo(T(dati.note), { size: 10 }); }

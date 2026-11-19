@@ -185,7 +185,7 @@
       doc.text("NETTO A PAGARE",R-88,ry+4);
       doc.text(eurPdf(cp.totale),R-2,ry+4,{align:"right"});
       y+=hBox+10;
-    }else if((p.iva_perc!=null&&p.iva_perc!=="")||prevSconto(tot,p)){
+    }else if((p.iva_perc!=null&&p.iva_perc!=="")||prevSconto(tot,p)||prevHaAcconto(p)){
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
          totale FINITO, non solo l'imponibile. È la cifra che gli interessa.
          10 nov 2026 — e se c'e' lo sconto, la riga dello sconto prima
@@ -202,7 +202,9 @@
       if(sconto){vociBox.push(["Totale voci",eurPdf(tot)]);vociBox.push([prevScontoEtichetta(p),"- "+eurPdf(sconto)]);}
       if(conIva){vociBox.push(["Imponibile",eurPdf(_pc.imponibile)]);
                  if(perc)vociBox.push(["IVA "+_pct(perc)+"%",eurPdf(_pc.iva)]);}
-      const hBox=vociBox.length*6+18;
+      /* 19 nov 2026 — l'acconto: due righe SOTTO il totale (prevAccontoRighe) */
+      const accBox=prevAccontoRighe(finito,p);
+      const hBox=vociBox.length*6+18+(accBox.length?accBox.length*6+3:0);
       if(y+hBox>272){doc.addPage();y=20;}
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
       doc.setFont("helvetica","normal");doc.setFontSize(9.5);
@@ -211,6 +213,11 @@
       doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
       doc.setFont("helvetica","bold");doc.setFontSize(11.5);
       doc.text(conIva?"TOTALE":"TOTALE (IVA esclusa)",R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
+      if(accBox.length){
+        doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+        let ay=ry+13;
+        accBox.forEach(function(a){doc.text(a[0],R-88,ay);doc.text(eurPdf(a[1]),R-2,ay,{align:"right"});ay+=6;});
+      }
       y+=hBox+10;
     }else{
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
@@ -740,8 +747,10 @@
     const luogoDef=mem.luogo||az.citta||"";
     const foroDef=mem.foro||az.citta||"";
     const tempiDef=mem.tempi||"30 giorni lavorativi dall'inizio dei lavori";
-    const pagDef=mem.pagamento||"30-40-30";
-    const opzPag=ORD_PAGAMENTI.map(o=>'<option value="'+o[0]+'" '+(o[0]===pagDef?'selected':'')+'>'+o[1]+'</option>').join("");
+    /* 19 nov 2026 — se il preventivo ha l'acconto, il pagamento parte da li' */
+    const _accOrd=prevAccontoRighe(totale,p);
+    const pagDef=_accOrd.length?"acconto":(mem.pagamento==="acconto"?"30-40-30":(mem.pagamento||"30-40-30"));
+    const opzPag=(_accOrd.length?[["acconto","Acconto alla firma e saldo alla fine, come nel preventivo"]]:[]).concat(ORD_PAGAMENTI).map(o=>'<option value="'+o[0]+'" '+(o[0]===pagDef?'selected':'')+'>'+o[1]+'</option>').join("");
     const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
 
     openSheetGrande("Conferma d'ordine",
@@ -770,6 +779,7 @@
       +  (perc?riga("IVA "+_pct(perc)+"%",ivaVal):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +  '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale</strong></span><strong>'+eur2(totale)+'</strong></div>'
+      +  (_accOrd.length?'<div style="margin-top:10px">'+_accOrd.map(a=>riga(esc(a[0]),a[1])).join("")+'</div>':'')
       +'</div>'
       +'<div class="campo-aiuto">'+(perc==null
           ? 'Nel preventivo non hai indicato l\'IVA: sul foglio uscira\' scritto "IVA esclusa". Per farci comparire il totale finito, metti l\'aliquota nel preventivo.'
@@ -890,12 +900,21 @@
     doc.setFont("helvetica","bold");doc.setFontSize(11);
     doc.text("TOTALE",M+2,y+2);doc.text(eurPdf(totale),R-2,y+2,{align:"right"});
     y+=9;
+    /* 19 nov 2026 — l'acconto del preventivo, sotto il totale */
+    const _accP=prevAccontoRighe(totale,p);
+    if(_accP.length){
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+      _accP.forEach(function(a){doc.text(a[0],M+2,y);doc.text(eurPdf(a[1]),R-2,y,{align:"right"});y+=5.5;});
+      y+=3;
+    }
     paragrafo(perc==null
       ? "Il corrispettivo si intende IVA esclusa. Il prezzo è fisso e invariabile per le opere sopra indicate."
       : "Il prezzo è fisso e invariabile per le opere sopra indicate, comprensivo di IVA nella misura riportata.",8.8,false,90);
 
     titoletto("Modalità di pagamento");
     let tp=ORD_PAG_TESTO[dati.pagamento]||ORD_PAG_TESTO["30-40-30"];
+    if(dati.pagamento==="acconto"&&_accP.length)
+      tp="Il corrispettivo sarà pagato con un acconto di "+eurPdf(_accP[0][1])+" alla sottoscrizione della presente e con il saldo di "+eurPdf(_accP[1][1])+" alla fine dei lavori.";
     if(az.iban)tp+=" Il pagamento avverra' tramite bonifico bancario sull'IBAN "+az.iban+".";
     if(az.giorni_pagamento)tp+=" Le fatture si intendono da saldare entro "+az.giorni_pagamento+" giorni dalla data di emissione.";
     paragrafo(tp);

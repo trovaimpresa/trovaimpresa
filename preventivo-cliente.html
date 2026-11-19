@@ -144,6 +144,8 @@
     h+='<div class="tot">';
     (S.totali||[]).forEach(function(x){h+='<div class="r"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></div>';});
     if(S.totale)h+='<div class="r fin"><span>'+esc(S.totale[0])+'</span><span>'+esc(S.totale[1])+'</span></div>';
+    /* 19 nov 2026 — acconto alla firma e saldo, sotto il totale */
+    (S.dopo||[]).forEach(function(x){h+='<div class="r"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></div>';});
     h+='</div>';
     if(S.nota_iva)h+='<div class="piccolo">'+esc(S.nota_iva)+'</div>';
     h+='</div>';

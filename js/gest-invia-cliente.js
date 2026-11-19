@@ -102,6 +102,11 @@
         out.totale=["Totale",eur2(_pc.totale)];
         out.totale_nota="IVA esclusa";
       }
+      /* 19 nov 2026 — l'acconto: righe DOPO il totale. La chiave «dopo» c'e'
+         solo se c'e' l'acconto: i preventivi gia' firmati non hanno questa
+         chiave, e aggiungerla vuota li farebbe sembrare cambiati. */
+      var acR=prevAccontoRighe(_pc.totale,p);
+      if(acR.length) out.dopo=acR.map(function(a){ return [a[0],eur2(a[1])]; });
     }
     return out;
   }
@@ -110,7 +115,7 @@
   function fotografia(){
     var p=_inv.p, az=_inv.az||{}, conti=invConti(p,_inv.righe);
     var caps=_inv.caps.filter(function(c){ return _inv.sel.caps[c.id]; });
-    return {
+    var snap={
       v:1,
       tipo:ruoloUtente==="professionista"?"parcella":"preventivo",
       numero:p.numero||null, data:p.data||null, titolo:T(p.titolo), note:T(p.note),
@@ -121,6 +126,8 @@
       totale:conti.totale, totale_nota:conti.totale_nota, nota_iva:_inv.sel.prev?conti.nota_iva:"",
       capitolati:caps.map(function(c){ var x=Object.assign({},c); x.cap_id=c.id; delete x.id; return x; })
     };
+    if(_inv.sel.prev&&conti.dopo) snap.dopo=conti.dopo;
+    return snap;
   }
   /* ⚠️ Il database (jsonb) riordina le chiavi: un JSON.stringify secco direbbe
      «diverso» anche quando non e' cambiato niente (trovato dal vivo il 1 nov:

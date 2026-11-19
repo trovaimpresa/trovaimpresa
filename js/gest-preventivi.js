@@ -315,6 +315,30 @@
     const perc=+(p&&p.sconto_perc)||0;
     return perc>0?"Sconto "+_pct(perc)+"%":"Sconto";
   }
+  /* 19 nov 2026 — L'ACCONTO DEL PREVENTIVO (chiesto da Spazio Giardino).
+     Si calcola sul TOTALE per il cliente (dopo sconto e IVA): e' quello che
+     il cliente paga alla firma. acconto_perc > 0 vince, se no gli euro di
+     «acconto». Mai sotto zero, mai piu' del totale. Lo studio no (parcella).
+     Non cambia NESSUN totale: aggiunge solo due righe sotto il totale. */
+  function prevAcconto(totale,p){
+    p=p||{};
+    if(typeof ruoloUtente!=="undefined"&&ruoloUtente==='professionista')return 0;
+    const perc=+p.acconto_perc||0;
+    let a=perc>0?_centPerc(totale,perc):_cent2(+p.acconto||0);
+    if(!(a>0))return 0;
+    if(a>totale)a=totale;
+    return a;
+  }
+  function prevAccontoEtichetta(p){
+    const perc=+(p&&p.acconto_perc)||0;
+    return perc>0?"Acconto alla firma ("+_pct(perc)+"%)":"Acconto alla firma";
+  }
+  /* le due righe sotto il totale, o nessuna: [[etichetta,euro],[«Saldo a fine lavori»,euro]] */
+  function prevAccontoRighe(totale,p){
+    const a=prevAcconto(totale,p); if(!a)return [];
+    return [[prevAccontoEtichetta(p),a],["Saldo a fine lavori",_cent2(totale-a)]];
+  }
+  function prevHaAcconto(p){ return !!p&&((+p.acconto_perc||0)>0||(+p.acconto||0)>0); }
   /* la somma delle voci, saltando i capitoli: per chi ha le righe in mano */
   function prevSommaVoci(righe){
     let t=0;(righe||[]).forEach(function(r){ if(!_rigaSezione(r))t+=impRiga(r.qta,r.prezzo); });
@@ -489,16 +513,18 @@
   }
   function eColonnaParcellaMancante(err){
     const m=(err&&err.message)||"";
-    return /cassa_perc|iva_perc|ritenuta|spese_forfait|sconto/i.test(m) && /column|schema cache/i.test(m);
+    return /cassa_perc|iva_perc|ritenuta|spese_forfait|sconto|acconto/i.test(m) && /column|schema cache/i.test(m);
   }
   /* 10 nov 2026 — se manca SOLO lo sconto (SQL del 10 nov non ancora
      eseguito) si toglie solo lo sconto: l'IVA, che c'e', si salva lo stesso. */
   function senzaCampiParcella(obj,err){
     const o=Object.assign({},obj);
     const m=(err&&err.message)||"";
-    const soloSconto=/sconto/i.test(m)&&!/cassa_perc|iva_perc|ritenuta|spese_forfait/i.test(m);
-    (soloSconto?["sconto","sconto_perc"]
-               :["cassa_perc","iva_perc","ritenuta","ritenuta_perc","spese_forfait","sconto","sconto_perc"])
+    /* 19 nov 2026 — «ritenuta_perc|...» non contiene «acconto»: la ritenuta
+       d'acconto si chiama «ritenuta», quindi /acconto/ trova solo l'acconto */
+    const soloSconto=/sconto|acconto/i.test(m)&&!/cassa_perc|iva_perc|ritenuta|spese_forfait/i.test(m);
+    (soloSconto?["sconto","sconto_perc","acconto","acconto_perc"]
+               :["cassa_perc","iva_perc","ritenuta","ritenuta_perc","spese_forfait","sconto","sconto_perc","acconto","acconto_perc"])
       .forEach(k=>delete o[k]);
     return o;
   }
@@ -522,6 +548,7 @@
     if(!persi.length)return "";
     if(ruoloUtente==='professionista')return "Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL";
     if(persi.every(k=>/^sconto/.test(k)))return "Salvato, ma lo sconto NON è stato registrato: manca un aggiornamento del database";
+    if(persi.every(k=>/^(sconto|acconto)/.test(k)))return "Salvato, ma l'acconto NON è stato registrato: manca un aggiornamento del database";
     return "Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database";
   }
   function bloccoIvaImpresa(p){
@@ -536,8 +563,12 @@
     const scPerc=+p.sconto_perc||0, scEur=+p.sconto||0;
     const scTipo=scPerc>0?"perc":(scEur>0?"eur":"perc");
     const scVal=scPerc>0?_pct(scPerc):(scEur>0?_pct(scEur):"");
+    /* 19 nov 2026 — l'acconto: stessa forma dello sconto (% o euro) */
+    const acPerc=+p.acconto_perc||0, acEur=+p.acconto||0;
+    const acTipo=acPerc>0?"perc":(acEur>0?"eur":"perc");
+    const acVal=acPerc>0?_pct(acPerc):(acEur>0?_pct(acEur):"");
     return '<div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">'
-      +'<label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">\ud83d\udcb6 IVA, sconto e totale</label>'
+      +'<label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">\ud83d\udcb6 IVA, sconto, acconto e totale</label>'
       +'</div>'
       +'<div class="field"><label for="pv-sconto">Sconto</label>'
       +'<div class="ctr-riga" style="display:flex;gap:10px"><input id="pv-sconto" type="text" inputmode="decimal" placeholder="Es. 10" value="'+esc(scVal)+'" style="flex:1">'
@@ -545,6 +576,10 @@
       +'<div class="campo-aiuto">Lascia vuoto se non fai sconto.</div></div>'
       +'<div class="field"><label>Aliquota IVA</label><select id="pv-iva-imp">'+opz+'</select>'
       +'<div class="campo-aiuto">Scegliendo un\'aliquota, sul PDF il cliente vede anche il <b>totale finito</b>. Lasciandola su "non indicata" il preventivo resta come prima.</div></div>'
+      +'<div class="field"><label for="pv-acconto">Acconto alla firma</label>'
+      +'<div class="ctr-riga" style="display:flex;gap:10px"><input id="pv-acconto" type="text" inputmode="decimal" placeholder="Es. 30" value="'+esc(acVal)+'" style="flex:1">'
+      +'<select id="pv-acconto-tipo" style="max-width:120px"><option value="perc" '+(acTipo==="perc"?"selected":"")+'>%</option><option value="eur" '+(acTipo==="eur"?"selected":"")+'>\u20ac</option></select></div>'
+      +'<div class="campo-aiuto">Lascia vuoto se non chiedi acconto. Sul PDF esce sotto il totale, col saldo.</div></div>'
       +'<div id="pv-riep-imp" class="prev-somma" style="text-align:left;line-height:1.9"></div>';
   }
   function aggiornaRiepilogoIvaImpresa(){
@@ -559,8 +594,9 @@
     const scDati=leggiScontoModulo();
     const sconto=prevSconto(somma,scDati);
     const conIva=!!(sel&&sel.value!=="");
-    /* niente IVA e niente sconto: il riquadro resta vuoto, come prima */
-    if(!conIva&&!sconto){box.innerHTML="";return;}
+    const acDati=leggiAccontoModulo();
+    /* niente IVA, niente sconto e niente acconto: il riquadro resta vuoto, come prima */
+    if(!conIva&&!sconto&&!prevHaAcconto(acDati)){box.innerHTML="";return;}
     /* il totale si somma sull'IVA GIA' arrotondata ai centesimi, se no le due
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
        1.100,05. Il cliente che rifa' la somma a mano trova l'errore. */
@@ -577,7 +613,11 @@
     }
     h+='<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +'<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>'
-      +(conIva?'Totale per il cliente':'Totale scontato (IVA esclusa)')+'</strong></span><strong>'+eur2(_pc.totale)+'</strong></div>';
+      +(conIva?'Totale per il cliente':(sconto?'Totale scontato (IVA esclusa)':'Totale (IVA esclusa)'))+'</strong></span><strong>'+eur2(_pc.totale)+'</strong></div>';
+    const acR=prevAccontoRighe(_pc.totale,acDati);
+    if(acR.length){
+      h+='<div style="margin-top:10px">'+acR.map(function(r){return riga(esc(r[0]),eur2(r[1]));}).join("")+'</div>';
+    }
     box.innerHTML=h;
   }
   /* lo sconto scritto nel modulo, nella forma del database */
@@ -589,11 +629,20 @@
     if(tipo&&tipo.value==="eur")return {sconto:_cent2(v),sconto_perc:null};
     return {sconto:null,sconto_perc:Math.min(v,100)};
   }
+  /* 19 nov 2026 — l'acconto scritto nel modulo, nella forma del database */
+  function leggiAccontoModulo(){
+    const inp=$("#pv-acconto"), tipo=$("#pv-acconto-tipo");
+    if(!inp)return {};
+    const v=_numIt("#pv-acconto")||0;
+    if(!(v>0))return {acconto:null,acconto_perc:null};
+    if(tipo&&tipo.value==="eur")return {acconto:_cent2(v),acconto_perc:null};
+    return {acconto:null,acconto_perc:Math.min(v,100)};
+  }
   function leggiCampiIvaImpresa(){
     if(ruoloUtente==='professionista')return {};
     const sel=$("#pv-iva-imp");
     if(!sel)return {};
-    return Object.assign({iva_perc: sel.value===""?null:(+sel.value||0)},leggiScontoModulo());
+    return Object.assign({iva_perc: sel.value===""?null:(+sel.value||0)},leggiScontoModulo(),leggiAccontoModulo());
   }
 
   async function prevForm(p,preset,aiApri){
@@ -722,6 +771,10 @@
       const scIn=$("#pv-sconto"), scTi=$("#pv-sconto-tipo");
       if(scIn)scIn.addEventListener("input",aggiornaRiepilogoIvaImpresa);
       if(scTi)scTi.addEventListener("change",aggiornaRiepilogoIvaImpresa);
+      /* 19 nov 2026 — l'acconto: idem */
+      const acIn=$("#pv-acconto"), acTi=$("#pv-acconto-tipo");
+      if(acIn)acIn.addEventListener("input",aggiornaRiepilogoIvaImpresa);
+      if(acTi)acTi.addEventListener("change",aggiornaRiepilogoIvaImpresa);
       aggiornaRiepilogoIvaImpresa();
     }
     /* la riga dell'AI si accende per ultima, quando le caselle ci sono gia' */
