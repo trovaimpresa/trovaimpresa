@@ -3917,5 +3917,7 @@ Sistemato:
 
 Provato sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione, perché `sb` è `const`). Banco `tools/banco-gestionale.js app`: ZERO difetti.
 ⬜ Non provati per regola: Emetti vero, invio SDI, «Acconto ricevuto» (serve una emessa), controllo con l'AI.
-Proposte con foto (in attesa del sì): «Fai la nota di credito» da una fattura emessa (voci copiate + riferimento); sul telefono i 4 pulsanti in testa su 2 righe (vale per tutte le finestre `.sh-head-az`).
-Da guardare: con spese anticipate in ordinario «Totale imponibile» comprende le spese fuori IVA (l'IVA è su un numero più piccolo); la nota di credito non dice quale fattura storna nel file SDI (`DatiFattureCollegate`).
+Funzioni nuove (foto approvate, «si si pubblica»):
+- **«↩ Fai la nota di credito»** su una fattura emessa o pagata (`fattNotaCredito`, azione `fatt-nc`): copia cliente, voci, cassa, spese, ritenuta, sconto; nelle note «Nota di credito che storna la fattura n. X/AAAA del GG/MM/AAAA». Da quella riga (`fattRifStornata`) il file SDI scrive `<DatiFattureCollegate>`: se la si toglie dalle note il collegamento sparisce.
+- **Telefono (≤600 px)**: i pulsanti in testa alle finestre `.sh-head-az` due per riga (`css/gestionale-stile.css` v36, vale per tutte le finestre grandi).
+Da guardare: con spese anticipate in ordinario «Totale imponibile» comprende le spese fuori IVA (l'IVA è su un numero più piccolo); una nota di credito scritta a mano (non da «Fai la nota di credito») non dice quale fattura storna.

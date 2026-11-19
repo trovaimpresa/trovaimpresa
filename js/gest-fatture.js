@@ -485,6 +485,40 @@
     const a=(mappa||fattAcconti)[String(f.id)];
     return a?Math.min(a.tot,Math.max(0,+c.daPagare||0)):0;
   }
+  /* ===== 19 nov 2026 (studio, voce Fatture) — LA NOTA DI CREDITO DA QUESTA =====
+     Una fattura emessa sbagliata non si cancella: si storna con la nota di
+     credito. Prima andava riscritta a mano, voce per voce. Adesso si copia
+     tutto (cliente, voci, cassa, spese, ritenuta, sconto) e nelle note c'e'
+     la riga «storna la fattura n. X/AAAA del GG/MM/AAAA»: da quella riga il
+     file per lo SDI scrive <DatiFattureCollegate>. Se la togli dalle note,
+     il collegamento nel file non c'e' piu'. */
+  async function fattNotaCredito(id){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f||!f.numero){toast("Fattura non trovata");return;}
+    let R=fattRighe[f.id];
+    if(!R){
+      const {data,error}=await sb.from("gest_fattura_righe").select("*").eq("fattura_id",f.id).order("ordine");
+      if(error){toast("Non riesco a leggere le voci della fattura: riprova fra un attimo");return;}
+      R=data||[];
+    }
+    const rif="Nota di credito che storna la fattura n. "+f.numero+"/"+fattAnno(f)+" del "+fdate(f.data)+".";
+    closeSheet();
+    await fattForm(null,{
+      cliente_id:f.cliente_id||null, data:todayStr(), tipo:"nota_credito",
+      cassa_perc:+f.cassa_perc||0, cassa_tipo:f.cassa_tipo||null,
+      spese:+f.spese||0, spese_iva:+f.spese_iva||0,
+      ritenuta_perc:+f.ritenuta_perc||0, sconto:+f.sconto||0,
+      note:rif,
+      _rif:{numero:f.numero,anno:fattAnno(f),data:f.data,cli:f.cli_nome||""},
+      _righe:R.slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0))
+        .map((r,i)=>({descrizione:r.descrizione,qta:r.qta,prezzo:r.prezzo,iva:r.iva,ordine:i}))
+    });
+  }
+  /* la fattura stornata, letta dalla riga delle note (vedi sopra) */
+  function fattRifStornata(f){
+    const m=/storna la fattura n\. ?(\d+)\/(\d{4}) del (\d{2})\/(\d{2})\/(\d{4})/i.exec(String((f&&f.note)||""));
+    return m?{numero:m[1],data:m[5]+"-"+m[4]+"-"+m[3]}:null;
+  }
   /* la porta dalla fattura alla ricevuta: «Acconto ricevuto» */
   function fattAcconto(id){
     const f=fattCache.find(x=>String(x.id)===String(id));
@@ -607,6 +641,9 @@
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
+    /* 19 nov 2026 — «Fai la nota di credito» da una fattura emessa (foto approvata) */
+    if(f.numero&&fattSegno(f)>0&&(f.stato==="emessa"||f.stato==="pagata"))
+      az.push({lab:"↩ Fai la nota di credito",action:"fatt-nc",data:{id:f.id}});
     /* 29/09/2026 — la fattura parte allo SDI con un clic (js/gest-sdi.js) */
     const sdiPartita=!!(f.sdi_uuid&&f.sdi_stato!=="scartata");
     if(f.numero&&(f.stato==="emessa"||f.stato==="pagata"))
@@ -1076,7 +1113,7 @@
     const tipoOpts=FATT_TIPI.map(t=>'<option value="'+t[0]+'"'+((f.tipo||"fattura")===t[0]?" selected":"")+'>'+t[1]+'</option>').join("");
     const nLav=(preset&&preset._lavori?preset._lavori.length:(fattLavori[f.id]||[]).length);
 
-    const titolo = isNew ? "Nuova fattura"
+    const titolo = isNew ? (f.tipo==="nota_credito"?"Nuova nota di credito":"Nuova fattura")
                  : (f.numero ? "Fattura n. "+f.numero+"/"+fattAnno(f) : "Bozza di fattura");
 
     _fattForfDisegno=true;
@@ -1087,6 +1124,7 @@
       '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
+      +   ((preset&&preset._rif)?'<div class="sh-nota fatt-nc-rif"><b>Storna la fattura n. '+esc(String(preset._rif.numero))+'/'+esc(String(preset._rif.anno))+' del '+esc(fdate(preset._rif.data))+'</b>'+(preset._rif.cli?' ('+esc(preset._rif.cli)+')':'')+'. Ho copiato le voci: togli quelle che non vanno stornate o cambia gli importi.</div>':'')
       +   '<div class="field"><label>Cliente</label><select id="fa-cli">'+((_cliFuori&&!f.cliente_id)?'':'<option value="">— nessuno —</option>')+cliOpts+'</select>'
       +     ((fattCliCache.length||_cliFuori)?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Clienti</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
       +   '</div>'
@@ -1188,7 +1226,7 @@
 
       ctrTastoHTML('fattura')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
-      +'<button class="btn-primary b-save" data-action="save-fatt" data-id="'+(f.id||"")+'">'+(isNew?"Crea fattura":"Salva")+'</button>');
+      +'<button class="btn-primary b-save" data-action="save-fatt" data-id="'+(f.id||"")+'">'+(isNew?(f.tipo==="nota_credito"?"Crea nota di credito":"Crea fattura"):"Salva")+'</button>');
     }finally{ _fattForfDisegno=false; }
     ctrAscolta('fattura');
 
@@ -2491,7 +2529,11 @@
        nell'importo del pagamento. */
     x+='        <ImportoTotaleDocumento>'+xnum(c.totale)+'</ImportoTotaleDocumento>\n';
     if((f.note||"").trim()) x+='        <Causale>'+xesc(xtaglia(f.note,200))+'</Causale>\n';
-    x+='      </DatiGeneraliDocumento>\n    </DatiGenerali>\n';
+    x+='      </DatiGeneraliDocumento>\n';
+    /* 19 nov 2026 — la nota di credito dice quale fattura storna */
+    const _rifNc=(f.tipo==="nota_credito")?fattRifStornata(f):null;
+    if(_rifNc) x+='      <DatiFattureCollegate>\n        <IdDocumento>'+xesc(_rifNc.numero)+'</IdDocumento>\n        <Data>'+xesc(_rifNc.data)+'</Data>\n      </DatiFattureCollegate>\n';
+    x+='    </DatiGenerali>\n';
 
     x+='    <DatiBeniServizi>\n';
     R.forEach((r,i)=>{
