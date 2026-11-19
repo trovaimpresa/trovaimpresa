@@ -6355,3 +6355,23 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 #report .rep-mese b.rep-ok{color:var(--ok)} #report .rep-mese b.rep-err{color:var(--err)}
 #report .rep-bar.sp,#report .mlav-bar.sp,#report .rep-legend i.rep-i-sp{background:#5f6b7a}
 #report .sec-head{flex-wrap:wrap;gap:8px}
+
+/* 19 nov 2026 — GALLERIA STRETTA SUL TELEFONO (chiesto da Alex: «ristringi sul
+   telefono»). Prima i filtri prendevano tutta la prima schermata e le foto si
+   vedevano solo scorrendo. Sotto i 700 px: via la riga di spiegazione, i
+   pulsanti di «Mostra» e «Quando» su una riga larga, «Cantiere» e «Chi l'ha
+   caricata» affiancati. «Prima del lavoro» / «A lavoro finito» diventano
+   «Prima» / «Finito», le stesse parole delle etichette sulle foto. */
+#galleria .gal-tel{display:none}
+@media(max-width:700px){
+  #galleria .gal-intro{display:none}
+  #galleria .gal-pc{display:none}
+  #galleria .gal-tel{display:inline}
+  #galleria .filtri{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:14px;padding-bottom:14px}
+  #galleria .filtro{flex-direction:column;align-items:stretch;gap:4px;min-width:0}
+  #galleria .filtro:nth-child(1),#galleria .filtro:nth-child(2){grid-column:1/-1}
+  #galleria .filtro-lab{font-size:14px}
+  #galleria .segm{display:flex;width:100%;box-sizing:border-box}
+  #galleria .segm button{flex:1 1 0;min-width:0;height:40px;padding:0 4px;font-size:15px!important;white-space:nowrap}
+  #galleria .filtro-sel{width:100%;max-width:none;height:42px}
+}

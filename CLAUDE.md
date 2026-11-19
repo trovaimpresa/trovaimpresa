@@ -3749,3 +3749,5 @@ Da sapere:
 - Provare nella pagina vera con `(0,eval)`: le `let` dentro un eval restano chiuse lì dentro (non diventano globali). Per provare `galVedi` & co. bisogna dichiarare `var galLista, galPos, galInfo` fuori. E `RENDER_TAB` tiene la `renderGalleria` VECCHIA: si chiama a mano.
 - Le miniature scaricano la foto intera ridotta (≈300 KB l'una, `loading="lazy"`): le miniature vere di Supabase costano a parte, non usate.
 ⬜ Non provati: un video vero da iPhone (.mov), «Scarica» sul telefono vero, una persona della squadra che carica (in ferramenta c'è solo «Capo»), lo studio tecnico.
+
+Sul telefono (chiesto da Alex: «ristringi sul telefono»): sotto i 700 px niente riga di spiegazione, «Mostra» e «Quando» su una riga larga, «Cantiere» e «Chi l'ha caricata» affiancati, «Prima» / «Finito» al posto di «Prima del lavoro» / «A lavoro finito» (`.gal-pc` / `.gal-tel` nel pulsante, regole in fondo a `css/gestionale.css`). Le foto adesso cominciano nella prima schermata.
