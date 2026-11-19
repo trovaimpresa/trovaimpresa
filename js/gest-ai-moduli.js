@@ -767,6 +767,9 @@
      meglio nessun avviso che un avviso sbagliato sulla ritenuta. */
   function ctrTipoCliente(){
     const sel=$("#pv-cli"); if(!sel||!sel.value) return null;
+    /* 19 nov 2026 — prima la tendina (porta il tipo da prevForm), poi cliCache */
+    const o=sel.options[sel.selectedIndex];
+    if(o&&o.dataset&&o.dataset.tipo) return String(o.dataset.tipo);
     const c=(cliCache||[]).find(x=>String(x.id)===String(sel.value));
     return (c&&c.tipo)?String(c.tipo):null;
   }

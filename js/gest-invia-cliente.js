@@ -74,8 +74,8 @@
     if(ruoloUtente==="professionista"){
       var cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
       out.totali.push(["Compenso",eur2(cp.compenso)]);
-      if(cp.spese) out.totali.push(["Spese (bolli, diritti)",eur2(cp.spese)]);
       if(cp.cassa) out.totali.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",eur2(cp.cassa)]);
+      if(cp.spese) out.totali.push(["Spese (bolli, diritti)",eur2(cp.spese)]);
       out.totali.push([cp.spese?"Totale imponibile":"Imponibile IVA",eur2(cp.imponibile)]);
       if(cp.iva) out.totali.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eur2(cp.baseIva):""),eur2(cp.iva)]);
       /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
@@ -304,7 +304,7 @@
         +'<div style="font-weight:700;font-size:17px;margin-bottom:8px">Manda per email</div>'
         +'<div style="margin:4px 0"><b>A:</b> '+esc(a)+'</div>'
         +'<div style="margin:4px 0"><b>Allegato:</b> '+esc(mailNomeFile())+'</div>'
-        +'<div style="margin:4px 0"><b>Nel testo:</b> il link per vederlo e firmarlo dal telefono</div>'
+        +'<div style="margin:4px 0"><b>Nel testo:</b> il link per '+(ruoloUtente==="professionista"?"vederla e firmarla":"vederlo e firmarlo")+' dal telefono</div>'
         +(r?'<div class="campo-aiuto" style="margin-top:6px">Se il cliente risponde, la risposta arriva a '+esc(r)+'.</div>':'')
         +'<div class="aic-fila" style="margin-top:12px">'
         +  '<button type="button" class="aic-btn" data-action="inv-mail-annulla"'+(s==="invio"?' disabled':'')+'>Annulla</button>'
@@ -393,8 +393,11 @@
     var p=_inv.p, d=_inv.link.dati||{}, nome=T(_inv.az.nome);
     var cosa=d.includi_prev===false?"il capitolato":((ruoloUtente==="professionista"?"la parcella":"il preventivo")+" n. "+(p.numero||""));
     var conCap=d.includi_prev!==false&&(d.capitolati||[]).length?" con il capitolato":"";
-    return "Buongiorno, le mando "+cosa+(p.titolo?" «"+T(p.titolo)+"»":"")+conCap+". Lo trova qui:\n"+invUrl()
-      +"\n\nSe va bene, può accettarlo e firmarlo direttamente dal telefono."+(nome?"\n\n"+nome:"");
+    /* 19 nov 2026 — «la parcella … La trova qui, accettarla e firmarla» (era «Lo trova… accettarlo») */
+    var fem=(d.includi_prev!==false&&ruoloUtente==="professionista"&&!conCap);
+    var lo=fem?"la":"lo";
+    return "Buongiorno, le mando "+cosa+(p.titolo?" «"+T(p.titolo)+"»":"")+conCap+". "+(fem?"La":"Lo")+" trova qui:\n"+invUrl()
+      +"\n\nSe va bene, può accettar"+lo+" e firmar"+lo+" direttamente dal telefono."+(nome?"\n\n"+nome:"");
   }
 
   async function cambiaScelta(k,acceso){
@@ -477,7 +480,7 @@
       return '<div class="sh-b">'+tit+fattaHtml+sotto
         +'<div class="aic-banda aic-banda--attesa"'+(fatta?' style="margin-top:8px"':'')+'><b>Aspetta la firma</b> di '+esc(smsChi(f))
         +'. Il codice arriva al '+esc(String(fir2.cellulare||"").replace(/^\+39(\d{3})(\d+)$/,"+39 $1 $2"))+'.</div>'
-        +'<div class="campo-aiuto" style="font-size:15px">Mandagli questo link: apre il documento e gli arriva il codice per firmare. Lo trova anche sul link normale del preventivo.</div>'
+        +'<div class="campo-aiuto" style="font-size:15px">Mandagli questo link: apre il documento e gli arriva il codice per firmare. Lo trova anche sul link normale '+(ruoloUtente==="professionista"?"della parcella":"del preventivo")+'.</div>'
         +'<div class="aic-fila" style="margin-top:10px">'
         +  '<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-sms-wa">'+_AIC_SVG.wa+'<span>Manda su WhatsApp</span></button>'
         +  '<button type="button" class="aic-btn" data-action="inv-sms-copia">'+_AIC_SVG.copia+'<span>Copia link</span></button>'

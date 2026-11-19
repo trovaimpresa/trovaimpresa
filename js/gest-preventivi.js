@@ -413,11 +413,37 @@
             imponibile:r2(imponibile),
             iva:r2(iva),documento:r2(r2(imponibile)+r2(iva)),ritenuta:r2(ritenuta),totale:r2(totale)};
   }
+  /* ===== 19 nov 2026 (collaudo dello studio) — LA CASSA CHE USI DAVVERO =====
+     Ogni parcella nuova nasceva al 4% (Inarcassa), anche per un geometra che
+     ha sempre messo il 5%: toccava correggerla ogni volta, e chi non se ne
+     accorgeva mandava al cliente una cifra sbagliata. Adesso si prende
+     l'ultima percentuale che hai usato (parcelle, poi fatture); il 4% resta
+     solo per la primissima. */
+  function prevCassaSolita(){
+    const P=(typeof prevCache!=="undefined"&&prevCache?prevCache:[])
+      .filter(x=>(+x.cassa_perc||0)>0)
+      .sort((a,b)=>String(b.created_at||b.data||"").localeCompare(String(a.created_at||a.data||"")));
+    if(P.length)return +P[0].cassa_perc;
+    const u=(typeof fattUltimaCassa==="function")?fattUltimaCassa():null;
+    return (u&&u.perc>0)?u.perc:4;
+  }
+  /* i dati della parcella di una parcella NUOVA che non passa dal modulo
+     (es. «Genera con AI»): gli stessi che il modulo proporrebbe */
+  function prevParcellaNuova(){
+    const forf=(typeof fattForfettario==="function")&&fattForfettario();
+    return {cassa_perc:prevCassaSolita(), iva_perc:forf?0:22, ritenuta:false, ritenuta_perc:20, spese_forfait:0};
+  }
   function bloccoParcella(p){
     if(ruoloUtente!=='professionista')return "";
     p=p||{};
-    const cassa=p.cassa_perc!=null?p.cassa_perc:4;
-    const iva=p.iva_perc!=null?p.iva_perc:22;
+    /* ⛔ 19 nov 2026 — le proposte (cassa solita, IVA 22%) valgono SOLO per
+       una parcella nuova. Una gia' salvata senza cassa o senza IVA (nata dal
+       computo, o di prima) si riapre con quello che ha: prima si riapriva
+       col 4% e il 22%, il modulo diceva 516,66 € mentre elenco e PDF
+       dicevano 407,20 €, e salvando senza toccare niente il totale cambiava. */
+    const giaSalvata=!!p.id;
+    const cassa=p.cassa_perc!=null?p.cassa_perc:(giaSalvata?0:prevCassaSolita());
+    const iva=p.iva_perc!=null?p.iva_perc:(giaSalvata?0:22);
     const rit=!!p.ritenuta;
     const spese=p.spese_forfait!=null?p.spese_forfait:"";
     /* ===== 12 agosto 2026 (sera) — LA CASSA AL 2% SPARIVA IN FATTURA =====
@@ -481,8 +507,8 @@
     const riga=(et,val,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${eur2(val)}</strong></div>`;
     box.innerHTML =
       riga("Compenso", c.compenso) +
-      (c.spese?riga("Spese", c.spese):"") +
       (c.cassa?riga("Cassa previdenziale", c.cassa):"") +
+      (c.spese?riga("Spese", c.spese):"") +
       `<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>` +
       /* 13 agosto 2026 — non e' piu' "Imponibile IVA": le spese anticipate
          stanno dentro questo numero ma l'IVA non ce l'hanno (art. 15), quindi
@@ -651,7 +677,10 @@
     if(isNew&&preset)p=Object.assign({},preset);
     let cl=[],righe=[];
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");cl=data||[];
+      /* 19 nov 2026 — anche il TIPO: il controllo della ritenuta (privato /
+         azienda / condominio) lo legge dalla tendina, non da cliCache, che
+         poteva essere vecchia o non avere il cliente appena creato */
+      const {data}=await sb.from("gest_clienti").select("id,nome,tipo").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");cl=data||[];
       /* 12 agosto 2026 (sera) — serve sapere il REGIME FISCALE: un forfettario
          non mette l'IVA e non subisce la ritenuta. Prima il preventivo non
          guardava i dati dell'azienda, proponeva il 22% a tutti, e chi e' in
@@ -681,7 +710,7 @@
         righe=rr||[];
       }
     }
-    const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
+    const cliOpts=cl.map(c=>`<option value="${c.id}" data-tipo="${esc(c.tipo||"")}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     /* Modulo lungo -> modale grande: a sinistra l'intestazione del preventivo,
        a destra le voci di costo, che sono la parte che ha bisogno di spazio. */
     openSheetGrande(isNew?"Nuovo preventivo":"Preventivo N. "+p.numero,
@@ -810,10 +839,10 @@
     if(error){toast("Non sono riuscito a creare il cliente: "+error.message);return;}
     if(!data||!data.length){toast("Cliente non creato: nessuna riga scritta. Riprova.");return;}
     const c=data[0];
-    cliCache.push({id:c.id,nome:c.nome||nome});
+    cliCache.push({id:c.id,nome:c.nome||nome,tipo:"privato"});
     /* la nuova opzione si mette in ordine alfabetico, come l'elenco */
     const opt=document.createElement("option");
-    opt.value=c.id; opt.textContent=c.nome||nome;
+    opt.value=c.id; opt.textContent=c.nome||nome; opt.dataset.tipo="privato";
     let messo=false;
     for(let i=1;i<sel.options.length;i++){
       if(_aiNorm(sel.options[i].textContent)>_aiNorm(opt.textContent)){sel.insertBefore(opt,sel.options[i]);messo=true;break;}
@@ -958,7 +987,14 @@
         const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
         if(nMax+1>numero)numero=nMax+1;
       }catch(e){ return {ok:false, error:"Numero non assegnato: riprova"}; }
-      const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero}).select().single();
+      /* 19 nov 2026 — allo studio la parcella dell'AI nasce con cassa e IVA
+         come una fatta a mano (prima senza: elenco e modulo dicevano due cifre) */
+      const _nuovoAI=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero},
+        ruoloUtente==='professionista'?prevParcellaNuova():{});
+      let {data:np,error}=await sb.from("gest_preventivi").insert(_nuovoAI).select().single();
+      if(error&&eColonnaParcellaMancante(error)){
+        ({data:np,error}=await sb.from("gest_preventivi").insert(senzaCampiParcella(_nuovoAI,error)).select().single());
+      }
       if(error) return {ok:false, error:error.message};
       const {error:e2}=await _scriviRighePrev(righe.map(r=>({...r,preventivo_id:np.id})));
       if(e2) return {ok:false, error:e2.message};
@@ -1032,10 +1068,18 @@
       if(!pro&&!/esclus|non compres|a carico|escluso/i.test(note))avvisi.push(["Nessuna nota su cosa è escluso","Es. materiali, smaltimento, ponteggio (aggiungi una nota)"]);
       if(!p.cliente_id)avvisi.push(["Manca il cliente","Scegli a chi è intestato il preventivo"]);
       else{
-        const {data:c}=await sb.from("gest_clienti").select("email,telefono").eq("id",p.cliente_id).maybeSingle();
+        const {data:c}=await sb.from("gest_clienti").select("email,telefono,tipo").eq("id",p.cliente_id).maybeSingle();
         if(c&&!String(c.email||"").trim()&&!String(c.telefono||"").trim())
           avvisi.push(["Il cliente non ha né telefono né email","Come glielo mandi? Aggiungili nella scheda cliente"]);
         else if(c)ok.push("Il cliente ha un recapito");
+        /* 19 nov 2026 — la parcella: ritenuta solo col cliente sostituto
+           d'imposta (stessa regola del controllo nel modulo) */
+        if(pro&&c&&c.tipo&&!fattForfettario()){
+          if(p.ritenuta&&c.tipo==="privato")
+            avvisi.push(["La ritenuta d'acconto c'è, ma il cliente è un privato","Con un privato non si applica: togli la spunta nella parcella"]);
+          else if(!p.ritenuta&&(c.tipo==="azienda"||c.tipo==="condominio"))
+            avvisi.push(["Manca la ritenuta d'acconto","Il cliente è "+(c.tipo==="condominio"?"un condominio":"un'azienda")+": di norma la ritenuta del 20% va applicata"]);
+        }
       }
     }catch(e){ return prevPdf(id); }   /* un controllo che si rompe non deve fermare il preventivo */
     if(!avvisi.length){ toast("Controllo fatto: tutto a posto ✔"); return prevPdf(id); }
@@ -1117,8 +1161,18 @@
         dove=[c.indirizzo,luogo].map(x=>String(x||"").trim()).filter(Boolean).join(", ");
       }
     }
-    const {data:lav,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
-      descrizione:p.titolo,dove:dove,data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
+    /* 19 nov 2026 (collaudo dello studio) — la PRATICA nasce senza data (come
+       una pratica nuova dal modulo: con oggi, domani era gia' «In ritardo») e
+       «Da preparare», cosi' il filtro «A che punto sta» la conta. */
+    const _pro=ruoloUtente==='professionista';
+    const _nuovo={user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
+      descrizione:p.titolo,dove:dove,data_prevista:_pro?null:todayStr(),cliente_id:p.cliente_id,importo:tot};
+    if(_pro)_nuovo.pratica_stato="da_preparare";
+    let {data:lav,error}=await sb.from("gest_lavori").insert(_nuovo).select("id").single();
+    if(error&&_pro&&/pratica_stato/i.test(error.message||"")){
+      delete _nuovo.pratica_stato;
+      ({data:lav,error}=await sb.from("gest_lavori").insert(_nuovo).select("id").single());
+    }
     if(error){toast("Errore: "+error.message);return;}
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
     rinfresca("preventivi","lavori","riepilogo");

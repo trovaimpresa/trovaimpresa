@@ -3883,3 +3883,20 @@ Sistemato:
 12. Quadro economico: «− 1.371,59 €» come nel riquadro del ribasso.
 
 Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Idee per dopo (da chiedere ad Alex): il capitolo della sicurezza nel cronoprogramma (oggi è una fase con i giorni); «Questo pezzo vale 5 messaggi» anche per il fondatore senza limite.
+
+# 19 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: PREVENTIVI E PARCELLA
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): parcella nuova con cassa 5%, spese 150, IVA e ritenuta (regime ordinario messo SOLO in memoria: Alex è RF19), cliente azienda e privato, PDF (letto con `jsPDF.API.save`), «Invia al cliente» (link, pagina del cliente, testo WhatsApp), accettato → pratica, fattura dal preventivo in BOZZA, ore → parcella, preventivo dal computo, «Genera con AI». Conti giusti: 2.300,50 + cassa 115,03 + spese 150 → IVA 531,42 su 2.415,53 → documento 3.096,95 − ritenuta 460,10 = **2.636,85** uguale in modulo, elenco, PDF, pagina del cliente e fattura. Poi cancellato tutto: conteggi uguali a prima, deposito 5 file.
+
+Sistemato:
+1. ⛔ Parcella nata dal computo (o vecchia, senza cassa/IVA salvate): riaperta mostrava cassa 4% e IVA 22% → modulo 516,66 €, elenco e PDF 407,20 €; salvando senza toccare il totale cambiava. Ora `bloccoParcella` propone cassa/IVA SOLO su una parcella nuova (`p.id` assente).
+2. Cassa proposta sempre al 4% anche a chi usa il 5%: `prevCassaSolita()` (ultima parcella, poi ultima fattura, se no 4).
+3. «Genera con AI» allo studio salvava senza cassa né IVA: ora `prevParcellaNuova()`.
+4. Controllo della ritenuta (azienda/condominio sì, privato no) muto: leggeva `cliCache`, vecchia o senza `tipo`. Ora la tendina `#pv-cli` porta `data-tipo` (`ctrTipoCliente`); anche «Controllo prima di mandare» lo dice.
+5. Accettato → pratica: nasceva con la data di oggi (domani «In ritardo») e senza stato. Ora senza data e «Da preparare» (`_prevCreaLavoro`, solo studio).
+6. Testi al cliente al maschile: «la parcella… Lo trova qui, accettarlo» → «La trova, accettarla» (WhatsApp, email `invia-preventivo-email.js`, finestra). Pagina del cliente: «Scrivi allo studio» (era «all'impresa»).
+7. Ordine del riepilogo: Compenso, Cassa, Spese (come la fattura) in modulo, PDF, lettera d'incarico, pagina del cliente.
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: «Email con PDF» (manda un'email vera), firma SMS (5 crediti), firma col dito del cliente.
+Da guardare (non fatti): sul telefono i 4 pulsanti in testa al preventivo occupano mezzo schermo; in forfettario la riga «Imponibile IVA» si legge anche senza IVA; il bollo da 2 € non è nel totale della parcella (si aggiunge in fattura, e lo dice).
+⚠️ Durante la prova un'ALTRA sessione ha creato e cestinato «PROVA ACCONTO — da cancellare» (n. 7, reparto edile): non è di questa prova, è rimasta nel Cestino.

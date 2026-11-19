@@ -161,8 +161,8 @@
          Stesse regole del riquadro nel gestionale (vedi calcolaParcella). */
       const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
       const righeTot=[["Compenso",cp.compenso,false]];
-      if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
       if(cp.cassa)   righeTot.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
+      if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
       righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
       if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
       /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
@@ -405,8 +405,8 @@
       +'<div class="sh-tit">Il compenso concordato</div>'
       +'<div class="prev-somma" style="text-align:left;line-height:1.9">'
       +  riga("Compenso",cp.compenso)
-      +  (cp.spese?riga("Spese (bolli, diritti)",cp.spese):"")
       +  (cp.cassa?riga("Cassa previdenziale",cp.cassa):"")
+      +  (cp.spese?riga("Spese (bolli, diritti)",cp.spese):"")
       +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
       +  riga(cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile)
       +  (cp.iva?riga(cp.spese?("IVA (su "+eur2(cp.baseIva)+")"):"IVA",cp.iva):"")
@@ -555,8 +555,8 @@
 
     titoletto("Compenso");
     const vociC=[["Compenso",cp.compenso,false]];
-    if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
     if(cp.cassa)   vociC.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
+    if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
     vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
     if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
     /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */

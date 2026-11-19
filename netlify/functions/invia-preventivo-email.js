@@ -77,14 +77,17 @@ function inizioGiornoRoma() {
 }
 
 function corpo({ nomeImpresa, cosa, titolo, conCap, link, contatti }) {
+  /* 19 nov 2026 — «la parcella»: La trova / accettarla (era sempre al maschile) */
+  const fem = /^la /i.test(String(cosa || '')) && !conCap;
+  const lo = fem ? 'la' : 'lo';
   const p = (t) => '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + t + '</p>';
   return '<!DOCTYPE html><html lang="it"><body style="margin:0;padding:0;background:#f4f7fb">'
     + '<div style="max-width:600px;margin:0 auto;padding:28px 22px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">'
     + '<div style="background:#fff;border-radius:14px;padding:30px 28px">'
     + (nomeImpresa ? '<div style="font-size:22px;font-weight:800;color:#0a2a4d;margin-bottom:22px">' + esc(nomeImpresa) + '</div>' : '')
     + p('Buongiorno,')
-    + p('le mando ' + esc(cosa) + (titolo ? ' «' + esc(titolo) + '»' : '') + (conCap ? ' con il capitolato' : '') + '. Lo trova in allegato in PDF.')
-    + p('Può vederlo anche dal telefono e, se va bene, accettarlo e firmarlo lì:')
+    + p('le mando ' + esc(cosa) + (titolo ? ' «' + esc(titolo) + '»' : '') + (conCap ? ' con il capitolato' : '') + '. ' + (fem ? 'La' : 'Lo') + ' trova in allegato in PDF.')
+    + p('Può veder' + lo + ' anche dal telefono e, se va bene, accettar' + lo + ' e firmar' + lo + ' lì:')
     + '<div style="text-align:center;margin:8px 0 22px"><a href="' + esc(link) + '" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:14px 26px;border-radius:10px">Apri ' + esc(cosa.replace(/ n\. .*/, '')) + '</a></div>'
     + p('Per qualsiasi domanda può rispondere a questa email.')
     + p('Cordiali saluti' + (nomeImpresa ? ',<br><b>' + esc(nomeImpresa) + '</b>' : ''))
