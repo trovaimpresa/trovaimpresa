@@ -5696,7 +5696,9 @@ async function caricaSubappalti() {
     const tipoBadge = isCerca ? '<span class="badge badge-imp">📋 Cerca</span>' : '<span class="badge badge-a">🙋 Offre</span>';
     const descr = s.descrizione || s.lavoro || '–';
     /* 18 nov 2026: la descrizione lunga allungava la riga di metri — si vede il titolo e 2 righe, il resto con «Leggi tutto» */
-    const _righe = String(descr).split('\n'); const descrTit = _righe[0]; const descrResto = _righe.slice(1).join(' ').replace(/\s+/g, ' ').trim();
+    const _righe = String(descr).split('\n'); let descrTit = _righe[0].trim(); let descrResto = _righe.slice(1).join(' ').replace(/\s+/g, ' ').trim();
+    /* 19 nov 2026: testo tutto su una riga (es. CUBICO) — il titolo si taglia a ~90 lettere, il resto va in «Leggi tutto» */
+    if (descrTit.length > 110) { let _c = descrTit.lastIndexOf(' ', 90); if (_c < 40) _c = 90; descrResto = (descrTit.slice(_c).trim() + ' ' + descrResto).trim(); descrTit = descrTit.slice(0, _c).trim() + '…'; }
     const contatti = [s.telefono ? '📞 ' + esc(s.telefono) : '', s.email ? '✉️ ' + esc(s.email) : ''].filter(Boolean).join('<br>') || '–';
     return `<tr>
       <td><strong>${esc(s.nome_impresa) || '—'}</strong></td>
