@@ -365,6 +365,17 @@
      apertura della Mappa ci mette qualche secondo in piu', una volta sola. */
   const MP_CACHE_KEY="ti_mappa_cache_v3";
   let mpCache=null, mpVista="aperti", mpMappa=null, mpLayer=null, mpInCorso=false;
+  /* 19 nov 2026 (collaudo Mappa) — mpGuasto: il servizio della carta non
+     risponde (rete caduta, troppe richieste). Prima un guasto e un indirizzo
+     sbagliato davano lo STESSO messaggio: «Non trovo l'indirizzo del tuo
+     ufficio, scrivilo con via e comune» anche quando l'indirizzo era giusto.
+     mpVecchi: i punti di prima, tenuti da parte quando premi «Ricalcola»,
+     cosi' se il servizio non risponde non perdi le distanze che avevi.
+     mpRifai: hai cambiato «Lavori da fare / Tutti» (o reparto) mentre cercavo
+     gli indirizzi: finito il giro, lo rifaccio con la scelta nuova. Prima la
+     scelta veniva ignorata e il pulsante diceva «Tutti» sopra la lista dei
+     soli lavori da fare. */
+  let mpGuasto=false, mpVecchi=null, mpRifai=false, mpRifaiForza=false;
 
   function mpLeggiCache(){
     if(mpCache)return mpCache;
@@ -401,14 +412,25 @@
   }
 
   /* indirizzo scritto a mano -> punto sulla carta */
-  async function mpTrovaPunto(indirizzo,vicinoA){
-    const q=mpChiave(indirizzo);
-    if(!q)return null;
+  /* opz={via,comune}: ricerca "a caselle" (via e comune separati). Serve
+     quando il comune l'ho aggiunto io: scritto tutto insieme, «via Garibaldi
+     100, Rieti» finiva in via Garibaldi a Fara in Sabina, PROVINCIA di Rieti,
+     a 33 km, con scritto accanto «comune ipotizzato: Rieti». */
+  async function mpTrovaPunto(indirizzo,vicinoA,opz){
+    const q=opz?("c:"+mpChiave(opz.via)+"|"+mpChiave(opz.comune)):mpChiave(indirizzo);
+    if(!q||q==="c:|")return null;
     const C=mpLeggiCache();
     if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: già cercato e non trovato */
+    const diPrima=()=>(mpVecchi&&mpVecchi[q]!==undefined)?mpVecchi[q]:null;
+    /* servizio gia' giu' in questo giro: non lo richiamo per ogni cantiere
+       (prima si aspettavano 30 secondi per sentirsi dire niente) */
+    if(mpGuasto)return diPrima();
     let trovato;
+    for(let prova=0;;prova++){
     try{
-      let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
+      let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it"
+        +(opz?"&street="+encodeURIComponent(opz.via)+"&city="+encodeURIComponent(opz.comune)
+             :"&q="+encodeURIComponent(indirizzo));
       /* spingo la ricerca verso la zona dell'ufficio: senza questo, una via che
          esiste anche in un'altra provincia poteva essere pescata a 400 km */
       if(vicinoA){
@@ -426,17 +448,23 @@
          guasto non si scrive: si riprova la volta dopo. */
       if(!r.ok){
         await mpAspetta(r.status===429?2500:1100);
-        return null;                      /* non si scrive niente in memoria */
+        if(prova<1)continue;              /* un'altra volta sola */
+        mpGuasto=true;
+        return diPrima();                 /* non si scrive niente in memoria */
       }
       const d0=await r.json();
       const a=(d0&&d0[0])?d0[0]:null;
       const ad=(a&&a.address)||{};
       trovato=a?{lat:+a.lat,lon:+a.lon,nome:a.display_name||"",
                  comune:ad.city||ad.town||ad.village||ad.municipality||""}:null;
+      break;
     }catch(e){
       /* rete caduta, richiesta bloccata: come sopra, non e' una risposta */
       await mpAspetta(1100);
-      return null;
+      if(prova<1)continue;
+      mpGuasto=true;
+      return diPrima();
+    }
     }
     C.punti[q]=trovato;
     mpSalvaCache();
@@ -456,6 +484,65 @@
     return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
   }
 
+  /* 19 nov 2026 — i lavori senza indirizzo, in fondo alla lista */
+  function mpSenzaHtml(lista){
+    if(!lista||!lista.length)return "";
+    const n=lista.length;
+    return '<div class="mp-avviso mp-avviso-lieve mp-senza"><span><b>'+(n===1?'1 lavoro senza indirizzo':n+' lavori senza indirizzo')+'</b>, '
+      +(n===1?'non è sulla carta':'non sono sulla carta')+'. Aprilo e scrivi il campo «Dove».</span>'
+      +lista.map(l=>'<div class="mp-senza-r"><span>'+esc(l.descrizione||"Lavoro")+'</span>'
+        +'<button type="button" class="btn" data-action="mp-apri" data-id="'+esc(String(l.id))+'">Apri</button></div>').join("")
+      +'</div>';
+  }
+  /* I pulsanti dentro il fumetto: Leaflet ferma il clic prima che arrivi al
+     document (dove ascolta il gestionale). Li prendo prima, in «capture». */
+  function mpAscoltaFumetti(){
+    const c=document.getElementById("mp-mappa");
+    if(!c||c._mpAscolta)return;
+    c._mpAscolta=true;
+    c.addEventListener("click",function(e){
+      const b=e.target&&e.target.closest?e.target.closest(".leaflet-popup [data-action]"):null;
+      if(!b)return;
+      e.preventDefault();e.stopPropagation();
+      if(b.dataset.action==="mp-apri")mpApri(b.dataset.id);
+      else if(b.dataset.action==="mp-strada")mpStrada(b.dataset.q);
+    },true);
+  }
+  function mpApri(id){
+    if(mpMappa)try{mpMappa.closePopup();}catch(e){}
+    if(window.apriCosa)window.apriCosa("lav",id);
+  }
+  function mpStrada(q){
+    window.open("https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(q||""),"_blank");
+  }
+
+  /* 19 nov 2026 — «Manda a …»: lo stesso messaggio WhatsApp dei Lavori
+     (_waLavoro), con l'indirizzo intero e il punto salvato */
+  function mpMandaBtn(r,ops){
+    const o=ops[r.l.operatore_id];
+    const nome=o&&o.nome?String(o.nome).trim().split(/\s+/)[0]:"";
+    let wa="";
+    /* il punto appena trovato vale subito, anche prima che sia salvato */
+    const lp=r.p?Object.assign({},r.l,{dove_lat:r.p.lat,dove_lon:r.p.lon,dove_geo:r.strada}):r.l;
+    try{wa=_waLavoro(lp,(o&&o.telefono)||"",(r.c&&r.c.nome)||"",r.strada);}catch(e){return "";}
+    return '<button class="btn mp-r-btn mp-manda" data-action="sq-wa" data-wa="'+esc(wa)+'">'+(nome?"Manda a "+esc(nome):"Manda a\u2026")+'</button>';
+  }
+  /* salva i punti uno dopo l'altro, senza disturbare: se non si puo'
+     (rete, permessi di chi non e' il titolare) resta tutto come prima */
+  async function mpSalvaPunti(lista){
+    for(const x of lista||[]){
+      try{
+        const {id,...campi}=x;
+        await sb.from("gest_lavori").update(campi).eq("id",id).eq("user_id",sbUid);
+      }catch(e){}
+    }
+  }
+
+  function mpLargFumetto(){
+    const w=(document.getElementById("mp-mappa")||{}).clientWidth||400;
+    return Math.max(180,Math.min(300,w-90));
+  }
+
   function mpFormattaKm(km){
     if(km==null)return "—";
     return (km<10?(Math.round(km*10)/10).toString().replace(".",","):Math.round(km))+" km";
@@ -466,10 +553,12 @@
     const box=$("#mp-lista"), avviso=$("#mp-avviso");
     if(!box)return;
     if(!sb||!sbUid||!cur){box.innerHTML="";return;}
-    if(mpInCorso)return;
+    if(mpInCorso){mpRifai=true;if(forza)mpRifaiForza=true;return;}
     mpInCorso=true;
+    mpGuasto=false;mpVecchi=null;
+    let finito=false;
     try{
-      if(forza){mpCache={punti:{}};mpSalvaCache();}
+      if(forza){mpVecchi=Object.assign({},mpLeggiCache().punti);mpCache={punti:{}};mpSalvaCache();}
 
       /* 1) da dove si parte: l'indirizzo dell'azienda */
       /* ===== 12 agosto 2026 (sera) — L'UFFICIO FINIVA A CASO IN ITALIA =====
@@ -483,7 +572,7 @@
       const {data:az,error:_eMp}=await sb.from("gest_azienda")
         .select("nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).maybeSingle();
       /* 12 nov 2026 — regola 20: senza rete non si chiede un indirizzo che c'e' gia' */
-      if(_eMp){if(avviso)avviso.innerHTML="";listaNonLetta(box,"la mappa","mappa");return;}
+      if(_eMp){if(avviso)avviso.innerHTML="";$("#mp-mappa").style.display="none";listaNonLetta(box,"la mappa","mappa");return;}
       const partenzaTxt=azIndirizzo(az).trim();
       /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
          dei cantieri: mancano solo i chilometri, perché non c'e' da dove misurarli. */
@@ -498,13 +587,24 @@
       $("#mp-mappa").style.display="";
 
       /* 2) i lavori con un indirizzo */
-      const [{data:lav},{data:cli}]=await Promise.all([
-        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      /* 19 nov 2026 (sì di Alex) — anche chi ci va e il punto gia' salvato
+         (sql/2026-11-19-lavori-punto-mappa.sql): la Mappa e l'app dell'operaio
+         adesso si parlano. Se le colonne nuove mancassero, si legge come prima. */
+      let _rOp=null;
+      try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);}catch(e){}
+      let _rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id,dove_lat,dove_lon,dove_km,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      if(_rL.error&&/dove_|column/i.test(_rL.error.message||""))_rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      const mpOp={};
+      try{const ro=_rOp?await _rOp:null;((ro&&ro.data)||[]).forEach(o=>{mpOp[o.id]=o;});}catch(e){}
+      const [{data:lav,error:_eL},{data:cli,error:_eC}]=await Promise.all([
+        Promise.resolve(_rL),
         /* stessa storia dell'ufficio: senza CAP, citta' e provincia l'indirizzo
            del cliente e' mezzo indirizzo, e il pin finisce dall'altra parte
            d'Italia */
         sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,paese").eq("user_id",sbUid).or(_cliOr(curMestiere()))
       ]);
+      /* 19 nov 2026 — senza rete qui diceva «Nessun cantiere da mostrare» */
+      if(_eL||_eC){if(avviso)avviso.innerHTML="";$("#mp-mappa").style.display="none";listaNonLetta(box,"la mappa","mappa");return;}
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
       /* ATTENZIONE: qui la lista dei lavori NON si può chiamare L.
          Leaflet, la libreria che disegna la carta, si chiama proprio L: chiamando
@@ -519,7 +619,12 @@
            qui si usava il solo c.indirizzo e si perdeva meta' indirizzo */
         const ind=(l.dove||"").trim()||cliIndirizzo(c).trim();
         return {l,c,ind};
-      }).filter(v=>v.ind);
+      });
+      /* 19 nov 2026 (sì di Alex) — i lavori senza indirizzo non sparivano: si
+         dicono in fondo alla lista, col pulsante per aprirli e scriverlo */
+      const senzaInd=voci.filter(v=>!v.ind).map(v=>v.l);
+      const _vociInd=voci.filter(v=>v.ind);
+      voci.length=0; voci.push(..._vociInd);
 
       /* 3) LA CARTA PRIMA DI TUTTO.
          Prima la disegnavo alla fine, dopo aver cercato tutti gli indirizzi: per
@@ -537,6 +642,7 @@
         }
         if(mpLayer)mpLayer.remove();
         mpLayer=L.layerGroup().addTo(mpMappa);
+        mpAscoltaFumetti();
         setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},100);
         /* se dopo 6 secondi non è arrivata nessuna tessera, la carta è bloccata */
         setTimeout(()=>{
@@ -562,8 +668,10 @@
       dice(0,voci.length+1);
       const pPart=partenzaTxt?await mpTrovaPunto(partenzaTxt+", Italia"):null;
       const comuneUff=(pPart&&pPart.comune)||"";
-      if(partenzaTxt&&!pPart&&avviso){
-        avviso.innerHTML='<div class="mp-avviso">Non trovo l\'indirizzo del tuo ufficio: ho cercato <b>'+esc(partenzaTxt)+'</b>. Scrivilo con via, numero e comune (per esempio <b>Via Roma 10, Rieti</b>) dal pulsante <b>Azienda</b> in alto a destra. Intanto la carta con i cantieri la vedi lo stesso.</div>';
+      if(partenzaTxt&&!pPart&&avviso&&!mpGuasto){
+        /* 19 nov 2026 — il pulsante si chiama «Dati azienda», non «Azienda»: lo metto qui */
+        avviso.innerHTML='<div class="mp-avviso"><span>Non trovo l\'indirizzo del tuo ufficio: ho cercato <b>'+esc(partenzaTxt)+'</b>. Scrivilo con via, numero e comune, per esempio <b>Via Roma 10, Rieti</b>.</span>'
+          +'<button type="button" class="btn" data-action="azienda">Apri Dati azienda</button></div>';
       }
       if(pPart&&ok&&window.L){
         punti.push([pPart.lat,pPart.lon]);
@@ -575,6 +683,7 @@
       /* 5) i cantieri, uno alla volta: il pin compare appena lo trovo */
       const mpGruppi={};
       const righe=[];
+      const mpDaSalvare=[];
       let fatti=1;
       for(const v of voci){
         /* Se l'indirizzo non dice in che comune sta ("via verani 18"), do' per
@@ -592,12 +701,31 @@
           const senzaNum=q.replace(/(\b\d{1,4}[a-zA-Z]?\b)(?=\s*,)/,"").replace(/\s+,/g,",").replace(/,\s*,/g,",");
           if(senzaNum!==q){ pt=await mpTrovaPunto(senzaNum,pPart); circa=!!pt; }
         }
+        /* 19 nov 2026 — il comune l'ho aggiunto io: il punto trovato deve stare
+           DAVVERO in quel comune. Se no riprovo con via e comune separati; se
+           ancora non torna, «scrivi anche il comune» invece di un numero sbagliato. */
+        let fuoriComune=false;
+        if(ipotesi&&pt&&pt.comune&&mpChiave(pt.comune)!==mpChiave(comuneUff)){
+          const pt2=await mpTrovaPunto(null,pPart,{via:v.ind,comune:comuneUff});
+          if(pt2&&(!pt2.comune||mpChiave(pt2.comune)===mpChiave(comuneUff))){pt=pt2;circa=false;}
+          else fuoriComune=true;
+        }
+        const guasto=!pt&&mpGuasto;
         let km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
         /* rete di sicurezza: se l'indirizzo era incompleto e il risultato è
            lontanissimo, non è il posto giusto. Meglio dire "non lo so". */
-        const sospetto=(!haComune&&km!=null&&km>80);
+        const sospetto=fuoriComune||(!haComune&&km!=null&&km>80);
         if(sospetto)km=null;
-        righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto,circa});
+        /* per «Indicazioni»: lo stesso indirizzo che ho cercato io, comune compreso */
+        const strada=(ipotesi&&!sospetto)?v.ind+", "+comuneUff:v.ind;
+        righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto,circa,guasto,strada});
+        /* 19 nov 2026 — il punto trovato si salva nel lavoro (per l'app dell'operaio) */
+        if(pt&&!sospetto&&!guasto){
+          const kmS=km!=null?Math.round(km*10)/10:null, L0=v.l;
+          const cambia=L0.dove_geo!==v.ind||Math.abs((+L0.dove_lat||0)-pt.lat)>1e-6||Math.abs((+L0.dove_lon||0)-pt.lon)>1e-6
+            ||(L0.dove_km==null?null:+L0.dove_km)!==kmS;
+          if(cambia&&("dove_geo" in L0))mpDaSalvare.push({id:L0.id,dove_lat:pt.lat,dove_lon:pt.lon,dove_km:kmS,dove_geo:v.ind});
+        }
         if(pt&&!sospetto&&ok&&window.L){
           punti.push([pt.lat,pt.lon]);
           /* 26 set 2026 — UN PIN PER OGNI LAVORO (Alessio: «ci devono essere i
@@ -608,18 +736,23 @@
           const peso=v.l.stato==="fatto"?0:(inRitardo(v.l.stato,v.l.data_prevista)?2:1);
           const chiave=pt.lat.toFixed(5)+","+pt.lon.toFixed(5);
           const g=mpGruppi[chiave]||(mpGruppi[chiave]={lav:[],peso:0,m:null});
-          g.lav.push({t:v.l.descrizione||"Lavoro",ind:v.ind,km});
+          g.lav.push({t:v.l.descrizione||"Lavoro",ind:v.ind,km,id:v.l.id,strada});
           g.peso=Math.max(g.peso,peso);
           const icona=mpPinIcona(["#059669","#D97706","#DC2626"][g.peso],g.lav.length);
+          /* 19 nov 2026 (sì di Alex) — nel fumetto «Apri il lavoro» e «Indicazioni» */
           const fumetto=g.lav.map(x=>"<b>"+esc(x.t)+"</b><br>"+esc(x.ind)
-              +(x.km!=null?"<br><b>"+mpFormattaKm(x.km)+"</b> dall'ufficio":"")).join("<hr style='border:0;border-top:1px solid #e3e8ef;margin:6px 0'>");
+              +(x.km!=null?"<br><b>"+mpFormattaKm(x.km)+"</b> dall'ufficio":"")
+              +'<div class="mp-fum-btn"><button type="button" class="btn" data-action="mp-apri" data-id="'+esc(String(x.id))+'">Apri il lavoro</button>'
+              +'<button type="button" class="btn" data-action="mp-strada" data-q="'+esc(x.strada)+'">Indicazioni</button></div>').join("<hr style='border:0;border-top:1px solid #e3e8ef;margin:10px 0'>");
           if(g.m){ g.m.setIcon(icona); g.m.setPopupContent(fumetto); }
-          else g.m=L.marker([pt.lat,pt.lon],{icon:icona}).addTo(mpLayer).bindPopup(fumetto);
+          /* 19 nov 2026 — fumetto largo al massimo quanto la carta (sul telefono usciva di lato) */
+          else g.m=L.marker([pt.lat,pt.lon],{icon:icona}).addTo(mpLayer).bindPopup(fumetto,{maxWidth:mpLargFumetto()});
           inquadra();
         }
         fatti++;dice(fatti-1,voci.length+1);
       }
       righe.sort((a,b)=>(a.km==null?1e9:a.km)-(b.km==null?1e9:b.km));
+      mpSalvaPunti(mpDaSalvare);
       /* metto da parte le distanze: la scheda Mappa del Riepilogo le legge da qui
          senza rifare nessun calcolo e senza chiamare nessun servizio */
       const C2=mpLeggiCache();C2.km={};
@@ -627,39 +760,56 @@
       mpSalvaCache();
 
       /* 6) la lista sotto la carta */
+      const senzaHtml=mpSenzaHtml(senzaInd);
       if(!righe.length){
         box.innerHTML=tabVuoto("Nessun cantiere da mostrare",
           "Scrivi il campo «Dove» nei lavori, oppure l'indirizzo nelle schede clienti.",
-          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
+          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>')+senzaHtml;
+        finito=true;
         return;
       }
-      const nonTrovati=pPart?righe.filter(r=>!r.p).length:0;
+      const nonTrovati=pPart?righe.filter(r=>!r.p&&!r.guasto).length:0;
       box.innerHTML=
-        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Nel campo «Dove» del lavoro scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b>.</div>':"")
+        (mpGuasto?'<div class="mp-avviso"><span>Il servizio della carta adesso non risponde. Riprova fra qualche minuto con <b>Ricalcola distanze</b>.</span></div>':"")
+        +(nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Controlla il campo «Dove» del lavoro e scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b>.</div>':"")
         +'<div class="mp-righe">'
         +righe.map(r=>{
-          const q=quando(r.l.data_prevista);
+          /* 19 nov 2026 — un lavoro FATTO non e' in ritardo: prima la data
+             passata usciva in rosso («49 giorni fa») come un lavoro da fare */
+          const fatto=r.l.stato==="fatto";
+          const q=quando(r.l.data_prevista,fatto?{neutro:true}:null);
           const rit=inRitardo(r.l.stato,r.l.data_prevista);
           return '<div class="mp-riga'+(r.p?"":" senza")+'">'
             +'<div class="mp-r-testo">'
             +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'
             +  '<div class="mp-r-sub">'+esc(r.ind)
             +    (r.c?' · '+esc(r.c.nome||""):"")
-            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+(rit?"in ritardo ("+esc(q.testo)+")":esc(q.testo))+'</span>'
+            +    ' · '+(fatto?'<span class="mp-fatto">fatto</span> · ':"")+'<span class="'+(rit?"q-passato":q.classe)+'">'+(rit?"in ritardo ("+esc(q.testo)+")":esc(q.testo))+'</span>'
             +    (r.ipotesi&&!r.sospetto?' · <span class="mp-ipotesi">comune ipotizzato: '+esc(comuneUff)+'</span>':"")
             +    (r.circa?' · <span class="mp-ipotesi">via trovata, numero no</span>':"")
+            +    (fatto?"":' · <span class="mp-civa">Ci va: '+esc((mpOp[r.l.operatore_id]&&mpOp[r.l.operatore_id].nome)||"nessuno")+'</span>')
             +    '</div>'
             +'</div>'
             +'<div class="mp-r-dist">'
             +  (r.km!=null?'<div class="mp-km">'+mpFormattaKm(r.km)+'</div><div class="mp-min">dall\'ufficio</div>'
-                 :(!pPart?'<div class="mp-km">—</div><div class="mp-min">manca l\'ufficio</div>'
-                   :(r.sospetto?'<div class="mp-km">?</div><div class="mp-min">indirizzo troppo vago</div>'
-                               :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')))
+                 :(!partenzaTxt?'<div class="mp-km">—</div><div class="mp-min">manca l\'ufficio</div>'
+                   :(mpGuasto&&(r.guasto||!pPart)?'<div class="mp-km">?</div><div class="mp-min">riprova pi&ugrave; tardi</div>'
+                   :(!pPart?'<div class="mp-km">?</div><div class="mp-min">ufficio non trovato</div>'
+                   :(r.sospetto?'<div class="mp-km">?</div><div class="mp-min">scrivi anche il comune</div>'
+                               :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')))))
             +'</div>'
-            +'<button class="btn mp-r-btn" data-action="map" data-q="'+esc(r.ind)+'">Indicazioni</button>'
+            /* 19 nov 2026 (sì di Alex) — «Apri» il lavoro */
+            +'<button class="btn mp-r-btn" data-action="mp-apri" data-id="'+esc(String(r.l.id))+'">Apri</button>'
+            /* 19 nov 2026 (sì di Alex) — mandalo a chi ci va, su WhatsApp */
+            +(fatto?"":mpMandaBtn(r,mpOp))
+            /* 19 nov 2026 — «Indicazioni» apre la STRADA per arrivarci (dal punto
+               dove sei), non solo il punto sulla carta come faceva prima */
+            +'<button class="btn mp-r-btn" data-action="mp-strada" data-q="'+esc(r.strada)+'">Indicazioni</button>'
             +'</div>';
         }).join("")
-        +'</div>';
+        +'</div>'
+        +senzaHtml;
+      finito=true;
     }catch(err){
       /* Se qualcosa va storto voglio vederlo scritto qui, non restare davanti a
          una pagina vuota senza sapere perché. */
@@ -667,7 +817,17 @@
       if(box)box.innerHTML='<div class="mp-avviso"><b>La mappa si &egrave; fermata.</b><br>'
         +esc(m)+'<br><br>Se non si sistema, scrivici da Aiuto → Assistenza diretta e manda questa schermata: con questa scritta si capisce cosa sistemare.</div>';
       try{console.error("[MAPPA]",err);}catch(e){}
-    }finally{ mpInCorso=false; }
+    }finally{
+      /* «Ricalcola» e poi il servizio della carta (o la connessione) non
+         risponde: rimetto i punti di prima, cosi' non si perdono le distanze */
+      if(mpVecchi&&(mpGuasto||!finito)){
+        const C3=mpLeggiCache();
+        for(const k in mpVecchi)if(C3.punti[k]===undefined)C3.punti[k]=mpVecchi[k];
+        mpSalvaCache();
+      }
+      mpInCorso=false;
+      if(mpRifai){const f=mpRifaiForza;mpRifai=mpRifaiForza=false;setTimeout(()=>renderMappa(f),0);}
+    }
   }
 
   /* ---- finestra "Carica foto o video" ---- */

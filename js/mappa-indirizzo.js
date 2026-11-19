@@ -37,13 +37,15 @@ function mappaHtml(ind,citta){
     campo.parentNode.insertBefore(box,campo.nextSibling);
     /* citta' del cliente scelto nel modulo (cliCache e' della pagina: si legge solo qui, a chiamata avvenuta) */
     const citta=function(){
-      try{const s=document.getElementById("j-cli");if(!s||!s.value)return "";
+      /* 19 nov 2026 — il modulo nuovo del lavoro ha la tendina #j-cliente, non #j-cli:
+         la citta' del cliente non si aggiungeva mai */
+      try{const s=document.getElementById("j-cliente")||document.getElementById("j-cli");if(!s||!s.value)return "";
         const c=(typeof cliCache!=="undefined"?cliCache:[]).find(function(x){return String(x.id)===String(s.value);});
         return c&&c.citta?c.citta:"";}catch(_){return "";}
     };
     const agg=function(){box.innerHTML=mappaHtml(i.value,citta());};
     i.addEventListener("input",function(){clearTimeout(timer);timer=setTimeout(agg,800);});
-    const sc=document.getElementById("j-cli");if(sc)sc.addEventListener("change",agg);
+    const sc=document.getElementById("j-cliente")||document.getElementById("j-cli");if(sc)sc.addEventListener("change",agg);
     agg();
   };
   const mo=new MutationObserver(function(){aggancia();});

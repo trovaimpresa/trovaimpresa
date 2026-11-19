@@ -343,7 +343,7 @@
       /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
          anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
-      sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato,dove_lat,dove_lon,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       /* 17 nov 2026 (voce Clienti) — anche i clienti nel Cestino, come fa
          l'elenco dei Preventivi: il lavoro di un cliente buttato non diceva

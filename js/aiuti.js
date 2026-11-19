@@ -134,6 +134,8 @@
     'apri-cli':         'La scheda completa del cliente: lavori, preventivi, fatture e documenti, tutto insieme.',
     'del-cli':          'Manda il cliente nel Cestino. I suoi lavori e le sue fatture restano dove sono.',
     'map':              'Fa vedere dov’è questo indirizzo sulla mappa.',
+    'mp-strada':        'Apre Google Maps con la strada per arrivare qui, partendo da dove sei.',
+    'mp-apri':          'Apre il lavoro: lo vedi e lo cambi, anche l\u2019indirizzo.',
     'pz-vai':           'Porta dentro il tuo prezzario le voci trovate nel file. Quelle che hai già non vengono raddoppiate.',
 
     /* --- lavoro di tutti i giorni --- */

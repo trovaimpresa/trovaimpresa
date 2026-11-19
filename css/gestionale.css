@@ -2145,6 +2145,20 @@
            overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .mp-r-sub .q-passato{ color:var(--err); font-weight:600; }
 .mp-r-sub .q-oggi{ color:var(--attesa); font-weight:700; }
+.mp-r-sub .mp-fatto{ color:var(--ok); font-weight:700; }
+/* 19 nov 2026 (collaudo Mappa) — il fumetto del pin era a 13 px (quello di Leaflet) */
+#mappa .leaflet-popup-content{ font-size:16px; line-height:1.45; margin:14px 18px; }
+/* 19 nov 2026 (sì di Alex) — legenda dei colori, pulsanti del fumetto, lavori senza indirizzo */
+#mappa .mp-legenda{ font-size:16px; margin:0 0 14px; color:var(--testo); font-weight:600; gap:10px 18px; }
+#mappa .mp-legenda .dot{ width:12px; height:12px; display:inline-block; }
+#mappa .mp-fum-btn{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+#mappa .mp-fum-btn .btn{ height:40px; padding:0 12px; font-size:15px; font-weight:600; }
+#mappa .mp-r-btn + .mp-r-btn{ margin-left:0; }
+#mappa .mp-senza{ display:block; margin-top:14px; }
+#mappa .mp-civa{ color:var(--blu,#0a2a4d); font-weight:700; }
+#mappa .mp-manda{ border-color:#16a34a; color:#15803d; }
+#mappa .mp-senza-r{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:16px; }
+#mappa .mp-senza-r .btn{ flex:0 0 auto; height:40px; padding:0 16px; font-size:15px; font-weight:600; }
 
 .mp-r-dist{ flex:0 0 auto; text-align:right; min-width:120px; }
 .mp-km{ font-size:24px; font-weight:800; letter-spacing:-.5px; color:var(--testo); line-height:1.1; }

@@ -81,6 +81,16 @@
     max-width: none !important;
   }
 
+  /* ⛔ 19 nov 2026 (collaudo Mappa del gestionale) — I FUMETTI ROTTI SUL TELEFONO.
+     Qui sopra c'era scritto che i fumetti «restano larghi quanto lo schermo».
+     Non e' vero: anche il fumetto sta dentro un contenitore largo ZERO, quindi
+     max-width:100% gli dava ZERO. Toccando un pin sul telefono usciva una
+     colonnina di una parola per riga, senza sfondo bianco. La larghezza del
+     fumetto la decide gia' Leaflet (maxWidth), quindi lo si fa uscire dalla rete. */
+  .leaflet-container:not(#nessuno) .leaflet-popup {
+    max-width: none !important;
+  }
+
   /* Tabelle larghe: scorrono invece di schiacciarsi */
   table {
     display: block;

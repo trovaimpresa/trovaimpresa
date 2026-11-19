@@ -3751,3 +3751,34 @@ Da sapere:
 ⬜ Non provati: un video vero da iPhone (.mov), «Scarica» sul telefono vero, una persona della squadra che carica (in ferramenta c'è solo «Capo»), lo studio tecnico.
 
 Sul telefono (chiesto da Alex: «ristringi sul telefono»): sotto i 700 px niente riga di spiegazione, «Mostra» e «Quando» su una riga larga, «Cantiere» e «Chi l'ha caricata» affiancati, «Prima» / «Finito» al posto di «Prima del lavoro» / «A lavoro finito» (`.gal-pc` / `.gal-tel` nel pulsante, regole in fondo a `css/gestionale.css`). Le foto adesso cominciano nella prima schermata.
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: MAPPA (impresa e artigiano) + MAPPA ↔ APP OPERAIO
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta»: 8 lavori, 1 cliente, 1 operaio «PROVA CONTROLLORE» (in ritardo, da fare, stesso posto, fatto, senza comune, indirizzo sbagliato, dal cliente, Milano, senza indirizzo). Poi cancellato tutto.
+
+Dove sta il codice: `js/gest-galleria-mappa.js` (`renderMappa`, `mpTrovaPunto`, `mpSenzaHtml`, `mpMandaBtn`, `mpSalvaPunti`, `mpApri`, `mpStrada`), clic in `js/gest-finestre-eventi.js` (`mp-vista`, `mp-ricalcola`, `mp-strada`, `mp-apri`), pagina `#mappa` in `gestionale-app.html`, stile `.mp-*` in `css/gestionale.css`.
+
+Difetti trovati e sistemati:
+1. Cambiando «Lavori da fare / Tutti» (o reparto) mentre cercava gli indirizzi, la scelta si perdeva: pulsante su «Tutti», lista dei soli da fare. Adesso finito il giro si rifà (`mpRifai`).
+2. «comune ipotizzato: Rieti» con il punto a Fara in Sabina (33 km): adesso il punto deve stare DAVVERO in quel comune; se no si riprova con via e comune separati, se no «scrivi anche il comune».
+3. Lavoro FATTO con la data passata in rosso («49 giorni fa»): adesso «fatto» in verde e la data neutra.
+4. Servizio della carta giù: diceva «Non trovo l'indirizzo del tuo ufficio, scrivilo con via e comune» (falso) dopo 30 secondi. Adesso si ferma alla prima mancata risposta (2 tentativi), lo dice, e dopo un «Ricalcola» non perde i punti di prima (`mpVecchi`).
+5. «pulsante Azienda in alto a destra» non esiste: c'è «Apri Dati azienda».
+6. «Indicazioni» apriva solo il punto: adesso la strada (Google Maps «dir»), col comune ipotizzato dentro.
+7. Senza rete: diceva «Nessun cantiere da mostrare» se i lavori non si leggevano; adesso «Non riesco a leggere» e la carta vecchia sparisce.
+8. ⛔ Fumetti dei pin ROTTI sul telefono (una parola per riga, senza sfondo): `css/mobile.css` metteva max-width:100% anche a `.leaflet-popup` (contenitore largo 0). Uscito dalla rete come piastrelle e segnaposti: vale per tutte le mappe del sito. Fumetto a 16 px (era 13: il 15 px del foglio perdeva contro quello di Leaflet caricato dopo) e largo quanto la carta (`mpLargFumetto`).
+9. `js/mappa-indirizzo.js`: nel modulo del lavoro cercava il cliente in `#j-cli`, ma il modulo nuovo ha `#j-cliente`: la città del cliente non si aggiungeva mai alla mappa.
+
+Nuovo (sì di Alex, foto prima): legenda dei colori sopra la carta; «Apri» su ogni riga e «Apri il lavoro» / «Indicazioni» nel fumetto (i clic nel fumetto si prendono in «capture» su `#mp-mappa`: Leaflet li ferma prima del document); in fondo «N lavori senza indirizzo» con i nomi e «Apri».
+
+## MAPPA ↔ APP OPERAIO (chiesto da Alex: «devono parlare tra loro»)
+Prima: l'operaio riceveva mezzo indirizzo (solo la via del cliente), «Apri mappa» faceva vedere un punto senza navigatore, il WhatsApp metteva il link solo se c'era «Dove», e la Mappa non sapeva chi ci va.
+- **Il punto passa all'operaio**: colonne `gest_lavori.dove_lat`, `dove_lon`, `dove_km`, `dove_geo` (`sql/2026-11-19-lavori-punto-mappa.sql`, migrazione `lavori_punto_mappa_19nov2026`, già eseguita, riga in PROVE). La Mappa le scrive quando trova il cantiere (solo se cambiano). `dove_geo` = l'indirizzo a cui appartiene il punto: se l'indirizzo del lavoro cambia, il punto non vale e si usa il testo.
+- **Mappa**: «Ci va: …» e «Manda a …» (WhatsApp, `_waLavoro`, numero dell'operaio; senza nessuno: WhatsApp chiede a chi).
+- **WhatsApp** (`_waLavoro`, `_waDove`, `_waStrada` in `js/gest-riepilogo-schede.js`): indirizzo intero (anche quello del cliente) e «Portami lì» col punto se c'è. Vale anche per Lavori e Agenda.
+- **App operaio** (`js/op-schede.js`: `opDove`, `opPuntoOk`, `opStradaUrl`, `opKm`; `js/op-mappa.js`; `js/op-agenda-giorno.js`): indirizzo intero (CAP, comune, provincia), «Portami lì» = navigatore (Mappe su iPhone, Google Maps sugli altri) nella scheda e dentro il lavoro, km dall'ufficio.
+⚠️ Il punto si salva solo quando il titolare apre la Mappa. Un lavoro nuovo mai visto sulla Mappa va all'operaio col testo.
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: un operaio vero dal suo telefono (permessi su CAP/comune del cliente), il telefono vero, lo studio tecnico.
+
+Dopo il giro delle voci (impresa/artigiano, poi studio tecnico), deciso da Alex il 19 nov: (1) un giro di controllo generale; (2) in una sessione NUOVA e separata, controllare che TUTTE le app parlino fra loro (gestionale, app operaio, noleggio, pannelli, sito, app casa…), e farle parlare dove non lo fanno.

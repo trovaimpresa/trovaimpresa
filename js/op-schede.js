@@ -27,7 +27,38 @@ function opTitolo(l){
   if(l.dove)return l.dove;
   return l.descrizione?l.descrizione.slice(0,40):"Lavoro";
 }
-function opDove(l){const cl=CLIENTI[l.cliente_id];return l.dove||(cl&&cl.indirizzo)||"";}
+/* 19 nov 2026 (sì di Alex) — L'INDIRIZZO INTERO E «PORTAMI LÌ»
+   Prima l'operaio riceveva mezzo indirizzo (solo la via del cliente, senza CAP
+   e comune) e «Apri mappa» faceva vedere un punto, senza navigatore.
+   Adesso: indirizzo intero (come la Mappa del gestionale), e se la Mappa ha
+   gia' trovato il cantiere (gest_lavori.dove_lat/dove_lon/dove_geo) si va a
+   QUEL punto. Se l'indirizzo e' cambiato dopo, il punto non vale e si usa il testo. */
+function opIndCliente(cl){
+  if(!cl)return "";
+  const via=(cl.indirizzo||"").trim();
+  const coda=[(cl.cap||"").trim(),(cl.citta||"").trim()].filter(Boolean).join(" ");
+  const pr=(cl.prov||"").trim();
+  if(!coda&&!pr)return via;
+  return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
+}
+function opDove(l){const cl=CLIENTI[l.cliente_id];return (l.dove||"").trim()||opIndCliente(cl);}
+function opPuntoOk(l){
+  const n=s=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+  return l&&l.dove_lat!=null&&l.dove_lon!=null&&!!l.dove_geo&&n(l.dove_geo)===n(opDove(l));
+}
+function opSuIphone(){const s=navigator.userAgent||"";return /iPhone|iPad|iPod/i.test(s)||(/Macintosh/.test(s)&&navigator.maxTouchPoints>1);}
+/* il punto di partenza lo mette il telefono, che sa dov'e' */
+function opStradaUrl(l){
+  const dove=opDove(l), ok=opPuntoOk(l);
+  const dest=ok?(l.dove_lat+","+l.dove_lon):dove;
+  if(opSuIphone())return "https://maps.apple.com/?daddr="+encodeURIComponent(dest)+"&dirflg=d";
+  return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(dest);
+}
+function opKm(l){
+  if(!opPuntoOk(l)||l.dove_km==null)return "";
+  const k=+l.dove_km;
+  return (k<10?String(Math.round(k*10)/10).replace(".",","):Math.round(k))+" km dall'ufficio";
+}
 function opMappaUrl(dove){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(dove);}
 
 function opCard(l,conFoto){
@@ -36,11 +67,11 @@ function opCard(l,conFoto){
   const cosa=l.descrizione?`<div class="op-cosa">${esc(l.descrizione.length>140?l.descrizione.slice(0,140)+"…":l.descrizione)}</div>`:"";
   return `<div class="op-card ${fatto?"v":"r"}" data-id="${l.id}">
     <div class="op-t">${esc(opTitolo(l))}</div>
-    ${dove&&opTitolo(l)!==dove?`<div class="op-dove">${esc(dove)}</div>`:""}
+    ${dove&&opTitolo(l)!==dove?`<div class="op-dove">${esc(dove)}${opKm(l)?` <span class="op-km">· ${opKm(l)}</span>`:""}</div>`:(opKm(l)?`<div class="op-dove"><span class="op-km">${opKm(l)}</span></div>`:"")}
     ${cosa}
     <span class="op-st ${fatto?"g":"r"}">${fatto?"FATTO":"DA FARE"}</span>
     <div class="op-btns">
-      ${dove?`<a class="op-b p" href="${opMappaUrl(dove)}" target="_blank" rel="noopener" data-mappa="1">${OP_MAPPA} Apri mappa</a>`:""}
+      ${dove?`<a class="op-b p" href="${esc(opStradaUrl(l))}" target="_blank" rel="noopener" data-mappa="1">${OP_MAPPA} Portami lì</a>`:""}
       ${n?`<button type="button" class="op-b" data-foto="${l.id}">Foto (${n})</button>`:""}
     </div></div>`;
 }

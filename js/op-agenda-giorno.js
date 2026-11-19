@@ -98,7 +98,9 @@ async function loadLavori(){
   LAVORI=data||[];
   const ids=[...new Set(LAVORI.map(l=>l.cliente_id).filter(Boolean))];
   if(ids.length){
-    const {data:cl}=await sb.from("gest_clienti").select("id,nome,indirizzo").in("id",ids);
+    /* 19 nov 2026 — anche CAP, comune e provincia: l'indirizzo intero (op-schede.js, opDove) */
+    let {data:cl,error:_eCl}=await sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").in("id",ids);
+    if(_eCl)({data:cl}=await sb.from("gest_clienti").select("id,nome,indirizzo").in("id",ids));
     CLIENTI=Object.fromEntries((cl||[]).map(c=>[c.id,c]));
   }
 }
@@ -342,7 +344,7 @@ function renderDay(){
   box.innerHTML=list.map(l=>{
     const cl=CLIENTI[l.cliente_id];
     const titolo=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,40):"Lavoro");
-    const dove=l.dove||(cl&&cl.indirizzo)||"";
+    const dove=(typeof opDove==="function")?opDove(l):(l.dove||(cl&&cl.indirizzo)||"");
     return `<div class="job" data-id="${l.id}">
       <h3>${esc(titolo)}</h3>
       ${dove?`<div class="where">📍 ${esc(dove)}</div>`:""}
@@ -381,7 +383,8 @@ async function openLavoro(id){
   const cl=CLIENTI[l.cliente_id];
   $("#lv-title").textContent=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,50):etic("Lavoro"));
   const bits=[];
-  if(l.dove||(cl&&cl.indirizzo))bits.push("📍 "+(l.dove||cl.indirizzo));
+  const _dv=(typeof opDove==="function")?opDove(l):(l.dove||(cl&&cl.indirizzo)||"");
+  if(_dv)bits.push("📍 "+_dv);
   if(l.data_prevista)bits.push("📅 "+dataIt(l.data_prevista));
   $("#lv-meta").innerHTML=bits.join(" · ")+" "+statoBadge(l.stato);
   $("#lv-istr").textContent=l.descrizione||"Nessuna istruzione.";

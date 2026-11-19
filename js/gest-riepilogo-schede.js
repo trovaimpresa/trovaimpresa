@@ -457,15 +457,31 @@
      dice di aprire il link per il resto, altrimenti il messaggio diventa un
      muro di testo (e l'indirizzo wa.me ha un limite).
      `cliente` e' facoltativo: la lista Lavori lo conosce, altri punti no. */
-  function _waLavoro(l,opTel,cliente){
+  /* 19 nov 2026 — `indirizzo` (facoltativo): l'indirizzo intero del cantiere.
+     Se manca: «Dove» del lavoro, se no quello del cliente (cliCache). Il link
+     «Portami lì» porta al punto salvato dalla Mappa se combacia con l'indirizzo. */
+  function _waDove(l,indirizzo){
+    if(indirizzo)return String(indirizzo).trim();
+    if((l.dove||"").trim())return l.dove.trim();
+    try{const c=(typeof cliCache!=="undefined"?cliCache:[]).find(x=>String(x.id)===String(l.cliente_id));
+      return c&&typeof cliIndirizzo==="function"?cliIndirizzo(c).trim():"";}catch(e){return "";}
+  }
+  function _waStrada(l,dove){
+    const n=s=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+    if(l.dove_lat!=null&&l.dove_lon!=null&&l.dove_geo&&n(l.dove_geo)===n(dove))
+      return "https://www.google.com/maps/dir/?api=1&destination="+l.dove_lat+","+l.dove_lon;
+    return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(dove);
+  }
+  function _waLavoro(l,opTel,cliente,indirizzo){
     const opLink=location.href.replace(/[?#].*$/,"").replace(/[^/]*$/,"")+"gestionale-operatore.html"+(l.id?("?lavoro="+encodeURIComponent(l.id)):"");
     const isPro=ruoloUtente==='professionista';
     const intro=isPro?"*Nuova pratica per te*":"*Nuovo lavoro per te*";
     const righe=[intro,""];
     if(cliente)righe.push("*Cliente:* "+cliente);
-    if(l.dove){
-      righe.push("*Dove:* "+l.dove);
-      righe.push("*Mappa:* https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(l.dove));
+    const dove=_waDove(l,indirizzo);
+    if(dove){
+      righe.push("*Dove:* "+dove);
+      righe.push("*Portami lì:* "+_waStrada(l,dove));
     }
     if(l.data_prevista)righe.push("*Quando:* "+fdate(l.data_prevista));
     const desc=(l.descrizione||"").trim();

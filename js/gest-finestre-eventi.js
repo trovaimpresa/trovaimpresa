@@ -624,6 +624,9 @@
     if(a==="gal-nuovo"){galCaricaLavori().then(galUploadForm);return;}
     if(a==="mp-vista"){mpVista=t.dataset.v;segmOn("#mp-vista",t.dataset.v);renderMappa();return;}
     if(a==="mp-ricalcola"){toast("Ricalcolo le distanze…");renderMappa(true);return;}
+    /* 19 nov 2026 — dalla Mappa: la strada per arrivare al cantiere, partendo da dove sei */
+    if(a==="mp-strada"){mpStrada(t.dataset.q);return;}
+    if(a==="mp-apri"){mpApri(t.dataset.id);return;}
     if(a==="vai-galleria"){
       galFilter.lav=t.dataset.id;galFilter.media="";galFilter.tipo="";galFilter.op="";
       closeSheet();

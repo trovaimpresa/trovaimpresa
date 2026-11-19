@@ -10,11 +10,17 @@
       const l=(LAVORI||[]).find(x=>x.id===id),el=document.getElementById("lv-mappa");
       if(!el)return r;
       const dove=(l&&typeof opDove==="function")?opDove(l):"";
-      el.innerHTML=mappaHtml(dove,"");
+      /* 19 nov 2026 (sì di Alex) — «Portami lì» dentro il lavoro: il navigatore,
+         al punto trovato dalla Mappa del gestionale se c'e' */
+      const porta=(l&&dove&&typeof opStradaUrl==="function")
+        ?'<a class="op-portami" href="'+opStradaUrl(l).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">Portami lì'+(opKm(l)?' <span>· '+opKm(l)+'</span>':'')+'</a>':"";
+      const punto=(l&&typeof opPuntoOk==="function"&&opPuntoOk(l))?(l.dove_lat+","+l.dove_lon):dove;
+      el.innerHTML=porta+mappaHtml(punto,"");
+      if(l&&typeof opPuntoOk==="function"&&opPuntoOk(l))return r;
       if(l&&l.cliente_id&&dove&&sb){
         const {data}=await sb.from("gest_clienti").select("citta").eq("id",l.cliente_id).maybeSingle();
         const c=data&&data.citta;
-        if(c&&document.getElementById("lv-mappa")===el)el.innerHTML=mappaHtml(dove,c);
+        if(c&&document.getElementById("lv-mappa")===el)el.innerHTML=porta+mappaHtml(dove,c);
       }
     }catch(_){}
     return r;
