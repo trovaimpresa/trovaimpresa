@@ -617,6 +617,7 @@
     if(a==="del-fatt")return eliminaFattura(id);
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-manda")return fattManda(id);
+    if(a==="fatt-nc")return fattNotaCredito(id);   /* 19 nov 2026 — nota di credito da questa fattura */
     if(a==="fatt-acconto")return fattAcconto(id);   /* 17 nov 2026 — porta la fattura nella ricevuta di pagamento */
     if(a==="fatt-buchi-ok")return fattBuchiOk();   /* 17 nov 2026 — js/gest-fattura-manda.js */
     if(a==="fatt-xml")return fatturaXml(id);

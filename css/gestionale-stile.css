@@ -318,3 +318,12 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #appview .wrap section .segm.mz-ling{display:flex;width:100%;max-width:560px;margin:0 0 16px;padding:4px}
 #appview .wrap section .segm.mz-ling button{flex:1;height:48px;font-size:18px;font-weight:700}
 @media(max-width:620px){#appview .wrap section .segm.mz-ling{max-width:none}}
+
+/* 19 nov 2026 (studio, voce Fatture) — sul telefono i pulsanti in testa alla
+   finestra (Emetti, PDF, Manda, Altro) stavano su 3 righe e mangiavano mezzo
+   schermo. Adesso due per riga, larghi uguali. Foto approvata da Alex. */
+@media (max-width:600px){
+  .sheet .sh-head-az{display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important;width:100%;box-sizing:border-box;overflow:visible !important}
+  .sheet .sh-head-az>*{min-width:0;width:auto;margin:0 !important;box-sizing:border-box}
+  .sheet .sh-head-az .btn,.sheet .sh-head-az details.sh-altro>summary{width:100%;box-sizing:border-box;justify-content:center;display:flex;padding:0 8px !important}
+}
