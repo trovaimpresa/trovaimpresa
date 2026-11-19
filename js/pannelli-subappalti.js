@@ -220,14 +220,22 @@
       var miaEmail = String(mia.data && mia.data[0] && mia.data[0].email || s.user.email || '').toLowerCase();
       var base = function () {
         return sb.from('subappalti').select('id,tipo,nome_impresa,descrizione,lavoro,citta,user_id,email,created_at')
-          .eq('attivo', true).order('created_at', { ascending: false }).limit(12);
+          .eq('attivo', true).order('created_at', { ascending: false }).limit(40);
       };
       var chiavi = REGIONI_SZ[regione];
       var r = chiavi ? await base().or(chiavi.map(function (k) { return 'citta.ilike.%' + k + '%'; }).concat(['regione.ilike.' + slugRegione(regione)]).join(',')) : { data: [] };
       var degliAltri = function (l) {
         return (l || []).filter(function (a) { return a.user_id !== s.user.id && String(a.email || '').toLowerCase() !== miaEmail; }).slice(0, 3);
       };
-      var lista = degliAltri(r.data), inRegione = lista.length > 0;
+      /* 19 nov 2026: «roma» dentro «Emilia-Romagna» faceva uscire la Puglia nel Lazio:
+         la ricerca del database è larga, qui si tiene solo la parola INTERA */
+      var dentro = function (a) {
+        var t = ' ' + [a.regione, a.citta].filter(Boolean).join(' ').toLowerCase() + ' ';
+        return String(a.regione || '').toLowerCase() === slugRegione(regione) || chiavi.some(function (k) {
+          return new RegExp('[^a-zàèéìòù]' + k + '(?![a-zàèéìòù])').test(t);
+        });
+      };
+      var lista = degliAltri((r.data || []).filter(dentro)), inRegione = lista.length > 0;
       if (!inRegione) { var t = await base(); lista = degliAltri(t.data); }
       if (!lista.length) return;
       if (!document.getElementById('sz-stile')) { var st = document.createElement('style'); st.id = 'sz-stile'; st.textContent = CSS_SZ; document.head.appendChild(st); }
