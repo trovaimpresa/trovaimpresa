@@ -16,7 +16,13 @@
        return (r.numero?(cosa+" n. "+r.numero+(r.anno?"/"+r.anno:"")):(cosa+" in bozza"))
          +(r.data?" del "+fdate(r.data):"")+(chi?" — "+chi:"");
      }},
-    {t:"gest_scadenze",    lab:"Scadenze",          campo:"titolo",         ic:"⏰", foglia:true},
+    /* 19 nov 2026 (collaudo Cestino) — due scadenze con lo stesso nome non si
+       distinguevano: adesso la riga dice anche il giorno. */
+    {t:"gest_scadenze",    lab:"Scadenze",          campo:"titolo",         ic:"⏰", foglia:true,
+     nome:function(r){
+       const t=String(r.titolo||"").trim()||"Scadenza";
+       return t+(r.data_scadenza?" — scade il "+fdate(r.data_scadenza):"");
+     }},
     /* 12 nov 2026 — le ricevute di pagamento. «Elimina» le metteva gia' da
        parte (eliminato_il), ma qui non comparivano: non si potevano riprendere.
        Il numero non si doppia: la numerazione conta anche quelle eliminate. */
@@ -26,7 +32,8 @@
        return "Ricevuta N. "+r.numero+(r.anno?"/"+r.anno:"")+(r.data?" del "+fdate(r.data):"")+(chi?" — "+chi:"");
      }},
     {t:"gest_mestieri",    lab:"Reparti",           campo:"nome",           ic:"🗂"},
-    {t:"gest_mezzi",       lab:"Mezzi e strumenti", campo:"nome",           ic:"🚚"},
+    /* 19 nov 2026 — il tipo si chiama come la voce del menu */
+    {t:"gest_mezzi",       lab:"Strumenti", labImp:"Mezzi e attrezzature", campo:"nome", ic:"🚚"},
     {t:"gest_operatori",   lab:"Persone",           campo:"nome",           ic:"👷"},
     {t:"gest_carte",       lab:"Carte aziendali",   campo:"nome",           ic:"💳"},
     {t:"gest_fornitori",   lab:"Fornitori",         campo:"nome",           ic:"🏪"},
@@ -47,10 +54,10 @@
        Il nome del lavoro lo va a prendere cestNomiLavori(), qui sotto.
        NIENTE "foglia": sotto al rapportino ci sono le ore, quindi "Elimina per
        sempre" deve passare dalla funzione del database che guarda la catena. */
-    {t:"gest_rapportini",  lab:"Rapportini di cantiere", campo:"materiali", ic:"📋",
+    {t:"gest_rapportini",  lab:"Rapportini di cantiere", labImp:"Giornate", campo:"materiali", ic:"📋",
      nome:function(r){
        const q=CEST_LAV[String(r.lavoro_id||"")];
-       return "Rapportino del "+fdate(r.data)+(q?(" — "+q):"");
+       return (ruoloUtente==='professionista'?"Rapportino del ":"Giornata del ")+fdate(r.data)+(q?(" — "+q):"");
      }},
     /* 14 settembre 2026 — i promemoria. Senza questa riga, buttarne uno lo
        faceva sparire e basta: la riga restava nel database con eliminato_il
@@ -67,9 +74,9 @@
     /* Il SAL non ha ne' nome ne' titolo: senza "nome" il Cestino scriverebbe
        dieci righe uguali e non si saprebbe quale si sta rimettendo a posto.
        NIENTE "foglia": sotto al SAL ci sono le sue righe. */
-    {t:"gest_sal",         lab:"Stati di avanzamento", campo:"numero",       ic:"📈",
+    {t:"gest_sal",         lab:"Stati di avanzamento", labImp:"Acconti", campo:"numero",       ic:"📈",
      nome:function(r){ return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(r.numero||"?")+" del "+fdate(r.data); }},
-    {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
+    {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", labImp:"Voci del tuo prezzario", campo:"descrizione", ic:"🏷", foglia:true},
     /* 19 nov 2026 — le foto e i video caricati dalla Galleria non hanno
        nome_file (e gest_video quella colonna non ce l'ha proprio): nel Cestino
        erano «(senza nome)», tutti uguali. Adesso «Foto prima del lavoro —
@@ -77,7 +84,16 @@
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true,
      nome:function(r){ return String(r.nome_file||"").trim()||cestNomeMedia("Foto",r); }},
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true,
-     nome:function(r){ return cestNomeMedia("Video",r); }}
+     nome:function(r){ return cestNomeMedia("Video",r); }},
+    /* 19 nov 2026 (collaudo Cestino) — i preventivi che manda l'operaio
+       (Squadra → «Preventivi da controllare»). «Elimina» li metteva da parte
+       (eliminato_il) ma qui non comparivano: non si potevano riprendere, e
+       le loro foto restavano nel deposito per sempre. Non hanno il reparto. */
+    {t:"gest_op_preventivi", lab:"Preventivi dell'operaio", campo:"titolo", ic:"📝", foglia:true,
+     nome:function(r){
+       const t=String(r.titolo||"").trim()||"Preventivo";
+       return t+(r.creato_da?" — di "+String(r.creato_da).trim():"");
+     }}
     /* gest_note NON c'e': e' stata tolta dal cestino il 9/8/2026 (vedi
        js/cestino.js). Lasciarla qui voleva dire una richiesta in piu' a ogni
        apertura, per una categoria che non si riempie mai. */
@@ -136,19 +152,30 @@
        ad avvisare per un furgone gia' venduto. */
     gest_mezzi    :[["gest_scadenze","mezzo_id","scadenza","scadenze"]]
   };
+  /* 19 nov 2026 (collaudo Cestino) — un padre solo non bastava.
+     Rimettendo a posto una foto col suo lavoro ancora nel Cestino, la foto
+     tornava ma in Galleria non si vedeva (sta sotto un lavoro che non c'e').
+     E un preventivo tornava col cliente «(nel cestino)». Adesso ogni riga
+     puo' avere piu' padri: per ognuno ancora nel Cestino si chiede UNA volta
+     sola se rimetterli a posto insieme. */
+  const _REP=["gest_mestieri","mestiere_id","reparto"];
+  const _CLI=["gest_clienti","cliente_id","cliente"];
+  const _LAV=["gest_lavori","lavoro_id","lavoro"];
   const CEST_PADRE={
-    gest_lavori           :["gest_mestieri","mestiere_id","reparto"],
-    gest_clienti          :["gest_mestieri","mestiere_id","reparto"],
-    gest_preventivi       :["gest_mestieri","mestiere_id","reparto"],
-    gest_fatture          :["gest_mestieri","mestiere_id","reparto"],
-    gest_mezzi            :["gest_mestieri","mestiere_id","reparto"],
-    gest_operatori        :["gest_mestieri","mestiere_id","reparto"],
-    gest_carte            :["gest_mestieri","mestiere_id","reparto"],
-    gest_scadenze         :["gest_mestieri","mestiere_id","reparto"],
-    gest_computi          :["gest_mestieri","mestiere_id","reparto"],
-    gest_fornitori        :["gest_mestieri","mestiere_id","reparto"],
-    gest_rapportini       :["gest_mestieri","mestiere_id","reparto"],
-    gest_fatture_fornitori:["gest_fornitori","fornitore_id","fornitore"]
+    gest_lavori           :[_REP,_CLI],
+    gest_clienti          :[_REP],
+    gest_preventivi       :[_REP,_CLI,_LAV],
+    gest_fatture          :[_REP,_CLI],
+    gest_mezzi            :[_REP],
+    gest_operatori        :[_REP],
+    gest_carte            :[_REP],
+    gest_scadenze         :[_REP,["gest_mezzi","mezzo_id","mezzo"]],
+    gest_computi          :[_REP],
+    gest_fornitori        :[_REP],
+    gest_rapportini       :[_REP,_LAV],
+    gest_fatture_fornitori:[["gest_fornitori","fornitore_id","fornitore"]],
+    gest_foto             :[_LAV],
+    gest_video            :[_LAV]
   };
   /* Quanto largo e' "nello stesso momento". I figli vengono messi via qualche
      istante PRIMA del padre, ma con la rete lenta puo' passare piu' tempo: due
@@ -204,6 +231,10 @@
     const quando=(t==="da_fare")?" prima del lavoro":((t==="fatto"||t==="lavoro")?" a lavoro finito":"");
     if(!q&&!quando)return "";
     return cosa+quando+(q?(" — "+q):"");
+  }
+  function cestFileOp(r){
+    let a=r&&r.files; if(typeof a==="string"){try{a=JSON.parse(a);}catch(e){a=[];}}
+    return Array.isArray(a)?a.map(function(f){return f&&f.path;}).filter(Boolean):[];
   }
   async function cestNomiLavori(risposte){
     CEST_LAV={};
@@ -317,7 +348,7 @@
          della persona): chiederle col reparto dava 6 errori 400 a ogni
          apertura del Cestino, poi si richiedeva senza. Si chiede subito giusto. */
       const filtra=(cestVista!=="tutti")&&!!_mid&&c.t!=="gest_mestieri"
-        &&["gest_spese","promemoria","gest_crediti","gest_prezzi_propri","gest_foto","gest_video"].indexOf(c.t)<0;
+        &&["gest_spese","promemoria","gest_crediti","gest_prezzi_propri","gest_foto","gest_video","gest_op_preventivi"].indexOf(c.t)<0;
       let r=null;
       try{ r=await q(filtra); }catch(e){ r=null; }
       if(filtra&&r&&r.error&&/mestiere_id|42703|column/i.test((r.error.message||"")+(r.error.code||""))){
@@ -342,7 +373,13 @@
        che e' il verso sbagliato in cui sbagliare. */
     const _incerto=risposte.some(x=>x.ko);
     /* 12 nov 2026 — regola 20: se non ha risposto NESSUNA tabella non si dice «Il cestino è vuoto» */
-    if(risposte.length&&risposte.every(x=>x.ko)){listaNonLetta(box,"il cestino","cestino");return;}
+    if(risposte.length&&risposte.every(x=>x.ko)){
+      /* 19 nov 2026 — sopra restavano i numeri vecchi e «Svuota il cestino»
+         su un elenco che non si e' potuto leggere */
+      cestCache=[];
+      if($("#cest-riass"))$("#cest-riass").innerHTML=cestGuastoHTML();
+      const _bar=document.getElementById("cz-barra"); if(_bar)_bar.remove();
+      listaNonLetta(box,"il cestino","cestino");return;}
     if(cestVista==="tutti"&&!_incerto){
       cestTotale=cestQui;
       cestContato=true;
@@ -377,8 +414,11 @@
           tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?(x.c.t==='gest_lavori'?_lav():x.c.labImp):x.c.lab,
           nome:nome.length>80?nome.slice(0,79).trimEnd()+"…":nome,
           quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
+          /* 19 nov 2026 — i file del preventivo dell'operaio (colonna files) */
+          files:(x.c.t==="gest_op_preventivi")?cestFileOp(r):null,
           sotto:(x.c.t==="gest_foto")?String(r.tipo||""):"",   /* 15 nov 2026: foto o documento (cestEliminato) */
-          padre:(_p&&r[_p[1]])?{tab:_p[0], col:_p[1], id:r[_p[1]], lab:_p[2]}:null});
+          padri:(_p||[]).filter(function(q){return r[q[1]];})
+            .map(function(q){return {tab:q[0], col:q[1], id:r[q[1]], lab:q[2]};})});
       });
     });
     cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
@@ -491,6 +531,7 @@
       if(_ba)_ba.onclick=function(){cestMostra+=CEST_PASSO;renderCestino(true);};
     }
     cestCzVis=visTutte;
+    cestCzStile();
     cestCzDecora(box,vis);
   }
 
@@ -539,6 +580,8 @@
       +'#cz-barra .cz-via:disabled{opacity:.45;cursor:not-allowed}'
       +'#cz-barra .cz-annulla{background:#fff;color:#0a2a4d;border:0}'
       +'#cestino{padding-bottom:110px}'
+      /* 19 nov 2026 — sul telefono «Elimina per sempre» andava a capo spostato a destra */
+      +'@media (max-width:560px){#cest-list .job-actions .ja{flex:1 1 100%;margin-left:0;justify-content:center}#cest-list .job-actions .ja.del{flex:1 1 0}#cest-list .job-actions>.ti-i{margin-left:auto}}'
       +'@media (max-width:880px){#cz-barra{left:10px;right:10px;bottom:84px;padding:12px}#cz-barra b{flex:1 1 100%}#cz-barra button{flex:1 1 0;font-size:16px;padding:10px 8px}#cestino{padding-bottom:200px}}'
       +'#cz-ov{position:fixed;inset:0;z-index:2000;background:rgba(10,42,77,.55);display:grid;place-items:center;padding:20px}'
       +'#cz-ov .cz-car{background:#fff;border-radius:18px;padding:28px 26px;max-width:460px;width:100%;text-align:center;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;color:#0a2a4d}'
@@ -632,7 +675,8 @@
       const lista=cestCache.filter(function(x){return cestScelti.has(cestCzChiave(x));});
       if(!lista.length)return;
       if(!(await gconfirm("Eliminare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+"?"
-        +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
+        /* 19 nov 2026 — la riga sulle fatture solo se in mezzo c'e' una fattura */
+        +(lista.some(function(x){return x.tab==="gest_fatture";})?"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali).":"")
         +"\n\nQuesta volta spariscono davvero e non si recuperano più.")))return;
       const scelte=new Set(lista.map(cestCzChiave));
       cestEliminaGiri(function(){return cestCache.filter(function(x){return scelte.has(cestCzChiave(x));});},lista.length,true);
@@ -646,8 +690,10 @@
     const cosa=q?("le "+quante+" cose trovate con «"+cestQ+"»")
       :(tipo?("tutte le "+quante+" «"+tipo+"»"):("tutte le "+quante+" cose del cestino"
         +(cestVista!=="tutti"?" di questo reparto":"")));
+    const _conFatt=cestCache.some(function(x){return x.tab==="gest_fatture"
+      &&(!q||(x.nome+" "+x.tipo).toLowerCase().includes(q))&&(!tipo||x.tipo===tipo);});
     if(!(await gconfirm("Eliminare per sempre "+cosa+"?"
-      +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
+      +(_conFatt?"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali).":"")
       +"\n\nQuesta volta spariscono davvero e non si recuperano più.")))return;
     const scelta=function(){return cestCache.filter(function(x){
       return (!q||(x.nome+" "+x.tipo).toLowerCase().includes(q))&&(!tipo||x.tipo===tipo);});};
@@ -761,34 +807,35 @@
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
 
-    /* Il padre e' ancora nel cestino? Allora rimettere a posto solo questo non
-       serve a niente: torna su ma non si vede da nessuna parte, perche' il
-       gestionale mostra solo la roba dei reparti (e dei fornitori) vivi. */
-    let padreDaTirareSu=null;
-    if(x.padre&&x.padre.id){
+    /* I padri sono ancora nel cestino? Allora rimettere a posto solo questa
+       non serve: torna su ma non si vede (o si vede «nel cestino»).
+       Si chiede una volta sola per tutti. */
+    const daTirareSu=[];
+    for(const pa of (x.padri||[])){
       try{
-        const {data:pd}=await sb.raw(x.padre.tab).select("id,nome,eliminato_il")
-          .eq("id",x.padre.id).eq("user_id",sbUid).limit(1);
+        const {data:pd}=await sb.raw(pa.tab).select("*")
+          .eq("id",pa.id).eq("user_id",sbUid).limit(1);
         const p=(pd||[])[0];
-        if(p&&p.eliminato_il){
-          const q=p.nome?(" «"+p.nome+"»"):"";
-          if((await gconfirm("Questa cosa sta dentro il "+x.padre.lab+q+", che è ancora nel cestino.\n\n"
-            +"Se rimetto a posto solo questa, non la vedrai da nessuna parte.\n\n"
-            +"Rimetto a posto anche il "+x.padre.lab+"?"))) padreDaTirareSu=p;
-        }
+        if(p&&p.eliminato_il)daTirareSu.push({pa:pa,p:p,
+          nome:String(p.nome||p.descrizione||p.titolo||"").trim().slice(0,60)});
       }catch(e){}
+    }
+    if(daTirareSu.length){
+      const el=daTirareSu.map(function(d){return "\u2022 il "+d.pa.lab+(d.nome?" «"+d.nome+"»":"");}).join("\n");
+      const uno=daTirareSu.length===1;
+      if(!(await gconfirm("È ancora nel cestino:\n"+el+"\n\n"
+        +"Se rimetto a posto solo questa, non "+(uno?"lo":"li")+" ritrovi.\n\n"
+        +"Rimetto a posto anche "+(uno?"lui":"loro")+"?")))daTirareSu.length=0;
     }
 
     let extra=0;
-    if(padreDaTirareSu){
+    for(const d of daTirareSu){
       /* la data si legge PRIMA di rimettere a posto il padre: e' quella che dice
-         "questi figli sono stati buttati via insieme a lui". Leggendola dopo,
-         il padre e' gia' tornato su e la data non c'e' piu': i figli
-         resterebbero tutti nel cestino, da ripescare a mano uno per uno. */
-      const quandoPadre=padreDaTirareSu.eliminato_il;
-      const rp=await cestRiga(x.padre.tab,padreDaTirareSu.id);
+         "questi figli sono stati buttati via insieme a lui". */
+      const quandoPadre=d.p.eliminato_il;
+      const rp=await cestRiga(d.pa.tab,d.p.id);
       if(rp&&rp.error){toast("Errore: "+rp.error.message);return;}
-      extra+=1+await cestFigli(x.padre.tab,padreDaTirareSu.id,quandoPadre);
+      extra+=1+await cestFigli(d.pa.tab,d.p.id,quandoPadre);
     }
 
     const {data,error}=await cestRiga(x.tab,x.id);
@@ -825,10 +872,16 @@
     _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
-    if(x.tab==="gest_mestieri"||(padreDaTirareSu&&x.padre.tab==="gest_mestieri"))renderLanding();
-    toast((!extra?"Rimesso a posto ✔"
-      :extra===1?"Rimesso a posto ✔ — e con lui anche 1 cosa che ci stava dentro"
-      :"Rimesso a posto ✔ — e con lui anche altre "+extra+" cose che ci stavano dentro")
+    if(x.tab==="gest_op_preventivi"&&typeof gpBanner==="function")try{gpBanner();}catch(e){}
+    if(x.tab==="gest_mestieri"||daTirareSu.some(function(d){return d.pa.tab==="gest_mestieri";}))renderLanding();
+    /* 19 nov 2026 — il lavoro o il cliente tornati su insieme NON «ci stavano
+       dentro»: si dicono per nome; le cose dentro si contano a parte */
+    const _insieme=daTirareSu.map(function(d){return "il "+d.pa.lab;});
+    const _dentro=extra-daTirareSu.length;
+    toast("Rimesso a posto ✔"
+      +(_insieme.length?" — insieme a "+_insieme.join(" e "):"")
+      +(_dentro===1?(_insieme.length?" e a 1 cosa che ci stava dentro":" — e con lui anche 1 cosa che ci stava dentro")
+       :_dentro>1?(_insieme.length?" e a "+_dentro+" cose che ci stavano dentro":" — e con lui anche altre "+_dentro+" cose che ci stavano dentro"):"")
       +_avvisoAccesso);
   }
 
@@ -846,7 +899,7 @@
   const CEST_NOMI={
     gest_lavori:"pratiche/lavori", gest_clienti:"clienti", gest_preventivi:"preventivi",
     gest_fatture:"fatture", gest_scadenze:"scadenze", gest_mestieri:"reparti",
-    gest_mezzi:"mezzi e strumenti", gest_operatori:"persone", gest_carte:"carte aziendali",
+    gest_mezzi:"mezzi e attrezzature", gest_operatori:"persone", gest_carte:"carte aziendali",
     gest_fornitori:"fornitori", gest_fatture_fornitori:"fatture fornitori",
     gest_spese:"spese", gest_ore:"ore lavorate", gest_crediti:"crediti formativi",
     gest_computi:"computi", gest_computo_capitoli:"capitoli del computo",
@@ -859,13 +912,14 @@
     gest_carte_movimenti:"movimenti della carta", gest_rifornimenti:"rifornimenti",
     /* 13 nov 2026 (quarto giro) — tre nomi di tabella uscivano a schermo */
     gest_sal:"stati di avanzamento", gest_sal_righe:"righe dello stato di avanzamento",
-    gest_preventivi_link:"link mandati al cliente", gest_analisi_righe:"righe dell'analisi dei prezzi"
+    gest_preventivi_link:"link mandati al cliente", gest_analisi_righe:"righe dell'analisi dei prezzi",
+    gest_op_preventivi:"preventivi dell'operaio"
   };
   function cestElenco(v){
     /* 11 nov 2026 — «1 righe della fattura»: con 1 si usa il singolare */
     const UNO={gest_fattura_righe:"riga della fattura",gest_preventivo_righe:"riga del preventivo",
       gest_lavori:"lavoro/pratica",gest_clienti:"cliente",gest_preventivi:"preventivo",gest_fatture:"fattura",
-      gest_scadenze:"scadenza",gest_mestieri:"reparto",gest_mezzi:"mezzo o strumento",gest_operatori:"persona",
+      gest_scadenze:"scadenza",gest_mestieri:"reparto",gest_mezzi:"mezzo o attrezzatura",gest_operatori:"persona",
       gest_carte:"carta aziendale",gest_fornitori:"fornitore",gest_fatture_fornitori:"fattura fornitore",
       gest_spese:"spesa",gest_ore:"ora lavorata",gest_crediti:"credito formativo",gest_computi:"computo",
       gest_computo_capitoli:"capitolo del computo",gest_computo_voci:"voce del computo",
@@ -952,9 +1006,14 @@
           lavoro: prima un lavoro con un rapportino non si eliminava (e dal
           Cestino il rapportino non si poteva nemmeno buttare). Stessa strada,
           UNA domanda sola che dice cosa se ne va. */
-       && prova.vivi.every(function(v){return v.tabella==="gest_ore"||v.tabella==="gest_spese"||v.tabella==="gest_rapportini";})){
+       /* 19 nov 2026 — anche foto e video del lavoro: prima bisognava andarli a
+          cercare in Galleria uno per uno. I file se ne vanno col secondo giro. */
+       && prova.vivi.every(function(v){return ["gest_ore","gest_spese","gest_rapportini","gest_foto","gest_video"].indexOf(v.tabella)>=0;})){
       if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nHa ancora dentro:\n"
-        +cestElenco(prova.vivi)+"\n\nSe ne vanno anche loro. Questa volta sparisce davvero e non si recupera pi\u00f9.")))return;
+        +cestElenco(prova.vivi)+"\n\n"
+        /* 19 nov 2026 — con una cosa sola «Se ne vanno anche loro» stonava */
+        +(prova.vivi.reduce(function(a,v){return a+(+v.n||0);},0)===1?"Se ne va anche quella.":"Se ne vanno anche loro.")
+        +" Questa volta sparisce davvero e non si recupera pi\u00f9.")))return;
       for(const v of prova.vivi){
         const r=await sb.from(v.tabella).delete().eq("user_id",sbUid).eq("lavoro_id",x.id).select("id");
         if(r.error){toast("Non eliminato: "+r.error.message);return;}
@@ -1010,6 +1069,7 @@
       (perBucket[b]=perBucket[b]||[]).push(path);
     };
     metti(x.tab,x.path);
+    (x.files||[]).forEach(function(p){metti(x.tab,p);});
     (elenco||[]).forEach(r=>metti(r.tabella,r.path));
     for(const b in perBucket){
       try{ await sb.storage.from(b).remove(perBucket[b]); }catch(e){}

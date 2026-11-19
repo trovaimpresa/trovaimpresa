@@ -3782,3 +3782,24 @@ Prima: l'operaio riceveva mezzo indirizzo (solo la via del cliente), «Apri mapp
 Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: un operaio vero dal suo telefono (permessi su CAP/comune del cliente), il telefono vero, lo studio tecnico.
 
 Dopo il giro delle voci (impresa/artigiano, poi studio tecnico), deciso da Alex il 19 nov: (1) un giro di controllo generale; (2) in una sessione NUOVA e separata, controllare che TUTTE le app parlino fra loro (gestionale, app operaio, noleggio, pannelli, sito, app casa…), e farle parlare dove non lo fanno.
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: CESTINO (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) nel reparto «ferramenta», tutto «PROVA CONTROLLORE»: cliente, lavoro, preventivo, fattura in BOZZA (nessuna emessa), foto e video col file nel deposito, 2 scadenze (una del mezzo), mezzo, persona, 56 voci del prezzario, 1 preventivo dell'operaio con foto. Poi cancellato tutto (anche dal Cestino e dal deposito): →0← righe, file nel deposito tornati →19← foto e →3← video.
+
+Codice: `js/gest-cestino.js` (`CEST_COSE`, `CEST_PADRE`, `renderCestino`, `cestRipristina`, `cestDefinitivo`, `cestPulisciFile`, `cestCzStile`), frase in cima in `gestionale-app.html` (`#cestino .gal-intro`), aiuto in `js/aiuti.js`.
+
+Funziona (provato): scelte per tipo, «Mostra altre» (50 alla volta), ricerca, «Rimetti a posto» del mezzo con la sua scadenza, «Elimina per sempre» col file tolto dal deposito, «Svuota» per tipo, «Scegli cosa eliminare» con la barra in basso (anche a 375), senza rete messaggi in italiano.
+
+Difetti trovati e sistemati:
+1. Foto/video rimessi a posto col LAVORO ancora nel Cestino: tornavano ma in Galleria non si vedevano. Preventivo/lavoro/fattura tornavano col cliente «(nel cestino)». Adesso `CEST_PADRE` ha più padri per riga (reparto, cliente, lavoro, mezzo, fornitore) e chiede UNA volta «È ancora nel cestino: il lavoro «…». Rimetto a posto anche lui?». ⚠️ Prima leggeva il padre con `select("id,nome,…")`: su `gest_lavori` (niente `nome`) sarebbe andata in errore; adesso `select("*")`. Un solo livello: il cliente del lavoro tirato su non viene chiesto.
+2. ⛔ I «Preventivi da controllare» dell'operaio (`gest_op_preventivi`, Squadra) eliminati NON arrivavano nel Cestino: non si riprendevano e le foto restavano nel deposito per sempre. Adesso tipo «Preventivi dell'operaio» (senza reparto, foglia; i file della colonna `files` si tolgono con «Elimina per sempre»). In `js/gest-prev-controllo.js` il messaggio dice «Messo nel cestino: lo riprendi da lì».
+3. Lavoro con foto o video: «Elimina per sempre» rifiutava («mettile prima nel cestino») e le foto andavano cercate in Galleria. Adesso come ore e spese: una domanda, se ne vanno insieme, file compresi.
+4. Senza rete: sopra l'avviso restavano i numeri vecchi e «Svuota il cestino». Adesso spariscono.
+5. Due scadenze con lo stesso nome uguali: adesso «… — scade il 15/02/2027».
+6. Nomi come il menu (solo impresa/artigiano): «Mezzi e attrezzature» (era «Mezzi e strumenti»; lo studio «Strumenti»), «Giornate» e «Giornata del …» (era «Rapportini di cantiere»), «Acconti» (era «Stati di avanzamento»), «Voci del tuo prezzario».
+7. «Clicca una riga per rimetterla a posto»: falso, la riga non fa niente. Ora «Premi «Rimetti a posto»…».
+8. Telefono: «Elimina per sempre» andava a capo spostato a destra; ora i due pulsanti larghi, la «i» accanto al secondo.
+9. «Le fatture già emesse restano nel cestino» compariva anche svuotando solo voci del prezzario: ora solo se ci sono fatture. «Se ne vanno anche loro» con una cosa sola → «Se ne va anche quella». Il messaggio dopo «Rimetti a posto» non dice più che il lavoro «ci stava dentro» la foto.
+
+Provato PRIMA del push sulla pagina vera rimettendo le funzioni (`(0,eval)(String(fn).replace(…))`) e cambiando `CEST_COSE`/`CEST_PADRE` sul posto (sono const, ma si possono modificare dentro). Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: lo studio tecnico (i nomi «Strumenti» / «Rapportino» restano quelli di prima), un reparto intero nel Cestino (non si butta il reparto di Alex).

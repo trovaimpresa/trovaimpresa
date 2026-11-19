@@ -122,7 +122,7 @@ document.addEventListener("click",function(e){
   else if(a==="riapri")gpScrivi(id,{stato:"da_controllare",esito_nota:null,controllato_da:null,controllato_il:null},"Riportato da controllare").then(ok=>{if(ok)gpDisegna();});
   else if(a==="elimina"){
     if(b.dataset.sicuro!=="1"){b.dataset.sicuro="1";b.textContent="Sicuro? Premi ancora";return;}
-    gpScrivi(id,{eliminato_il:new Date().toISOString()},"Eliminato").then(ok=>{if(ok)gpDisegna();});
+    gpScrivi(id,{eliminato_il:new Date().toISOString()},"Messo nel cestino: lo riprendi da lì").then(ok=>{if(ok){gpDisegna();try{if(typeof _cestRicontaPallino==="function")_cestRicontaPallino();}catch(_){}}});
   }
 });
 

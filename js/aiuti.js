@@ -45,7 +45,7 @@
     computi:      'Il computo metrico: le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri.',
     prezzario:    'Le voci di prezzo che usi sempre, scritte una volta sola. Nel computo le ritrovi cercando una parola ed entrano già fatte, col loro prezzo.',
     crediti:      'I CFP che devi fare ogni anno per restare iscritto all’albo. Segni i corsi mano a mano che li fai e vedi quanti te ne mancano.',
-    cestino:      'Tutto quello che elimini passa di qui e resta a disposizione: finché è nel cestino non è perso. Clicca una riga per rimetterla a posto.',
+    cestino:      'Tutto quello che elimini passa di qui e resta a disposizione: finché è nel cestino non è perso. Premi «Rimetti a posto» per riaverlo.',
 
     /* ⚠️ 11 agosto 2026 — QUESTA VOCE NON SONO LE RICHIESTE DEI CLIENTI.
        Diceva «Le richieste di preventivo che arrivano dai clienti di
