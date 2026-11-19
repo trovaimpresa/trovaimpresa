@@ -174,8 +174,16 @@ exports.handler = async function (event) {
 
     if (action === 'delete_conv') {
       if (!user_id) return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'user_id mancante.' }) };
+      // 19 nov 2026 (collaudo Assistenza) — prima si cancellavano i messaggi
+      // e le foto allegate restavano nel deposito «supporto-allegati» per
+      // sempre, senza piu' nessuna riga che le nominasse. Adesso vanno via
+      // insieme. Se il deposito non risponde, i messaggi si cancellano lo stesso.
+      const { data: conAll } = await sb.from('supporto_messaggi')
+        .select('allegato').eq('user_id', user_id).not('allegato', 'is', null);
       const { error } = await sb.from('supporto_messaggi').delete().eq('user_id', user_id);
       if (error) throw error;
+      const file = (conAll || []).map(r => r.allegato).filter(Boolean);
+      if (file.length) { try { await sb.storage.from('supporto-allegati').remove(file); } catch (e) {} }
       return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
     }
 

@@ -876,10 +876,10 @@
     if(x.tab==="gest_mestieri"||daTirareSu.some(function(d){return d.pa.tab==="gest_mestieri";}))renderLanding();
     /* 19 nov 2026 — il lavoro o il cliente tornati su insieme NON «ci stavano
        dentro»: si dicono per nome; le cose dentro si contano a parte */
-    const _insieme=daTirareSu.map(function(d){return "il "+d.pa.lab;});
+    const _insieme=daTirareSu.map(function(d){return "al "+d.pa.lab;});
     const _dentro=extra-daTirareSu.length;
     toast("Rimesso a posto ✔"
-      +(_insieme.length?" — insieme a "+_insieme.join(" e "):"")
+      +(_insieme.length?" — insieme "+_insieme.join(" e "):"")
       +(_dentro===1?(_insieme.length?" e a 1 cosa che ci stava dentro":" — e con lui anche 1 cosa che ci stava dentro")
        :_dentro>1?(_insieme.length?" e a "+_dentro+" cose che ci stavano dentro":" — e con lui anche altre "+_dentro+" cose che ci stavano dentro"):"")
       +_avvisoAccesso);

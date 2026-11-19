@@ -3803,3 +3803,20 @@ Difetti trovati e sistemati:
 9. «Le fatture già emesse restano nel cestino» compariva anche svuotando solo voci del prezzario: ora solo se ci sono fatture. «Se ne vanno anche loro» con una cosa sola → «Se ne va anche quella». Il messaggio dopo «Rimetti a posto» non dice più che il lavoro «ci stava dentro» la foto.
 
 Provato PRIMA del push sulla pagina vera rimettendo le funzioni (`(0,eval)(String(fn).replace(…))`) e cambiando `CEST_COSE`/`CEST_PADRE` sul posto (sono const, ma si possono modificare dentro). Banco `tools/banco-gestionale.js app`: ZERO difetti. ⬜ Non provati: lo studio tecnico (i nomi «Strumenti» / «Rapportino» restano quelli di prima), un reparto intero nel Cestino (non si butta il reparto di Alex).
+Pubblicato (→d1758790←, Netlify riuscito) e riprovato sul sito vero a 1440 e 375: tutto ✔. Dal test dopo il push: il messaggio diceva «insieme a il lavoro» → ora «insieme al lavoro» (va col push dopo).
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: CHIEDI UNA FUNZIONE + ASSISTENZA DIRETTA (impresa e artigiano)
+
+Provato dal vivo (1440 e 375) con «PROVA CONTROLLORE»: richiesta mandata (le 2 email partite e consegnate, viste su Resend), risposta finta dal database (stato + testo), numerino, elenco; messaggio in Assistenza con foto, risposta finta, numerino in →5← secondi (collegamento vivo), segnato letto all'apertura; esempi, casella vuota, senza rete. Poi cancellato tutto.
+
+Codice: `js/gest-richieste-chat.js` (`renderRichieste`, `salvaRichiesta`, `contaRichiesteNuove`, `renderAssistenza`, `asstInvia`), copia del Noleggio in `js/nol-supporto.js`, email in `netlify/functions/richiesta-funzione.js` e `supporto-avviso.js`, pannello admin in `admin.html` + `netlify/functions/admin-supporto.js`.
+
+Difetti trovati e sistemati:
+1. Toccando un esempio («Mi servirebbe poter…») e premendo subito «Manda» partiva la frase a metà. Ora «Finisci la frase: scrivi cosa ti serve».
+2. Il numerino di «Chiedi una funzione» si accendeva solo con una RISPOSTA scritta: «Fatta ✔» o «Per ora non la facciamo» senza testo restavano invisibili. Ora conta la «firma» stato+risposta (chiave `ti_risposte_viste_v2`; le viste della v1 valgono come già viste). Stessa cosa nel Noleggio (`js/nol-supporto.js`).
+3. «e un'altra quando la richiesta è fatta»: l'email parte anche per «Ci stiamo lavorando», «non la facciamo» e per ogni risposta → «e un'altra ogni volta che ti rispondo».
+4. Senza rete l'Assistenza diceva «Non mandato: TypeError: Failed to fetch» (inglese, in verde). In `js/gest-base.js` (`toast`) «non mandat» e «allegato non» sono errori: rosso e tradotto. Nel Noleggio tradotto in `nol-supporto.js`.
+5. ⛔ Pannello admin, «Elimina conversazione» (`delete_conv`): cancellava i messaggi ma le foto allegate restavano nel deposito `supporto-allegati` per sempre. Ora vanno via insieme. ⚠️ Il deposito NON si pulisce dal browser dell'impresa né da SQL (`storage.protect_delete`): serve la chiave del server.
+
+⚠️ Rimasto: →1← file di prova da →70← byte in `supporto-allegati` (`1119cf1e…/1795094826025-prova-controllore.png`): il messaggio è cancellato ma il file non si toglie senza la chiave del server.
+Banco `tools/banco-gestionale.js app`: ZERO difetti.

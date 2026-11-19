@@ -280,7 +280,9 @@
      o una conferma (verde). Prima tutto spariva in 1,9 secondi. */
   function toast(m){
     const t=$("#toast"), s=String(m);
-    const isErr=/^(errore|non salvat|non eliminat|non rimoss|nota non|attenzione|le vecchie voci)/i.test(s)||/manca la migrazione/i.test(s);
+    /* 19 nov 2026 (collaudo Assistenza) — «Non mandato: TypeError: Failed to fetch»
+       usciva in inglese e verde: «non mandat» e «allegato non» sono errori */
+    const isErr=/^(errore|non salvat|non eliminat|non rimoss|nota non|attenzione|le vecchie voci|non mandat|allegato non)/i.test(s)||/manca la migrazione/i.test(s);
     const isOk=/[✔✅📌]/.test(s);
     t.textContent=_msgPro(isErr?traduciErrore(s):s);
     t.classList.remove("ok","err");

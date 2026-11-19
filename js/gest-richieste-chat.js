@@ -414,6 +414,10 @@
     const ta=$("#rq-testo");
     const testo=(ta?ta.value:"").trim();
     if(testo.length<5){toast("Scrivi cosa ti serve, anche poche parole");return;}
+    /* 19 nov 2026 (collaudo) — toccando un esempio e premendo subito «Manda»
+       partiva «Mi servirebbe poter» da solo: a me arrivava una richiesta vuota */
+    if(Array.prototype.some.call(document.querySelectorAll("[data-rq-es]"),function(b){return testo.replace(/[….\s]+$/,"")===String(b.dataset.rqEs||"").trim();})){
+      toast("Finisci la frase: scrivi cosa ti serve");if(ta)ta.focus();return;}
     if(testo.length>2000){toast("Troppo lungo: massimo 2000 caratteri");return;}
     let email="";
     try{const {data:{user}}=await sb.auth.getUser();email=(user&&user.email)||"";}catch(e){}
@@ -448,16 +452,32 @@
      computer, il numerino ricompare una volta. Meglio un numero in piu' che
      una risposta non letta.
      ============================================================ */
-  const RQ_VISTE="ti_risposte_viste_v1";
-  function _rqViste(){
-    try{return JSON.parse(localStorage.getItem(RQ_VISTE)||"[]");}catch(e){return [];}
+  /* 19 nov 2026 (collaudo) — prima contava solo le RISPOSTE scritte: se
+     dal pannello admin la richiesta passava a «Fatta ✔» o «Per ora non la
+     facciamo» senza testo, il numerino restava spento. Adesso si ricorda
+     la «firma» di ogni richiesta (stato + risposta): se cambia, e' nuova.
+     Le viste della versione 1 (solo numeri) valgono come gia' viste. */
+  const RQ_VISTE="ti_risposte_viste_v2", RQ_VISTE_V1="ti_risposte_viste_v1";
+  function _rqFirma(r){return String(r.id)+"|"+String(r.stato||"ricevuta")+"|"+String(r.risposta||"").trim();}
+  function _rqConta(r){return String(r.risposta||"").trim()!==""||(r.stato&&r.stato!=="ricevuta");}
+  function _rqViste(data){
+    try{
+      const v2=localStorage.getItem(RQ_VISTE);
+      if(v2!=null)return JSON.parse(v2||"[]");
+      const v1=JSON.parse(localStorage.getItem(RQ_VISTE_V1)||"[]").map(String);
+      if(data&&v1.length){
+        const f=data.filter(r=>v1.indexOf(String(r.id))>=0).map(_rqFirma);
+        localStorage.setItem(RQ_VISTE,JSON.stringify(f));return f;
+      }
+    }catch(e){}
+    return [];
   }
   function _rqSegnaViste(){
     if(!sb||!sbUid)return;
-    sb.from("gest_richieste").select("id,risposta").eq("user_id",sbUid)
+    sb.from("gest_richieste").select("id,stato,risposta").eq("user_id",sbUid)
       .then(({data,error})=>{
         if(error||!data)return;
-        const con=data.filter(r=>String(r.risposta||"").trim()!=="").map(r=>String(r.id));
+        const con=data.filter(_rqConta).map(_rqFirma);
         try{localStorage.setItem(RQ_VISTE,JSON.stringify(con));}catch(e){}
         setCnt("#cnt-richieste",0);
       });
@@ -466,12 +486,12 @@
     if(!sb||!sbUid){setCnt("#cnt-richieste",0);return;}
     try{
       const {data,error}=await sb.from("gest_richieste")
-        .select("id,risposta").eq("user_id",sbUid);
+        .select("id,stato,risposta").eq("user_id",sbUid);
       /* se la lettura non riesce NON si scrive zero: uno zero falso dice
          "non hai risposte" ed e' la bugia peggiore proprio qui */
       if(error||!data)return;
-      const viste=_rqViste();
-      const n=data.filter(r=>String(r.risposta||"").trim()!=="" && viste.indexOf(String(r.id))<0).length;
+      const viste=_rqViste(data);
+      const n=data.filter(r=>_rqConta(r) && viste.indexOf(_rqFirma(r))<0).length;
       setCnt("#cnt-richieste",n,"attesa");
       _pallinoMenu();
     }catch(e){}

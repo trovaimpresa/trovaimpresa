@@ -13,7 +13,21 @@
     fatta:{lab:"Fatta ✔",bg:"#e6f6ec",fg:"#1b8a3f"},
     non_faremo:{lab:"Per ora non la facciamo",bg:"#fdecea",fg:"#b3261e"}
   };
-  const SUP_VISTE="ti_risposte_viste_v1";   /* la stessa chiave del gestionale principale */
+  /* 19 nov 2026 — come nel gestionale principale (js/gest-richieste-chat.js):
+     la «firma» stato+risposta, cosi' il numerino si accende anche quando la
+     richiesta passa a «Fatta ✔» senza testo. Stessa chiave v2. */
+  const SUP_VISTE="ti_risposte_viste_v2", SUP_VISTE_V1="ti_risposte_viste_v1";
+  function _supFirma(r){return String(r.id)+"|"+String(r.stato||"ricevuta")+"|"+String(r.risposta||"").trim();}
+  function _supConta(r){return String(r.risposta||"").trim()!==""||(r.stato&&r.stato!=="ricevuta");}
+  function _supViste(data){
+    try{
+      const v2=localStorage.getItem(SUP_VISTE);
+      if(v2!=null)return JSON.parse(v2||"[]");
+      const v1=JSON.parse(localStorage.getItem(SUP_VISTE_V1)||"[]").map(String);
+      if(data&&v1.length){const f=data.filter(r=>v1.indexOf(String(r.id))>=0).map(_supFirma);localStorage.setItem(SUP_VISTE,JSON.stringify(f));return f;}
+    }catch(e){}
+    return [];
+  }
   let supCache=[], supInvio=false, supFile=null, supCanale=null;
   const _supUrl={};
   function supCnt(sel,n){const e=$(sel);if(e)e.textContent=n>0?String(n):"";}
@@ -30,7 +44,7 @@
       else lista.innerHTML='<div class="gal-intro" style="margin-top:22px">Non riesco a leggere le tue richieste: controlla la connessione e riprova.</div>';
       return;}
     const R=data||[];
-    try{localStorage.setItem(SUP_VISTE,JSON.stringify(R.filter(r=>String(r.risposta||"").trim()).map(r=>String(r.id))));}catch(e){}
+    try{localStorage.setItem(SUP_VISTE,JSON.stringify(R.filter(_supConta).map(_supFirma)));}catch(e){}
     supCnt("#cnt-richieste",0);
     if(!R.length){lista.innerHTML='<div class="gal-intro" style="margin-top:22px">Qui sotto compariranno le cose che ci hai chiesto, con lo stato di ognuna.</div>';return;}
     const fmt=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"";
@@ -62,10 +76,10 @@
   }
   async function supContaRisposte(){
     if(!sb||!sbUid)return;
-    const {data,error}=await sb.from("gest_richieste").select("id,risposta").eq("user_id",sbUid);
+    const {data,error}=await sb.from("gest_richieste").select("id,stato,risposta").eq("user_id",sbUid);
     if(error||!data)return;       /* se non legge non scrive zero: uno zero falso e' una bugia */
-    let viste=[];try{viste=JSON.parse(localStorage.getItem(SUP_VISTE)||"[]");}catch(e){}
-    supCnt("#cnt-richieste",data.filter(r=>String(r.risposta||"").trim()&&viste.indexOf(String(r.id))<0).length);
+    const viste=_supViste(data);
+    supCnt("#cnt-richieste",data.filter(r=>_supConta(r)&&viste.indexOf(_supFirma(r))<0).length);
   }
 
   function _supOra(d){try{return new Date(d).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});}catch(e){return "";}}
@@ -168,7 +182,8 @@
       delete riga.origine;({data,error}=await sb.from("supporto_messaggi").insert(riga).select("id"));
     }
     supInvio=false;
-    if(error){toast("Non mandato: "+(error.message||"errore"));return;}
+    /* 19 nov 2026 — come nel gestionale: niente inglese tecnico senza rete */
+    if(error){toast("Non mandato: "+(/Failed to fetch|NetworkError|network error|fetch failed|Load failed/i.test(error.message||"")?"la connessione non risponde. Controlla la rete e riprova":(error.message||"errore")));return;}
     if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}
     if(ta)ta.value="";
     supTogliFile();
