@@ -6282,11 +6282,11 @@ async function caricaRichieste() {
       + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px;font-weight:600">' + esc(r.testo || '') + '</div>'
       + '<textarea class="rqa-risp" id="rqa-t-' + r.id + '" rows="2" placeholder="Scrivi la risposta che vedrà nel gestionale (e per email)">' + esc(r.risposta || '') + '</textarea>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'
-      +   bott(r, 'in_lavorazione', 'Ci sto lavorando') + bott(r, 'fatta', 'Fatta') + bott(r, 'non_faremo', 'Non la facciamo')
-      +   '<button class="u-btn rqa-salva" onclick="rispondiRichiesta(' + r.id + ')">Salva la risposta</button>'
+      +   bott(r, 'in_lavorazione', 'Ci sto lavorando · invia ✉️') + bott(r, 'fatta', 'Fatta · invia ✉️') + bott(r, 'non_faremo', 'Non la facciamo · invia ✉️')
+      +   '<button class="u-btn rqa-salva" onclick="rispondiRichiesta(' + r.id + ')">Salva e invia la risposta ✉️</button>'
       +   '<button class="u-btn" style="margin-left:auto;color:#c62828;border-color:#e57373" onclick="eliminaRichiesta(' + r.id + ')">Elimina</button>'
       + '</div>'
-      + '<div class="rqa-nota">Quando cambi lo stato o salvi una risposta, all\'impresa arriva un\'email.</div>'
+      + '<div class="rqa-nota">Ogni pulsante con ✉️ salva e manda subito la risposta all\'impresa: la vede nel suo gestionale e le arriva per email.</div>'
       + '</div>';
   }).join('');
 }
