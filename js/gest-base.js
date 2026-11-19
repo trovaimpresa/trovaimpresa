@@ -209,7 +209,12 @@
   const statoLabel={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto"};
   /* Lavoro in ritardo: data prevista già passata e non ancora fatto.
      Il rosso (--err) è riservato SOLO a questo caso; il "da fare" normale è ambra (--attesa). */
-  const inRitardo=(stato,data)=>!!data&&stato!=="fatto"&&data<todayStr();
+  /* 19 nov 2026 (studio tecnico) — una pratica DEPOSITATA o IN ISTRUTTORIA
+     aspetta il Comune: non e' in ritardo lo studio. Il terzo valore e' lo
+     stato della pratica (gest_lavori.pratica_stato); per impresa e artigiano
+     e' vuoto e non cambia niente. */
+  const _alComune=ps=>ps==="depositata"||ps==="istruttoria";
+  const inRitardo=(stato,data,ps)=>!!data&&stato!=="fatto"&&data<todayStr()&&!_alComune(ps);
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
   const db=()=>state[cur];

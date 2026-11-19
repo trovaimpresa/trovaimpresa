@@ -366,6 +366,10 @@
     /* conteggi per vista: sulla lista intera, non su quella cercata */
     const conta={};LAV_VISTE.forEach(v=>conta[v.k]=lavFiltra(TUTTI,v.k,oggi).length);
     let L=lavFiltra(TUTTI,filter.vista,oggi);
+    /* 19 nov 2026 (sì di Alex) — studio tecnico: filtro per «A che punto sta» */
+    if(ruoloUtente==='professionista'&&filter.pstato){
+      L=L.filter(l=>(l.pratica_stato||"da_preparare")===filter.pstato);
+    }
     if(filter.q){
       const q=filter.q.toLowerCase();
       L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)
@@ -395,8 +399,8 @@
         : [{lab:"Lavoro",w:"36%"},{lab:"Cliente",w:"24%",cls:"c-cli"},{lab:"Quando",w:"17%"},
            {lab:"Chi",w:"10%",cls:"c-chi"},{lab:"Importo",w:"13%",cls:"c-imp"}],
       righe:L.map(l=>{
-        const q=quando(l.data_prevista,{neutro:l.stato==="fatto"});
-        const late=inRitardo(l.stato,l.data_prevista);
+        const q=quando(l.data_prevista,{neutro:l.stato==="fatto"||_alComune(l.pratica_stato)});
+        const late=inRitardo(l.stato,l.data_prevista,l.pratica_stato);
         const _staPra=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
         return {
           id:l.id,
@@ -418,6 +422,22 @@
          se no il totale in cima non si capisce da dove viene */
       cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",true,"lav","",cliVista[l.cliente_id]||"")).join("")
     });
+    lavPstati(_praPro?lavFiltra(TUTTI,filter.vista,oggi):null);
+  }
+  /* 19 nov 2026 (sì di Alex) — la riga «A che punto sta» sotto i filtri delle
+     Pratiche: Da preparare · Depositata · In istruttoria · Integrazioni… col
+     numero. Conta le pratiche del filtro di sopra (Tutte, Prossime…). Esce
+     solo allo studio e solo se c'e' almeno una pratica. */
+  function lavPstati(base){
+    const viste=$("#lav-viste"); if(!viste)return;
+    let box=$("#lav-pstati");
+    if(!base||!base.length&&!filter.pstato){ if(box)box.remove(); return; }
+    if(!box){ box=document.createElement("div"); box.id="lav-pstati"; box.className="lav-pstati"; viste.insertAdjacentElement("afterend",box); }
+    const conta={}; base.forEach(l=>{const k=l.pratica_stato||"da_preparare";conta[k]=(conta[k]||0)+1;});
+    const btn=(k,lab,n)=>`<button class="vista${(filter.pstato||"")===k?" on":""}" data-action="lav-pstato" data-v="${k}">${esc(lab)}${n?`<span class="v-cnt${k==="integrazioni"?" err":""}">${n}</span>`:""}</button>`;
+    box.innerHTML='<span class="lav-pstati-t">A che punto sta</span>'
+      +btn("","Tutte",0)
+      +PRATICA_STATI.filter(st=>conta[st[0]]||filter.pstato===st[0]).map(st=>btn(st[0],st[1],conta[st[0]]||0)).join("");
   }
 
   /* ⚠️ i due conti qui sotto NON sono riscritti: chiamano lavFiltra, la
@@ -624,7 +644,7 @@
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     let _calKo=false;   /* 12 nov 2026 — regola 20 */
-    if(sb&&sbUid){const {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];_calKo=!!_eCal;}
+    if(sb&&sbUid){const {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];_calKo=!!_eCal;}
     else calJobs=[];
     /* ===== 12 agosto 2026 — LE SCADENZE SUL CALENDARIO =====
        Il calendario leggeva UNA tabella sola: i lavori. Le scadenze — DURC,
@@ -892,7 +912,7 @@
   function openDay(ds){
     const jobs=calJobs.filter(l=>l.data_prevista===ds);
     const list=jobs.length?jobs.map(j=>{
-      const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds);
+      const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds,j.pratica_stato);
       const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
       /* 17 nov 2026 — pallino rosso e scritta «Da fare»: adesso dice «In ritardo», come in Lavori e nella legenda */
       const lab=sf?'Fatto':(late?'In ritardo':(inCorso?'In corso':'Da fare'));

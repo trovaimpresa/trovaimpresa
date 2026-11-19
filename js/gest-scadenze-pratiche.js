@@ -1032,7 +1032,10 @@
            Scriverlo un'altra volta qui era un ramo che non faceva niente —
            l'ha trovato un sabotaggio che nessun banco poteva accusare. */
         +'<span class="lsc-q '+(fatta?'':q.classe)+'">'
-        +  (fatta?'fatta':(rit?'scaduta '+q.testo:q.testo))+'</span>'
+        +  (fatta?'fatta':(rit?'scaduta '+q.testo:q.testo))
+        +  ((x.data_scadenza&&!/^\d/.test(q.testo||''))?'<small class="lsc-d">'+esc(fdate(x.data_scadenza))+'</small>':'')+'</span>'   /* la data solo se «fra 12 giorni»: «10 gen» la dice gia' */
+        /* 19 nov 2026 (sì di Alex) — la scadenza si apre da qui; chiusa, si torna nella pratica */
+        +'<button type="button" class="btn lsc-apri" data-action="scad-da-pratica-apri" data-id="'+esc(String(x.id))+'" data-lav="'+esc(String(lav))+'">Apri</button>'
         +'</div>';
     }).join("");
     box.innerHTML='<div class="lm-conta">'+testa+'</div>'

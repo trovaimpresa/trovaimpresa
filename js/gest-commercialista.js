@@ -206,7 +206,7 @@
     const box=$("#cli-storia"); if(!box||!sb||!sbUid)return;
     try{
       const [rl,rp,rf]=await Promise.all([
-        sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,importo").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
+        sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,importo,pratica_stato").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
         sb.from("gest_preventivi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
         sb.from("gest_fatture").select("id,numero,anno,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30)
       ]);
@@ -223,7 +223,7 @@
         +'<span class="cs-t">'+esc(t)+'<small>'+esc(sotto)+'</small></span><span class="cs-v">'+v+'</span></button>';
       const gruppo=(tit,arr)=>arr.length?'<div class="cs-gr">'+tit+' ('+arr.length+')</div>'+arr.join(""):"";
       const html=
-        gruppo("Lavori",L.map(l=>riga("lav",l.id,l.descrizione||"Lavoro",((typeof inRitardo==="function"&&inRitardo(l.stato,l.data_prevista))?"In ritardo":(STL[l.stato]||l.stato||""))+" · "+fdate(l.data_prevista),+l.importo?eur2(+l.importo):"")))
+        gruppo("Lavori",L.map(l=>riga("lav",l.id,l.descrizione||"Lavoro",((typeof inRitardo==="function"&&inRitardo(l.stato,l.data_prevista,l.pratica_stato))?"In ritardo":(STL[l.stato]||l.stato||""))+" · "+fdate(l.data_prevista),+l.importo?eur2(+l.importo):"")))
        +gruppo("Preventivi",P.map(p=>{const t=totP[p.id];return riga("prev",p.id,"N. "+(p.numero||"—")+" — "+(p.titolo||""),(STL[p.stato]||p.stato||"")+" · "+fdate(p.data),t?eur2(+t.imponibile||0)+' <small>IVA esclusa</small>':"");}))
        +gruppo("Fatture",F.map(f=>{const t=totF[f.id];return riga("fatt",f.id,f.numero?("Fattura n. "+f.numero+"/"+(f.anno||"")):"Fattura in bozza",(STL[f.stato]||f.stato||"")+" · "+fdate(f.data),t?eur2(+t.totale||0):"");}));
       box.innerHTML='<div class="sh-tit">I suoi lavori, preventivi e fatture</div>'

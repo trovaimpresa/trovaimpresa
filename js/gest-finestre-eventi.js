@@ -291,6 +291,7 @@
     if(a==="report-csv")return reportCsv();
     if(a==="report-pdf")return reportPdf();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
+    if(a==="lav-pstato"){filter.pstato=t.dataset.v||"";renderJobs();return;}   /* 19 nov 2026: studio, «A che punto sta» */
     /* un solo menu "..." per tutte le sezioni: le voci le ha già preparate
        renderTabella, qui si legge solo il registro. */
     if(a==="tab-menu"){
@@ -891,6 +892,20 @@
       const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
       await scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
       if(document.querySelector("#sheet #s-tit")&&$("#overlay").classList.contains("open"))_tornaAlLavoro=lavId;
+      return;
+    }
+    /* 19 nov 2026 (sì di Alex) — «Apri» su una scadenza dentro la pratica/lavoro:
+       si apre la scadenza e, chiusa, si torna nella pratica (_tornaAlLavoro). */
+    if(a==="scad-da-pratica-apri"){
+      let _cambiato=true;
+      try{_cambiato=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
+      if(_cambiato&&!(await gconfirm("Apro la scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      const lavId=t.dataset.lav;
+      const {data:s1,error:e1}=await sb.from("gest_scadenze").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(e1){toast("Non riesco ad aprire la scadenza: "+e1.message);return;}
+      if(!s1){toast("Questa scadenza non c'è più");if(typeof renderLavScadenze==="function")renderLavScadenze();return;}
+      await scadForm(s1);
+      if(lavId&&document.querySelector("#sheet #s-tit")&&$("#overlay").classList.contains("open"))_tornaAlLavoro=lavId;
       return;
     }
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}

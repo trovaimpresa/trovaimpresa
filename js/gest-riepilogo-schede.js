@@ -139,7 +139,7 @@
     }catch(_){}})();
     try{
       const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc},{data:ff}]=await Promise.all([
-        sb.from("gest_lavori").select("stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_lavori").select("stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_preventivi").select("stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi").select("id,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,scadute,prossima_data").eq("user_id",sbUid),
@@ -148,7 +148,7 @@
       ]);
       /* Lavori: aperti (da fare o in corso). Rosso se almeno uno è in ritardo. */
       const aperti=(lav||[]).filter(l=>l.stato!=="fatto");
-      setCnt("#cnt-lavori",aperti.length,aperti.some(l=>inRitardo(l.stato,l.data_prevista))?"err":"attesa");
+      setCnt("#cnt-lavori",aperti.length,aperti.some(l=>inRitardo(l.stato,l.data_prevista,l.pratica_stato))?"err":"attesa");
       /* Preventivi: in attesa di risposta. */
       setCnt("#cnt-preventivi",(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato").length,"attesa");
       /* Mezzi e Attrezzature: la vista gest_mezzi_scadenze non ha mestiere_id,
@@ -418,18 +418,20 @@
   }
   function jobCardSupa(l,withFoto,opTel,conImp,menuTab,opNome,cliNome){
     const fatto=l.stato==="fatto", dove=l.dove||"";
-    const late=inRitardo(l.stato,l.data_prevista);
+    const late=inRitardo(l.stato,l.data_prevista,l.pratica_stato);
     /* 7 nov 2026 — collaudo della semplicita': il pallino rosso diceva «Da fare».
        Il colore sta solo dove c'e' anche la parola: rosso = «In ritardo»,
        blu = «In corso», ambra = «Da fare», verde = «Fatto». */
-    const lavLab=fatto?"Fatto":(late?"In ritardo":(l.stato==="in_corso"?"In corso":"Da fare"));
+    /* 19 nov 2026: la pratica che aspetta il Comune non e' «Da fare»: «Al Comune», pallino blu */
+    const alC=!fatto&&_alComune(l.pratica_stato);
+    const lavLab=fatto?"Fatto":(late?"In ritardo":(alC?"Al Comune":(l.stato==="in_corso"?"In corso":"Da fare")));
     const dp=esc(l.data_prevista||"");
     const dots=menuTab?`<span class="job-menu"><button class="lav-dots" data-action="tab-menu" data-tab="${menuTab}" data-id="${esc(String(l.id))}" title="Altre azioni">&#8943;</button></span>`:"";
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div>
         ${conImp&&+l.importo?`<span class="job-imp">${eur(l.importo)}</span>`:""}</div>
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':(l.stato==="in_corso"?'blu':'rosso'))}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
+        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':((alC||l.stato==="in_corso")?'blu':'rosso'))}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
         ${cliNome?`<span>👤 ${esc(cliNome)}</span>`:""}
@@ -599,9 +601,10 @@
   function lavFiltra(L,v,oggi){
     const aperto=l=>l.stato!=="fatto";
     if(v==="tutti")    return L.slice();
-    if(v==="ritardo")  return L.filter(l=>aperto(l)&&!!l.data_prevista&&l.data_prevista<oggi);
+    if(v==="ritardo")  return L.filter(l=>aperto(l)&&!!l.data_prevista&&l.data_prevista<oggi&&!_alComune(l.pratica_stato));
     if(v==="oggi")     return L.filter(l=>aperto(l)&&l.data_prevista===oggi);
-    if(v==="prossimi") return L.filter(l=>aperto(l)&&(!l.data_prevista||l.data_prevista>oggi));
+    /* 19 nov 2026: la pratica che aspetta il Comune con la data passata sta qui (non e' in ritardo) */
+    if(v==="prossimi") return L.filter(l=>aperto(l)&&(!l.data_prevista||l.data_prevista>oggi||(l.data_prevista<oggi&&_alComune(l.pratica_stato))));
     if(v==="incassare")return L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")!=="pagata");   /* lo stato lo scrive la fattura quando viene emessa */
     if(v==="archivio") return L.filter(l=>l.stato==="fatto");
     return L;

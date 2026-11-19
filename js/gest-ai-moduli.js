@@ -48,7 +48,8 @@
 
   function _aiStrisciaDisegna(){
     /* 1 nov 2026: il numero accanto a «Ricarica crediti» nel menu */
-    try{ const c=document.getElementById("cnt-crediti"); if(c&&_aiStato) c.textContent=String(Number(_aiStato.remaining||0)); }catch(e){}
+    /* 19 nov 2026: il fondatore non ha limite (get_ai_status manda fondatore:true) */
+    try{ const c=document.getElementById("cnt-crediti"); if(c&&_aiStato) c.textContent=_aiStato.fondatore?"∞":String(Number(_aiStato.remaining||0)); }catch(e){}
     const box=$("#ai-striscia"), st=_aiStato; if(!box||!st)return;
     const txt=$("#ai-str-txt"), cta=$("#ai-str-cta"), piu=$("#ai-str-piu"), giu=$("#ai-str-giu");
     if(!txt||!cta||!piu||!giu)return;
@@ -69,7 +70,11 @@
     box.classList.toggle("ai-str--spenta", !attiva);
     box.classList.toggle("ai-str--pochi", pochi);
 
-    if(attiva){
+    if(attiva&&st.fondatore){
+      txt.innerHTML = "<b>Crediti senza limite</b> (fondatore)";
+      cta.textContent = "Ricarica";
+      cta.href = "/ricarica-crediti.html";
+    }else if(attiva){
       txt.innerHTML = "<b>"+_aiCrediti(rest)+"</b> da usare"
         + (pochi ? " — stanno finendo" : "");
       cta.textContent = "Ricarica";
@@ -298,6 +303,21 @@
     })();
   }
 
+  /* 19 nov 2026 (voce Pratiche) — la tendina ha quel nome? false = l'elenco
+     e' gia' pieno e il nome non c'e' (es. il cliente non e' in rubrica): prima
+     il messaggio diceva «ho riempito Cliente» e la tendina restava vuota.
+     null = l'elenco non e' ancora arrivato: non si sa, si prova lo stesso. */
+  function _aiTendinaHa(sel,nome){
+    if(!sel||!nome) return false;
+    const vere=[].filter.call(sel.options,o=>o.value);
+    if(!vere.length) return null;
+    const cerca=_aiNorm(nome);
+    return vere.some(o=>_aiNorm(o.textContent)===cerca);
+  }
+  function _aiNonTrovati(lista){
+    if(!lista||!lista.length) return "";
+    return " Non trovo "+lista.join(", ")+" nel tuo elenco: sceglilo tu o aggiungilo.";
+  }
   /* 7 nov 2026 — le caselle della pratica: le riempie la macchina di
      js/ai-integrazione.js (AI.riempiPratica), qui si illuminano */
   function aiPraticaCaselle(d,messi,soloVuote){
@@ -381,7 +401,7 @@
         const _aiCli = tipo==='cliente' && window.AI && typeof window.AI.cliente==="function";
         const d=pratica ? await window.AI.pratica(testo,null) : (_aiCli ? await window.AI.cliente(testo) : await window.AI.dati(m.feature,testo));
         if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
-        const messi=[];
+        const messi=[], nonTrovati=[];
         m.campi.forEach(c=>{
           const v=d[c.da];
           if(v===undefined||v===null||String(v).trim()==="") return;
@@ -389,7 +409,8 @@
           if(!el) return;
           if(c.tendina){
             _aiTendina(el,v,3000,()=>_aiIllumina(el));
-            messi.push(c.nome);
+            if(_aiTendinaHa(el,v)===false) nonTrovati.push(c.nome.toLowerCase()+" «"+String(v).trim()+"»");
+            else messi.push(c.nome);
           }else{
             el.value=String(v);
             el.dispatchEvent(new Event("input",{bubbles:true}));
@@ -409,6 +430,7 @@
           st.className="ai-riga-st ai-riga-st--ok";
           st.textContent="Ho riempito "+messi.length+(messi.length===1?" casella: ":" caselle: ")
             + messi.join(", ") + ". Controlla e correggi quello che serve, poi salva tu."
+            + _aiNonTrovati(nonTrovati)
             + ((pratica&&d&&d.nota)?" — "+d.nota:"");
         }
       }catch(e){
@@ -438,20 +460,23 @@
               st.className="ai-riga-st ai-riga-st--err";
               st.textContent="Questo documento non riesco a leggerlo bene. Prova con una foto più dritta e con più luce.";
             }else{
-              const messi=[];
+              const messi=[], nonTrovati=[];
               m.campi.forEach(c=>{
                 const v=d[c.da]; if(v===undefined||v===null||String(v).trim()==="") return;
                 const el=document.getElementById(c.id); if(!el) return;
                 if(el.value&&String(el.value).trim()!==""&&c.id!=="j-data") return;   /* quello che hai scritto tu non si tocca */
-                if(c.tendina){ _aiTendina(el,v,3000,()=>_aiIllumina(el)); }
+                if(c.tendina){
+                  _aiTendina(el,v,3000,()=>_aiIllumina(el));
+                  if(_aiTendinaHa(el,v)===false){ nonTrovati.push(c.nome.toLowerCase()+" «"+String(v).trim()+"»"); return; }
+                }
                 else { el.value=String(v); el.dispatchEvent(new Event("input",{bubbles:true})); _aiIllumina(el); }
                 messi.push(c.nome);
               });
               aiPraticaCaselle(d,messi,true);   /* 19 nov 2026: quello che hai scritto tu non si tocca */
               st.className="ai-riga-st "+(messi.length?"ai-riga-st--ok":"ai-riga-st--err");
               st.textContent=messi.length
-                ? "Dal documento ho riempito: "+messi.join(", ")+". Controlla, poi salva tu."+(d.nota?" — "+d.nota:"")
-                : "Nel documento non ho trovato dati della pratica.";
+                ? "Dal documento ho riempito: "+messi.join(", ")+". Controlla, poi salva tu."+_aiNonTrovati(nonTrovati)+(d.nota?" — "+d.nota:"")
+                : "Nel documento non ho trovato dati della pratica."+_aiNonTrovati(nonTrovati);
             }
           }
         }catch(e){

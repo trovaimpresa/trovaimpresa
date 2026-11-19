@@ -722,7 +722,7 @@
                {lab:"Stato",w:"12%"},{lab:"Importo",w:"12%",cls:"c-imp"}],
       righe:L.map(l=>{
         const fatto=l.stato==="fatto";
-        const late=inRitardo(l.stato,l.data_prevista);
+        const late=inRitardo(l.stato,l.data_prevista,l.pratica_stato);
         const q=quando(l.data_prevista,{neutro:fatto});
         const st=late?{c:"ritardo",l:"In ritardo"}:fatto?{c:"fatto",l:"Fatto"}
                 :l.stato==="in_corso"?{c:"in_corso",l:"In corso"}:{c:"da_fare",l:"Da fare"};

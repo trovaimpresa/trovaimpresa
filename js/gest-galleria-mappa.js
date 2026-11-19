@@ -592,7 +592,7 @@
          adesso si parlano. Se le colonne nuove mancassero, si legge come prima. */
       let _rOp=null;
       try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);}catch(e){}
-      let _rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id,dove_lat,dove_lon,dove_km,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      let _rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id,dove_lat,dove_lon,dove_km,dove_geo,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if(_rL.error&&/dove_|column/i.test(_rL.error.message||""))_rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       const mpOp={};
       try{const ro=_rOp?await _rOp:null;((ro&&ro.data)||[]).forEach(o=>{mpOp[o.id]=o;});}catch(e){}
@@ -733,7 +733,7 @@
              stesso indirizzo finivano uno sopra l'altro: se ne vedeva uno.
              Adesso stesso punto = un pin solo col NUMERO dei lavori, e il
              fumetto li elenca tutti. Il colore e' quello del piu' urgente. */
-          const peso=v.l.stato==="fatto"?0:(inRitardo(v.l.stato,v.l.data_prevista)?2:1);
+          const peso=v.l.stato==="fatto"?0:(inRitardo(v.l.stato,v.l.data_prevista,v.l.pratica_stato)?2:1);
           const chiave=pt.lat.toFixed(5)+","+pt.lon.toFixed(5);
           const g=mpGruppi[chiave]||(mpGruppi[chiave]={lav:[],peso:0,m:null});
           g.lav.push({t:v.l.descrizione||"Lavoro",ind:v.ind,km,id:v.l.id,strada});
@@ -778,7 +778,7 @@
              passata usciva in rosso («49 giorni fa») come un lavoro da fare */
           const fatto=r.l.stato==="fatto";
           const q=quando(r.l.data_prevista,fatto?{neutro:true}:null);
-          const rit=inRitardo(r.l.stato,r.l.data_prevista);
+          const rit=inRitardo(r.l.stato,r.l.data_prevista,r.l.pratica_stato);
           return '<div class="mp-riga'+(r.p?"":" senza")+'">'
             +'<div class="mp-r-testo">'
             +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'

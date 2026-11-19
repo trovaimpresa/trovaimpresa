@@ -6398,3 +6398,19 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .pr-cat .pr-cat-c{display:flex;flex-direction:column;gap:4px;min-width:0;margin:0;font-size:16px;font-weight:700;color:var(--testo-2,#475569)}
 .pr-cat .pr-cat-c>span{font-size:16px;font-weight:700}
 .pr-cat .pr-cat-c input{width:100%;min-width:0;box-sizing:border-box}
+
+/* 19 nov 2026 — PRATICHE: la scadenza dentro la pratica ha la data e «Apri» */
+.lav-media .lsc-q .lsc-d{ display:block; font-weight:600; font-size:14px; color:var(--testo-2); margin-top:2px; text-align:right; }
+.lav-media .lsc-apri{ height:40px; padding:0 16px; font-size:15px; font-weight:700; flex:0 0 auto; }
+@media (max-width:700px){ .lav-media .lsc-apri{ width:100%; } .lav-media .lsc-q .lsc-d{ text-align:left; } }
+
+/* 19 nov 2026 — PRATICHE (studio): la riga «A che punto sta» sotto i filtri.
+   Pastiglie, non linguette: e' un secondo filtro, non deve sembrare lo stesso. */
+.lav-pstati{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 14px}
+.lav-pstati .lav-pstati-t{font-size:15px;font-weight:700;color:var(--testo-2);margin-right:4px}
+.lav-pstati .vista{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;
+  border:1px solid var(--bordo);border-radius:999px;background:var(--card,#fff);color:var(--testo);
+  font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+.lav-pstati .vista.on{background:var(--blu,#0066ff);border-color:var(--blu,#0066ff);color:#fff}
+.lav-pstati .vista.on .v-cnt{background:#fff;color:var(--blu,#0066ff)}
+@media (max-width:700px){ .lav-pstati .lav-pstati-t{width:100%} }

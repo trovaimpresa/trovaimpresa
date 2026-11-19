@@ -247,7 +247,7 @@
     let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[],FL=[],RIFR=[],FFO=[],NOLR=[];
     try{
       const r=await Promise.all([
-        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -349,7 +349,7 @@
 
     /* ---- calcoli (identici a prima) ---- */
     const aperti   = L.filter(l=>l.stato!=="fatto");
-    const ritardo  = aperti.filter(l=>inRitardo(l.stato,l.data_prevista));
+    const ritardo  = aperti.filter(l=>inRitardo(l.stato,l.data_prevista,l.pratica_stato));
     /* Stessa definizione della sezione Fatture: "da incassare" sono le fatture
        che hai EMESSO e che non ti hanno pagato. I lavori finiti non ancora
        fatturati sono un'altra cosa e li conto a parte: prima finivano qui dentro
@@ -782,7 +782,7 @@
       tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
       vuoto:"Nessun lavoro aperto",
       righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
-        t:l.descrizione||"Lavoro", v:q.testo, cls:inRitardo(l.stato,l.data_prevista)?"q-passato":q.classe,
+        t:l.descrizione||"Lavoro", v:q.testo, cls:inRitardo(l.stato,l.data_prevista,l.pratica_stato)?"q-passato":q.classe,
         action:"edit-job", id:l.id};})
     }));
 
