@@ -3686,5 +3686,6 @@ Difetti trovati e sistemati:
 5. «Modifica fattura»: l'importo si riempie con `_numTesto` (prima a volte «1200.5» all'inglese finché non passava euro-casella).
 
 Funziona e NON toccato: cestino (rimette a posto anche il fornitore della fattura), Scadenze (la fattura scaduta compare), documenti, avvisi su P.IVA ed email.
-⚠️ Da decidere con Alex (chiesto il 19 nov): (a) la ricerca in alto non trova i fornitori (`CT_CAMPI` in js/gest-ricerca.js ha solo clienti, lavori, preventivi, fatture); (b) «Collegamento TrovaImpresa» cerca solo `tipo='negozio'` e di negozi veri iscritti ce ne sono 0: non trova mai niente.
+Nuovo (sì di Alex, foto approvata): la ricerca in alto trova anche i FORNITORI e le FATTURE DA PAGARE (`CT_CAMPI.fornitori` / `fattforn` in js/gest-ricerca.js). Tutte e due le righe aprono la scheda del fornitore (`forn-scheda`, tipo `forn`): la fattura non si apre da `fattfCache`, che è vuota se in Fornitori non ci sei mai entrato. Se le due tabelle non si leggono, la ricerca resta quella di prima.
+Tolto (deciso da Alex): il riquadro «Collegamento TrovaImpresa» nel modulo del fornitore. Cercava solo `tipo='negozio'` e di negozi veri iscritti ce ne sono 0. Al suo posto la colonna «Altri dati» (P.IVA, indirizzo, note). `#fo-tid` resta nascosto: un collegamento già salvato non si perde. `fornTiCerca` / `fornTiScegli` restano nel file, non chiamate.
 ⬜ Non provato dal vivo: «Fotografa una fattura» (AI, crediti a 0) e il margine del lavoro collegato (il lavoro in ferramenta è un dato di Alex).

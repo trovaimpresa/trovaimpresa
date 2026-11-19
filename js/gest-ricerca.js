@@ -36,7 +36,10 @@
     clienti:["nome","referente","telefono","email","citta","indirizzo","piva","cf","note"],
     lavori:["descrizione","dove","note","lavoro_svolto","pratica_tipo","pratica_protocollo"],
     preventivi:["titolo","numero","oggetto","note"],
-    fatture:["numero","oggetto","cli_nome","note"]
+    fatture:["numero","oggetto","cli_nome","note"],
+    /* 19 nov 2026 — anche i fornitori e le loro fatture da pagare (sì di Alex) */
+    fornitori:["nome","categoria","telefono","email","indirizzo","piva","note"],
+    fattforn:["numero","note"]
   };
   const CT_ST_PREV={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
   const CT_ST_FATT={bozza:"Bozza",emessa:"Emessa",pagata:"Pagata",insoluta:"Insoluta",annullata:"Annullata"};
@@ -62,8 +65,9 @@
     const mid=curMestiere();
     if(mid==null)return "Entra prima in un reparto.";
     const leggi=t=>sb.from(t).select("*").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO);
-    const [rc,rl,rp,rf]=await Promise.all([
-      leggi("gest_clienti"),leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture")
+    const [rc,rl,rp,rf,ro,rff]=await Promise.all([
+      leggi("gest_clienti"),leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture"),
+      leggi("gest_fornitori"),leggi("gest_fatture_fornitori")
     ]);
     /* ⚠️ UNA TABELLA CHE NON SI APRE NON DEVE SPEGNERE TUTTA LA RICERCA.
        Un collaboratore puo' avere il permesso sui lavori e non sulle fatture:
@@ -74,7 +78,9 @@
     const prendi=(r,come)=>{ if(r.error){ctMancanti.push(come);return [];} return r.data||[]; };
     ctDati={
       clienti:prendi(rc,"clienti"), lavori:prendi(rl,"lavori"),
-      preventivi:prendi(rp,"preventivi"), fatture:prendi(rf,"fatture")
+      preventivi:prendi(rp,"preventivi"), fatture:prendi(rf,"fatture"),
+      /* i fornitori sono in piu': se non si leggono la ricerca di prima resta com'era */
+      fornitori:(ro&&!ro.error&&ro.data)||[], fattforn:(rff&&!rff.error&&rff.data)||[]
     };
     ctTroncato=[rc,rl,rp,rf].some(r=>(r.data||[]).length>=CT_TETTO);
     if(ctMancanti.length===4)return "Non riesco a leggere i dati: "+(rc.error||rl.error||rp.error||rf.error).message;
@@ -108,6 +114,12 @@
       lavori:ctDati.lavori.filter(l=>dentro(ctTesto(l,CT_CAMPI.lavori)+suo(l))),
       preventivi:ctDati.preventivi.filter(p=>dentro(ctTesto(p,CT_CAMPI.preventivi)+suo(p))),
       fatture:ctDati.fatture.filter(f=>dentro(ctTesto(f,CT_CAMPI.fatture)+suo(f))),
+      fornitori:(ctDati.fornitori||[]).filter(o=>dentro(ctTesto(o,CT_CAMPI.fornitori))),
+      /* la fattura da pagare esce anche scrivendo il nome del suo fornitore */
+      fattforn:(ctDati.fattforn||[]).filter(x=>{
+        const o=(ctDati.fornitori||[]).find(y=>String(y.id)===String(x.fornitore_id));
+        return dentro(ctTesto(x,CT_CAMPI.fattforn)+(o?" "+ctPiatto(o.nome):""));
+      }),
       nomeCli:nomeCli
     };
   }
@@ -124,7 +136,8 @@
      Preventivo e fattura no: i loro pulsanti pescano dalla lista gia' a
      schermo, che e' vuota se in quella sezione non ci sei mai entrato. */
   function ctRiga(tipo,id,titolo,sotto){
-    const AZ={cli:"apri-cli",lav:"edit-job"};
+    /* 19 nov 2026: «forn» apre la scheda del fornitore (forn-scheda la rilegge dal database) */
+    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda"};
     return '<button type="button" class="ct-riga" data-ct="'+esc(tipo)+'" data-id="'+esc(String(id))+'"'
       +(AZ[tipo]?' data-action="'+AZ[tipo]+'"':'')+'>'
       +'<span class="ct-t">'+esc(titolo)+'</span>'
@@ -157,6 +170,21 @@
     h+=ctBlocco("Fatture", r.fatture.map(f=>
         ctRiga("fatt",f.id,(f.numero?("Fattura "+fattNum(f)):"Bozza di fattura"),
           ctMeta(nome(f.cliente_id),CT_ST_FATT[f.stato]||f.stato||""))));
+    /* 19 nov 2026 — fornitori e fatture da pagare. La fattura apre la scheda
+       del SUO fornitore (li' c'e' la riga con «Pagata»): cosi' non si pesca
+       da fattfCache, che e' vuota se in Fornitori non ci sei mai entrato. */
+    const oggiCt=todayStr();
+    const apertoDi=id=>(ctDati.fattforn||[]).filter(x=>String(x.fornitore_id)===String(id)&&x.stato!=="pagata").reduce((t,x)=>t+(+x.importo||0),0);
+    h+=ctBlocco("Fornitori", r.fornitori.map(o=>{
+        const ap=apertoDi(o.id);
+        return ctRiga("forn",o.id,o.nome||"(fornitore senza nome)",ctMeta(o.categoria||"",o.telefono||"",ap>0?("da pagare "+eur(ap)):"niente da pagare"));
+      }));
+    h+=ctBlocco("Fatture da pagare", r.fattforn.filter(x=>x.fornitore_id!=null).map(x=>{
+        const o=(ctDati.fornitori||[]).find(y=>String(y.id)===String(x.fornitore_id))||{};
+        const pag=x.stato==="pagata";
+        return ctRiga("forn",x.fornitore_id,(x.numero?("n. "+x.numero):"Fattura")+(o.nome?" — "+o.nome:""),
+          ctMeta(eur(x.importo),pag?"pagata":(x.scadenza?((x.scadenza<oggiCt?"scaduta il ":"da pagare entro il ")+fdate(x.scadenza)):"senza scadenza")));
+      }));
     if(!h)h='<div class="ct-vuoto">Nessun risultato per «'+esc(q)+'».</div>';
     /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
     if(ctTroncato)h+='<div class="ct-piu">Hai più di '+CT_TETTO+' righe in una sezione: cerco dentro le prime '+CT_TETTO+'.</div>';

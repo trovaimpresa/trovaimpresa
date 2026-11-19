@@ -297,23 +297,19 @@
       +'<div class="row2">'
       +'<div class="field"><label>Telefono</label><input id="fo-tel" value="'+esc(f.telefono||'')+'" placeholder="Es. 340 1234567"></div>'
       +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="ordini@..."></div></div>'
-      +'<div class="row2">'
-      +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
-      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Es. Via Roma 12, Rieti"></div></div>'
-      +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
-      +'<div class="sh-tit">🔗 Collegamento TrovaImpresa</div>'
-      +'<p class="sh-nota" style="margin-top:0">Se questa rivendita è iscritta a TrovaImpresa, collegala: ti prendi i suoi contatti con un clic, e in futuro i suoi preventivi arriveranno direttamente qui.</p>'
+      +'<div class="sh-tit">Altri dati</div>'
+      +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
+      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Es. Via Roma 12, Rieti"></div>'
+      +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
+      /* 19 nov 2026 — il riquadro «Collegamento TrovaImpresa» e' stato TOLTO
+         (deciso da Alex): cercava solo i negozi iscritti e non ce n'e' nessuno,
+         quindi non trovava mai niente. Il collegamento gia' salvato non si
+         perde: resta in questa casella nascosta. fornTiCerca / fornTiScegli
+         restano nel file, non le chiama piu' nessuno. */
       +'<input type="hidden" id="fo-tid" value="'+esc(f.trovaimpresa_id||'')+'">'
-      +'<div id="fo-ti-stato">'+(f.trovaimpresa_id
-          ?'<div class="ff-riass" style="background:var(--ok-bg);border-color:var(--ok);color:var(--ok)">✓ Collegato a un negozio di TrovaImpresa <button type="button" class="btn btn-sm" data-action="forn-ti-scollega" style="margin-left:8px">Scollega</button></div>'
-          :'')+'</div>'
-      +'<div class="row2" style="align-items:end">'
-      +'<div class="field" style="margin-bottom:0"><label>Cerca il negozio</label><input id="fo-ti-q" placeholder="Es. Edilcentro Rieti"></div>'
-      +'<button type="button" class="btn" data-action="forn-ti-cerca" style="height:46px">🔎 Cerca</button></div>'
-      +'<div id="fo-ti-risultati" style="margin-top:10px"></div>'
       +'</div>'
       +'</div></div>',
       ctrTastoHTML('fornitore')
