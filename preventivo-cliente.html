@@ -255,9 +255,9 @@
   /* ---------------- la pagina ---------------- */
   function disegna(){
     var imp=S.impresa||{};
-    document.title=cosaE()+(S.numero?" n. "+S.numero:"")+" — "+(imp.nome||"La tua impresa");
+    document.title=cosaE()+(S.numero?" n. "+S.numero:"")+" — "+(imp.nome||(S.tipo==="parcella"?"Il tuo tecnico":"La tua impresa"));
     $("t-da").textContent=(S.includi_prev===false?"Capitolato":cosaE())+" da";
-    $("t-imp").textContent=imp.nome||"La tua impresa";
+    $("t-imp").textContent=imp.nome||(S.tipo==="parcella"?"Il tuo tecnico":"La tua impresa");
     $("t-per").textContent=[S.cliente?"per "+S.cliente:"",S.dove||""].filter(Boolean).join(" · ");
     var haPrev=S.includi_prev!==false, haCap=(S.capitolati||[]).length>0;
     if(!haPrev)scheda="cap";
@@ -279,7 +279,7 @@
     if(wa&&wa.length<=10)wa="39"+wa;
     h+='<div class="azioni"><div class="due">'
       +'<button type="button" class="bott" id="stampa">Stampa o salva PDF</button>'
-      +'<button type="button" class="bott" id="scrivi"'+(tel||imp.email?'':' disabled')+'>Scrivi all\'impresa</button></div>'
+      +'<button type="button" class="bott" id="scrivi"'+(tel||imp.email?'':' disabled')+'>Scrivi '+(S.tipo==="parcella"?"allo studio":"all\'impresa")+'</button></div>'
       +'<div class="contatti" id="contatti">'
       +(tel?'<a class="bott" href="tel:'+esc(tel)+'">Chiama</a><a class="bott" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener">WhatsApp</a>':'')
       +(imp.email?'<a class="bott" href="mailto:'+esc(imp.email)+'?subject='+encodeURIComponent(cosaE()+(S.numero?" n. "+S.numero:""))+'">Email</a>':'')
