@@ -173,6 +173,8 @@
          lo Scadenzario le mostra, e il numerino del menu diceva 1 mentre dentro
          ce n'erano 2 scadute. Stessa lista che usa renderScadenze. */
       let _per=[];try{_per=await scadenzePersone(curMestiere());}catch(_){}
+      /* 19 nov 2026 — e la scadenza delle carte aziendali, che lo Scadenzario mostra */
+      try{if(typeof scadenzeCarte==="function")_per=_per.concat(await scadenzeCarte(curMestiere()));}catch(_){}
       const sAperte=(sc||[]).concat(_per).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
       /* Fornitori: fatture da pagare. Rosso se qualcuna è scaduta.

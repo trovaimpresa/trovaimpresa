@@ -14,7 +14,7 @@
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">💳</div><p>Nessuna carta</p><small>Accedi per gestire le carte aziendali</small></div>`;return;}
     const mid=curMestiere();
     const [rcs,rsd]=await Promise.all([
-      sb.from("gest_carte").select("id,nome,dipendente_id,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_carte").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
       sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid)
     ]);
     /* 11 nov 2026 — collaudo 3.13: senza rete diceva «nessuna carta» (regola 20) */
@@ -43,6 +43,7 @@
         <div class="c-righe">
           <div class="c-r"><span class="c-rt">Titolare</span><span class="c-rv">${nomeDip?esc(nomeDip):"nessuno"}</span></div>
           <div class="c-r"><span class="c-rt">Stato</span><span class="c-rv ${bloccata?"":"ok"}">${bloccata?"Bloccata":"Attiva"}</span></div>
+          ${c.scadenza?(function(){const sc=_cartaScadInfo(c.scadenza);return `<div class="c-r"><span class="c-rt">Scade</span><span class="c-rv" style="${sc.col?"color:"+sc.col+";font-weight:700":""}">${sc.testo}</span></div>`;})():""}
         </div>
         <div class="card-acts">${schedaUnPulsante([
           {lab:"Apri",action:"carta-dettaglio",data:{id:c.id}},
@@ -66,12 +67,13 @@
         <div class="field"><label>Stato</label><select id="ct-stato">
           <option value="attiva" ${(c.stato||"attiva")==="attiva"?"selected":""}>Attiva</option>
           <option value="bloccata" ${c.stato==="bloccata"?"selected":""}>Bloccata</option></select></div>
+        ${_cartaScadHTML(c.scadenza)}
         </div>
         </div><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Note</div>
-        <div class="field"><textarea id="ct-note" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
-        <p class="sh-nota">Il saldo non si scrive qui: viene da solo dalle ricariche meno le spese, che si registrano dal pulsante <b>Movimenti</b>.</p>
+        <div class="field"><textarea id="ct-note" placeholder="Ultime 4 cifre, limite, promemoria... (il numero intero no)">${esc(c.note||"")}</textarea></div>
+        <p class="sh-nota">Il saldo non si scrive qui: viene da solo dalle ricariche meno le spese, che si registrano aprendo la carta (pulsante <b>Apri</b>).</p>
         </div>
         </div></div>`,
       ctrTastoHTML('carta')
@@ -79,16 +81,69 @@
        <button class="btn-primary b-save" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
     ctrAscolta('carta');
   }
+  /* 19 nov 2026 (si' di Alex, foto prima) — LA SCADENZA DELLA CARTA.
+     Mese e anno come sulla carta (03/27); si salva l'ultimo giorno del mese.
+     Colonna gest_carte.scadenza (sql/2026-11-19-carte-scadenza.sql). */
+  const _MESI_CARTA=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  function _cartaScadHTML(scad){
+    const m=scad?+String(scad).slice(5,7):0, a=scad?+String(scad).slice(0,4):0;
+    const y0=new Date().getFullYear(), anni=[];
+    for(let y=y0-1;y<=y0+10;y++)anni.push(y);
+    if(a&&!anni.includes(a))anni.unshift(a);
+    return `<div class="field"><label>Scade il (mese e anno scritti sulla carta)</label>
+      <div style="display:flex;gap:10px">
+        <select id="ct-scad-m" style="flex:1"><option value="">— mese —</option>${_MESI_CARTA.map((n,i)=>`<option value="${i+1}" ${m===i+1?"selected":""}>${String(i+1).padStart(2,"0")} - ${n}</option>`).join("")}</select>
+        <select id="ct-scad-a" style="flex:1"><option value="">— anno —</option>${anni.map(y=>`<option value="${y}" ${a===y?"selected":""}>${y}</option>`).join("")}</select>
+      </div>
+      <small style="color:var(--testo-2);font-size:14px">La trovi anche nelle Scadenze, e un mese prima te la ricorda l\u2019email del mattino.</small></div>`;
+  }
+  /* undefined = la casella non c'e'; null = vuota; false = scritta a meta' */
+  function _cartaScadLeggi(){
+    const sm=$("#ct-scad-m"), sa=$("#ct-scad-a");
+    if(!sm||!sa)return undefined;
+    const m=+sm.value, a=+sa.value;
+    if(!m&&!a)return null;
+    if(!m||!a){campoManca(!m?sm:sa,"Scegli tutti e due: il mese e l'anno.");return false;}
+    const ult=new Date(a,m,0).getDate();
+    return a+"-"+String(m).padStart(2,"0")+"-"+String(ult).padStart(2,"0");
+  }
+  function _cartaScadInfo(scad){
+    const testo=String(scad).slice(5,7)+"/"+String(scad).slice(0,4);
+    const oggi=todayStr(), fra30=_giorniDopo(oggi,30);
+    if(scad<oggi)return {testo:testo+" — scaduta",col:"var(--err)"};
+    if(scad<=fra30)return {testo:testo+" — scade presto",col:"var(--attesa)"};
+    return {testo,col:""};
+  }
+
+  /* 19 nov 2026 — collaudo Carte: due tocchi su «Crea» facevano due carte */
+  let _cartaSalvo=false;
   async function saveCarta(id){
+    if(_cartaSalvo)return;
     const nome=$("#ct-nome").value.trim();if(!nome){campoManca($("#ct-nome"),"Manca il nome della carta: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const dipendente_id=$("#ct-dip").value||null, stato=$("#ct-stato").value, note=$("#ct-note").value.trim()||null;
-    const {data,error}=id
-      ?await sb.from("gest_carte").update({nome,dipendente_id,stato,note}).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_carte").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,dipendente_id,stato,note}).select("id");
+    const scad=_cartaScadLeggi(); if(scad===false)return;
+    _cartaSalvo=true;
+    let data,error,senzaScad=false;
+    try{
+      const riga={nome,dipendente_id,stato,note};
+      if(scad!==undefined)riga.scadenza=scad;
+      const scrivi=r=>id
+        ?sb.from("gest_carte").update(r).eq("id",id).eq("user_id",sbUid).select("id")
+        :sb.from("gest_carte").insert(Object.assign({user_id:sbUid,mestiere_id:curMestiere()},r)).select("id");
+      ({data,error}=await scrivi(riga));
+      /* la colonna «scadenza» (sql/2026-11-19-carte-scadenza.sql) non c'e'
+         ancora: si salva il resto, la carta non si perde */
+      if(error&&/scadenza/i.test(error.message||"")&&/column|schema cache/i.test(error.message||"")){
+        delete riga.scadenza; senzaScad=scad!=null; ({data,error}=await scrivi(riga));
+      }
+    }
+    finally{_cartaSalvo=false;}
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    closeSheet();renderCarte();toast(id?"Aggiornata":"Carta aggiunta ✔");
+    closeSheet();renderCarte();_carteRinfresca();
+    if(senzaScad)toast("Carta salvata, ma la scadenza non ancora: manca un aggiornamento del database");
+    else toast(id?"Aggiornata":"Carta aggiunta ✔");
   }
   async function delCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -100,8 +155,12 @@
     const {data,error}=await sb.from("gest_carte").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminata: nessuna riga rimossa");return;}
-    renderCarte();toast(window.cestinoAttivo&&window.cestinoAttivo()?"Carta nel cestino: la riprendi da lì":"Carta eliminata");
+    renderCarte();_carteRinfresca();toast(window.cestinoAttivo&&window.cestinoAttivo()?"Carta nel cestino: la riprendi da lì":"Carta eliminata");
   }
+
+  /* 19 nov 2026 — le carte entrano nel Riepilogo, nell'Assistente e nel
+     Report: dopo ogni cambio quelle sezioni vanno ridisegnate */
+  function _carteRinfresca(){try{if(typeof rinfresca==="function")rinfresca("riepilogo","report");}catch(_){}}
 
   /* dettaglio carta: saldo + movimenti, si apre dalla lista carte */
   let cartaAttivaId=null, movimentiCartaCache=[];
@@ -120,6 +179,8 @@
           <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" style="font-size:1.05rem;padding:10px" data-euro></div>
         </div>
         <div class="field"><label style="font-size:1rem">Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..." style="font-size:1.05rem;padding:10px"></div>
+        <div class="field"><label style="font-size:1rem">Quando</label><input type="date" id="mv-data" value="${todayStr()}" max="${todayStr()}" style="font-size:1.05rem;padding:10px">
+          <small style="color:var(--testo-2);font-size:14px">Di solito \u00e8 oggi: cambiala se la spesa \u00e8 di un altro giorno.</small></div>
         <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
       </div>
       <div id="ct-mov-lista" style="font-size:1.05rem"></div>`,
@@ -129,10 +190,17 @@
   async function renderMovimentiCarta(){
     const lista=$("#ct-mov-lista"), saldoBox=$("#ct-saldo-box");
     if(!lista||!cartaAttivaId)return;
-    const [{data:mv},{data:sd}]=await Promise.all([
+    const [rmv,rsd]=await Promise.all([
       sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,inserito_da").eq("carta_id",cartaAttivaId).order("data",{ascending:false}).order("created_at",{ascending:false}),
       sb.from("gest_carte_saldo").select("saldo").eq("carta_id",cartaAttivaId).maybeSingle()
     ]);
+    /* 19 nov 2026 — senza rete diceva «0,00 € SENZA SOLDI» e «Nessun movimento» */
+    if(rmv.error||rsd.error){
+      if(saldoBox)saldoBox.innerHTML='<span style="font-size:1.1rem;color:var(--err)">Non riesco a leggere il saldo</span>';
+      lista.innerHTML='<div style="color:var(--err);font-size:15px;text-align:center;padding:14px">Non riesco a leggere i movimenti: controlla la connessione e riapri la carta.</div>';
+      return;
+    }
+    const mv=rmv.data, sd=rsd.data;
     movimentiCartaCache=mv||[];
     const saldo=(sd&&sd.saldo)||0;
     const vuota=saldo<=0;
@@ -154,7 +222,10 @@
       </div>`;
     }).join("");
   }
+  /* 19 nov 2026 — collaudo Carte: due tocchi su «Aggiungi movimento» = due movimenti */
+  let _movSalvo=false;
   async function salvaMovimentoCarta(){
+    if(_movSalvo)return;
     if(!cartaAttivaId||!sbUid){toast("Devi essere loggato");return;}
     const tipo=$("#mv-tipo").value;
     const importo=_numIt("#mv-importo")||0;
@@ -164,12 +235,22 @@
        e fermarsi dall'altra */
     if(importo>1000000){toast("Importo troppo alto: controlla quello che hai scritto");return;}
     const causale=$("#mv-causale").value.trim()||null;
-    const {error}=await sb.from("gest_carte_movimenti").insert({
-      user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,inserito_da:"Capo"
-    });
-    if(error){toast("Errore: "+error.message);return;}
-    $("#mv-importo").value="";$("#mv-causale").value="";
-    toast("Movimento registrato ✔");renderMovimentiCarta();renderCarte();
+    /* 19 nov 2026 (si' di Alex) — il giorno del movimento: prima era sempre oggi */
+    const _dEl=$("#mv-data"), data=(_dEl&&_dEl.value)||todayStr();
+    if(data>todayStr()){campoManca(_dEl,"Questa data non è ancora arrivata: scrivi il giorno in cui l'hai fatta.");return;}
+    _movSalvo=true;
+    try{
+      const _c=(carteCache||[]).find(x=>String(x.id)===String(cartaAttivaId));
+      if(tipo==="spesa"&&_c&&_c.stato==="bloccata"&&typeof window.tiChiedi==="function"
+        &&!(await window.tiChiedi("Questa carta è segnata come bloccata.",{titolo:"Registro lo stesso la spesa?",si:"Sì, registra",no:"No"})))return;
+      const {data:_ins,error}=await sb.from("gest_carte_movimenti").insert({
+        user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,data,inserito_da:"Capo"
+      }).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!_ins||!_ins.length){toast("Non salvato: nessuna riga scritta");return;}
+    }finally{_movSalvo=false;}
+    $("#mv-importo").value="";$("#mv-causale").value="";if(_dEl)_dEl.value=todayStr();
+    toast("Movimento registrato ✔");renderMovimentiCarta();renderCarte();_carteRinfresca();
   }
   async function eliminaMovimentoCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -184,7 +265,7 @@
     const {data,error}=await sb.from("gest_carte_movimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
-    renderMovimentiCarta();renderCarte();toast("Movimento eliminato");
+    renderMovimentiCarta();renderCarte();_carteRinfresca();toast("Movimento eliminato");
   }
 
 

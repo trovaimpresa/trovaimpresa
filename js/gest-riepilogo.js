@@ -888,7 +888,8 @@
 
     if(!_proNascosto("carte"))C.push(rieCard({
       tab:"carte", titolo:"Carte", n:eur(saldoTot), dati:CA.length>0,
-      lab:"saldo di "+carteAtt.length+(carteAtt.length===1?" carta attiva":" carte attive"),
+      lab:(function(){const nb=carteAtt.filter(c=>c.stato==="bloccata").length, n=carteAtt.length;
+        return "saldo di "+n+(n===1?" carta":" carte")+(nb?" ("+nb+(nb===1?" bloccata)":" bloccate)"):"");})(),
       tono: saldoTot<0?"err":"neutro", vuoto:"Nessuna carta attiva",
       righe: carteAtt.slice(0,2).map(c=>({
         t:c.nome||"Carta", v:eur(saldoMap[c.id]||0),

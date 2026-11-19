@@ -791,7 +791,8 @@
   }
   /* apre la sezione giusta e, appena il suo elenco e' caricato, la scheda */
   const CAL_PRONTO={"edit-prom":()=>typeof promCache!=="undefined"&&promCache,"edit-mezzo":()=>typeof mezziCache!=="undefined"&&mezziCache,
-    "edit-fatt":()=>typeof fattCache!=="undefined"&&fattCache,"edit-fattf":()=>typeof fattfCache!=="undefined"&&fattfCache};
+    "edit-fatt":()=>typeof fattCache!=="undefined"&&fattCache,"edit-fattf":()=>typeof fattfCache!=="undefined"&&fattfCache,
+    "carta-dettaglio":()=>typeof carteCache!=="undefined"&&carteCache};
   async function calVai(tab,azione,id){
     if(typeof closeSheet==="function")closeSheet();
     /* 18 nov 2026 — si torna DA DOVE si e' partiti: dallo Scadenzario si apre

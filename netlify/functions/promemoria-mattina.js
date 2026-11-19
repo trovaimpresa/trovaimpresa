@@ -396,7 +396,7 @@ function costruisciEmail(d) {
   ${sezione('#e65100', 'Preventivi senza risposta', rPrevAtt, 'Apri i preventivi', SITO + '#preventivi')}
   ${sezione('#c62828', 'Fatture dei fornitori da pagare', rForn, 'Apri i fornitori', SITO + '#fornitori')}
   ${sezione('#0066ff', 'Documenti della squadra', rSquadra, 'Apri la squadra', SITO + '#squadra')}
-  ${sezione('#0066ff', 'Mezzi: assicurazione e revisione', rMezzi, 'Apri i mezzi', SITO + '#mezzi')}
+  ${sezione('#0066ff', 'Mezzi e carte: cosa scade', rMezzi, 'Apri i mezzi', SITO + '#mezzi')}
   <div style="padding:6px 26px 28px;border-top:1px solid #edf1f6;margin-top:6px">
     <p style="font-size:14px;color:#7a8798;line-height:1.7;margin:18px 0 0">
       ${d.completo
@@ -421,7 +421,7 @@ function oggetto(d) {
   if ((d.prevAtt || []).length) pezzi.push(plurale(d.prevAtt.length, 'preventivo senza risposta', 'preventivi senza risposta'));
   if ((d.forn || []).length)    pezzi.push(plurale(d.forn.length, 'fattura fornitore da pagare', 'fatture fornitori da pagare'));
   if ((d.squadra || []).length) pezzi.push(plurale(d.squadra.length, 'documento della squadra', 'documenti della squadra'));
-  if ((d.mezzi || []).length)   pezzi.push(plurale(d.mezzi.length, 'scadenza di un mezzo', 'scadenze dei mezzi'));
+  if ((d.mezzi || []).length)   pezzi.push(plurale(d.mezzi.length, 'scadenza di un mezzo o di una carta', 'scadenze di mezzi e carte'));
   if (d.completo) {
     if ((d.promPassati || []).length) pezzi.push(plurale(d.promPassati.length, 'promemoria da fare', 'promemoria da fare'));
     if (d.scadute.length) pezzi.push(plurale(d.scadute.length, 'scadenza già passata', 'scadenze già passate'));
@@ -570,7 +570,7 @@ const handler = async function () {
       } catch (e) { erroriNuovi.push(nome + ': ' + e.message); return []; }
     };
     const dataTetto7 = giorniDopo(oggi, -7);
-    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt, dPrevCtl] = await Promise.all([
+    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt, dPrevCtl, dCarte] = await Promise.all([
       leggiLarga('fatture fornitori', f => vivi(sb.from('gest_fatture_fornitori')
         .select('id, user_id, fornitore_id, numero, importo, scadenza')
         .in('user_id', utenti).is('data_pagata', null).neq('stato', 'pagata')
@@ -596,7 +596,12 @@ const handler = async function () {
       leggiLarga('preventivi controllati', f => vivi(sb.from('gest_op_preventivi')
         .select('id, user_id, titolo, esito_nota, controllato_da, controllato_il')
         .in('user_id', utenti).eq('stato', 'controllato')
-        .gte('controllato_il', new Date(Date.now() - 24 * 3600 * 1000).toISOString()), f))
+        .gte('controllato_il', new Date(Date.now() - 24 * 3600 * 1000).toISOString()), f)),
+      /* 19 nov 2026 — la scadenza delle carte aziendali (sql/2026-11-19-carte-scadenza.sql).
+         Se la colonna non c'e' ancora, leggiLarga mette l'errore da parte e l'email parte lo stesso. */
+      leggiLarga('carte', f => vivi(sb.from('gest_carte')
+        .select('id, user_id, nome, scadenza')
+        .in('user_id', utenti).not('scadenza', 'is', null), f))
     ]);
     const nomeOperatore = Object.fromEntries(dOp.map(x => [String(x.id), x.nome || '']));
     const nomeFornitore = Object.fromEntries(dFor.map(x => [String(x.id), x.nome || '']));
@@ -799,6 +804,15 @@ const handler = async function () {
           if (t) mezziOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduta ieri' : t.testo, col: t.col }));
           else if (completo && giaPassata(data)) mezziVecchie.push(Object.assign(r, { ev: passataTesto(data).replace('scaduto', 'scaduta'), col: '#c62828' }));
         });
+      });
+
+      // 3-bis. 19 nov 2026 — scadenza delle carte aziendali (tappe 30, 7, 1), con i mezzi
+      (voglio('mezzi') ? dCarte : []).filter(x => String(x.user_id) === uid).forEach(x => {
+        const data = x.scadenza; if (!data) return;
+        const t = tappaDi(data, [30, 7, 1]);
+        const r = { tit: 'Carta «' + (x.nome || 'aziendale') + '» — Scadenza della carta', sotto: '' };
+        if (t) mezziOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduta ieri' : t.testo, col: t.col }));
+        else if (completo && giaPassata(data)) mezziVecchie.push(Object.assign(r, { ev: passataTesto(data).replace('scaduto', 'scaduta'), col: '#c62828' }));
       });
 
       // 4. preventivi senza risposta: a 7 e a 14 giorni; il lunedi' tutti

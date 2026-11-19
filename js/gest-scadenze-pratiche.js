@@ -113,6 +113,18 @@
       return out;
     }catch(_){ return []; }
   }
+  /* 19 nov 2026 (si' di Alex, foto prima) — LA SCADENZA DELLE CARTE AZIENDALI.
+     Sola lettura, come mezzi e fornitori: il dato sta nella carta, si apre da li'.
+     Se la colonna non c'e' ancora (sql/2026-11-19-carte-scadenza.sql) non esce niente. */
+  async function scadenzeCarte(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const r=await sb.from("gest_carte").select("*").eq("user_id",sbUid).eq("mestiere_id",mid||curMestiere());
+      if(r.error)return [];
+      return (r.data||[]).filter(c=>c.scadenza).map(c=>({id:"ca:"+c.id,_carta:true,_caId:c.id,_nome:c.nome||"Carta",
+        titolo:"Scadenza della carta",tipo_pratica:"Carta aziendale",data_scadenza:c.scadenza,stato:"aperta"}));
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -139,8 +151,8 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const [scadPersone,scadMezzi,scadForn]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid)]);
-    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn).sort(function(a,b){
+    const [scadPersone,scadMezzi,scadForn,scadCarte]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid),scadenzeCarte(mid)]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn,scadCarte).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
@@ -172,6 +184,20 @@
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._carta){
+          const apriC={action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}};
+          return {
+            id:s.id,
+            click:apriC,
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `💳 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"💳 Apri la carta",action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}}]
+          };
+        }
         if(s._forn){
           const apriF={action:"cal-vai",data:{tab:"fornitori",azione:"edit-fattf",id:s._ffId}};
           return {
@@ -239,6 +265,17 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    if(s._carta){
+      let bgC="var(--sfondo)",fgC="var(--testo-2)",labC="In tempo",tonoC="t-neutro";
+      if(s.data_scadenza<oggi){bgC="var(--err-bg)";fgC="var(--err)";labC="Scaduta";tonoC="t-err";}
+      else if(s.data_scadenza<=lim){bgC="var(--attesa-bg)";fgC="var(--attesa)";labC="In scadenza";tonoC="t-attesa";}
+      return schedaJob({
+        tono:tonoC, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgC};color:${fgC}">${labC}</span>`,
+        meta:["💳 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri",action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}}]
+      });
+    }
     if(s._forn){
       let bgF="var(--sfondo)",fgF="var(--testo-2)",labF="In tempo",tonoF="t-neutro";
       if(s.data_scadenza<oggi){bgF="var(--err-bg)";fgF="var(--err)";labF="Scaduta";tonoF="t-err";}
