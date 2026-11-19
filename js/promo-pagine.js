@@ -121,7 +121,7 @@
          a meta' del testo, su tutte le pagine pubbliche (js/marchio-in-guida.js) */
       if (!document.querySelector('script[src*="marchio-in-guida"]')) {
         var mg = document.createElement('script');
-        mg.src = '/js/marchio-in-guida.js?v=1';
+        mg.src = '/js/marchio-in-guida.js?v=2';
         mg.defer = true;
         document.head.appendChild(mg);
       }

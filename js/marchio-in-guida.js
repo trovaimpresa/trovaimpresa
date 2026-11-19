@@ -95,11 +95,18 @@
       if (!r.width || !r.height) continue;
       ok.push(h);
     }
-    if (ok.length < 2) return null;
-    return ok[Math.floor(ok.length / 2)];
+    if (!ok.length) return null;
+    // si risale fino al riquadro che contiene SOLO quel titolo (la scheda di
+    // un post del forum, un annuncio): la carta va fra un riquadro e l'altro,
+    // mai dentro, sopra il titolo
+    var el = ok[Math.floor(ok.length / 2)];
+    while (el.parentNode && el.parentNode !== document.body &&
+           el.parentNode.querySelectorAll('h2').length === 1) el = el.parentNode;
+    return el;
   }
 
-  function avvia() {
+  function avvia(giro) {
+    giro = giro || 0;
     try {
       var nome = location.pathname.replace(/^\//, '').replace(/\.html$/, '').replace(/\/$/, '') || 'home';
       if (nome === 'home' || nome === 'index') return;        // la home ha gia' i suoi
@@ -109,6 +116,9 @@
       var riga = document.querySelector('.ti-riga');
       var mezzo = riga ? null : titoloDiMezzo();
       var fondo = document.getElementById('ti-video-promo') || document.querySelector('footer');
+      // forum, lavoro, articoli: i titoli arrivano dal database dopo un po'.
+      // Si riprova due volte prima di mettere la carta in fondo
+      if (!riga && !mezzo && giro < 2) { setTimeout(function () { avvia(giro + 1); }, 3000); return; }
       if (!riga && !mezzo && !fondo) return;
 
       var st = document.createElement('style');

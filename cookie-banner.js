@@ -30,7 +30,7 @@
   try {
     if (!window.__tiPromoPagine && !document.querySelector('script[src*="promo-pagine"]')) {
       var promo = document.createElement('script');
-      promo.src = '/js/promo-pagine.js?v=4';
+      promo.src = '/js/promo-pagine.js?v=5';
       promo.defer = true;
       (document.head || document.documentElement).appendChild(promo);
     }
