@@ -19,7 +19,9 @@
     { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' },
     { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' },
     { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae' },
-    { id: 17198, nome: 'Kasanova',  logo: 'kasanova.webp',   w: 168, h: 25, cosa: 'Casalinghi e arredo', c: '#ff00a4' }
+    { id: 17198, nome: 'Kasanova',  logo: 'kasanova.webp',   w: 168, h: 25, cosa: 'Casalinghi e arredo', c: '#ff00a4' },
+    { id: 54303, nome: 'Gagliardi', logo: 'gagliardi.webp',  w: 168, h: 44, cosa: 'Materiale elettrico e idraulico', c: '#1f2bb8' },
+    { id: 9529,  nome: 'Plenitude', logo: 'eni-plenitude.webp', w: 168, h: 54, cosa: 'Luce, gas e fotovoltaico', c: '#009e62' }
   ];
   var AWIN_ME = '3137864';
 
@@ -90,7 +92,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=12';
+        ml.src = '/js/marchi-lati.js?v=13';
         ml.defer = true;
         document.head.appendChild(ml);
       }

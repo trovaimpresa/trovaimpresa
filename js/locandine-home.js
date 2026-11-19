@@ -36,29 +36,36 @@
     lampade: { id: 10404,  nome: 'Lampade.it', logo: 'lampade-it.webp', cosa: 'Lampade e luci',                    c: '#e5233b' },
     trotec:  { id: 115365, nome: 'Trotec',     logo: 'trotec.webp',     cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' },
     vonroc:  { id: 126387, nome: 'Vonroc',     logo: 'vonroc.webp',     cosa: 'Elettroutensili per casa e giardino', c: '#35beae' },
-    kasanova:{ id: 17198,  nome: 'Kasanova',   logo: 'kasanova.webp',   cosa: 'Casalinghi e arredo', c: '#ff00a4' }
+    kasanova:{ id: 17198,  nome: 'Kasanova',   logo: 'kasanova.webp',   cosa: 'Casalinghi e arredo', c: '#ff00a4' },
+    gagliardi:{ id: 54303, nome: 'Gagliardi',  logo: 'gagliardi.webp',  cosa: 'Materiale elettrico e idraulico', c: '#1f2bb8' },
+    plenitude:{ id: 9529,  nome: 'Plenitude',  logo: 'eni-plenitude.webp', cosa: 'Luce, gas e fotovoltaico', c: '#009e62' }
   };
 
   // Chi sta dove. marchio = carta del negozio, google = annuncio Google.
   // In alto, negli spazi piu' grandi, i marchi piu' vicini all'edilizia (Alex, 15 nov).
   var IN_ALTO = [
-    { spazio: 'hero-sx', marchio: 'vevor' },
-    { spazio: 'hero-dx', marchio: 'trotec' }
+    // 19 nov 2026 (Alex): in cima, a destra e a sinistra, Plenitude.
+    // Vevor e Trotec scendono nella prima coppia sotto, un po' piu' piccola.
+    { spazio: 'hero-sx', marchio: 'plenitude' },
+    { spazio: 'hero-dx', marchio: 'plenitude' }
   ];
   var IN_COLONNA = [
     // 15 nov 2026 (Alex): «devono essere 14». Sulla home nazionale #categorie non
     // c'e', quindi la coppia del passo 1 si aggancia a «Cerchi idee per casa?».
-    { sez: '#le-idee',          lato: 'sx', passo: 1, marchio: 'vonroc' },
-    { sez: '#le-idee',          lato: 'dx', passo: 1, marchio: 'lampade' },
-    { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'comet' },
-    { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'rowenta' },
-    { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'moulinex' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'kasanova' }, // 16 nov: accanto a Moulinex
-    { sez: '.why-section',      lato: 'sx', passo: 4, google: true },
-    { sez: '.why-section',      lato: 'dx', passo: 4, google: true }
+    // 19 nov 2026: tutti scesi di un passo per far posto a Vevor e Trotec.
+    { sez: '#le-idee',          lato: 'sx', passo: 1, marchio: 'vevor' },
+    { sez: '#le-idee',          lato: 'dx', passo: 1, marchio: 'trotec' },
+    { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'vonroc' },
+    { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'lampade' },
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'comet' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'rowenta' },
+    { sez: '.why-section',      lato: 'sx', passo: 4, marchio: 'moulinex' },
+    { sez: '.why-section',      lato: 'dx', passo: 4, marchio: 'kasanova' }, // 16 nov: accanto a Moulinex
+    { sez: '#pub-forum',        lato: 'sx', passo: 5, marchio: 'gagliardi' }, // 19 nov: nuovo su Awin
+    { sez: '#pub-forum',        lato: 'dx', passo: 5, google: true },
+    { sez: '#pub-gest',         lato: 'sx', passo: 6, google: true }
     // 16 nov 2026 (Alex, «la pubblicita di google e tutta uguale»): tolti i 4 spazi
-    // Google accanto alle recensioni. Con 6 spazi uno sotto l'altro AdSense
-    // mostrava lo stesso annuncio ovunque. Restano i 2 qui sopra + quello al centro.
+    // Google accanto alle recensioni. Restano 2 Google ai lati + quello al centro.
   ];
 
   var CSS = '.tlm{display:flex;flex-direction:column;width:100%;height:100%;background:#fff;border:2px solid #ff8800;' +
@@ -242,7 +249,7 @@
     var bordoComune = BORDO;
     var precedente = largaOk;
     var perPasso = {};
-    for (var p = 1; p <= 5; p++) {
+    for (var p = 1; p <= 7; p++) {
       var spazio = 99999;
       for (var k = 0; k < l.length; k++) {
         if (parseInt(l[k].getAttribute('data-passo'), 10) !== p) continue;
