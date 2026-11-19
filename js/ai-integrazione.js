@@ -938,12 +938,20 @@
     el.dispatchEvent(new Event('change', { bubbles: true }));
     return el;
   }
-  function riempiPratica(d, primo) {
+  /* 19 nov 2026 (voce Pratiche) — soloVuote: dalla FOTO del documento le
+     caselle che hai gia' scritto tu non si toccano (come «Cosa c'e' da fare»
+     e «Dove»). Prima un Comune scritto a mano veniva sostituito da quello
+     letto nel documento. «A che punto sta» si cambia solo se e' ancora su
+     «Da preparare», il tipo solo se non e' stato scelto. */
+  function riempiPratica(d, primo, soloVuote) {
     const messi = [];
     if (!d) return messi;
-    if (scegliOpzione('j-pr-tipo', d.pratica_tipo)) messi.push('Tipo di pratica');
-    if (scegliOpzione('j-pr-stato', d.pratica_stato)) messi.push('A che punto sta');
+    const pieno = function (id) { const e = document.getElementById(id); return !!(e && String(e.value || '').trim()); };
+    if (!(soloVuote && pieno('j-pr-tipo')) && scegliOpzione('j-pr-tipo', d.pratica_tipo)) messi.push('Tipo di pratica');
+    const _st = document.getElementById('j-pr-stato');
+    if (!(soloVuote && _st && _st.value && _st.value !== 'da_preparare') && scegliOpzione('j-pr-stato', d.pratica_stato)) messi.push('A che punto sta');
     CASELLE_PRATICA.forEach(function (c) {
+      if (soloVuote && pieno(c[0])) return;
       let v = d[c[1]];
       if (c[1] === 'pratica_data_dep' && v && !/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return;
       const el = riempiCampo(c[0], v, primo);

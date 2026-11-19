@@ -538,8 +538,22 @@
     $("#overlay").classList.remove("open");
     const _lid=_tornaAlLavoro; _tornaAlLavoro=null;
     /* solo se a chiudersi e' proprio la scheda della persona */
-    if(_lid&&document.querySelector("#sheet #d-nome"))lavoroApri(_lid);
+    /* 19 nov 2026 (voce Pratiche) — anche la scadenza aperta dalla scheda
+       della pratica («+ Aggiungi una scadenza»): chiusa, si torna nella pratica */
+    if(_lid&&document.querySelector("#sheet #d-nome, #sheet #s-tit"))lavoroApri(_lid);
   }
+  /* 19 nov 2026 (voce Pratiche) — una fotografia delle caselle del lavoro
+     appena aperto: serve a non chiedere «se hai scritto qualcosa va perso»
+     quando non hai toccato niente. */
+  function _lavValori(){
+    const v=[...document.querySelectorAll('#sheet [id^="j-"]')]
+      .filter(e=>"value" in e&&e.tagName!=="BUTTON")
+      /* le caselle dei soldi si riscrivono da sole («1200,5» → «1.200,50»): si confronta il numero */
+      .map(e=>e.id+"="+(e.hasAttribute("data-euro")?String(parseFloat(String(e.value).replace(/\./g,"").replace(",","."))||0):e.value));
+    const st=document.querySelector("#sheet #j-stato .on");
+    return v.join("|")+"|stato="+(st?st.dataset.v:"");
+  }
+  var _lavFoto=null;
   /* Riapre un lavoro salvato rileggendolo dal database (e' l'azione «edit-job»:
      sta qui perche' la usano in due). */
   async function lavoroApri(id){
@@ -553,6 +567,7 @@
     const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
     if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
     jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);renderLavPreventivo(data.id);}
+    try{_lavFoto=_lavValori();}catch(_){_lavFoto=null;}
   }
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
@@ -668,11 +683,22 @@
       const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
       const _lv=((typeof lavCache!=="undefined"?lavCache:[])||[]).find(x=>String(x.id)===String(id));
       const _nm=_lv&&_lv.descrizione?"«"+String(_lv.descrizione).slice(0,80)+"»":"";
+      /* ⚠️ 19 nov 2026 (voce Pratiche) — LE SCADENZE DEL LAVORO BUTTATO.
+         Come per i mezzi (14 ago): col Cestino il «set null» del database non
+         scatta mai, e la pratica buttata lasciava vive le sue scadenze
+         (integrazioni, fine lavori): nello Scadenzario «(pratica eliminata)»
+         e l'email del mattino continuava ad avvisare. Adesso vanno nel
+         Cestino con lei e tornano su con lei (CEST_FIGLI in gest-cestino.js).
+         Quelle gia' «fatte» restano dove sono: sono storia. */
+      let _nScL=0;
+      try{const r=await sb.from("gest_scadenze").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("lavoro_id",id).neq("stato","fatta");_nScL=r.count||0;}catch(_){}
+      const _pro=ruoloUtente==='professionista';
+      const _scT=_nScL?("Ha "+_nScL+(_nScL===1?" scadenza aperta: va":" scadenze aperte: vanno")+" nel Cestino insieme a "+(_pro?"lei":"lui")+". "):"";
       if(_cest&&_nm&&typeof window.tiChiedi==="function"){
-        if(!(await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
-      }else if(!(await gconfirm(_cest
+        if(!(await window.tiChiedi(_scT+(_pro?"La riprendi":"Lo riprendi")+" dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
+      }else if(!(await gconfirm(_scT+(_cest
           ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
-          : "Eliminare questo lavoro? L'azione non si può annullare.")))return;
+          : "Eliminare questo lavoro? L'azione non si può annullare."))))return;
       const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
       /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
       if(foto&&foto.length&&!(window.cestinoAttivo&&window.cestinoAttivo())){
@@ -683,7 +709,11 @@
       const {data:okDel,error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDel||!okDel.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      renderAll();toast(_cest?"Lavoro nel cestino: lo riprendi da lì":"Lavoro eliminato ✔");return;
+      /* col Cestino acceso questa «delete» scrive solo la data (si ripescano insieme) */
+      if(_nScL&&_cest){ try{ await sb.from("gest_scadenze").delete().eq("user_id",sbUid).eq("lavoro_id",id).neq("stato","fatta"); }catch(_){} }
+      renderAll();
+      const _conSc=_nScL&&_cest?(" con "+_nScL+(_nScL===1?" scadenza":" scadenze")):"";
+      toast(_cest?(_pro?("Pratica nel cestino"+_conSc+": la riprendi da lì"):("Lavoro nel cestino"+_conSc+": lo riprendi da lì")):"Lavoro eliminato ✔");return;
     }
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
@@ -851,10 +881,17 @@
          della scadenza si riscrive quello della pratica, e quello che c'era
          scritto e non ancora salvato va perso. Prima non lo diceva nessuno
          (il commento qui sopra sosteneva pure il contrario). Ora si avvisa. */
-      if(!(await gconfirm("Apro il modulo della scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      /* 19 nov 2026 (voce Pratiche) — si chiede solo se nel modulo e' cambiato
+         qualcosa; e chiusa la scadenza si torna nella pratica (_tornaAlLavoro).
+         Prima lo chiedeva sempre, e salvando si finiva nell'elenco. */
+      let _cambiato=true;
+      try{_cambiato=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
+      if(_cambiato&&!(await gconfirm("Apro il modulo della scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       const lavId=id;
       const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
-      return scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
+      await scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
+      if(document.querySelector("#sheet #s-tit")&&$("#overlay").classList.contains("open"))_tornaAlLavoro=lavId;
+      return;
     }
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
     if(a==="scad-persona"){

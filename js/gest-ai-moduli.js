@@ -300,10 +300,10 @@
 
   /* 7 nov 2026 — le caselle della pratica: le riempie la macchina di
      js/ai-integrazione.js (AI.riempiPratica), qui si illuminano */
-  function aiPraticaCaselle(d,messi){
+  function aiPraticaCaselle(d,messi,soloVuote){
     if(!window.AI||typeof window.AI.riempiPratica!=="function"||!d) return;
     const ids={"Tipo di pratica":"j-pr-tipo","A che punto sta":"j-pr-stato","Comune":"j-pr-comune","N. protocollo":"j-pr-prot","Data di deposito":"j-pr-data","Foglio":"j-cat-fog","Particella":"j-cat-par","Subalterno":"j-cat-sub"};
-    window.AI.riempiPratica(d,null).forEach(function(n){
+    window.AI.riempiPratica(d,null,!!soloVuote).forEach(function(n){
       messi.push(n);
       const el=document.getElementById(ids[n]); if(el) _aiIllumina(el);
     });
@@ -447,7 +447,7 @@
                 else { el.value=String(v); el.dispatchEvent(new Event("input",{bubbles:true})); _aiIllumina(el); }
                 messi.push(c.nome);
               });
-              aiPraticaCaselle(d,messi);
+              aiPraticaCaselle(d,messi,true);   /* 19 nov 2026: quello che hai scritto tu non si tocca */
               st.className="ai-riga-st "+(messi.length?"ai-riga-st--ok":"ai-riga-st--err");
               st.textContent=messi.length
                 ? "Dal documento ho riempito: "+messi.join(", ")+". Controlla, poi salva tu."+(d.nota?" — "+d.nota:"")

@@ -34,7 +34,10 @@
 
   const CT_CAMPI={
     clienti:["nome","referente","telefono","email","citta","indirizzo","piva","cf","note"],
-    lavori:["descrizione","dove","note","lavoro_svolto","pratica_tipo","pratica_protocollo"],
+    /* 19 nov 2026 (voce Pratiche) — anche il Comune e i catastali: un geometra
+       cerca «foglio 12» o la particella, e non usciva niente */
+    lavori:["descrizione","dove","note","lavoro_svolto","pratica_tipo","pratica_protocollo",
+            "pratica_comune","catasto_foglio","catasto_particella","catasto_sub"],
     preventivi:["titolo","numero","oggetto","note"],
     fatture:["numero","oggetto","cli_nome","note"],
     /* 19 nov 2026 — anche i fornitori e le loro fatture da pagare (sì di Alex) */
@@ -96,9 +99,27 @@
      Adesso il nome (e i dati) del cliente si ATTACCANO al testo della riga,
      e poi si chiede che ci siano TUTTE le parole. «Verdi» da solo tira
      fuori tutto di Verdi; «verdi bagno» solo il bagno di Verdi. */
+  /* 19 nov 2026 (voce Pratiche) — «foglio 12», «particella 345», «sub 2»:
+     la parola davanti al numero si cerca anche lei */
+  /* «foglio 12» diventa una parola sola «foglio:12;», cosi' non trova anche
+     il foglio 120 (il «;» chiude il numero). Fg, mappale, part., subalterno
+     valgono come foglio, particella, sub. */
+  const CT_CAT_NOMI={foglio:"foglio",fg:"foglio",particella:"particella",part:"particella",mappale:"particella",map:"particella",sub:"sub",subalterno:"sub"};
+  function ctCatasto(l){
+    let s="";
+    const v=x=>ctPiatto(String(x).trim()).replace(/\s+/g,"");
+    if(l.catasto_foglio)s+=" foglio:"+v(l.catasto_foglio)+";";
+    if(l.catasto_particella)s+=" particella:"+v(l.catasto_particella)+";";
+    if(l.catasto_sub)s+=" sub:"+v(l.catasto_sub)+";";
+    return s;
+  }
+  function ctCatastoDomanda(q){
+    return q.replace(/(^|[^a-z0-9])(foglio|fg|particella|part|mappale|map|subalterno|sub)\.?\s*([a-z0-9]+)(?=$|[^a-z0-9])/g,
+      function(m,pre,k,n){ return pre+CT_CAT_NOMI[k]+":"+n+";"; });
+  }
   function ctTrova(q){
     if(!ctDati)return null;
-    const parole=ctPiatto(q).split(/\s+/).filter(Boolean);
+    const parole=ctCatastoDomanda(ctPiatto(q)).split(/\s+/).filter(Boolean);
     if(!parole.length)return null;
     const dentro=testo=>parole.every(w=>testo.indexOf(w)>=0);
     const nomeCli={}, testoCli={};
@@ -111,7 +132,7 @@
     const suo=r=>(r.cliente_id!=null&&testoCli[String(r.cliente_id)])?(" "+testoCli[String(r.cliente_id)]):"";
     return {
       clienti:ctDati.clienti.filter(c=>dentro(ctTesto(c,CT_CAMPI.clienti))),
-      lavori:ctDati.lavori.filter(l=>dentro(ctTesto(l,CT_CAMPI.lavori)+suo(l))),
+      lavori:ctDati.lavori.filter(l=>dentro(ctTesto(l,CT_CAMPI.lavori)+ctCatasto(l)+suo(l))),
       preventivi:ctDati.preventivi.filter(p=>dentro(ctTesto(p,CT_CAMPI.preventivi)+suo(p))),
       fatture:ctDati.fatture.filter(f=>dentro(ctTesto(f,CT_CAMPI.fatture)+suo(f))),
       fornitori:(ctDati.fornitori||[]).filter(o=>dentro(ctTesto(o,CT_CAMPI.fornitori))),

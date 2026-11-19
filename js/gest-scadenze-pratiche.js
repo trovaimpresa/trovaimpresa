@@ -561,10 +561,13 @@
       </div>
       <div class="field"><label>Data di deposito</label><input type="date" id="j-pr-data" value="${esc(job.pratica_data_dep||"")}"></div>
       <div class="field"><label>Dati catastali</label>
-        <div class="row3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <input id="j-cat-fog" value="${esc(job.catasto_foglio||"")}" placeholder="Es. 12">
-          <input id="j-cat-par" value="${esc(job.catasto_particella||"")}" placeholder="Es. 345">
-          <input id="j-cat-sub" value="${esc(job.catasto_sub||"")}" placeholder="Es. 2">
+        <!-- 19 nov 2026 (voce Pratiche): ogni casella dice cosa e'. Prima erano
+             tre caselle con solo «Es. 12 / Es. 345 / Es. 2»: sul telefono una
+             sotto l'altra, e non si capiva quale fosse il foglio. -->
+        <div class="pr-cat">
+          <label class="pr-cat-c" for="j-cat-fog"><span>Foglio</span><input id="j-cat-fog" value="${esc(job.catasto_foglio||"")}" placeholder="Es. 12"></label>
+          <label class="pr-cat-c" for="j-cat-par"><span>Particella</span><input id="j-cat-par" value="${esc(job.catasto_particella||"")}" placeholder="Es. 345"></label>
+          <label class="pr-cat-c" for="j-cat-sub"><span>Sub</span><input id="j-cat-sub" value="${esc(job.catasto_sub||"")}" placeholder="Es. 2"></label>
         </div>
       </div>`;
   }
@@ -639,7 +642,10 @@
         +`<div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="${pro?"Es. CILA per rifacimento bagno":"Es. taglio siepe e pulizia aiuole"}">${esc(job.descrizione||"")}</textarea></div>`
         +`<div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Es. Via Roma 12, scala B, piano 3"></div>`
         +'<div class="row2">'
-        +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>`
+        /* 19 nov 2026 (voce Pratiche) — per lo studio la data NON si mette da
+           sola a oggi: una pratica creata e lasciata cosi' il giorno dopo era
+           gia' «In ritardo» (rossa), mentre aspettava solo il Comune. */
+        +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||(pro?"":todayStr())}"></div>`
         +`<div class="field"><label>${pro?"Collaboratore":"Operaio"}</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>`
         +'<div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>'
         +'</div>'
@@ -689,7 +695,7 @@
       ${bloccoPratica(job)}
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
-        <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
+        <div class="field"><label>${ruoloUtente==='professionista'?"Collaboratore":"Chi ci va"}</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
       <div class="field"><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
       </div>
@@ -760,7 +766,7 @@
                Si può lasciare vuoto: la persona nasce lo stesso e il margine dice che manca. -->
           <label class="ore-c" id="or-chi-nuovo-box" style="display:none"><span>Nome della persona</span><input id="or-chi-nuovo" placeholder="Nome e cognome"></label>
           <label class="ore-c" id="or-chi-costo-box" style="display:none"><span>Quanto ti costa all'ora (€)</span><input id="or-chi-costo" type="text" inputmode="decimal" placeholder="Es. 22,50"></label>
-          <label class="ore-c ore-c--tutta"><span>Cosa ha fatto (se vuoi)</span><input id="or-nota" placeholder="Es. Posa piastrelle bagno"></label>
+          <label class="ore-c ore-c--tutta"><span>Cosa ha fatto (se vuoi)</span><input id="or-nota" placeholder="${ruoloUtente==='professionista'?"Es. Rilievo e pratica al Comune":"Es. Posa piastrelle bagno"}"></label>
           <button type="button" class="btn ore-c--tutta" data-action="ore-add">+ Aggiungi le ore</button></div>
         <div class="margine-box" id="ora-box"></div>
         <!-- 22 agosto 2026 — IL PONTE FRA LE ORE E LA PARCELLA.
@@ -945,7 +951,10 @@
       const data=t.toISOString().slice(0,10);
       const desc=String((dati&&dati.descrizione)||"").trim();
       const tipo=praticaTipoScritto((dati&&dati.pratica_tipo)||"");   /* 15 nov 2026: nel titolo «Agibilità» */
-      const titolo=("Integrazioni "+(tipo?tipo+" ":"")+(desc?"— "+desc:"")).trim();
+      /* 19 nov 2026 (voce Pratiche) — «Integrazioni CILA — CILA bagno Rossi»:
+         il tipo si scriveva due volte se c'era gia' nella descrizione */
+      const _base=titoloScadenza(tipo,desc,true);
+      const titolo=(!desc&&!tipo)?"Integrazioni":(desc&&_base===desc)?("Integrazioni — "+desc):("Integrazioni "+_base).trim();
       if(!(await gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi da «Scadenze e promemoria».")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
         tipo_pratica:"Integrazione richiesta dal Comune",lavoro_id:lavId,
@@ -1091,12 +1100,13 @@
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       /* 11 nov 2026 — collaudo 3.4: la casella che manca si segna (campoManca) */
       if(!descrizione){campoManca($("#j-desc"),"Manca cosa c'è da fare: scrivilo qui.");return;}
-      if(!data_prevista){campoManca($("#j-data"),"Manca la data: mettila qui.");return;}
+      /* 19 nov 2026 (voce Pratiche) — la pratica puo' nascere senza data (si aspetta il Comune) */
+      if(!data_prevista&&ruoloUtente!=='professionista'){campoManca($("#j-data"),"Manca la data: mettila qui.");return;}
       const importo=_numIt("#j-imp")||0;
       if(editing.fattura&&!(importo>0)){campoManca($("#j-imp"),"Manca l'importo: scrivilo qui.");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id},
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista:data_prevista||null,operatore_id:operatore_id||null,importo,cliente_id},
         leggiCampiPratica());
       /* niente scorciatoia "nasce già fatturato": la fattura si crea dalla sua sezione */
       let {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();

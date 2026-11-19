@@ -677,6 +677,12 @@
     ['per mostrarti il lavoro','per mostrarti la pratica'],
     ['a lavoro finito','a pratica finita'],
     ['per questo lavoro','per questa pratica'],
+    /* 19 nov 2026 (voce Pratiche) — nella scheda aperta si leggeva ancora
+       «Documenti di questo lavoro» e «… su questo lavoro» */
+    ['Documenti di questo lavoro','Documenti di questa pratica'],
+    ['di questo lavoro','di questa pratica'],
+    ['su questo lavoro','su questa pratica'],
+    ['questo lavoro','questa pratica'],
     ['Modifica lavoro','Modifica pratica'],
     /* 16 agosto 2026 — titolo della prima zona del modulo */
     ['Il lavoro','La pratica'],

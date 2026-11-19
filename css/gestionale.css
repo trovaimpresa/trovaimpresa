@@ -6389,3 +6389,12 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #galleria .segm button{flex:1 1 0;min-width:0;height:40px;padding:0 4px;font-size:15px!important;white-space:nowrap}
   #galleria .filtro-sel{width:100%;max-width:none;height:42px}
 }
+
+/* 19 nov 2026 — COLLAUDO DELLE PRATICHE: i dati catastali con la loro scritta
+   (Foglio · Particella · Sub). Tre in fila anche sul telefono: sono numeri corti.
+   Niente style in linea: mobile.css mette a una colonna tutto quello che ha
+   «grid-template-columns» scritto sull'elemento. */
+.pr-cat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pr-cat .pr-cat-c{display:flex;flex-direction:column;gap:4px;min-width:0;margin:0;font-size:16px;font-weight:700;color:var(--testo-2,#475569)}
+.pr-cat .pr-cat-c>span{font-size:16px;font-weight:700}
+.pr-cat .pr-cat-c input{width:100%;min-width:0;box-sizing:border-box}

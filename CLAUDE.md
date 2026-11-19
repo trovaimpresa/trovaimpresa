@@ -3832,3 +3832,26 @@ Si interrompevano (sistemato, decisione lasciata a Claude da Alex: «fai tu il m
 Difetti sistemati: la tendina dei clienti della fattura non si rileggeva (un cliente aggiunto dopo l'apertura → fattura su «— nessuno —»): `fattForm` la rilegge sempre. Nel lavoro «Rapportini di giornata» → «Giornate di questo lavoro» (lo studio resta com'era).
 Non fatti, idee per dopo: carta → lavoro (la colonna `gest_carte_movimenti.lavoro_id` c'è ma nessuno la scrive); scheda del mezzo → in quali lavori è stato usato.
 ⚠️ `_accontiDelLavoro` è stato provato con una BOZZA (il filtro «col numero» tolto nella copia di prova): con una fattura emessa vera non provato, per regola.
+
+# 19 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: PRATICHE
+
+Prova dal vivo con `?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE» (3 pratiche, 3 scadenze, 2 PDF), 1440 e 375. Poi cancellato tutto: →0← righe, file tolti dal deposito, conti del reparto tornati come prima.
+
+Codice: modulo `jobForm` / `bloccoPratica` / `saveJob` / `proponiScadenza*` in `js/gest-scadenze-pratiche.js`; elenco `renderJobs` / `lavNumeri` in `js/gest-schede-clienti.js`; apri/elimina/«+ Aggiungi una scadenza» in `js/gest-finestre-eventi.js`; ricerca in alto `js/gest-ricerca.js`; AI `aiRigaVia` (`js/gest-ai-moduli.js`) + `AI.pratica` / `riempiPratica` (`js/ai-integrazione.js`), server `netlify/functions/ai-pratica.mjs`; parole lavoro→pratica `_FRASI` (`js/gest-reparti.js`, applicate da `js/gest-ingresso.js` solo se il testo passa `_DA_TRADURRE`).
+
+Funziona (provato): crea, modifica, «Depositata» mette la data di oggi, «Integrazioni richieste» propone la scadenza a 30 giorni, scadenze nella scheda, documenti PDF (carica, elimina), cestino e «Rimetti a posto», ricerca per protocollo/tipo/Comune, telefono senza righe che escono.
+
+Sistemato (da pubblicare):
+1. Dati catastali: tre caselle senza nome («Es. 12 / Es. 345 / Es. 2», sul telefono una sotto l'altra). Ora «Foglio · Particella · Sub» in fila anche a 375 (`.pr-cat` in `css/gestionale.css`; niente style in linea: `mobile.css` mette a una colonna chi ha `grid-template-columns` scritto sull'elemento).
+2. Ricerca in alto: non trovava Comune e catastali. Ora sì, e «foglio 12» / «fg 12» / «mappale 120» / «sub 2» trovano quel numero preciso (`ctCatasto`, `ctCatastoDomanda`: «foglio:12;» non pesca il 120).
+3. ⛔ Pratica nel Cestino: le sue scadenze restavano vive («(pratica eliminata)» nello Scadenzario e l'email del mattino che avvisava). Ora le scadenze APERTE vanno nel Cestino con lei e tornano su con lei (`del-job-supa` + `CEST_FIGLI.gest_lavori`, `_LAV` fra i padri di `gest_scadenze`). Vale anche per impresa e artigiano.
+4. «+ Aggiungi una scadenza» dalla pratica: chiedeva sempre «se hai scritto qualcosa va perso» e dopo il salvataggio si finiva nell'elenco. Ora chiede solo se hai cambiato qualcosa (`_lavValori` / `_lavFoto`, i soldi si confrontano come numero) e chiusa la scadenza si torna nella pratica (`_tornaAlLavoro`).
+5. Pratica nuova: la data non si mette più da sola a oggi (il giorno dopo era già «In ritardo»), e si può salvare senza data (finisce in «Prossime»). Solo studio.
+6. Leggi un documento (foto/PDF): le caselle della pratica scritte a mano venivano sostituite (es. il Comune). Ora restano (`riempiPratica(d,primo,soloVuote)`); «A che punto sta» cambia solo se è ancora «Da preparare».
+7. Parole: «1 pratica già fatto» → «già fatta»; «Finite e non ancora incassate»; filtri «Tutte», «Prossime»; «Documenti di questa pratica», «… su questa pratica» (`_FRASI`); «Chi ci va» → «Collaboratore» (scritto alla fonte: «Chi ci va» non passa `_DA_TRADURRE`); esempio delle ore da studio; «Pratica nel cestino con 2 scadenze: la riprendi da lì»; nel Cestino «la pratica», «Rimessa a posto», «con lei»; documento: «Documento nel cestino: lo riprendi da lì».
+8. Titolo scadenza integrazioni: «Integrazioni CILA — … CILA …» → il tipo non si ripete (`titoloScadenza`).
+9. Sul telefono la riga sotto il titolo diceva «Da un lavoro nasce il preventivo»: `menuDaStudio()` cercava «Strumenti» nel menu, che dal 18 nov non c'è più. Ora guarda `ruoloUtente`; la riga si riscrive se è nata prima di sapere il ruolo (`data-studio`, si confronta il ruolo e non il testo, se no il traduttore la fa riscrivere all'infinito).
+
+Provato prima del push sulla pagina vera rimettendo le funzioni (1, 2, 3, 4, 5, 7 in parte). ⬜ NON provati dal vivo prima del push: l'AI vera (crediti di Alex finiti: 30/30 di novembre, risposta 402; il riempimento delle caselle è provato con una risposta finta), il microfono, la riga del telefono (9). Banco `tools/banco-gestionale.js app`: ZERO difetti (il banco gira solo da impresa).
+
+Idee per dopo (funzioni nuove, NON fatte, da chiedere ad Alex con la foto): scadenze cliccabili dentro la pratica; filtro per «A che punto sta» (es. tutte le «Integrazioni richieste»); una pratica che aspetta il Comune (Depositata / In istruttoria) non dovrebbe diventare «In ritardo».

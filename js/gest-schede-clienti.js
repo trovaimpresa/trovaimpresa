@@ -381,7 +381,8 @@
     const _praPro=(ruoloUtente==='professionista');
     renderTabella({
       id:"lav", box:"#jobs-list",
-      viste:"#lav-viste", visteDef:LAV_VISTE.map(v=>({k:v.k,lab:v.lab,err:v.k==="ritardo"})),
+      viste:"#lav-viste", /* 19 nov 2026 (voce Pratiche) — «Tutti», «Prossimi» detti a delle pratiche */
+      visteDef:LAV_VISTE.map(v=>({k:v.k,lab:(_praPro&&({tutti:"Tutte",prossimi:"Prossime"})[v.k])||v.lab,err:v.k==="ritardo"})),
       vista:filter.vista, conta:conta, azioneVista:"lav-vista",
       vuoto:filter.q?tabVuotoCerca(filter.q):lavVuoto(filter.vista),
       /* 9 agosto 2026 — per uno studio la colonna "Chi" conta poco (spesso è
@@ -454,9 +455,9 @@
         sotto:(peggio.descrizione||("Senza nome")),
         tono:"err", action:"edit-job", id:peggio.id}):null,
       daInc.length?numCard({
-        domanda:"Finiti e non ancora incassati",
+        domanda:pro?"Finite e non ancora incassate":"Finiti e non ancora incassati",
         numero:eur(valInc),
-        sotto:quanti(daInc.length)+(daInc.length===1?" già fatto":" già fatti"),
+        sotto:quanti(daInc.length)+(daInc.length===1?(pro?" già fatta":" già fatto"):(pro?" già fatte":" già fatti")),   /* 19 nov 2026: «1 pratica già fatto» */
         tono:"attesa", action:"lav-vista", v:"incassare"}):null
     ]);
   }

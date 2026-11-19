@@ -79,6 +79,12 @@
   };
 
   function menuDaStudio() {
+    /* 19 nov 2026 (voce Pratiche) — dal giorno che le voci si sono unite
+       («Mezzi e attrezzature») la scritta «Strumenti» non c'e' piu' e lo
+       studio leggeva la frase dell'impresa («Da un lavoro nasce…»).
+       ruoloUtente adesso si legge (sta in gest-reparti.js, fuori da ogni
+       funzione): si guarda prima quello. */
+    try { if (typeof ruoloUtente !== 'undefined' && ruoloUtente) return ruoloUtente === 'professionista'; } catch (_) {}
     var s = document.querySelector('[data-tab="attrezzature"] span');
     return !!(s && s.textContent.trim() === 'Strumenti');
   }
@@ -479,10 +485,19 @@
      detto. Le sezioni chiuse non si vedono comunque. */
   function rigaSezione() {
     if (conMouse) return;
+    /* 19 nov 2026 (voce Pratiche) — anche qui la frase dello studio: sul
+       telefono un geometra leggeva «Da un lavoro nasce il preventivo». E se
+       la riga e' nata prima di sapere il ruolo, si riscrive. */
+    var studio = menuDaStudio();
     document.querySelectorAll('section[id]').forEach(function (sez) {
-      var t = AIUTI_TAB[sez.id];
+      var t = (studio && AIUTI_TAB_STUDIO[sez.id]) || AIUTI_TAB[sez.id];
       if (!t) return;
-      if (sez.querySelector('.ti-sez')) return;
+      var gia = sez.querySelector('.ti-sez');
+      /* ⚠️ si confronta il RUOLO con cui e' nata, non il testo: il traduttore
+         dello studio cambia le parole dopo, e confrontando il testo si
+         riscriverebbe all'infinito */
+      var chi = studio ? '1' : '0';
+      if (gia) { if (gia.dataset.studio !== chi) { gia.textContent = t; gia.dataset.studio = chi; } return; }
       /* ⚠️ certe sezioni una riga di presentazione ce l'hanno gia' scritta a
          mano (il Riepilogo, l'Agenda, la Galleria): due frasi che dicono la
          stessa cosa una sotto l'altra sono peggio di nessuna. */
@@ -492,6 +507,7 @@
       var p = document.createElement('p');
       p.className = 'ti-sez';
       p.textContent = t;
+      p.dataset.studio = chi;
       /* il titolo spesso sta dentro una riga con i pulsanti a fianco: la
          frase va SOTTO tutta quella riga, non in mezzo ai pulsanti */
       var testa = h.parentNode;

@@ -521,7 +521,8 @@
     if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
     /* col cestino il file NON si tocca: se no il ripristino darebbe un documento rotto */
     if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
-    await renderDocLavoro(docLavId);toast("Documento eliminato");
+    /* 19 nov 2026 (voce Pratiche) — come nei Clienti: va nel Cestino, e lo si dice */
+    await renderDocLavoro(docLavId);toast((window.cestinoAttivo&&window.cestinoAttivo())?"Documento nel cestino: lo riprendi da lì":"Documento eliminato");
   }
 
   async function fattfForm(f){
