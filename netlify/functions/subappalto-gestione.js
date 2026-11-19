@@ -15,6 +15,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.s
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const SITO = 'https://trovaimpresa.com';
+const { mandaAbbinamenti } = require('./lib/abbinamento-subappalti');
 const GIORNI = 30;
 
 const H = {
@@ -56,13 +57,14 @@ const emailValida = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e || '').tr
 
 /* 18 nov 2026 (richiesta di Alex): a ogni annuncio nuovo arriva un avviso a info@,
    come per le iscrizioni. Se non parte, l'annuncio resta pubblicato lo stesso. */
-async function avvisaAdmin(a) {
+async function avvisaAdmin(a, abb) {
   if (!RESEND_KEY) return;
   const cosa = a.tipo === 'cerca' ? 'Cerca subappaltatori' : 'Offre disponibilità';
   const titolo = String((a.tipo === 'cerca' ? a.descrizione : a.lavoro) || '').split('\n')[0].slice(0, 120);
   const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a">
     <p><b>${esc(a.nome_impresa || '—')}</b> ha pubblicato un subappalto.</p>
     <p>${esc(cosa)} · ${esc(titolo)}<br>📍 ${esc(a.citta || '—')}</p>
+    <p>📨 ${abb && abb.inviate ? `Avvisate <b>${abb.inviate}</b> imprese iscritte (${esc((abb.regioni || []).join(', '))}): ${esc((abb.nomi || []).join(', '))}` : `Nessuna impresa avvisata${abb && abb.motivo ? ' (' + esc(abb.motivo) + ')' : ''}`}</p>
     <p><a href="${SITO}/subappalto-annuncio?id=${encodeURIComponent(a.id)}">Vedi l'annuncio</a> · <a href="${SITO}/admin.html">Apri il pannello admin</a></p></div>`;
   try { await mandaEmail('info@trovaimpresa.com', '🔔 Nuovo subappalto: ' + (a.nome_impresa || titolo), html); } catch (e) { console.warn('[subappalto-gestione] avviso admin:', e.message); }
 }
@@ -179,7 +181,14 @@ exports.handler = async function (event) {
 
     if (azione === 'link') {
       if (a.email_link_inviata) return risposta(200, { gia_inviata: true });
-      await avvisaAdmin(a);
+      /* 19 nov 2026: email di abbinamento alle imprese della stessa regione
+         (lib/abbinamento-subappalti.js). Non lancia mai: l'annuncio è già online. */
+      let abb = { inviate: 0, motivo: 'annuncio non attivo' };
+      if (a.attivo !== false) {
+        const proprietario = await sb(`${dove}&select=user_id`).catch(() => []);
+        abb = await mandaAbbinamenti({ ...a, user_id: (proprietario[0] || {}).user_id || null }, { sb, resendKey: RESEND_KEY });
+      }
+      await avvisaAdmin(a, abb);
       if (!RESEND_KEY || !emailValida(a.email)) return risposta(200, { inviata: false });
       const ok = await mandaEmail(a.email, 'Il tuo annuncio di subappalto è online', emailLink(a, linkGestione(id, token)));
       if (ok) await sb(dove, { method: 'PATCH', body: JSON.stringify({ email_link_inviata: true }) });
