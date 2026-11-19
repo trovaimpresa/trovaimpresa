@@ -149,7 +149,8 @@
     const {data:f}=await sb.from("gest_fornitori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(!f){toast("Fornitore non trovato");return;}
     const {data:ff}=await sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid).eq("fornitore_id",id).order("scadenza",{ascending:true});
-    const fatture=(ff||[]).sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(a.scadenza||"9999").localeCompare(String(b.scadenza||"9999")));
+    /* 19 nov 2026 — come nell'elenco: in cima le ULTIME salvate, le pagate in fondo */
+    const fatture=(ff||[]).sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(b.created_at||"").localeCompare(String(a.created_at||"")));
     const oggi=todayStr();
     const aperte=fatture.filter(x=>x.stato!=="pagata");
     const totAp=aperte.reduce((sm,x)=>sm+(+x.importo||0),0);
@@ -160,9 +161,9 @@
       const q=x.scadenza?quando(x.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
       return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'" style="margin-bottom:8px">'
         +'<div class="ff-info">'+(x.numero?'<b>n. '+esc(x.numero)+'</b>':'<b>Fattura</b>')+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</div>'
-        +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta':q.testo))+'</span>'
+        +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta '+q.testo:q.testo))+'</span>'
         +'<span class="ff-imp">'+eur(x.importo)+'</span>'
-        +(pag?'':'<button class="btn btn-sm" data-action="fattf-stato" data-id="'+esc(String(x.id))+'" data-v="pagata" data-forn="'+esc(String(f.id))+'">✔ Pagata</button>')
+        +'<div class="ff-acts"><button class="btn btn-sm" data-action="fattf-stato" data-id="'+esc(String(x.id))+'" data-v="'+(pag?'da_pagare':'pagata')+'" data-forn="'+esc(String(f.id))+'">'+(pag?'↩ Riapri':'✔ Pagata')+'</button></div>'
         +'</div>';
     }).join(""):'<p class="sh-nota" style="margin-top:0">Nessuna fattura registrata per questo fornitore.</p>';
     openSheetGrande(esc(f.nome||"Fornitore")+tag,
@@ -350,9 +351,25 @@
     const box=$("#fo-ti-risultati");if(box)box.innerHTML="";
     toast("Negozio collegato: ricordati di salvare ✔");
   }
+  let fornSalvo=false;   /* 19 nov 2026: due tocchi su «Aggiungi» facevano DUE fornitori (provato dal vivo) */
   async function saveForn(id){
+    if(fornSalvo)return;
     const nome=$("#fo-nome").value.trim();if(!nome){campoManca($("#fo-nome"),"Manca il nome del fornitore: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
+    fornSalvo=true;
+    try{ await _saveForn(id,nome); }
+    finally{ fornSalvo=false; }
+  }
+  async function _saveForn(id,nome){
+    /* 19 nov 2026 — stesso nome di un fornitore che c'e' gia': si chiede prima */
+    if(!id&&(fornCache||[]).some(x=>String(x.nome||"").trim().toLowerCase()===nome.toLowerCase())){
+      if(!(await gconfirm("Hai già un fornitore che si chiama «"+nome+"».\n\nLo aggiungo lo stesso?")))return;
+    }
+    const _bs=document.querySelector('#sheet [data-action="save-forn"]');if(_bs)_bs.disabled=true;
+    try{ await _saveFornScrivi(id,nome); }
+    finally{ if(_bs&&document.body.contains(_bs))_bs.disabled=false; }
+  }
+  async function _saveFornScrivi(id,nome){
     const row={nome,categoria:$("#fo-cat").value||null,telefono:$("#fo-tel").value.trim()||null,
       email:$("#fo-email").value.trim()||null,piva:$("#fo-piva").value.trim()||null,
       indirizzo:$("#fo-ind").value.trim()||null,note:$("#fo-note").value.trim()||null,

@@ -466,7 +466,7 @@
       +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
       +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
       +'<div class="row2">'
-      +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0" data-euro></div>'
+      +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo?_numTesto(f.importo):'')+'" placeholder="0" data-euro></div>'
       +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -487,7 +487,15 @@
     if(typeof acqTesta==="function")acqTesta();
     if(!isNew&&typeof acqBoxCarica==="function")acqBoxCarica(f.id);
   }
+  let fattfSalvo=false;   /* 19 nov 2026: due tocchi su «Aggiungi» facevano DUE fatture da pagare (provato dal vivo) */
   async function saveFattf(id){
+    if(fattfSalvo)return;
+    fattfSalvo=true;
+    const _bs=document.querySelector('#sheet [data-action="save-fattf"]');if(_bs)_bs.disabled=true;
+    try{ await _saveFattf(id); }
+    finally{ fattfSalvo=false; if(_bs&&document.body.contains(_bs))_bs.disabled=false; }
+  }
+  async function _saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const fornitore_id=$("#ff-forn").value;if(!fornitore_id){toast("Scegli il fornitore");return;}
     const importo=_numIt("#ff-imp")||0;
@@ -501,6 +509,12 @@
         closeSheet();toast("Bolla registrata: la merce è negli Acquisti del mese ✔");return;
       }
       toast("Scrivi l'importo della fattura, per esempio 1.200,50");return;
+    }
+    /* 19 nov 2026 — stesso numero dallo stesso fornitore: quasi sempre e' la
+       stessa fattura scritta due volte (e pagata due volte). Si chiede prima. */
+    const _num=$("#ff-num").value.trim();
+    if(!id&&_num&&(fattfCache||[]).some(x=>String(x.fornitore_id)===String(fornitore_id)&&String(x.numero||"").trim().toLowerCase()===_num.toLowerCase())){
+      if(!(await gconfirm("Di questo fornitore hai già la fattura n. "+_num+".\n\nLa registro lo stesso?")))return;
     }
     const row={fornitore_id,numero:$("#ff-num").value.trim()||null,data:$("#ff-data").value||todayStr(),
       importo,scadenza:$("#ff-scad").value||null,lavoro_id:$("#ff-lav").value||null,note:$("#ff-note").value.trim()||null};

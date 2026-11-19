@@ -3672,3 +3672,19 @@ Difetti trovati e sistemati:
 6. «Ci sono 1 lavorazioni» → «C'è 1 lavorazione». La domanda «Mettere nel cestino l'acconto n. …» trova il numero anche dall'elenco.
 
 Errore 400 all'apertura: non si ripete (3 aperture, 0 errori). Nei registri Supabase del 18 nov l'unico 400 su una lettura è `gest_preventivi?computo_id=…` (colonna che non esiste) alle 20:49: NON sta in nessun file del sito, quasi certo una prova scritta a mano in un'altra sessione.
+
+# 19 NOVEMBRE 2026 — UNA VOCE PER VOLTA: FORNITORI (impresa e artigiano)
+
+(Il Prezzario era già stato fatto il 18 nov: questa sessione è passata alla voce dopo.)
+Provato dal vivo (1440 e 375) nel reparto «ferramenta»: fornitori e fatture «PROVA CONTROLLORE», un documento, pagata/riapri, cestino e ritorno. Poi cancellato tutto (anche dal Cestino e dal deposito file): 0 righe.
+
+Difetti trovati e sistemati:
+1. Doppio tocco su «Aggiungi» = 2 fornitori; su «Aggiungi» della fattura = 2 fatture da pagare. Chiavistelli `fornSalvo` (js/gest-fornitori.js) e `fattfSalvo` (js/gest-carte-documenti.js).
+2. Scheda del fornitore: le righe delle fatture erano senza stile («scaduta1.200,50 €» attaccato). Le regole `.ff-*` valevano solo per `#fornitori`: ora anche per `#sheet` (css/gestionale.css).
+3. Scheda del fornitore: una fattura segnata pagata non si poteva riaprire da lì; ora c'è «Riapri». In cima le ultime salvate (come nell'elenco). «scaduta 9 giorni fa» come nell'elenco.
+4. Stesso nome di un fornitore che c'è già, o stesso numero di fattura dallo stesso fornitore: prima di salvare si chiede («Lo aggiungo lo stesso?»). Non blocca.
+5. «Modifica fattura»: l'importo si riempie con `_numTesto` (prima a volte «1200.5» all'inglese finché non passava euro-casella).
+
+Funziona e NON toccato: cestino (rimette a posto anche il fornitore della fattura), Scadenze (la fattura scaduta compare), documenti, avvisi su P.IVA ed email.
+⚠️ Da decidere con Alex (chiesto il 19 nov): (a) la ricerca in alto non trova i fornitori (`CT_CAMPI` in js/gest-ricerca.js ha solo clienti, lavori, preventivi, fatture); (b) «Collegamento TrovaImpresa» cerca solo `tipo='negozio'` e di negozi veri iscritti ce ne sono 0: non trova mai niente.
+⬜ Non provato dal vivo: «Fotografa una fattura» (AI, crediti a 0) e il margine del lavoro collegato (il lavoro in ferramenta è un dato di Alex).
