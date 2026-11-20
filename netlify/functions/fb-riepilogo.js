@@ -3,12 +3,12 @@
 //
 // Dentro: i subappalti, le offerte di lavoro e i nuovi iscritti con la
 // scheda pubblica arrivati nelle ultime 24 ore. Ogni riga ha il pulsante che
-// apre facebook-post.html col testo pronto. Se non c'e' niente, non parte.
+// apre facebook-post.html col testo pronto. Ogni giorno c'e' anche un marchio della pubblicita' della home, a giro: l'email parte sempre.
 //
 // ⛔ Le due righe vanno insieme: l'import di `schedule` e
 //    `exports.handler = schedule(...)` in fondo.
 const { schedule } = require('@netlify/functions');
-const { SITO } = require('./lib/fb-testi');
+const { SITO, MARCHI, marchioDelGiorno } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -54,11 +54,15 @@ const handler = async () => {
     imp.forEach(i => righe.push(riga('👷 Nuovo iscritto —', i.nome_attivita || i.nome || 'senza nome', i.citta, 'imp', i.id)));
   } catch (e) { console.error('[fb-riepilogo] iscritti', e.message); }
 
-  if (!righe.length) { console.log('[fb-riepilogo] niente di nuovo'); return { statusCode: 200 }; }
+  const nuovi = righe.length;
+  // 20 nov 2026 (Alex): ogni giorno anche un marchio della pubblicita' della
+  // home, a giro. Cosi' la pagina ha un post anche nei giorni senza novita'.
+  const mk = marchioDelGiorno();
+  righe.push(riga('🛠️ Pubblicità —', MARCHI[mk].nome, '', 'mar', mk));
 
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
     <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Da pubblicare su Facebook</h2>
-    <p style="font-size:16px;color:#475569;margin:0 0 8px">Arrivati nelle ultime 24 ore. Tocca «Prepara il post»: il testo è già scritto.</p>
+    <p style="font-size:16px;color:#475569;margin:0 0 8px">${nuovi ? 'Arrivati nelle ultime 24 ore, più il marchio di oggi.' : 'Niente di nuovo ieri: c\'è il marchio di oggi.'} Tocca «Prepara il post»: il testo è già scritto.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${righe.join('')}</table>
   </div>`;
   const r = await fetch('https://api.resend.com/emails', {

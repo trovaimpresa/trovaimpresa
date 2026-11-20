@@ -83,4 +83,45 @@ function testoIscritto(i) {
   return { titolo: `Nuovo iscritto — ${nome || 'senza nome'}`, testo: righe.filter(r => r !== null).join('\n'), link };
 }
 
-module.exports = { SITO, testoSubappalto, testoOfferta, testoIscritto };
+// I marchi della pubblicita' della home (Awin). Stessi id e frasi di
+// js/locandine-home.js e js/marchio-in-guida.js: se ne entra uno nuovo,
+// va aggiunto anche qui. Rowenta e Moulinex no (c'entrano poco coi lavori).
+const AWIN_ME = '3137864';
+const MARCHI = {
+  plenitude: { id: 9529,   nome: 'Plenitude',  tag: 'plenitude', frase: 'Plenitude (gruppo Eni): luce e gas per la casa, fotovoltaico, climatizzatori e caldaie con installazione.' },
+  vevor:     { id: 118433, nome: 'Vevor',      tag: 'vevor',     frase: 'Betoniere, ponteggi, attrezzi e macchinari da cantiere a buon prezzo.' },
+  gagliardi: { id: 54303,  nome: 'Gagliardi',  tag: 'gagliardi', frase: 'Materiale elettrico, idraulico e videosorveglianza di marca, con spedizione rapida.' },
+  trotec:    { id: 115365, nome: 'Trotec',     tag: 'trotec',    frase: 'Deumidificatori, misuratori di umidità e utensili per chi lavora in casa e in cantiere.' },
+  vonroc:    { id: 126387, nome: 'Vonroc',     tag: 'vonroc',    frase: 'Trapani, smerigliatrici e utensili elettrici per casa e giardino.' },
+  lampade:   { id: 10404,  nome: 'Lampade.it', tag: 'lampade',   frase: 'Lampade, faretti e illuminazione per ogni stanza, anche a LED.' },
+  comet:     { id: 23030,  nome: 'Comet',      tag: 'comet',     frase: 'Elettrodomestici, climatizzatori e illuminazione per la casa nuova.' },
+  kasanova:  { id: 17198,  nome: 'Kasanova',   tag: 'kasanova',  frase: 'Casalinghi, cucina e arredo per completare la casa dopo i lavori.' }
+};
+const GIRO = ['plenitude', 'vevor', 'gagliardi', 'trotec', 'vonroc', 'lampade', 'comet', 'kasanova'];
+// il marchio del giorno: uno diverso ogni giorno, in giro
+function marchioDelGiorno(d = new Date()) {
+  const g = Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 864e5);
+  return GIRO[g % GIRO.length];
+}
+
+function testoMarchio(chiave) {
+  const m = MARCHI[chiave];
+  if (!m) return null;
+  // link corto: netlify.toml lo gira su Awin (con clickref=facebook, per sapere da dove arriva)
+  const link = `${SITO}/vai/${chiave}`;
+  const righe = [
+    `🛠️ ${m.nome}`,
+    m.frase,
+    '',
+    '👉 Guarda le offerte:',
+    link,
+    '',
+    'Stai facendo lavori? Trova l\'impresa o l\'artigiano giusto, gratis:',
+    SITO,
+    '',
+    `Pubblicità · link affiliato #adv #${m.tag} #casa #edilizia #trovaimpresa`
+  ];
+  return { titolo: `Pubblicità — ${m.nome}`, testo: righe.join('\n'), link };
+}
+
+module.exports = { SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio };

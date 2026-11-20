@@ -1485,3 +1485,54 @@
   to = "/imprese-:splat"
   status = 302
 
+
+# 20 nov 2026 — link corti dei marchi per i post Facebook (/vai/<marchio> → Awin).
+# Stessi marchi di netlify/functions/lib/fb-testi.js: se ne entra uno, aggiungerlo qui.
+[[redirects]]
+  from = "/vai/plenitude"
+  to = "https://www.awin1.com/cread.php?awinmid=9529&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/vevor"
+  to = "https://www.awin1.com/cread.php?awinmid=118433&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/gagliardi"
+  to = "https://www.awin1.com/cread.php?awinmid=54303&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/trotec"
+  to = "https://www.awin1.com/cread.php?awinmid=115365&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/vonroc"
+  to = "https://www.awin1.com/cread.php?awinmid=126387&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/lampade"
+  to = "https://www.awin1.com/cread.php?awinmid=10404&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/comet"
+  to = "https://www.awin1.com/cread.php?awinmid=23030&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/vai/kasanova"
+  to = "https://www.awin1.com/cread.php?awinmid=17198&awinaffid=3137864&clickref=facebook"
+  status = 302
+  force = true
+
