@@ -266,8 +266,8 @@
     'rapportini di giornata': 'Li scrive chi sta in cantiere, dal telefono: ore, materiali, cosa e’ stato fatto. Tu li leggi qui la sera, senza telefonate.',
     'note (compaiono sul pdf)': 'ATTENZIONE: queste le LEGGE IL CLIENTE, sono stampate sul documento. Le note che vuoi tenere per te vanno nel campo «Note» del lavoro, non qui.',
     'titolare (chi ce l\'ha in tasca)': 'La persona che ha in mano la carta. Le spese che registra finiscono su di lui, e sul suo telefono vede solo la sua carta.',
-    'crediti (cfp)': 'I crediti formativi che ti da’ questo corso. Li conta il tuo Ordine: se non arrivi al minimo dell’anno rischi la sospensione.',
-    'crediti formativi da fare ogni anno (cfp)': 'Quanti CFP ti chiede il tuo Ordine ogni anno. Per molti sono 30, ma controlla il regolamento tuo: cambia da Ordine a Ordine.',
+    'crediti (cfp)': 'I crediti formativi che ti da’ questo corso. Li conta il tuo Ordine: se non arrivi al minimo rischi la sospensione.',
+    'traguardo dei crediti formativi (cfp)': 'Quanti CFP ti chiede il tuo Ordine. Se conta su tre anni (geometri, architetti: 60) lo scegli in Crediti formativi → «Come conta il tuo Ordine».',
 
     'cassa previdenziale': 'Il contributo per la tua cassa (Inarcassa, Geometri, EPPI, INPS). Si calcola SOLO sul compenso, non sulle spese, e si aggiunge in fattura: lo paga il cliente. La percentuale confermala al commercialista.',
     'ritenuta d\'acconto': 'Una parte del tuo compenso che il cliente NON ti paga: la versa lui allo Stato per conto tuo, come anticipo delle tue tasse. Di solito il 20%, e solo sul compenso. Non e\u2019 un costo: la ritrovi nella dichiarazione dei redditi.',

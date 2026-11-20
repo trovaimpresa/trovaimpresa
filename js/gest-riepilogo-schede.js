@@ -175,6 +175,8 @@
       let _per=[];try{_per=await scadenzePersone(curMestiere());}catch(_){}
       /* 19 nov 2026 — e la scadenza delle carte aziendali, che lo Scadenzario mostra */
       try{if(typeof scadenzeCarte==="function")_per=_per.concat(await scadenzeCarte(curMestiere()));}catch(_){}
+      /* 20 nov 2026 — e i crediti formativi che mancano (solo da ottobre dell'ultimo anno) */
+      try{if(typeof scadenzeCrediti==="function")_per=_per.concat(await scadenzeCrediti());}catch(_){}
       const sAperte=(sc||[]).concat(_per).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
       /* Fornitori: fatture da pagare. Rosso se qualcuna è scaduta.

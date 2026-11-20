@@ -163,6 +163,33 @@
         titolo:"Scadenza della carta",tipo_pratica:"Carta aziendale",data_scadenza:c.scadenza,stato:"aperta"}));
     }catch(_){ return []; }
   }
+  /* 20 nov 2026 (si' di Alex, foto prima) — I CREDITI FORMATIVI CHE MANCANO.
+     Sola lettura, come carte e fornitori. Esce solo da ottobre dell'ultimo
+     anno del periodo (anno o triennio, come dice l'Ordine) e solo se mancano
+     crediti: lo stesso conto della sezione (credConto in gest-preventivi.js).
+     I corsi sono della PERSONA: si vedono uguali in tutti i reparti, e solo a
+     chi ha la voce «Crediti formativi» nel menu. */
+  async function scadenzeCrediti(){
+    if(!sb||!sbUid||typeof credConto!=="function")return [];
+    const tb=document.querySelector("#tab-crediti");
+    if(!tb||tb.style.display==="none")return [];
+    try{
+      const [rc,ra]=await Promise.all([
+        sb.from("gest_crediti").select("data,crediti,tipo").eq("user_id",sbUid),
+        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
+      ]);
+      if(rc.error)return [];
+      const reg=credRegolaDa(ra&&!ra.error?ra.data:null);
+      const K=credConto(rc.data||[],reg,todayStr().slice(0,4));
+      if(!K.avviso)return [];
+      const n=v=>String(Math.round(v*100)/100).replace(".",",");
+      let frase=K.mancano>0?("ne mancano "+n(K.mancano)):"";
+      if(K.mancaDeont>0)frase+=K.mancano>0?(" (di cui "+n(K.mancaDeont)+" di deontologia)"):("mancano "+n(K.mancaDeont)+" di deontologia");
+      return [{id:"cfp:"+K.a,_cred:true,_nome:reg.periodo===3?("triennio "+K.da+"–"+K.a):("anno "+K.a),
+        titolo:"Crediti formativi: "+frase,
+        tipo_pratica:"Crediti formativi",data_scadenza:K.scade,stato:"aperta"}];
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -189,8 +216,8 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const [scadPersone,scadMezzi,scadForn,scadCarte,scadInc]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid),scadenzeCarte(mid),scadenzeIncassi(mid)]);
-    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn,scadCarte,scadInc).sort(function(a,b){
+    const [scadPersone,scadMezzi,scadForn,scadCarte,scadInc,scadCred]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid),scadenzeFornitori(mid),scadenzeCarte(mid),scadenzeIncassi(mid),scadenzeCrediti()]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi,scadForn,scadCarte,scadInc,scadCred).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
@@ -222,6 +249,20 @@
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._cred){
+          const apriCr={action:"vai-sezione",data:{go:"crediti"}};
+          return {
+            id:s.id,
+            click:apriCr,
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `🎓 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"🎓 Apri i crediti formativi",action:"vai-sezione",data:{go:"crediti"}}]
+          };
+        }
         if(s._carta){
           const apriC={action:"cal-vai",data:{tab:"carte",azione:"carta-dettaglio",id:s._caId}};
           return {
@@ -316,6 +357,17 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    if(s._cred){
+      let bgR="var(--sfondo)",fgR="var(--testo-2)",labR="In tempo",tonoR="t-neutro";
+      if(s.data_scadenza<oggi){bgR="var(--err-bg)";fgR="var(--err)";labR="Scaduta";tonoR="t-err";}
+      else if(s.data_scadenza<=lim){bgR="var(--attesa-bg)";fgR="var(--attesa)";labR="In scadenza";tonoR="t-attesa";}
+      return schedaJob({
+        tono:tonoR, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgR};color:${fgR}">${labR}</span>`,
+        meta:["🎓 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri",action:"vai-sezione",data:{go:"crediti"}}]
+      });
+    }
     if(s._carta){
       let bgC="var(--sfondo)",fgC="var(--testo-2)",labC="In tempo",tonoC="t-neutro";
       if(s.data_scadenza<oggi){bgC="var(--err-bg)";fgC="var(--err)";labC="Scaduta";tonoC="t-err";}

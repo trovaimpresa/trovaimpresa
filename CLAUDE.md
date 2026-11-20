@@ -3937,9 +3937,12 @@ Sistemato:
 
 Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione).
 
-Funzioni nuove — FOTO MANDATE, ASPETTANO IL SÌ DI ALEX (non costruite):
-- **Conto sul triennio**: finestra «Come conta il tuo Ordine» (Ordine, ogni anno / in tre anni, anno di inizio, crediti da fare, di cui deontologia); riquadro «Triennio 2024–2026 · 48,5 di 60», «ti mancano X entro il 31/12/2026 (fra N giorni)», deontologia «5,5 di 6», un numero per anno. Serve SQL: `gest_azienda.cfp_ordine`, `cfp_periodo` (1/3), `cfp_inizio`, `cfp_deont`.
-- **Attestato** (PDF o foto) attaccato al corso, con Cestino che toglie anche il file.
-- **Avviso**: da ottobre dell'ultimo anno, se mancano crediti → scheda rossa nel Riepilogo e riga in Scadenze.
-- **Ricerca in alto** che trova anche i corsi (oggi no: `js/gest-ricerca.js` guarda clienti, pratiche, preventivi, fatture, fornitori).
-⬜ Non provato: la voce «Crediti formativi da fare ogni anno» nei Dati azienda (stessa colonna `cfp_obiettivo`).
+Funzioni nuove (sì di Alex a tutte e 4, foto prima):
+- **Come conta il tuo Ordine** (`credTraguardo` / `saveCredTraguardo`, era «Cambia il traguardo»): Ordine (geometri 60/3 anni/6 deont., architetti 60/3/12, ingegneri 30/anno), anno o triennio, anno di inizio, crediti, di cui deontologia. Colonne `gest_azienda.cfp_ordine`, `cfp_periodo` (1/3), `cfp_inizio`, `cfp_deont` (`sql/2026-11-20-crediti-triennio-attestato.sql`, migrazione `crediti_triennio_attestato_20nov2026`, riga in PROVE). Periodo vuoto = anno con `cfp_obiettivo`, come prima.
+- **UN conto solo**: `credRegolaDa(az)`, `credPeriodoDi`, `credConto(corsi,reg,anno)` in `js/gest-preventivi.js` (globali). Li usano la sezione, la scheda del Riepilogo («su 60 del triennio 2024–2026») e lo Scadenzario.
+- **Avviso** (`credConto(...).avviso`): da ottobre dell'ultimo anno del periodo, se mancano crediti o deontologia → scheda del Riepilogo accesa con «Ne mancano X entro il 31/12» e riga «Crediti formativi: ne mancano …» nello Scadenzario (`scadenzeCrediti()` in `js/gest-scadenze-pratiche.js`, anche nel pallino del menu; «Apri» → `vai-sezione` crediti). Solo se la voce «Crediti formativi» c'è nel menu.
+- **Attestato** (PDF o foto, max 10 MB) nel modulo del corso: `credAttestatoHTML`, `credAttSalva`, `credApriAttestato`; colonne `gest_crediti.attestato_path`, `attestato_nome`; deposito `gestionale-foto`, cartella `<utente>/attestati/`. ⛔ Cartella chiusa ai collaboratori: `gest_file_reparto` riconosce «attestati», `gest_puo_file` dice false (migrazioni `attestati_cartella_20nov2026`, `attestati_solo_titolare_20nov2026`). Il file entra DOPO il salvataggio del corso: se non entra lo dice. «Togli» lo toglie al Salva. Nel Cestino «Elimina per sempre» toglie anche il file (`path:r.storage_path||r.attestato_path`).
+- **Ricerca in alto** trova i corsi (titolo, ente, tipo, note, nome dell'attestato) → apre il corso (`edit-cred` → `credApri(id)`, che lo rilegge se `credCache` è vuota).
+- Dati azienda: la casella si chiama «Traguardo dei crediti formativi (CFP)».
+Provato prima del push col banco del gestionale (pagina vera, database finto, faccia studio, 1440 e 375): triennio 48,5 di 60, deontologia 5,5 di 6, finestra con «Collegio dei Geometri» che riempie 60/3/6, salvataggio, attestato caricato/vuoto rifiutato/tolto, Scadenzario, ricerca, Riepilogo, niente fuori schermo né sotto 13 px. `tools/banco-gestionale.js app`: ZERO difetti.
+⬜ Non provato: la casella del traguardo nei Dati azienda (stessa colonna `cfp_obiettivo`); un collaboratore che prova ad aprire un attestato (serve un suo account).

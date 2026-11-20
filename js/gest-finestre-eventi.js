@@ -118,7 +118,8 @@
     if(a==="cest-ripristina")return cestRipristina(id);
     if(a==="cest-definitivo")return cestDefinitivo(id);
     if(a==="new-cred")return credForm(null);
-    if(a==="edit-cred")return credForm(credCache.find(c=>String(c.id)===String(id)));
+    if(a==="edit-cred")return credApri(id);   /* 20 nov 2026: anche da ricerca e Scadenzario (credCache vuota) */
+    if(a==="cred-att")return credApriAttestato(id);
     if(a==="save-cred")return saveCred(id);
     if(a==="cred-traguardo")return credTraguardo();
     if(a==="save-cred-traguardo")return saveCredTraguardo();

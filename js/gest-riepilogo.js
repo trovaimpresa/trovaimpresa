@@ -1114,15 +1114,21 @@
     }
     if(_menuVisto("crediti")){
       try{
-        const {data:CR,error:eCr}=await sb.from("gest_crediti").select("data,crediti").eq("user_id",sbUid);
+        const {data:CR,error:eCr}=await sb.from("gest_crediti").select("data,crediti,tipo").eq("user_id",sbUid);
         if(!eCr&&CR&&CR.length){
-          const anno=oggi.slice(0,4);
-          /* 20 nov 2026 — i corsi con la data nel futuro non sono ancora fatti */
-          const fatti=CR.filter(c=>String(c.data||"").slice(0,4)===anno&&String(c.data||"")<=oggi).reduce((t,c)=>t+(+c.crediti||0),0);
-          const ob=(AZ&&+AZ.cfp_obiettivo>0)?+AZ.cfp_obiettivo:30;
+          /* 20 nov 2026 — lo STESSO conto della sezione (credConto): anno o
+             triennio come dice l'Ordine, i corsi futuri non contano, e da
+             ottobre dell'ultimo anno la scheda si accende se mancano crediti */
+          const reg=(typeof credRegolaDa==="function")?credRegolaDa(AZ):null;
+          const K=reg?credConto(CR,reg,oggi.slice(0,4)):null;
+          const fatti=K?K.fatti:CR.filter(c=>String(c.data||"").slice(0,4)===oggi.slice(0,4)&&String(c.data||"")<=oggi).reduce((t,c)=>t+(+c.crediti||0),0);
+          const ob=reg?reg.obiettivo:((AZ&&+AZ.cfp_obiettivo>0)?+AZ.cfp_obiettivo:30);
+          const _n2=v=>String(Math.round(v*100)/100).replace(".",",");
           C.push(rieCard({
-            tab:"crediti", titolo:"Crediti formativi", n:String(Math.round(fatti*100)/100).replace(".",","), dati:true,
-            lab:"su "+ob+" di quest\u2019anno", tono:"neutro", male:false, righe:[]
+            tab:"crediti", titolo:"Crediti formativi", n:_n2(fatti), dati:true,
+            lab:"su "+_n2(ob)+(reg&&reg.periodo===3?" del triennio "+K.da+"\u2013"+K.a:" di quest\u2019anno"),
+            tono:"neutro", male:!!(K&&K.avviso),
+            motivo:(K&&K.avviso)?("Ne mancano "+_n2(K.mancano||K.mancaDeont)+" entro il "+fdate(K.scade)):"", righe:[]
           }));
         }
       }catch(e){}

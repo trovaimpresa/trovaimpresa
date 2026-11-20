@@ -416,7 +416,7 @@
         cestCache.push({tab:x.c.t, ic:x.c.ic, foglia:!!x.c.foglia,
           tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?(x.c.t==='gest_lavori'?_lav():x.c.labImp):x.c.lab,
           nome:nome.length>80?nome.slice(0,79).trimEnd()+"…":nome,
-          quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
+          quando:r.eliminato_il, id:r.id, path:r.storage_path||r.attestato_path||null,   /* 20 nov: anche l'attestato del corso */
           /* 19 nov 2026 — i file del preventivo dell'operaio (colonna files) */
           files:(x.c.t==="gest_op_preventivi")?cestFileOp(r):null,
           sotto:(x.c.t==="gest_foto")?String(r.tipo||""):"",   /* 15 nov 2026: foto o documento (cestEliminato) */

@@ -210,7 +210,7 @@ const avHtml=`
         <div class="sh-nota">Serve al pulsante <b>«Porta le ore nella parcella»</b> nel registro delle ore: le ore diventano righe già col prezzo. Se lo lasci vuoto, le righe arrivano <b>senza prezzo</b> e lo scrivi tu. ⛔ Non è il costo di un collaboratore: è quanto <b>chiedi tu</b>.</div>
         ${ruoloUtente==='professionista'?`
         <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
-          <label>Crediti formativi da fare ogni anno (CFP)</label>
+          <label>Traguardo dei crediti formativi (CFP)</label>
           <input type="number" id="a-cfp" inputmode="numeric" value="${a.cfp_obiettivo!=null?a.cfp_obiettivo:30}" placeholder="30"></div>
         <div class="sh-nota">Di norma <b>30</b> per ingegneri e architetti, <b>20</b> per i geometri. È l'obiettivo che vedi nella sezione Crediti formativi.</div>`:""}
       </div>

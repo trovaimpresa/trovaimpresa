@@ -42,7 +42,9 @@
     fatture:["numero","oggetto","cli_nome","note"],
     /* 19 nov 2026 — anche i fornitori e le loro fatture da pagare (sì di Alex) */
     fornitori:["nome","categoria","telefono","email","indirizzo","piva","note"],
-    fattforn:["numero","note"]
+    fattforn:["numero","note"],
+    /* 20 nov 2026 — i corsi dei crediti formativi (si' di Alex) */
+    crediti:["titolo","ente","tipo","note","attestato_nome"]
   };
   const CT_ST_PREV={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
   const CT_ST_FATT={bozza:"Bozza",emessa:"Emessa",pagata:"Pagata",insoluta:"Insoluta",annullata:"Annullata"};
@@ -68,9 +70,14 @@
     const mid=curMestiere();
     if(mid==null)return "Entra prima in un reparto.";
     const leggi=t=>sb.from(t).select("*").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO);
-    const [rc,rl,rp,rf,ro,rff]=await Promise.all([
+    /* i corsi sono della PERSONA (niente reparto) e si cercano solo se la voce
+       «Crediti formativi» c'e' nel menu */
+    const _tbCr=document.querySelector("#tab-crediti");
+    const _conCr=!!(_tbCr&&_tbCr.style.display!=="none");
+    const [rc,rl,rp,rf,ro,rff,rcr]=await Promise.all([
       leggi("gest_clienti"),leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture"),
-      leggi("gest_fornitori"),leggi("gest_fatture_fornitori")
+      leggi("gest_fornitori"),leggi("gest_fatture_fornitori"),
+      _conCr?sb.from("gest_crediti").select("*").eq("user_id",sbUid).limit(CT_TETTO):Promise.resolve({data:[]})
     ]);
     /* ⚠️ UNA TABELLA CHE NON SI APRE NON DEVE SPEGNERE TUTTA LA RICERCA.
        Un collaboratore puo' avere il permesso sui lavori e non sulle fatture:
@@ -83,7 +90,8 @@
       clienti:prendi(rc,"clienti"), lavori:prendi(rl,"lavori"),
       preventivi:prendi(rp,"preventivi"), fatture:prendi(rf,"fatture"),
       /* i fornitori sono in piu': se non si leggono la ricerca di prima resta com'era */
-      fornitori:(ro&&!ro.error&&ro.data)||[], fattforn:(rff&&!rff.error&&rff.data)||[]
+      fornitori:(ro&&!ro.error&&ro.data)||[], fattforn:(rff&&!rff.error&&rff.data)||[],
+      crediti:(rcr&&!rcr.error&&rcr.data)||[]
     };
     ctTroncato=[rc,rl,rp,rf].some(r=>(r.data||[]).length>=CT_TETTO);
     if(ctMancanti.length===4)return "Non riesco a leggere i dati: "+(rc.error||rl.error||rp.error||rf.error).message;
@@ -141,6 +149,7 @@
         const o=(ctDati.fornitori||[]).find(y=>String(y.id)===String(x.fornitore_id));
         return dentro(ctTesto(x,CT_CAMPI.fattforn)+(o?" "+ctPiatto(o.nome):""));
       }),
+      crediti:(ctDati.crediti||[]).filter(c=>dentro(ctTesto(c,CT_CAMPI.crediti))),
       nomeCli:nomeCli
     };
   }
@@ -158,7 +167,7 @@
      schermo, che e' vuota se in quella sezione non ci sei mai entrato. */
   function ctRiga(tipo,id,titolo,sotto){
     /* 19 nov 2026: «forn» apre la scheda del fornitore (forn-scheda la rilegge dal database) */
-    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda"};
+    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda",cred:"edit-cred"};
     return '<button type="button" class="ct-riga" data-ct="'+esc(tipo)+'" data-id="'+esc(String(id))+'"'
       +(AZ[tipo]?' data-action="'+AZ[tipo]+'"':'')+'>'
       +'<span class="ct-t">'+esc(titolo)+'</span>'
@@ -206,6 +215,9 @@
         return ctRiga("forn",x.fornitore_id,(x.numero?("n. "+x.numero):"Fattura")+(o.nome?" — "+o.nome:""),
           ctMeta(eur(x.importo),pag?"pagata":(x.scadenza?((x.scadenza<oggiCt?"scaduta il ":"da pagare entro il ")+fdate(x.scadenza)):"senza scadenza")));
       }));
+    h+=ctBlocco("Corsi (crediti formativi)", r.crediti.map(c=>
+        ctRiga("cred",c.id,c.titolo||"Corso",
+          ctMeta(c.ente||"",c.data?fdate(c.data):"",String(+c.crediti||0).replace(".",",")+" CFP",c.attestato_path?"📎 attestato":""))));
     if(!h)h='<div class="ct-vuoto">Nessun risultato per «'+esc(q)+'».</div>';
     /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
     if(ctTroncato)h+='<div class="ct-piu">Hai più di '+CT_TETTO+' righe in una sezione: cerco dentro le prime '+CT_TETTO+'.</div>';

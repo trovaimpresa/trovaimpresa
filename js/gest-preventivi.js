@@ -1191,13 +1191,80 @@
      Tabella: sql/gest-ore-e-crediti.sql. Se manca, la sezione lo dice. */
   const CRED_TIPI=["Aggiornamento professionale","Deontologia","Sicurezza",
                    "Corso abilitante","Seminario / convegno","Altro"];
-  let credCache=[], credAnno=null, credObiettivo=30;
+  let credCache=[], credAnno=null, credObiettivo=30, credReg=null;
+
+  /* ===== 20 nov 2026 (si' di Alex, foto prima) — COME CONTA IL TUO ORDINE =====
+     Geometri e architetti contano i crediti su TRE anni, non su uno: il
+     riquadro diceva «ti mancano 15,5 per chiudere il 2026» a chi aveva 48,5
+     su 60 del triennio. Adesso si sceglie l'Ordine (riempie i numeri) e si
+     possono cambiare: vale il regolamento del proprio Ordine.
+     Numeri controllati il 20 nov 2026: geometri 60 in 3 anni (6 deontologia),
+     architetti 60 in 3 anni (12 deontologia), ingegneri almeno 30.
+     Colonne: gest_azienda.cfp_ordine / cfp_periodo (1 o 3) / cfp_inizio /
+     cfp_deont (sql/2026-11-20-crediti-triennio-attestato.sql). Periodo vuoto
+     = conto dell'anno con cfp_obiettivo, come prima. */
+  const CRED_ORDINI={
+    geometri:  {lab:"Collegio dei Geometri",   periodo:3, ob:60, deont:6},
+    architetti:{lab:"Ordine degli Architetti", periodo:3, ob:60, deont:12},
+    ingegneri: {lab:"Ordine degli Ingegneri",  periodo:1, ob:30, deont:null},
+    periti:    {lab:"Periti industriali",      periodo:null},
+    altro:     {lab:"Altro",                   periodo:null}
+  };
+  function credRegolaDa(az){
+    const r={
+      ordine:(az&&az.cfp_ordine)||"",
+      periodo:(az&&+az.cfp_periodo===3)?3:1,
+      obiettivo:(az&&+az.cfp_obiettivo>0)?+az.cfp_obiettivo:30,
+      inizio:(az&&+az.cfp_inizio>1990)?+az.cfp_inizio:null,
+      deont:(az&&az.cfp_deont!=null&&az.cfp_deont!==""&&+az.cfp_deont>=0)?+az.cfp_deont:null
+    };
+    if(r.periodo===3&&!r.inizio)r.inizio=+todayStr().slice(0,4);
+    return r;
+  }
+  async function credLeggiRegola(){
+    try{
+      const {data:az,error}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+      if(error)return credRegolaDa(null);
+      return credRegolaDa(az);
+    }catch(e){ return credRegolaDa(null); }
+  }
+  /* gli anni del periodo che contiene «anno» */
+  function credPeriodoDi(reg,anno){
+    anno=+anno;
+    if(reg.periodo!==3)return {da:anno,a:anno};
+    const da=reg.inizio+3*Math.floor((anno-reg.inizio)/3);
+    return {da:da,a:da+2};
+  }
+  /* UN conto solo: lo usano la sezione, il Riepilogo e lo Scadenzario.
+     Un corso con la data nel futuro e' «in programma»: non conta ancora. */
+  function credConto(corsi,reg,anno){
+    const oggi=todayStr(), p=credPeriodoDi(reg,anno);
+    const dentro=c=>{const y=+String(c.data||"").slice(0,4);return y>=p.da&&y<=p.a;};
+    const L=(corsi||[]).filter(dentro);
+    const fatto=c=>String(c.data||"")<=oggi;
+    const LF=L.filter(fatto);
+    const somma=A=>A.reduce((t,c)=>t+(+c.crediti||0),0);
+    const fatti=Math.round(somma(LF)*100)/100;
+    const deont=Math.round(somma(LF.filter(c=>c.tipo==="Deontologia"))*100)/100;
+    const perAnno={};
+    for(let y=p.da;y<=p.a;y++)perAnno[y]=0;
+    LF.forEach(function(c){const y=+String(c.data).slice(0,4);perAnno[y]=Math.round(((perAnno[y]||0)+(+c.crediti||0))*100)/100;});
+    const mancano=Math.max(0,Math.round((reg.obiettivo-fatti)*100)/100);
+    const mancaDeont=reg.deont!=null?Math.max(0,Math.round((reg.deont-deont)*100)/100):0;
+    const scade=p.a+"-12-31";
+    const giorni=Math.round((new Date(scade+"T12:00:00")-new Date(oggi+"T12:00:00"))/864e5);
+    /* l'avviso si accende da ottobre dell'ultimo anno del periodo */
+    const avviso=oggi>=(p.a+"-10-01")&&oggi<=scade&&(mancano>0||mancaDeont>0);
+    return {da:p.da,a:p.a,fatti:fatti,deont:deont,inProgramma:Math.round(somma(L.filter(c=>!fatto(c)))*100)/100,
+      perAnno:perAnno,mancano:mancano,mancaDeont:mancaDeont,scade:scade,giorni:giorni,avviso:avviso};
+  }
+  function credOrdineLab(reg){ const o=CRED_ORDINI[reg.ordine]; return (o&&reg.ordine!=="altro")?o.lab:""; }
 
   async function renderCrediti(){
     const box=$("#cred-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML="";return;}
     const {data,error}=await sb.from("gest_crediti")
-      .select("id,titolo,ente,data,crediti,tipo,note").eq("user_id",sbUid)
+      .select("*").eq("user_id",sbUid)
       .order("data",{ascending:false});
     if(error){
       $("#cred-riass").innerHTML="";
@@ -1211,65 +1278,67 @@
       return;
     }
     credCache=data||[];
-    /* l'obiettivo annuo sta nei Dati azienda: 30 per ingegneri e architetti,
-       20 per i geometri. Ognuno mette il suo. */
-    credObiettivo=30;   /* si riparte sempre dal default, se no resta quello di prima */
-    try{
-      const {data:az}=await sb.from("gest_azienda").select("cfp_obiettivo").eq("user_id",sbUid).maybeSingle();
-      if(az&&az.cfp_obiettivo!=null&&+az.cfp_obiettivo>0)credObiettivo=+az.cfp_obiettivo;
-    }catch(e){}
+    const reg=await credLeggiRegola();
+    credReg=reg; credObiettivo=reg.obiettivo;
 
     const anni=[...new Set(credCache.map(c=>String(c.data||"").slice(0,4)).filter(Boolean))].sort().reverse();
     const annoOggi=todayStr().slice(0,4);
     if(!credAnno)credAnno=anni.includes(annoOggi)?annoOggi:(anni[0]||annoOggi);
     const L=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno);
-    /* 20 nov 2026 — un corso con la data nel futuro e' un corso a cui sei
-       iscritto, non uno che hai fatto: prima contava subito e il riquadro
-       poteva dire «sei a posto» a dicembre con un convegno ancora da fare. */
     const _oggiCr=todayStr();
     const _giaFatto=c=>String(c.data||"")<=_oggiCr;
-    const LF=L.filter(_giaFatto);
-    const fatti=LF.reduce((s,c)=>s+(+c.crediti||0),0);
-    const inProgramma=L.filter(c=>!_giaFatto(c)).reduce((s,c)=>s+(+c.crediti||0),0);
-    const mancano=Math.max(0,credObiettivo-fatti);
-    const perc=credObiettivo?Math.min(100,Math.round(fatti/credObiettivo*100)):0;
-
-    /* ===== 12 agosto 2026 (sera) — I CREDITI PER TIPO =====
-       Il campo "Tipo" si compilava a ogni corso e non veniva contato da
-       nessuna parte. Cosi' il riquadro poteva dire "Obiettivo raggiunto: sei a
-       posto" a chi ha 30 crediti tutti di aggiornamento e ZERO di deontologia,
-       che quasi tutti gli Ordini chiedono a parte. Adesso il conto per tipo si
-       vede, e se manca la deontologia il riquadro lo dice invece di rassicurare
-       e basta. Non invento la quota: ogni Ordine ha la sua, quindi si avvisa e
-       si rimanda al regolamento. */
-    const perTipo={};
-    LF.forEach(function(c){const t=(c.tipo||"Altro");perTipo[t]=(perTipo[t]||0)+(+c.crediti||0);});
+    const K=credConto(credCache,reg,credAnno);
     const _n2=v=>String(Math.round(v*100)/100).replace(".",",");
-    const deont=perTipo["Deontologia"]||0;
+    const perc=reg.obiettivo?Math.min(100,Math.round(K.fatti/reg.obiettivo*100)):0;
+    const tri=reg.periodo===3;
+    const ordLab=credOrdineLab(reg);
+
+    /* i crediti per tipo del periodo (12 ago 2026: il campo «Tipo» non lo contava nessuno) */
+    const perTipo={};
+    credCache.filter(c=>{const y=+String(c.data||"").slice(0,4);return y>=K.da&&y<=K.a&&_giaFatto(c);})
+      .forEach(function(c){const t=(c.tipo||"Altro");perTipo[t]=(perTipo[t]||0)+(+c.crediti||0);});
     const rigaTipi=Object.keys(perTipo).filter(t=>perTipo[t]>0).sort((a,b)=>perTipo[b]-perTipo[a])
       .map(t=>'<span class="cred-tipo">'+esc(t)+': <b>'+_n2(perTipo[t])+'</b></span>').join("");
-    /* il riquadro in cima: è l'unica cosa che uno vuole sapere davvero */
-    const tono=(mancano===0&&deont>0)?"ok":((mancano===0||perc>=60)?"attesa":"err");
+    const rigaAnni=tri?Object.keys(K.perAnno).map(y=>'<span class="cred-tipo">'+y+': <b>'+_n2(K.perAnno[y])+'</b></span>').join(""):"";
+
+    const aPosto=K.mancano===0&&K.mancaDeont===0;
+    const tono=aPosto?"ok":(K.avviso?"err":"attesa");
+    const titolo=tri?("Triennio "+K.da+" – "+K.a+(ordLab?" · "+ordLab:"")):(ordLab?("Il "+credAnno+" · "+ordLab):"");
+    let msg;
+    if(K.giorni<0){
+      msg=aPosto?((tri?"Triennio "+K.da+" – "+K.a:"Il "+credAnno)+": eri a posto.")
+        :((tri?"Triennio "+K.da+" – "+K.a:"Il "+credAnno)+" chiuso: mancavano <b>"+_n2(K.mancano)+" crediti</b>.");
+    }else if(K.mancano===0){
+      msg=tri?"Crediti del triennio raggiunti.":"Obiettivo "+credAnno+" raggiunto: sei a posto.";
+    }else{
+      msg="Ti mancano <b>"+_n2(K.mancano)+" crediti</b> entro il <b>"+fdate(K.scade)+"</b>"
+        +(K.giorni>=0?" (fra "+K.giorni+(K.giorni===1?" giorno":" giorni")+")":"")+".";
+    }
+    if(reg.deont!=null){
+      msg+='<br>Deontologia: <b>'+_n2(K.deont)+' di '+_n2(reg.deont)+'</b>'
+        +(K.mancaDeont>0?' — te ne '+(K.mancaDeont===1?'manca':'mancano')+' <b>'+_n2(K.mancaDeont)+'</b>.':' ✓');
+    }else if(K.deont===0&&K.fatti>0){
+      msg+='<br>Attenzione: non hai <b>nessun credito di Deontologia</b>. Quasi tutti gli Ordini ne chiedono una quota a parte: controlla il regolamento del tuo.';
+    }
+    if(K.inProgramma>0)msg+='<br>In programma: <b>'+_n2(K.inProgramma)+' CFP</b> di corsi non ancora fatti. Li conto il giorno del corso.';
+
     $("#cred-riass").innerHTML=
       '<div class="cred-box cred-'+tono+'">'
-      /* 13 nov 2026 (lista «MANCA», n. 19) — il traguardo si cambia da qui */
-      +'<div class="cred-testa"><div class="cred-num">'+String(Math.round(fatti*100)/100).replace(".",",")+' <small>di '+credObiettivo+' CFP</small></div>'
-      +'<button type="button" class="btn cred-cambia" data-action="cred-traguardo">Cambia il traguardo</button></div>'
+      +(titolo?'<div class="cred-per">'+esc(titolo)+'</div>':'')
+      +'<div class="cred-testa"><div class="cred-num">'+_n2(K.fatti)+' <small>di '+_n2(reg.obiettivo)+' CFP</small></div>'
+      +'<button type="button" class="btn cred-cambia" data-action="cred-traguardo">Come conta il tuo Ordine</button></div>'
       +'<div class="cred-barra"><span style="width:'+perc+'%"></span></div>'
-      +'<div class="cred-msg">'+(mancano===0
-          ? "Obiettivo "+credAnno+" raggiunto: sei a posto."
-          : "Ti mancano <b>"+String(Math.round(mancano*100)/100).replace(".",",")+" crediti</b> per chiudere il "+credAnno+".")
-      +(inProgramma>0?'<br>In programma: <b>'+_n2(inProgramma)+' CFP</b> di corsi non ancora fatti. Li conto il giorno del corso.':'')
-      +(deont===0&&fatti>0
-          ? '<br>Attenzione: nel '+credAnno+' non hai <b>nessun credito di Deontologia</b>. Quasi tutti gli Ordini ne chiedono una quota a parte: controlla il regolamento del tuo.'
-          : '')
-      +'</div>'
+      +'<div class="cred-msg">'+msg+'</div>'
+      +(rigaAnni?'<div class="cred-tipi">'+rigaAnni+'</div>':'')
       +(rigaTipi?'<div class="cred-tipi">'+rigaTipi+'</div>':'')
       +'<div class="cred-anni">'+(anni.length?anni:[annoOggi]).map(function(a){
           return '<button type="button" class="chip'+(a===credAnno?' on':'')+'" data-action="cred-anno" data-v="'+a+'">'+a+'</button>';
         }).join("")+'</div>'
       +'</div>';
 
+    const attBtn=c=>c.attestato_path
+      ? {lab:"📎 Attestato",action:"cred-att",data:{id:c.id}}
+      : {lab:"+ Attestato",action:"edit-cred",data:{id:c.id}};
     renderTabella({
       id:"cred", box:"#cred-list",
       viste:"#cred-viste", visteDef:[], vista:"", conta:{}, azioneVista:"",
@@ -1284,7 +1353,9 @@
           id:c.id,
           click:{action:"edit-cred",data:{id:c.id}},
           celle:[
-            '<span class="lav-bar '+(_giaFatto(c)?'fatto':'in_corso')+'"></span><span class="c-nome">'+esc(c.titolo||"Corso")+'</span>'+(_giaFatto(c)?'':' <span class="stato" style="background:var(--info-bg);color:var(--info)">In programma</span>'),
+            '<span class="lav-bar '+(_giaFatto(c)?'fatto':'in_corso')+'"></span><span class="c-nome">'+esc(c.titolo||"Corso")+'</span>'
+              +(c.attestato_path?' <span title="Attestato allegato">📎</span>':'')
+              +(_giaFatto(c)?'':' <span class="stato" style="background:var(--info-bg);color:var(--info)">In programma</span>'),
             esc(c.ente||"—"),
             esc(c.tipo||"—"),
             '<b>'+String(+c.crediti||0).replace(".",",")+'</b>',
@@ -1292,13 +1363,14 @@
           ],
           menu:[
             {lab:"✏ Modifica",action:"edit-cred",data:{id:c.id}},
+            attBtn(c),
             {lab:"🗑 Elimina",action:"del-cred",data:{id:c.id},del:true}
           ]
         };
       }),
       cards:()=>L.map(function(c){
         return schedaJob({
-          tono:"t-ok", titolo:esc(c.titolo||"Corso"),
+          tono:"t-ok", titolo:esc(c.titolo||"Corso")+(c.attestato_path?' <span title="Attestato allegato">📎</span>':''),
           destra:_giaFatto(c)
             ?'<span class="stato" style="background:var(--ok-bg);color:var(--ok)">'+String(+c.crediti||0).replace(".",",")+' CFP</span>'
             :'<span class="stato" style="background:var(--info-bg);color:var(--info)">In programma · '+String(+c.crediti||0).replace(".",",")+' CFP</span>',
@@ -1306,63 +1378,185 @@
           nota:c.note?"📝 "+esc(c.note):"",
           azioni:[
             {lab:"✏ Modifica",action:"edit-cred",data:{id:c.id}},
+            attBtn(c),
             {lab:"🗑 Elimina",action:"del-cred",data:{id:c.id},del:true}
           ]});
       }).join("")
     });
   }
 
-  /* ===== 13 nov 2026 (lista «MANCA», n. 19) — IL TRAGUARDO SI SCEGLIE =====
-     Era nei Dati azienda (gest_azienda.cfp_obiettivo) e da qui non si vedeva:
-     il controllore l'ha letto come «fisso a 30». Adesso si cambia dalla
-     sezione. Stessa colonna, quindi Dati azienda e Riepilogo dicono lo stesso. */
-  function credTraguardo(){
-    const fatti=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno&&String(c.data||"")<=todayStr()).reduce((s,c)=>s+(+c.crediti||0),0);
-    openSheetGrande("Il traguardo dei crediti",
+  /* ===== 20 nov 2026 — «COME CONTA IL TUO ORDINE» (era «Cambia il traguardo») ===== */
+  async function credTraguardo(){
+    const reg=credReg||await credLeggiRegola();
+    const anno=credAnno||todayStr().slice(0,4);
+    const ordOpts='<option value="">— scegli —</option>'+Object.keys(CRED_ORDINI).map(k=>
+      '<option value="'+k+'"'+(reg.ordine===k?' selected':'')+'>'+esc(CRED_ORDINI[k].lab)+'</option>').join("");
+    openSheetGrande("Come conta il tuo Ordine",
       '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b">'
-      +'<div class="sh-tit">Quanti crediti ti servono ogni anno</div>'
-      +'<div class="field"><label>Traguardo (CFP all\'anno)</label><input type="number" id="cr-trag" inputmode="numeric" min="1" max="999" value="'+credObiettivo+'" style="max-width:160px"></div>'
-      +'<p class="sh-nota" style="margin-bottom:0">Gli ingegneri devono avere sempre almeno <b>30</b> CFP. Architetti e geometri ne fanno <b>60 in tre anni</b>: qui, per ora, il conto è dell\'anno. Controlla il regolamento del tuo Ordine.</p>'
+      +'<div class="sh-tit">Il tuo Ordine</div>'
+      +'<div class="field"><label>Sei iscritto a</label><select id="cr-ord">'+ordOpts+'</select></div>'
+      +'<div class="field"><label>Come si contano i crediti</label><select id="cr-per">'
+      +'<option value="3"'+(reg.periodo===3?' selected':'')+'>In tre anni (triennio)</option>'
+      +'<option value="1"'+(reg.periodo!==3?' selected':'')+'>Ogni anno</option></select></div>'
+      +'<div class="row2">'
+      +'<div class="field" id="cr-ini-f"><label>Il triennio comincia nel</label><input type="text" inputmode="numeric" id="cr-ini"'+_noAuto()+' value="'+(reg.inizio||anno)+'"></div>'
+      +'<div class="field"><label>Crediti da fare</label><input type="text" inputmode="decimal" id="cr-trag"'+_noAuto()+' value="'+String(reg.obiettivo).replace(".",",")+'"></div>'
+      +'</div>'
+      +'<div class="field"><label>Di cui di Deontologia</label><input type="text" inputmode="decimal" id="cr-deo"'+_noAuto()+' value="'+(reg.deont!=null?String(reg.deont).replace(".",","):"")+'" placeholder="Lascia vuoto se non serve" style="max-width:220px"></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">Scegliendo l\'Ordine i numeri si mettono da soli: geometri e architetti <b>60 in tre anni</b>, ingegneri <b>almeno 30</b>. Puoi cambiarli: vale il regolamento del tuo Ordine.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
-      +'<div class="sh-tit">Il '+esc(credAnno||todayStr().slice(0,4))+'</div>'
+      +'<div class="sh-tit" id="cr-trag-tit"></div>'
       +'<div class="prev-somma" id="cr-trag-conto" style="text-align:left;line-height:1.9"></div>'
       +'</div>'
       +'</div></div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-cred-traguardo">Salva</button>');
+    const leggi=function(){
+      const per=+($("#cr-per")||{}).value===3?3:1;
+      const ini=parseInt(($("#cr-ini")||{}).value,10);
+      const ob=_numIt("#cr-trag"), deTxt=(($("#cr-deo")||{}).value||"").trim(), de=_numIt("#cr-deo");
+      return {ordine:($("#cr-ord")||{}).value||"", periodo:per, inizio:(ini>1990&&ini<2200)?ini:+anno,
+        obiettivo:(ob>0?ob:0), deont:(deTxt===""?null:de)};
+    };
     const conto=function(){
       const box=$("#cr-trag-conto"); if(!box)return;
-      const ob=parseInt(($("#cr-trag")||{}).value,10)||0;
+      const r=leggi();
+      const f=$("#cr-ini-f"); if(f)f.style.display=r.periodo===3?"":"none";
+      const K=credConto(credCache,Object.assign({},r,{obiettivo:r.obiettivo||0,deont:(r.deont!=null&&r.deont>=0)?r.deont:null}),anno);
       const n=v=>String(Math.round(v*100)/100).replace(".",",");
       const riga=(a,b)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+a+'</span><strong>'+b+'</strong></div>';
-      box.innerHTML=riga("Crediti fatti",n(fatti)+" CFP")+riga("Traguardo",ob>0?ob+" CFP":"—")
-        +riga(ob>0&&fatti>=ob?"Sei a posto":"Ti mancano",ob>0?(fatti>=ob?"✓":n(Math.max(0,ob-fatti))+" CFP"):"—");
+      const t=$("#cr-trag-tit"); if(t)t.textContent=r.periodo===3?("Il triennio "+K.da+" – "+K.a):("Il "+anno);
+      box.innerHTML=riga("Crediti fatti",n(K.fatti)+" CFP")
+        +riga("Traguardo",r.obiettivo>0?n(r.obiettivo)+" CFP":"—")
+        +riga(r.obiettivo>0&&K.mancano===0?"Sei a posto":"Ti mancano",r.obiettivo>0?(K.mancano===0?"✓":n(K.mancano)+" CFP"):"—")
+        +(r.deont!=null&&r.deont>=0?riga("Deontologia",n(K.deont)+" di "+n(r.deont)):"")
+        +riga("Scade il",fdate(K.scade));
     };
     conto();
-    const inp=$("#cr-trag"); if(inp)inp.addEventListener("input",conto);
+    const sel=$("#cr-ord");
+    if(sel)sel.addEventListener("change",function(){
+      const o=CRED_ORDINI[sel.value];
+      if(o&&o.periodo){
+        $("#cr-per").value=String(o.periodo);
+        $("#cr-trag").value=String(o.ob);
+        $("#cr-deo").value=o.deont!=null?String(o.deont):"";
+      }
+      conto();
+    });
+    ["#cr-per","#cr-ini","#cr-trag","#cr-deo"].forEach(function(q){
+      const el=$(q); if(el){el.addEventListener("input",conto);el.addEventListener("change",conto);}
+    });
   }
+  let _credTragSalvo=false;
   async function saveCredTraguardo(){
     if(!sbUid){toast("Devi essere loggato");return;}
-    const inp=$("#cr-trag"), ob=parseInt(inp?inp.value:"",10);
-    if(!(ob>0&&ob<1000)){ if(typeof campoManca==="function")campoManca(inp,"Manca il traguardo: scrivi quanti crediti ti servono."); else toast("Scrivi quanti crediti ti servono"); return; }
-    const {data,error}=await sb.from("gest_azienda").upsert({user_id:sbUid,cfp_obiettivo:ob},{onConflict:"user_id"}).select("user_id");
-    if(error){toast("Errore: "+error.message);return;}
-    if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    closeSheet();renderCrediti();toast("Traguardo: "+ob+" CFP all'anno ✔");
+    if(_credTragSalvo)return;
+    const _manca=(sel,dice)=>{ if(typeof campoManca==="function")campoManca(sel,dice); else toast(dice); };
+    const per=+($("#cr-per")||{}).value===3?3:1;
+    const ini=parseInt(($("#cr-ini")||{}).value,10);
+    const ob=_numIt("#cr-trag");
+    const deTxt=(($("#cr-deo")||{}).value||"").trim(), de=_numIt("#cr-deo");
+    if(!(ob>0&&ob<1000)){_manca("#cr-trag","Mancano i crediti da fare: scrivi un numero, per esempio 60.");return;}
+    if(per===3&&!(ini>1990&&ini<2200)){_manca("#cr-ini","Scrivi l'anno in cui comincia il triennio, per esempio 2026.");return;}
+    if(deTxt!==""&&(de==null||de<0||de>ob)){_manca("#cr-deo","La deontologia va scritta con un numero, non più alto dei crediti da fare.");return;}
+    const row={user_id:sbUid,cfp_obiettivo:Math.round(ob),cfp_periodo:per,cfp_inizio:per===3?ini:null,
+      cfp_deont:deTxt===""?null:de,cfp_ordine:($("#cr-ord")||{}).value||null};
+    _credTragSalvo=true;
+    try{
+      const {data,error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"}).select("user_id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+      credReg=null;
+      closeSheet();renderCrediti();
+      if(typeof rinfresca==="function")rinfresca("riepilogo","scadenzario");
+      toast(per===3?("Salvato: "+row.cfp_obiettivo+" CFP in tre anni ✔"):("Salvato: "+row.cfp_obiettivo+" CFP all'anno ✔"));
+    }finally{_credTragSalvo=false;}
+  }
+
+  /* ===== 20 nov 2026 (si' di Alex) — L'ATTESTATO DEL CORSO =====
+     Un PDF o una foto, nel deposito «gestionale-foto», cartella
+     <utente>/attestati/ (chiusa ai collaboratori: gest_puo_file). Il file si
+     carica DOPO aver salvato il corso: se non entra, il corso resta e lo si dice. */
+  const CRED_ATT_MAX=10*1024*1024;
+  let credAttTogli=false;
+  function credAttestatoHTML(c){
+    const ha=c&&c.attestato_path;
+    return '<div class="field"><label>Attestato (PDF o foto)</label>'
+      +(ha?'<div id="cr-att-ora" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'
+        +'<span style="font-size:15px">📎 '+esc(c.attestato_nome||"attestato")+'</span>'
+        +'<button type="button" class="btn" data-action="cred-att" data-id="'+esc(String(c.id))+'">Apri</button>'
+        +'<button type="button" class="btn" id="cr-att-togli">Togli</button></div>':'')
+      +'<input type="file" id="cr-att" accept="application/pdf,image/*">'
+      +'<p class="sh-nota" style="margin:6px 0 0">'+(ha?'Sceglierne un altro sostituisce questo.':'Così, se l\'Ordine te lo chiede, lo trovi qui.')+'</p>'
+      +'</div>';
+  }
+  function credAttEstensione(f){
+    const m=/\.([a-z0-9]{1,5})$/i.exec(f.name||""); if(m)return m[1].toLowerCase();
+    if(/pdf/.test(f.type))return "pdf"; if(/png/.test(f.type))return "png"; return "jpg";
+  }
+  function credAttControlla(f){
+    if(!f)return null;
+    if(!f.size)return "Il file è vuoto.";
+    if(f.size>CRED_ATT_MAX)return "Il file è troppo grande: al massimo 10 MB.";
+    if(!(/^application\/pdf$|^image\//.test(f.type)||/\.(pdf|jpe?g|png|webp|heic)$/i.test(f.name||"")))return "Va bene un PDF o una foto.";
+    return null;
+  }
+  async function credAttSalva(id,vecchio){
+    const inp=$("#cr-att"), f=inp&&inp.files&&inp.files[0];
+    if(f){
+      const path=sbUid+"/attestati/"+id+"-"+Date.now()+"."+credAttEstensione(f);
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,f,{contentType:f.type||undefined});
+      if(up)return "Corso salvato, ma l'attestato non è entrato: "+((typeof traduciErrore==="function")?traduciErrore(up.message):up.message);
+      const {data:ok,error:e2}=await sb.from("gest_crediti").update({attestato_path:path,attestato_nome:String(f.name||"attestato").slice(0,120)})
+        .eq("id",id).eq("user_id",sbUid).select("id");
+      if(e2||!ok||!ok.length){ try{await sb.storage.from("gestionale-foto").remove([path]);}catch(_){} return "Corso salvato, ma l'attestato non è entrato: riprova."; }
+      if(vecchio){ try{await sb.storage.from("gestionale-foto").remove([vecchio]);}catch(_){} }
+      return null;
+    }
+    if(credAttTogli&&vecchio){
+      const {data:ok,error}=await sb.from("gest_crediti").update({attestato_path:null,attestato_nome:null})
+        .eq("id",id).eq("user_id",sbUid).select("id");
+      if(error||!ok||!ok.length)return "Corso salvato, ma l'attestato non è stato tolto: riprova.";
+      try{await sb.storage.from("gestionale-foto").remove([vecchio]);}catch(_){}
+    }
+    return null;
+  }
+  async function credApriAttestato(id){
+    let c=credCache.find(x=>String(x.id)===String(id));
+    if(!c||!c.attestato_path){
+      const {data}=await sb.from("gest_crediti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      c=data;
+    }
+    if(!c||!c.attestato_path){toast("Questo corso non ha l'attestato.");return;}
+    const w=window.open("","_blank");
+    const {data,error}=await sb.storage.from("gestionale-foto").createSignedUrl(c.attestato_path,3600);
+    if(error||!data||!data.signedUrl){ if(w)w.close(); toast("Non riesco ad aprire l'attestato: riprova."); return; }
+    if(w)w.location.href=data.signedUrl; else location.href=data.signedUrl;
+  }
+  /* aperto da fuori (ricerca in alto, Scadenzario): credCache puo' essere vuota */
+  async function credApri(id){
+    let c=credCache.find(x=>String(x.id)===String(id));
+    if(!c){
+      const {data,error}=await sb.from("gest_crediti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(error||!data){toast("Non trovo questo corso: forse è nel Cestino.");return;}
+      c=data;
+    }
+    return credForm(c);
   }
 
   function credForm(c){
     const isNew=!c;c=c||{};
+    credAttTogli=false;
     const tipoOpts=CRED_TIPI.map(t=>'<option value="'+esc(t)+'" '+(t===c.tipo?'selected':'')+'>'+esc(t)+'</option>').join("");
     openSheetGrande(isNew?"Nuovo corso":"Modifica corso",
       '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Il corso</div>'
       +'<div class="field"><label>Titolo</label><input id="cr-tit" value="'+esc(c.titolo||"")+'" placeholder="Es. Aggiornamento sicurezza 40 ore"></div>'
-      +'<div class="field"><label>Ente che lo ha organizzato</label><input id="cr-ente" value="'+esc(c.ente||"")+'" placeholder="Es. Ordine Ingegneri di Rieti"></div>'
+      +'<div class="field"><label>Ente che lo ha organizzato</label><input id="cr-ente" value="'+esc(c.ente||"")+'" placeholder="Es. Collegio dei Geometri di Rieti"></div>'
       +'<div class="field"><label>Tipo</label><select id="cr-tipo">'+tipoOpts+'</select></div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -1370,25 +1564,28 @@
       +'<div class="sh-tit">Quando e quanto</div>'
       +'<div class="row2">'
       +'<div class="field"><label>Data</label><input type="date" id="cr-data" value="'+(c.data||todayStr())+'"></div>'
-      /* 12 agosto 2026 (sera) — era type="number". Su tastiera italiana si
-         scrive "2,5", e una casella type=number con la virgola dentro NON
-         restituisce niente: il credito veniva salvato come ZERO. Mezzo credito
-         perso a ogni corso, e il gestionale poteva dirti "sei a posto" con i
-         CFP che non tornavano. Adesso e' una casella di testo letta da
-         _numIt, come i prezzi del computo: 2,5 e 2.5 vanno bene tutti e due. */
+      /* 12 agosto 2026 (sera) — casella di testo letta da _numIt: «2,5» e «2.5» vanno bene tutti e due */
       +'<div class="field"><label>Crediti (CFP)</label><input type="text" inputmode="decimal" id="cr-cfp"'+_noAuto()+' value="'+(c.crediti!=null?String(c.crediti).replace(".",","):"")+'" placeholder="Es. 2,5"></div></div>'
+      +credAttestatoHTML(c)
       +'<div class="field"><label>Note</label><textarea id="cr-note" placeholder="Numero attestato, dove l\'hai salvato...">'+esc(c.note||"")+'</textarea></div>'
-      +'<p class="sh-nota" style="margin-bottom:0">Il traguardo dell\'anno si cambia in cima alla sezione, con «Cambia il traguardo».</p>'
+      +'<p class="sh-nota" style="margin-bottom:0">Il traguardo si cambia in cima alla sezione, con «Come conta il tuo Ordine».</p>'
       +'</div>'
       +'</div></div>',
       ctrTastoHTML('corso')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-cred" data-id="'+(c.id||"")+'">'+(isNew?"Aggiungi":"Salva")+'</button>');
     ctrAscolta('corso');
+    const tg=$("#cr-att-togli");
+    if(tg)tg.addEventListener("click",function(){
+      credAttTogli=true;
+      const o=$("#cr-att-ora"); if(o)o.innerHTML='<span style="font-size:15px;color:var(--testo-2)">L\'attestato si toglie quando premi «Salva».</span>';
+    });
   }
 
+  let _credSalvo=false;
   async function saveCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
+    if(_credSalvo)return;
     const titolo=$("#cr-tit").value.trim();
     /* 20 nov 2026 — la casella sbagliata diventa rossa (prima solo un
        messaggio), e i crediti non si salvano piu' negativi o a zero per
@@ -1400,19 +1597,30 @@
     if(!_cfpTxt){_manca("#cr-cfp","Mancano i crediti. Se il corso non ne dà, scrivi 0.");return;}
     if(_cfp==null){_manca("#cr-cfp","Scrivi i crediti con un numero: per esempio 2,5.");return;}
     if(_cfp<0){_manca("#cr-cfp","I crediti non possono essere sotto zero.");return;}
+    const _f=$("#cr-att")&&$("#cr-att").files&&$("#cr-att").files[0];
+    const _fErr=credAttControlla(_f);
+    if(_fErr){_manca("#cr-att",_fErr);return;}
     const row={titolo, ente:$("#cr-ente").value.trim()||null,
       tipo:$("#cr-tipo")?$("#cr-tipo").value:null,
       data:$("#cr-data").value,
       crediti:_cfp,
       note:$("#cr-note").value.trim()||null};
-    const {data,error}=id
-      ?await sb.from("gest_crediti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_crediti").insert(Object.assign({user_id:sbUid},row)).select("id");
-    if(error){toast("Errore: "+error.message);return;}
-    if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    /* l'anno mostrato segue il corso appena segnato, se no sembra sparito */
-    credAnno=String(row.data).slice(0,4);
-    closeSheet();renderCrediti();toast(id?"Aggiornato ✔":"Corso segnato ✔");
+    const vecchio=id?((credCache.find(x=>String(x.id)===String(id))||{}).attestato_path||null):null;
+    _credSalvo=true;
+    try{
+      const {data,error}=id
+        ?await sb.from("gest_crediti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+        :await sb.from("gest_crediti").insert(Object.assign({user_id:sbUid},row)).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+      const errAtt=await credAttSalva(data[0].id,vecchio);
+      /* l'anno mostrato segue il corso appena segnato, se no sembra sparito */
+      credAnno=String(row.data).slice(0,4);
+      closeSheet();renderCrediti();
+      if(typeof rinfresca==="function")rinfresca("riepilogo","scadenzario");
+      if(errAtt)toast(errAtt);
+      else toast(id?"Aggiornato ✔":"Corso segnato ✔");
+    }finally{_credSalvo=false;}
   }
   /* funzione a parte: il gestore dei clic di questo blocco NON è async,
      quindi l'await deve stare qui dentro */
@@ -1424,7 +1632,9 @@
     const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
-    renderCrediti();toast((window.cestinoAttivo&&window.cestinoAttivo())?"Corso nel cestino: lo riprendi da lì":"Corso eliminato");
+    renderCrediti();
+    if(typeof rinfresca==="function")rinfresca("riepilogo","scadenzario");
+    toast((window.cestinoAttivo&&window.cestinoAttivo())?"Corso nel cestino: lo riprendi da lì":"Corso eliminato");
   }
 
 
