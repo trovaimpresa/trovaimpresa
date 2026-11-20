@@ -1056,6 +1056,72 @@
     return tot;
   }
 
+  /* ============================================================
+     20 nov 2026 (studio, voce Fornitori — «2 si» di Alex, foto approvata)
+     LE FATTURE DEI FORNITORI DELLA PRATICA, DA RIADDEBITARE AL CLIENTE.
+     Topografo, laboratorio, geologo: lo studio le paga e spesso le gira al
+     cliente. Vanno nel RIMBORSO SPESE (#fa-spese-iva), NON nelle spese
+     anticipate art. 15: la fattura del fornitore e' intestata allo studio,
+     non al cliente. Un tocco somma quelle scelte alla casella (non la
+     sostituisce); poi la cifra si cambia a mano come sempre.
+     Se un'altra fattura della stessa pratica ha gia' un rimborso spese, lo
+     dice: si riaddebita una volta sola.
+     ============================================================ */
+  async function fattRiaddebito(lavIds,fattId){
+    const casella=$("#fa-spese-iva");
+    const ids=[...new Set((lavIds||[]).filter(Boolean).map(String))];
+    if(!casella||!ids.length||!sb||!sbUid)return;
+    const [rff,rfo,rlv,rfl]=await Promise.all([
+      sb.from("gest_fatture_fornitori").select("id,numero,importo,fornitore_id,lavoro_id,created_at").eq("user_id",sbUid).in("lavoro_id",ids),
+      sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid),
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).in("id",ids),
+      sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids)
+    ]);
+    if(rff.error)return;
+    const ff=(rff.data||[]).filter(x=>(+x.importo||0)>0).sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    if(!ff.length||!document.body.contains(casella))return;
+    const nomi={};((rfo&&rfo.data)||[]).forEach(x=>{nomi[String(x.id)]=x.nome;});
+    const lav=((rlv&&rlv.data)||[]);
+    /* le altre fatture della stessa pratica con un rimborso spese gia' scritto */
+    let gia=[];
+    const altre=[...new Set(((rfl&&rfl.data)||[]).map(x=>String(x.fattura_id)).filter(x=>x!==String(fattId||"")))];
+    if(altre.length){
+      try{
+        const {data:fa}=await sb.from("gest_fatture").select("id,numero,anno,data,spese_iva").eq("user_id",sbUid).in("id",altre);
+        gia=(fa||[]).filter(x=>(+x.spese_iva||0)>0);
+      }catch(_){}
+    }
+    if(!document.body.contains(casella))return;
+    const tot=_cent2(ff.reduce((a,x)=>a+(+x.importo||0),0));
+    const dove=lav.length===1?"Su «"+esc(lav[0].descrizione||"questa pratica")+"»":"Su queste pratiche";
+    const box=document.createElement("div");box.className="fa-ria";box.id="fa-ria";
+    box.innerHTML='<b>'+dove+' hai '+ff.length+(ff.length===1?' fattura':' fatture')+' di fornitori da riaddebitare: '+eur2(tot)+'</b>'
+      +'<div class="fa-ria-elenco">'+ff.map(x=>esc(nomi[String(x.fornitore_id)]||"Fornitore")+(x.numero?' n. '+esc(x.numero):'')+' · '+eur2(+x.importo||0)).join(' — ')+'</div>'
+      +'<div class="fa-ria-scegli" hidden>'+ff.map(x=>'<label class="fa-ria-r"><input type="checkbox" checked data-imp="'+(+x.importo||0)+'"> '
+        +esc(nomi[String(x.fornitore_id)]||"Fornitore")+(x.numero?' n. '+esc(x.numero):'')+' · '+eur2(+x.importo||0)+'</label>').join('')+'</div>'
+      +(gia.length?'<p class="fa-ria-nota" style="color:var(--attesa)">⚠️ La fattura '+gia.map(x=>x.numero?('n. '+esc(String(x.numero))+(x.anno?'/'+x.anno:'')):'in bozza').join(', ')+' di questa pratica ha già un rimborso spese ('+gia.map(x=>eur2(+x.spese_iva)).join(', ')+'): non riaddebitarle due volte.</p>':'')
+      +'<div class="fa-ria-acts"><button type="button" class="btn btn-primary btn-sm" data-ria="metti">Mettile nel rimborso spese</button><button type="button" class="btn btn-sm" data-ria="scegli">Scegli quali</button></div>'
+      +'<p class="fa-ria-nota">Vanno nel <b>rimborso spese</b>, non nelle spese anticipate: la fattura del fornitore è intestata a te, non al cliente.</p>';
+    const fld=casella.closest(".field")||casella;
+    fld.parentNode.insertBefore(box,fld.nextSibling);
+    box.addEventListener("click",function(ev){
+      const b=ev.target.closest("[data-ria]");if(!b)return;
+      ev.preventDefault();ev.stopPropagation();
+      if(b.dataset.ria==="scegli"){
+        const sc=box.querySelector(".fa-ria-scegli"), el=box.querySelector(".fa-ria-elenco");
+        sc.hidden=!sc.hidden; if(el)el.hidden=!sc.hidden;
+        return;
+      }
+      const somma=_cent2([...box.querySelectorAll(".fa-ria-scegli input:checked")].reduce((a,c)=>a+(+c.dataset.imp||0),0));
+      if(!(somma>0)){toast("Spunta almeno una fattura");return;}
+      const prima=_numIt("#fa-spese-iva")||0;
+      /* scritta coi centesimi, come la scrive la casella uscendo («2.196,50», non «2.196,5») */
+      casella.value=_cent2(prima+somma).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
+      casella.dispatchEvent(new Event("input",{bubbles:true}));
+      casella.dispatchEvent(new Event("change",{bubbles:true}));
+      box.innerHTML='<b>Messe nel rimborso spese: '+eur2(somma)+' ✔</b><p class="fa-ria-nota">Se cambi idea, correggi la cifra nella casella qui sopra.</p>';
+    });
+  }
   async function fattForm(f,preset){
     const isNew=!f;
     f=f||preset||{};
@@ -1257,6 +1323,11 @@
       e.addEventListener("change",fattTotaleLive);
     });
     fattTotaleLive();
+    /* 20 nov 2026 (studio, voce Fornitori — si' di Alex, foto approvata):
+       le fatture dei fornitori della pratica, da riaddebitare nel rimborso spese */
+    if(ruoloUtente==="professionista"&&!(f.id&&f.numero)){
+      try{ fattRiaddebito(isNew?(fattLavoriInCorso||[]):((typeof fattLavori!=="undefined"&&fattLavori[f.id])||[]), f.id||null); }catch(_){}
+    }
     /* 13 nov 2026 — il riquadro «Pagamento»: l'IBAN si vede solo se serve,
        e la scadenza segue la data finche' non la tocchi tu. */
     const _fm=$("#fa-modo"), _fs=$("#fa-scad"), _fd=$("#fa-data");

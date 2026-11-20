@@ -527,14 +527,34 @@
 
   async function fattfForm(f){
     const isNew=!(f&&f.id);f=f||{};
+    window._tornaPraticaDaFf=null;   /* lo rimette lavFfApri, se si arriva dalla pratica */
+    /* 20 nov 2026 — il fornitore della fattura deve stare nella tendina: se la
+       lista in memoria e' vecchia (o vuota) si rilegge. Prima la tendina
+       restava sul primo nome e al Salva la fattura cambiava fornitore. */
+    if(f.fornitore_id&&sb&&sbUid&&!(fornCache||[]).some(x=>String(x.id)===String(f.fornitore_id))){
+      try{const {data:fo}=await sb.from("gest_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false});if(fo)fornCache=fo;}catch(e){}
+    }
     /* 26 set 2026 — prima qui si fermava: «Prima aggiungi un fornitore».
        Con la foto della fattura il fornitore lo si aggiunge da li', con un
        tocco: quindi il modulo si apre lo stesso, con la tendina vuota. */
     const fops=(fornCache.length?'':'<option value="">— nessun fornitore ancora —</option>')+fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
+    const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
     let lavOps='<option value="">— nessuno —</option>';
     if(sb&&sbUid){
       const {data:lv}=await sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("data_prevista",{ascending:false}).limit(100);
-      lavOps+=(lv||[]).map(l=>'<option value="'+l.id+'" '+(String(f.lavoro_id||'')===String(l.id)?'selected':'')+'>'+esc(l.descrizione||'Lavoro')+'</option>').join("");
+      lavOps+=(lv||[]).map(l=>'<option value="'+l.id+'" '+(String(f.lavoro_id||'')===String(l.id)?'selected':'')+'>'+esc(l.descrizione||(_pro?'Pratica':'Lavoro'))+'</option>').join("");
+      /* ⛔ 20 nov 2026 (studio, voce Fornitori, provato dal vivo) — se il lavoro
+         collegato non e' nella tendina (nel Cestino, o oltre i 100 piu'
+         recenti), la tendina restava su «nessuno» e al Salva il collegamento
+         SPARIVA in silenzio: rimesso a posto il lavoro, la fattura non contava
+         piu' nel suo margine. Adesso il collegamento resta, scritto per quello
+         che e'. */
+      if(f.lavoro_id&&!(lv||[]).some(l=>String(l.id)===String(f.lavoro_id))){
+        let nomeL="";
+        try{ const lr=await (sb.raw?sb.raw("gest_lavori"):sb.from("gest_lavori")).select("descrizione,eliminato_il").eq("id",f.lavoro_id).eq("user_id",sbUid).maybeSingle();
+             if(lr&&lr.data)nomeL=(lr.data.descrizione||"")+(lr.data.eliminato_il?" (nel cestino)":""); }catch(e){}
+        lavOps+='<option value="'+esc(String(f.lavoro_id))+'" selected>'+esc(nomeL||(_pro?"Pratica collegata":"Lavoro collegato"))+'</option>';
+      }
     }
     openSheetGrande(isNew?'Fattura da pagare':'Modifica fattura',
       '<div class="sh-cols"><div class="sh-col">'
@@ -545,21 +565,24 @@
       +(fornCache.length?'':'<div class="campo-aiuto">Con la foto qui sopra lo aggiungo io. A mano: <button type="button" class="aic-link" data-action="new-forn">+ Nuovo fornitore</button></div>')
       +'</div>'
       +'<div class="row2">'
-      +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
+      +'<div class="field"><label>Numero della sua fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
       +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
       +'<div class="row2">'
       +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo?_numTesto(f.importo):'')+'" placeholder="0" data-euro></div>'
-      +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
+      +'<div class="field"><label>La paghi entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Collegamenti e note</div>'
-      +'<p class="sh-nota" style="margin-top:0">Se la colleghi a un lavoro, il suo importo entra <b>da solo</b> nel margine di quel lavoro, su una riga sua. <b>Non riscriverla anche fra le Spese</b>: la conteresti due volte.</p>'
-      +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
+      +'<p class="sh-nota" style="margin-top:0">'+(_pro
+        ?'Se la colleghi a una pratica, il suo importo entra <b>da solo</b> nel margine di quella pratica, su una riga sua. <b>Non riscriverla anche fra le Spese</b>: la conteresti due volte.'
+        :'Se la colleghi a un lavoro, il suo importo entra <b>da solo</b> nel margine di quel lavoro, su una riga sua. <b>Non riscriverla anche fra le Spese</b>: la conteresti due volte.')+'</p>'
+      +'<div class="field"><label>'+(_pro?'Pratica collegata (facoltativo)':'Lavoro collegato (facoltativo)')+'</label><select id="ff-lav">'+lavOps+'</select></div>'
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
-      /* 10 nov 2026 — la merce comprata, riga per riga (js/gest-acquisti.js) */
-      +(typeof acqBoxHTML==="function"?acqBoxHTML():'')
+      /* 10 nov 2026 — la merce comprata, riga per riga (js/gest-acquisti.js).
+         20 nov 2026 (si' di Alex): allo studio no, non compra merce */
+      +(!_pro&&typeof acqBoxHTML==="function"?acqBoxHTML():'')
       +'</div></div>',
       ctrTastoHTML('fattfornitore')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
@@ -610,8 +633,12 @@
     /* la merce comprata: si salva con la fattura (prima di chiudere, perche'
        le righe si leggono dal modulo) */
     let nAcq=0;
-    if(typeof acqSalva==="function")nAcq=await acqSalva(data[0].id,row,!!id);
+    /* senza il riquadro (studio) non si tocca la merce: acqSalva la cancellerebbe */
+    if(typeof acqSalva==="function"&&document.getElementById("acq-box"))nAcq=await acqSalva(data[0].id,row,!!id);
+    const _tp=window._tornaPraticaDaFf;window._tornaPraticaDaFf=null;
     closeSheet();renderFornitori();rinfresca("riepilogo");
+    /* 20 nov 2026 — aperta dalla pratica: si torna nella pratica */
+    if(_tp&&typeof lavoroApri==="function"){await lavoroApri(_tp);toast(id?"Aggiornata ✔":"Fattura registrata ✔");return;}
     /* 11 nov 2026 — appena registrata, la fattura si confronta con le bolle
        dello stesso fornitore nello stesso mese (stessa bfConfronta di
        «Acquisti del mese»). Torna: spunta verde. Merce in piu' o che non e'

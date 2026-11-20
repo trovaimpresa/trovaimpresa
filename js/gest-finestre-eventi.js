@@ -1083,6 +1083,14 @@
       toast("Collegamento rimosso: ricordati di salvare");return;
     }
     if(a==="new-fattf-forn")return fattfForm({fornitore_id:id});
+    /* 20 nov 2026 — fatture dei fornitori dentro la pratica / il lavoro */
+    if(a==="lav-ff-apri"||a==="lav-ff-nuova"){
+      let _cambiato=true;
+      try{_cambiato=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
+      const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+      if(_cambiato&&!(await gconfirm("Apro la fattura al posto di "+(_pro?"questa pratica":"questo lavoro")+".\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      return lavFfApri(a==="lav-ff-apri"?id:null,a==="lav-ff-apri"?t.dataset.lav:id);
+    }
     if(a==="forn-doc")return fornDocApri(id);
     if(a==="forn-doc-scegli"){const i=$("#forn-doc-file");if(i)i.click();return;}
     if(a==="lav-doc-scegli"){const i=$("#lav-doc-file");if(i)i.click();return;}
@@ -1146,6 +1154,9 @@
         if(document.querySelector("#sheet #cp-lista")&&typeof compVociCompId!=="undefined"&&compVociCompId)return compTornaAlComputo();
         if(document.querySelector("#sheet #sal-voci")&&typeof salTorna==="function")return salTorna();
         /* 20 nov 2026 — computo aperto dalla pratica: chiuso, si torna nella pratica */
+        /* 20 nov 2026 — fattura di un fornitore aperta dalla pratica: si torna li' */
+        const _tf=window._tornaPraticaDaFf;
+        if(_tf&&document.querySelector("#sheet #ff-forn")){window._tornaPraticaDaFf=null;closeSheet();return lavoroApri(_tf);}
         const _tp=window._tornaPraticaDaComp;
         if(_tp&&document.querySelector("#sheet #co-nav")&&typeof compVociCompId!=="undefined"&&String(compVociCompId)===_tp.comp){
           window._tornaPraticaDaComp=null; closeSheet(); return lavoroApri(_tp.lav);

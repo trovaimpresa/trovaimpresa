@@ -4047,9 +4047,38 @@ Funzioni nuove (foto prima, «1 si 2 si pubblica» di Alex) — SOLO STUDIO:
 - **Computo e stati di avanzamento dentro la pratica** (`bloccoScadenzePratica` + `renderLavComputi` in `js/gest-scadenze-pratiche.js`, chiamata da `renderLavScadenze`): computi collegati (`gest_computi.lavoro_id`) col totale (`compRiepilogo`) e i loro SAL (`salConti`), «Apri» e «+ Nuovo stato di avanzamento». Le azioni `lav-comp-apri` / `lav-sal-apri` / `lav-sal-nuovo` (js/gest-finestre-eventi.js) passano da `salDaPratica()` (js/gest-sal-prezzario.js): apre PRIMA il computo (cosi' «← Torna al computo» sa dove tornare), poi il SAL. Chiudendo il computo si torna nella pratica (`window._tornaPraticaDaComp`, letto da «close» solo se il computo aperto e' quello).
 - **Certificato di pagamento** (`salCertificatoPdf`, azione `sal-cert`, pulsante nella scheda del SAL e nel menu «⋯»): stessi conti del SAL (`compRiepilogoDa` + `salConti`), importo anche in lettere (`euroInLettere`), firme Direttore dei lavori + Committente, fascia rossa se SAL in bozza o impresa mancante. Numero = numero del SAL.
 - **Impresa che esegue i lavori**: casella nella scheda del SAL (solo studio), colonna `gest_sal.impresa_esecutrice` (`sql/2026-11-20-sal-impresa.sql`, migrazione `sal_impresa_20nov2026` GIÀ ESEGUITA, riga in PROVE); un SAL nuovo la riprende dal SAL di prima. Paracadute se la colonna manca.
+Pubblicato 7b73a42, Netlify ok, riprovato sul sito vero 1440 e 375: riquadro nella pratica (computo 27.918,00, SAL in cima l'ultimo), nuovo SAL dalla pratica e ritorno alla pratica chiudendo il computo, SAL 2 che riparte dal SAL 1 con l'impresa, Certificato di pagamento 14.893,40 con lettere e firma del DL, niente fattura allo studio, avviso sul SAL dopo, Cestino che ridisegna l'elenco, telefono senza niente fuori. Pulito: conteggi uguali. ⚠️ Durante la prova un'altra sessione ha cancellato la pratica di prova: le prove si fanno in una chiamata sola.
+
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: FORNITORI
+
+Prova da geometra dal vivo (`?vedi=professionista` + `window._tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): 6 fornitori (topografo, laboratorio prove, copisteria, software CAD, geologo, strutturista), 5 fatture (1.220,00 scaduta, 610,50, 48,80 senza scadenza, 1098, 1.586) → riassunto 4.563,30 € in 5 fatture, 1 scaduta ✔; 3 collegate alla pratica → margine «Fatture fornitori −3.416,50» ✔; Scadenze (4 con scadenza, la pagata sparisce) ✔; Assistente «Fornitori 4.563,30 · 1 fattura scaduta» ✔; pagata/riapri dalla scheda ✔; documento PDF caricato ✔; ricerca «geologo» ✔; fornitore nel Cestino con la sua fattura e «Rimetti a posto» ✔; telefono: niente fuori schermo, niente sotto 13 px. Poi cancellato tutto (anche file e Cestino): conteggi uguali a prima.
+
+Codice: `js/gest-fornitori.js` (elenco, scheda, documenti, modulo), `fattfForm`/`saveFattf` in `js/gest-carte-documenti.js`, foto AI `ffFotoHTML` in `js/gest-ai-cantiere.js`, margine della pratica `js/gest-ore-spese.js`, Scadenze `scadenzeFornitori` in `js/gest-scadenze-pratiche.js`, Cestino `js/gest-cestino.js`.
+
+Sistemato:
+1. ⛔ Modifica di una fattura il cui lavoro/pratica è nel Cestino (o oltre i 100 più recenti): la tendina restava su «nessuno» e al Salva il collegamento SPARIVA (provato dal vivo: `lavoro_id` → null; rimessa a posto la pratica, la fattura non contava più nel margine). Ora la tendina tiene il collegamento («… (nel cestino)», letto con `sb.raw`). Tutte le facce.
+2. Tipi di fornitore dello studio (`FORN_CATS_STUDIO`: Topografo / rilievi, Laboratorio prove, Geologo, Strutturista / consulente, Termotecnico / impiantista, Copisteria / stampe, Software e licenze, Visure e servizi, Ufficio e cancelleria, Altro). Una categoria vecchia salvata resta in fondo alla tendina. `_foPro()`.
+3. Parole da cantiere allo studio: elenco vuoto e aiuto della voce («rivendite… materiale»), segnaposto (Edil Market, laterizi, ordini@), documenti («DDT… foto alla cassa»), foto AI della fattura («bolla… merce comprata»), «Lavoro collegato» → «Pratica collegata» e la nota del margine, nella pratica «Spese e materiali» → «Spese di questa pratica» (`_FRASI`).
+4. Nella fattura del fornitore le caselle «Numero fattura» e «Da pagare entro» avevano l'aiuto delle fatture AI CLIENTI («numerazione continua…», «entro cui il cliente deve pagare»): ora «Numero della sua fattura» e «La paghi entro», con aiuto loro. Tutte le facce.
+5. Aiuti delle spese della parcella SBAGLIATI: «Spese anticipate… ci va l'IVA sopra» (da agosto sono fuori IVA, art. 15) e «imponibile = compenso + cassa + spese». Corretti in `js/aiuti.js`.
+6. Elenco fornitori: in cima gli ultimi salvati (era per nome). Tutte le facce.
+7. Documento del fornitore eliminato: «Documento nel cestino: lo riprendi da lì» (diceva «eliminato»). Cestino: la fattura del fornitore era solo «88» → «Fattura n. 88 — Laboratorio prove · 610,50 €».
+
+8. ⛔ (mio, trovato provando) aprendo la fattura da fuori dei Fornitori la tendina del fornitore poteva essere vecchia: sceglieva un altro nome e il Salva cambiava fornitore. `fattfForm` rilegge i fornitori se quello della fattura non c'è.
+
+Funzioni nuove («1 si 2 si 3 si» di Alex, foto prima computer e telefono) — `?v=20nov-fo`:
+- **Fatture dei fornitori dentro la pratica** (tutte le facce: «di questo lavoro» all'impresa): `lavFattForn(lavoroId)` in `js/gest-fornitori.js`, chiamata da `renderSpeseBlock` sotto il margine (`#lav-ff`): chi, n., pagata / da pagare / scaduta, importo, «Apri», «+ Fattura di un fornitore per questa pratica». Azioni `lav-ff-apri` / `lav-ff-nuova` (js/gest-finestre-eventi.js, con la domanda «va perso» solo se la pratica è stata toccata) → `lavFfApri`; Annulla/Indietro e Salva tornano nella pratica (`window._tornaPraticaDaFf`, azzerato da `fattfForm`).
+- **Riaddebito nella fattura al cliente** (solo studio, fattura non ancora emessa): `fattRiaddebito(lavIds,fattId)` in `js/gest-fatture.js` sotto «Rimborso spese»: «Su «pratica» hai N fatture di fornitori da riaddebitare», «Mettile nel rimborso spese» (SOMMA alla casella, coi centesimi), «Scegli quali» (spunte). Nel RIMBORSO SPESE, mai nelle spese anticipate art. 15 (fattura intestata allo studio). Se un'altra fattura della stessa pratica ha già un rimborso spese, lo dice.
+- **Studio senza merce**: allo studio niente «Acquisti del mese» in Fornitori e niente «Cosa hai comprato» nella fattura del fornitore (e `acqSalva` non gira senza il riquadro: non cancella la merce di una fattura vecchia).
+- **«per la pratica «…»»** accanto a ogni fattura nell'elenco e nella scheda del fornitore (`_ffNomiLavori` / `_ffPerLavoro`, «(nel cestino)» se lo è).
+Provate sulla pagina vera rimettendo le funzioni (prova in UNA chiamata: dati creati e letti insieme): pratica con 3 fatture (3.416,50, Apri, nuova già sulla pratica), riaddebito di 2 su 3 → rimborso spese 2.196,50 e il conto si aggiorna, niente fattura salvata; elenco «per la pratica», Acquisti nascosto; telefono 375: niente fuori, niente sotto 13 px. Pulito: conteggi uguali a prima.
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti (rifatto dopo le funzioni nuove).
+⬜ Non provato dal vivo: «Fotografa una fattura» (AI, 1 credito); l'email del mattino con la fattura scaduta; il ritorno nella pratica dopo «Salva» col file vero (provato solo «Apri» e il salvataggio).
+⬜ Da guardare: nella pratica dello studio restano parole da cantiere fuori da questa voce («Rapportini di giornata… li scrive la squadra»), e «Rimborso spese (trasferte, materiali)» nella fattura. La tendina «Strumenti usati in questa pratica» col conto di Alex mostra «escavatore» (conto misto impresa/studio).
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4081,6 +4110,18 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Stati di avanzamento ↔ Ricerca in alto: — i SAL non si trovano (si trova il computo? da guardare a fine giro).
 - Stati di avanzamento ↔ Clienti: ✔ il cliente arriva dal computo (PDF «Spett.le», elenco).
 - Si può unire: Stati di avanzamento dentro Computo metrico? NO per ora: l'elenco di tutti i SAL serve (chiesto da Alex il 20 ago); con il riquadro nella pratica si parlano senza unirle.
+
+- Fornitori ↔ Pratiche: ✔ la fattura collegata entra nel margine («Fatture fornitori»); dal 20 nov il collegamento non si perde più modificando la fattura. ✔ dal 20 nov nella pratica c'è l'elenco delle sue fatture, con «Apri» e «+ Fattura» (si torna nella pratica).
+- Fornitori ↔ Fatture e parcella: ✔ dal 20 nov la fattura al cliente propone di riaddebitare le fatture dei fornitori della pratica nel rimborso spese. — la PARCELLA (preventivo) no: nasce prima delle spese. Aiuti delle spese corretti il 20 nov.
+- Fornitori ↔ Scadenze e promemoria: ✔ le fatture da pagare con la data ci sono; pagata → sparisce.
+- Fornitori ↔ Assistente: ✔ scheda Fornitori con lo stesso totale e «1 fattura scaduta». — una fattura scaduta non sale in «Parti da qui».
+- Fornitori ↔ Calendario / email del mattino: ✔ (dal codice).
+- Fornitori ↔ Report e Tasse e fisco: ✔ le fatture contano come spese (anche quelle non pagate, per data).
+- Fornitori ↔ Cestino: ✔ il fornitore va e torna con le sue fatture; dal 20 nov la fattura nel Cestino ha nome e importo.
+- Fornitori ↔ Ricerca in alto: ✔ fornitori e fatture da pagare.
+- Fornitori ↔ Commercialista: ✔ avviso «senza partita IVA il commercialista non sa…».
+- Fornitori ↔ Collaboratori / Strumenti: — non c'entrano.
+- Si può unire: NO, Fornitori resta voce sola.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

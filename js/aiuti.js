@@ -75,7 +75,9 @@
     agenda:       'Cosa deve fare chi collabora con te, giorno per giorno. È quello che vedono sul telefono.',
     calendario:   'Il mese a colpo d’occhio: quando è prevista ogni pratica.',
     galleria:     'Le foto e i video dei sopralluoghi e dei cantieri che segui, tutti in un posto solo.',
-    mappa:        'Dove sono le pratiche che segui e quanto distano da te.'
+    mappa:        'Dove sono le pratiche che segui e quanto distano da te.',
+    /* 20 nov 2026 (studio, voce Fornitori) */
+    fornitori:    'Topografo, laboratorio prove, geologo, copisteria, software: chi lavora per lo studio, con le sue fatture da pagare e le scadenze.'
   };
 
   function menuDaStudio() {
@@ -202,8 +204,8 @@
     'contributo cassa (%)': 'La percentuale della tua cassa (4% Inarcassa, 5% Geometri e Periti). Si calcola SOLO sul compenso, mai sulle spese. Se la sbagli, sbaglia anche la fattura che nasce da questo preventivo.',
     'applica la ritenuta d\'acconto del 20%': 'Spuntala solo se il cliente e’ azienda, professionista o condominio: sono loro che versano allo Stato il 20% del tuo compenso. Con un privato NO: la spunta di troppo ti fa incassare il 20% in meno.',
     'ritenuta d\'acconto (%)': 'Quanto il cliente trattiene e versa per conto tuo. Di norma 20% sul compenso. Non e’ una tassa in piu’: e’ un anticipo, lo ritrovi nella dichiarazione.',
-    'spese (bolli, diritti, copie)': 'Quello che hai anticipato TU per il cliente. Ci va l’IVA sopra ma non la ritenuta, e non e’ guadagno: sono soldi che ti torni indietro.',
-    'spese anticipate (bolli, diritti, visure)': 'Quello che hai anticipato TU per il cliente. Ci va l’IVA sopra ma non la ritenuta, e non e’ guadagno: sono soldi che ti torni indietro.',
+    'spese (bolli, diritti, copie)': 'Quello che hai anticipato TU per il cliente, con la ricevuta intestata a lui: bolli, diritti, visure. Niente IVA, niente cassa, niente ritenuta (art. 15). Non e’ guadagno: sono soldi che ti tornano indietro.',
+    'spese anticipate (bolli, diritti, visure)': 'Quello che hai anticipato TU per il cliente, con la ricevuta intestata a lui: bolli, diritti, visure. Niente IVA, niente cassa, niente ritenuta (art. 15). Non e’ guadagno: sono soldi che ti tornano indietro.',
     'spese documentate': 'Spese con la ricevuta in mano, riaddebitate al cliente tali e quali. Tienile separate dal compenso: sul conto si comportano in modo diverso.',
     'rimborso spese (trasferte, materiali)': 'Benzina, pedaggi, materiali comprati per andare avanti. Se lo scrivi qui finisce sul documento come voce a parte, non mescolato al compenso.',
     'iva': 'La percentuale che aggiungi al prezzo e che poi versi allo Stato. In edilizia 10% su manutenzione e ristrutturazione, 4% sulla prima casa, 22% tutto il resto. Nel dubbio chiedi al commercialista: sbagliarla si paga.',
@@ -211,6 +213,9 @@
     'data fattura': 'La data di emissione. Da qui parte il conto dei giorni per il pagamento e il trimestre in cui l’IVA va versata: non metterla a caso.',
     'modalità di pagamento': 'Bonifico, contanti, assegno... Finisce stampato sulla fattura e dentro il file per lo SdI.',
     'come si paga': 'Bonifico, contanti, assegno... Finisce stampato sulla fattura e dentro il file per lo SdI.',
+    /* 20 nov 2026 — nella fattura di un FORNITORE paghi tu: le due caselle hanno il loro aiuto */
+    'numero della sua fattura': 'Il numero scritto sulla fattura del fornitore. Serve a riconoscerla e a non registrarla due volte.',
+    'la paghi entro': 'La data entro cui devi pagare tu il fornitore. Dopo quella, la fattura diventa rossa qui e nelle Scadenze.',
     'da pagare entro': 'La data entro cui il cliente deve pagare. Dopo quella, il gestionale te la segna in ritardo e te la fa vedere in rosso.',
     'entro quanti giorni ti devono pagare': 'I giorni dalla data della fattura. 30 e’ lo standard, 60 con le aziende grandi. Serve al gestionale per dirti chi e’ in ritardo senza che tu conti i giorni.',
     'pec': 'La casella di posta certificata del cliente. Serve a consegnargli la fattura elettronica quando non ha il codice destinatario.',
@@ -273,8 +278,8 @@
     'cassa previdenziale': 'Il contributo per la tua cassa (Inarcassa, Geometri, EPPI, INPS). Si calcola SOLO sul compenso, non sulle spese, e si aggiunge in fattura: lo paga il cliente. La percentuale confermala al commercialista.',
     'ritenuta d\'acconto': 'Una parte del tuo compenso che il cliente NON ti paga: la versa lui allo Stato per conto tuo, come anticipo delle tue tasse. Di solito il 20%, e solo sul compenso. Non e\u2019 un costo: la ritrovi nella dichiarazione dei redditi.',
     'aliquota iva': 'La percentuale di IVA su questa voce. Le prestazioni professionali vanno al 22%. Il 10% e il 4% sono per chi esegue i lavori (ristrutturazione, prima casa), non per la parcella.',
-    'imponibile': 'La somma su cui si calcola l\u2019IVA: compenso + cassa + spese. Non e\u2019 quello che incassi.',
-    'imponibile iva': 'La somma su cui si calcola l\u2019IVA: compenso + cassa + spese. Non e\u2019 quello che incassi.',
+    'imponibile': 'La somma su cui si calcola l\u2019IVA: compenso + cassa (+ rimborso spese). Le spese anticipate (bolli, diritti) restano fuori. Non e\u2019 quello che incassi.',
+    'imponibile iva': 'La somma su cui si calcola l\u2019IVA: compenso + cassa (+ rimborso spese). Le spese anticipate (bolli, diritti) restano fuori. Non e\u2019 quello che incassi.',
     'spese (bolli, diritti, visure)': 'Quello che hai anticipato per conto del cliente: marche da bollo, diritti di segreteria, visure. Glielo riaddebiti tal quale, non e\u2019 un tuo guadagno.',
     'bollo (\u20ac)': 'La marca da bollo da 2 euro. Va sulle fatture senza IVA sopra i 77,47 euro (per esempio in forfettario). Se in fattura c\u2019e\u2019 l\u2019IVA, di solito non serve.',
     'sconto (\u20ac)': 'Uno sconto in euro sul totale. Si toglie dopo l\u2019IVA.',

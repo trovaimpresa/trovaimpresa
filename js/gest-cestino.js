@@ -38,7 +38,15 @@
     {t:"gest_operatori",   lab:"Collaboratori", labImp:"Persone", campo:"nome", ic:"👷"},
     {t:"gest_carte",       lab:"Carte aziendali",   campo:"nome",           ic:"💳"},
     {t:"gest_fornitori",   lab:"Fornitori",         campo:"nome",           ic:"🏪"},
-    {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true},
+    /* 20 nov 2026 (studio, voce Fornitori) — la riga diceva solo «88»: adesso
+       chi l'ha fatta e quanto vale */
+    {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true,
+     nome:function(r){
+       let chi="";
+       try{ const f=(typeof fornCache!=="undefined"?fornCache:[]).find(function(x){return String(x.id)===String(r.fornitore_id);}); if(f)chi=f.nome||""; }catch(e){}
+       const imp=+r.importo||0;
+       return "Fattura"+(r.numero?" n. "+r.numero:"")+(chi?" — "+chi:"")+(imp?" · "+eur2(imp):"");
+     }},
     {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
     /* 18 nov 2026 (collaudo di Giornate): le ore non hanno un nome, la riga diceva solo «del 18/11/2026» */
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true,

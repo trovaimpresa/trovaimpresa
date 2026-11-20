@@ -151,8 +151,12 @@ function ffFotoHTML(){
   _ffLetto=null;
   return '<div class="sh-b aic-box" id="ff-foto">'
     +'<div class="sh-tit">Fotografala e la riempio io</div>'
-    +'<p class="sh-nota" style="margin-top:0">Fai la foto alla fattura o alla bolla, oppure scegli il PDF. '
-    +'Leggo io fornitore, numero, data, importo, scadenza e <b>la merce comprata</b>. Costa <b>1 credito</b>.</p>'
+    /* 20 nov 2026 (studio, voce Fornitori) — allo studio niente bolle ne' merce */
+    +((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")
+      ?'<p class="sh-nota" style="margin-top:0">Fai la foto alla fattura, oppure scegli il PDF. '
+       +'Leggo io fornitore, numero, data, importo e scadenza. Costa <b>1 credito</b>.</p>'
+      :'<p class="sh-nota" style="margin-top:0">Fai la foto alla fattura o alla bolla, oppure scegli il PDF. '
+       +'Leggo io fornitore, numero, data, importo, scadenza e <b>la merce comprata</b>. Costa <b>1 credito</b>.</p>')
     +'<div class="aic-fila">'
     +  '<label class="aic-btn aic-btn--pieno">'+_AIC_SVG.cam+'<span>Fai la foto</span>'
     +    '<input type="file" id="ff-foto-cam" accept="image/*" capture="environment" hidden></label>'

@@ -52,13 +52,20 @@
      ============================================================ */
   let fornCache=[],fattfCache=[];
   const FORN_CATS=["Rivendita edile","Ferramenta","Colorificio","Termoidraulica","Materiale elettrico","Legname","Noleggio attrezzature","Cava / Inerti","Altro"];
+  /* 20 nov 2026 (studio, voce Fornitori) — i fornitori di uno studio tecnico
+     non sono rivendite: sono topografi, laboratori, geologi, copisterie,
+     software. La categoria e' solo testo: un fornitore gia' salvato con una
+     voce dell'impresa la tiene (si aggiunge in fondo alla tendina). */
+  const FORN_CATS_STUDIO=["Topografo / rilievi","Laboratorio prove","Geologo","Strutturista / consulente","Termotecnico / impiantista","Copisteria / stampe","Software e licenze","Visure e servizi","Ufficio e cancelleria","Altro"];
+  function _foPro(){ try{ return ruoloUtente==='professionista'; }catch(e){ return false; } }
   async function renderFornitori(){
     const box=$("#forn-list"),lst=$("#fattf-list"),rr=$("#fattf-riass"),tt=$("#fattf-tit");
     if(!box||!cur)return;
     if(!sb||!sbUid){box.innerHTML=tabVuoto("I tuoi fornitori","Accedi per gestirli.");if(lst)lst.innerHTML="";return;}
     const mid=curMestiere(), oggi=todayStr();
     const [rf,rff]=await Promise.all([
-      sb.from("gest_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      /* 20 nov 2026 — regola di Alex: in cima gli ULTIMI salvati (era in ordine di nome) */
+      sb.from("gest_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("created_at",{ascending:false}),
       sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
     if(rf.error||rff.error){
@@ -73,6 +80,11 @@
       return;
     }
     fornCache=rf.data||[];fattfCache=rff.data||[];
+    /* 20 nov 2026 (studio, voce Fornitori — si' di Alex, foto approvata):
+       allo studio «Acquisti del mese» non serve (e' la merce del cantiere) */
+    const _acqB=document.querySelector('#fornitori [data-acq="mese"]');if(_acqB)_acqB.style.display=_foPro()?"none":"";
+    /* ...e accanto a ogni fattura si scrive per quale pratica / lavoro e' */
+    const lavNomi=await _ffNomiLavori(fattfCache);
     /* quanto hai speso da ogni fornitore quest'anno (dalle spese dei lavori).
        Lettura tollerante: se la colonna fornitore_id non c'e' ancora, si salta. */
     const annoCorr=oggi.slice(0,4);let spesoForn={};
@@ -97,7 +109,9 @@
       : "";
     if(!fornCache.length){
       box.innerHTML=tabVuoto("I tuoi fornitori",
-        "Le rivendite e i negozi dove compri il materiale. Qui tieni i contatti (chiama o scrivi su WhatsApp con un tocco) e le fatture da pagare con le scadenze: niente più brutte sorprese.",
+        _foPro()
+          ? "Chi lavora per lo studio: topografo, laboratorio prove, geologo, copisteria, software. Qui tieni i contatti (chiama o scrivi su WhatsApp con un tocco) e le loro fatture da pagare con le scadenze: niente più brutte sorprese."
+          : "Le rivendite e i negozi dove compri il materiale. Qui tieni i contatti (chiama o scrivi su WhatsApp con un tocco) e le fatture da pagare con le scadenze: niente più brutte sorprese.",
         _SVGV+'<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
         {t:"+ Aggiungi il primo fornitore",a:"new-forn"});
       tabBottoneTesta(box,false);
@@ -132,7 +146,7 @@
       const rit=!pag&&f.scadenza&&f.scadenza<oggi;
       const q=f.scadenza?quando(f.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
       return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'">'
-        +'<div class="ff-info"><b>'+esc(nome)+'</b>'+(f.numero?' · n. '+esc(f.numero):'')+(f.note?'<small>'+esc(f.note)+'</small>':'')+'</div>'
+        +'<div class="ff-info"><b>'+esc(nome)+'</b>'+(f.numero?' · n. '+esc(f.numero):'')+(f.note?'<small>'+esc(f.note)+'</small>':'')+_ffPerLavoro(f,lavNomi)+'</div>'
         +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta '+q.testo:q.testo))+'</span>'
         +'<span class="ff-imp">'+eur(f.importo)+'</span>'
         +'<div class="ff-acts">'
@@ -155,12 +169,13 @@
     const aperte=fatture.filter(x=>x.stato!=="pagata");
     const totAp=aperte.reduce((sm,x)=>sm+(+x.importo||0),0);
     const waTel=waCleanTel(f.telefono||"");
+    const lavNomi=await _ffNomiLavori(fatture);
     const tag=f.categoria?'<span class="tipo-tag">'+esc(f.categoria)+'</span>':'';
     const righeFatt=fatture.length?fatture.map(x=>{
       const pag=x.stato==="pagata", rit=!pag&&x.scadenza&&x.scadenza<oggi;
       const q=x.scadenza?quando(x.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
       return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'" style="margin-bottom:8px">'
-        +'<div class="ff-info">'+(x.numero?'<b>n. '+esc(x.numero)+'</b>':'<b>Fattura</b>')+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</div>'
+        +'<div class="ff-info">'+(x.numero?'<b>n. '+esc(x.numero)+'</b>':'<b>Fattura</b>')+(x.note?'<small>'+esc(x.note)+'</small>':'')+_ffPerLavoro(x,lavNomi)+'</div>'
         +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta '+q.testo:q.testo))+'</span>'
         +'<span class="ff-imp">'+eur(x.importo)+'</span>'
         +'<div class="ff-acts"><button class="btn btn-sm" data-action="fattf-stato" data-id="'+esc(String(x.id))+'" data-v="'+(pag?'da_pagare':'pagata')+'" data-forn="'+esc(String(f.id))+'">'+(pag?'↩ Riapri':'✔ Pagata')+'</button></div>'
@@ -213,7 +228,9 @@
     openSheetGrande("Documenti di "+esc(docFornNome),
       '<div class="sh-b">'
       +'<div class="sh-tit">Carica un documento</div>'
-      +'<p class="sh-nota" style="margin-top:0">Listini, contratti, DDT, fatture in PDF o la foto fatta alla cassa: qui restano attaccati al fornitore e non si perdono. Massimo 15 MB per file.</p>'
+      +'<p class="sh-nota" style="margin-top:0">'+(_foPro()
+        ?'Offerte, incarichi, relazioni, certificati di prova, fatture in PDF: qui restano attaccati al fornitore e non si perdono.'
+        :'Listini, contratti, DDT, fatture in PDF o la foto fatta alla cassa: qui restano attaccati al fornitore e non si perdono.')+' Massimo 15 MB per file.</p>'
       +'<button class="btn-primary" data-action="forn-doc-scegli" style="margin-top:6px">Scegli i file dal computer</button>'
       +'</div>'
       +'<div class="sh-b">'
@@ -281,29 +298,32 @@
     if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
     /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
     if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
-    renderDocForn();toast("Documento eliminato");
+    /* 20 nov 2026 — come i documenti della pratica: va nel Cestino, e lo si dice */
+    renderDocForn();toast((window.cestinoAttivo&&window.cestinoAttivo())?"Documento nel cestino: lo riprendi da lì":"Documento eliminato");
   }
 
   let _tiRisultati=[];
   function fornForm(f){
     const isNew=!(f&&f.id);f=f||{};
-    const cats=FORN_CATS.map(c=>'<option value="'+c+'" '+(c===(f.categoria||"")?'selected':'')+'>'+c+'</option>').join("");
+    const _lista=_foPro()?FORN_CATS_STUDIO.slice():FORN_CATS.slice();
+    if(f.categoria&&_lista.indexOf(f.categoria)<0)_lista.push(f.categoria);
+    const cats=_lista.map(c=>'<option value="'+c+'" '+(c===(f.categoria||"")?'selected':'')+'>'+c+'</option>').join("");
     openSheetGrande(isNew?'Nuovo fornitore':'Modifica fornitore',
       '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Chi è</div>'
-      +'<div class="field"><label>Nome</label><input id="fo-nome" value="'+esc(f.nome||'')+'" placeholder="Es. Edil Market Rossi"></div>'
+      +'<div class="field"><label>Nome</label><input id="fo-nome" value="'+esc(f.nome||'')+'" placeholder="'+(_foPro()?'Es. Studio Rilievi Rossi':'Es. Edil Market Rossi')+'"></div>'
       +'<div class="field"><label>Tipo</label><select id="fo-cat"><option value="">— scegli —</option>'+cats+'</select></div>'
       +'<div class="row2">'
       +'<div class="field"><label>Telefono</label><input id="fo-tel" value="'+esc(f.telefono||'')+'" placeholder="Es. 340 1234567"></div>'
-      +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="ordini@..."></div></div>'
+      +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="'+(_foPro()?'studio@...':'ordini@...')+'"></div></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Altri dati</div>'
       +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
       +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Es. Via Roma 12, Rieti"></div>'
-      +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
+      +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="'+(_foPro()?'Es. chiedere di Marco, rilievo a corpo fino a 40 punti':'Es. chiedere di Marco, sconto 10% sui laterizi')+'">'+esc(f.note||'')+'</textarea></div>'
       /* 19 nov 2026 — il riquadro «Collegamento TrovaImpresa» e' stato TOLTO
          (deciso da Alex): cercava solo i negozi iscritti e non ce n'e' nessuno,
          quindi non trovava mai niente. Il collegamento gia' salvato non si
@@ -385,4 +405,70 @@
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     closeSheet();renderFornitori();rinfresca("riepilogo");
     toast(avvisoTi?"Salvato, ma il collegamento TrovaImpresa no: manca la migrazione SQL (gest-fornitori-plus)":(id?"Aggiornato ✔":"Fornitore aggiunto ✔"));
+  }
+
+  /* ============================================================
+     20 nov 2026 (studio, voce Fornitori — «1 si 2 si 3 si» di Alex, foto
+     approvate). Le fatture dei fornitori parlano con la PRATICA:
+     - accanto a ogni fattura «per la pratica «…»» (elenco e scheda);
+     - dentro la pratica l'elenco delle sue fatture, con «Apri» e
+       «+ Fattura di un fornitore per questa pratica»; chiudendo o salvando
+       la fattura si torna nella pratica (window._tornaPraticaDaFf).
+     Valgono per tutte le facce: all'impresa si dice «lavoro».
+     ============================================================ */
+  async function _ffNomiLavori(lista){
+    const ids=[...new Set((lista||[]).map(x=>x.lavoro_id).filter(Boolean).map(String))];
+    if(!ids.length||!sb||!sbUid)return {};
+    try{
+      const {data}=await (sb.raw?sb.raw("gest_lavori"):sb.from("gest_lavori")).select("id,descrizione,eliminato_il").eq("user_id",sbUid).in("id",ids);
+      const m={};(data||[]).forEach(l=>{m[String(l.id)]=(l.descrizione||"")+(l.eliminato_il?" (nel cestino)":"");});
+      return m;
+    }catch(e){ return {}; }
+  }
+  function _ffPerLavoro(f,nomi){
+    if(!f||!f.lavoro_id)return "";
+    const n=(nomi||{})[String(f.lavoro_id)];
+    return '<small class="ff-lav">'+(_foPro()?'per la pratica':'per il lavoro')+(n?' «'+esc(n)+'»':'')+'</small>';
+  }
+  async function lavFattForn(lavoroId){
+    const mb=$("#margine-box");if(!mb||!sb||!sbUid||!lavoroId)return;
+    let box=$("#lav-ff");
+    if(!box){box=document.createElement("div");box.id="lav-ff";box.className="lav-ff";mb.parentNode.insertBefore(box,mb.nextSibling);}
+    const pro=_foPro();
+    const [rff,rfo]=await Promise.all([
+      sb.from("gest_fatture_fornitori").select("id,numero,importo,stato,scadenza,fornitore_id,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId),
+      sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid)
+    ]);
+    if(String(speseLavoroId||"")!==String(lavoroId))return;   /* nel frattempo si e' aperto un altro lavoro */
+    if(rff.error){box.innerHTML="";return;}
+    const ff=(rff.data||[]).sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    const nomi={};((rfo&&rfo.data)||[]).forEach(x=>{nomi[String(x.id)]=x.nome;});
+    const oggi=todayStr(), tot=ff.reduce((a,x)=>a+(+x.importo||0),0);
+    const nuova='<button type="button" class="btn btn-sm" data-action="lav-ff-nuova" data-id="'+esc(String(lavoroId))+'">+ Fattura di un fornitore per '+(pro?'questa pratica':'questo lavoro')+'</button>';
+    if(!ff.length){box.innerHTML='<div class="lav-ff-tit">Fatture dei fornitori</div><p class="lav-ff-vuoto">Nessuna fattura di fornitore collegata.</p>'+nuova;return;}
+    box.innerHTML='<div class="lav-ff-tit">Fatture dei fornitori di '+(pro?'questa pratica':'questo lavoro')+' — '+eur2(tot)+'</div>'
+      +ff.map(x=>{
+        const pag=x.stato==="pagata", rit=!pag&&x.scadenza&&x.scadenza<oggi;
+        return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'">'
+          +'<div class="ff-info"><b>'+esc(nomi[String(x.fornitore_id)]||"Fornitore")+'</b>'+(x.numero?' · n. '+esc(x.numero):'')+'</div>'
+          +'<span class="ff-q'+(rit?' q-passato':'')+'">'+(pag?'pagata':(rit?'scaduta':'da pagare'))+'</span>'
+          +'<span class="ff-imp">'+eur2(+x.importo||0)+'</span>'
+          +'<div class="ff-acts"><button type="button" class="btn btn-sm" data-action="lav-ff-apri" data-id="'+esc(String(x.id))+'" data-lav="'+esc(String(lavoroId))+'">Apri</button></div>'
+          +'</div>';
+      }).join("")
+      +nuova;
+  }
+  async function lavFfApri(fattId,lavoroId){
+    let row={lavoro_id:lavoroId};
+    if(fattId){
+      const {data,error}=await sb.from("gest_fatture_fornitori").select("*").eq("id",fattId).eq("user_id",sbUid).maybeSingle();
+      if(error||!data){toast("Questa fattura non c'è più (potrebbe essere nel cestino)");return;}
+      row=data;
+    }
+    /* sempre riletti: dalla pratica non si e' passati da Fornitori, e la lista
+       in memoria puo' essere vecchia (provato: la tendina sceglieva un altro
+       fornitore e il salvataggio veniva rifiutato) */
+    {const {data:fo}=await sb.from("gest_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false});if(fo)fornCache=fo;}
+    await fattfForm(row);
+    window._tornaPraticaDaFf=String(lavoroId);
   }

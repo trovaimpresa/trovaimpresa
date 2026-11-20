@@ -468,6 +468,8 @@
          qui sopra e' scritto SENZA la manodopera, e senza questa riga
          sembrerebbe un margine vero. Meglio saperlo che crederci. */
       +(oreLette?"":`<span class="sp-forn" style="flex-basis:100%">⚠️ Non sono riuscito a leggere le ore di questo lavoro: nel margine qui sopra <b>la manodopera non c'è</b>. Ricarica la pagina.</span>`);
+    /* 20 nov 2026 (si' di Alex) — sotto il margine, QUALI fatture di fornitori (js/gest-fornitori.js) */
+    if(typeof lavFattForn==="function")lavFattForn(lavoroId);
     renderAndamentoSpese(sp,imp);
   }
 

@@ -2977,6 +2977,17 @@
 #fornitori .ff-imp, #sheet .ff-imp{ font-weight:800; font-size:17px; white-space:nowrap; min-width:90px; text-align:right; }
 #fornitori .ff-acts, #sheet .ff-acts{ display:flex; gap:8px; }
 #fornitori a.btn{ display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
+/* 20 nov 2026 (si' di Alex) — dentro la pratica / il lavoro: le sue fatture dei fornitori (js/gest-fornitori.js, lavFattForn) */
+#sheet .lav-ff{ margin-top:12px; padding:12px 14px; background:var(--card); border:1px solid var(--bordo); border-radius:12px; }
+#sheet .lav-ff-tit{ font-weight:700; font-size:15px; margin:0 0 10px; }
+#sheet .lav-ff-vuoto{ color:var(--testo-2); font-size:14px; margin:0 0 10px; }
+#sheet .lav-ff .ff-r{ margin-bottom:8px; padding:10px 12px; font-size:15px; }
+#fornitori .ff-info small.ff-lav, #sheet .ff-info small.ff-lav{ color:var(--blu,#1d4ed8); }
+/* 20 nov 2026 (si' di Alex) — fattura al cliente: le fatture dei fornitori della pratica da riaddebitare (js/gest-fatture.js, fattRiaddebito) */
+#sheet .fa-ria{ border:1px solid var(--bordo); border-radius:12px; padding:12px 14px; margin:10px 0; background:var(--card); font-size:15px; line-height:1.45; }
+#sheet .fa-ria .fa-ria-r{ display:flex; gap:8px; align-items:center; margin-top:6px; }
+#sheet .fa-ria .fa-ria-acts{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+#sheet .fa-ria .fa-ria-nota{ margin:8px 0 0; color:var(--testo-2); font-size:14px; }
 
 /* la tendina "fornitore" nella riga di aggiunta spesa, e il nome sotto la spesa */
 .spesa-add select{

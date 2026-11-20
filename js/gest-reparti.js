@@ -724,7 +724,8 @@
     ['Cerca cliente, indirizzo, lavoro','Cerca cliente, indirizzo, pratica'],
     ['Apri il lavoro','Apri la pratica'],
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
-    ['Spese e materiali di questo lavoro','Spese e materiali di questa pratica'],
+    /* 20 nov 2026 (studio, voce Fornitori): allo studio non ci sono materiali */
+    ['Spese e materiali di questo lavoro','Spese di questa pratica'],
     ['Guadagno o perdita per lavoro','Guadagno o perdita per pratica'],
     ['lavori in perdita','pratiche in perdita'],
     ['lavoro in perdita','pratica in perdita'],
