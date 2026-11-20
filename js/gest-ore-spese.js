@@ -86,6 +86,8 @@
     const lab = $("#ore-mese-lab"); if(lab) lab.textContent = MESI_L[q.m].charAt(0).toUpperCase()+MESI_L[q.m].slice(1) + " " + q.a;
 
     body.innerHTML = '<p class="fatt-empty">Conto le ore…</p>';
+    /* 20 nov 2026 (collaudo Agenda dello studio) — «tutta l'azienda» allo studio */
+    const _oc = $("#ore-chi"); if(_oc) _oc.textContent = ruoloUtente==='professionista' ? "tutto lo studio" : "tutta l'azienda";
 
     /* tutta la squadra dell'azienda, non del solo reparto: vedi la nota in cima */
     const [rOps, rTmb, rOre] = await Promise.all([
@@ -164,7 +166,9 @@
 
     if(!TMB.length && !ORE.length && !(rOre && rOre.error)){
       body.innerHTML = tabVuoto("Nessuna ora in " + MESI_L[q.m],
-        "Qui arrivano le ore che la squadra timbra dal telefono e quelle scritte in «Segna la giornata». Se il mese è appena iniziato, è normale.", AG_VUOTO);
+        ruoloUtente==='professionista'
+          ? "Qui arrivano le ore che i collaboratori timbrano dal telefono e quelle scritte nel «Registro delle ore» della pratica. Se il mese è appena iniziato, è normale."
+          : "Qui arrivano le ore che la squadra timbra dal telefono e quelle scritte in «Segna la giornata». Se il mese è appena iniziato, è normale.", AG_VUOTO);
       return;
     }
 
@@ -242,12 +246,17 @@
       }
     });
 
-    let diffTot = totMs - totScr, dt;
-    if(!totMs || !totScr) dt = '<span class="ore-diff no">—</span>';
+    /* 20 nov 2026 (collaudo Agenda) — la differenza del totale mescolava le
+       persone: david solo timbrate (1 min) e Giulia solo scritte (2h 30m)
+       davano «−2h 29m» in arancio, un allarme falso. Si confrontano solo le
+       persone che hanno TUTTE E DUE le misure, come fa ogni riga. */
+    const _due = PERS.filter(p => p.ms > 0 && p.scrMs > 0);
+    let diffTot = _due.reduce((s,p) => s + p.ms - p.scrMs, 0), dt;
+    if(!_due.length) dt = '<span class="ore-diff no">—</span>';
     else if(Math.abs(diffTot) < 900000) dt = '<span class="ore-diff ok">uguali</span>';
     else dt = '<span class="ore-diff att">' + (diffTot < 0 ? "−" : "+") + _oreHM(Math.abs(diffTot)) + '</span>';
 
-    H += '<div class="ore-riga tot"><span class="c1">Totale squadra</span>'
+    H += '<div class="ore-riga tot"><span class="c1">' + (ruoloUtente==='professionista' ? "Totale dello studio" : "Totale squadra") + '</span>'
       + '<span class="c2">' + PERS.reduce((s,p)=>s+p.giorni,0) + '</span>'
       + '<span class="c3">' + _oreHM(totMs) + '</span>'
       + '<span class="c4">' + _oreHM(totScr) + '</span>'

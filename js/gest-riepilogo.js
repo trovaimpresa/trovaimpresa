@@ -494,7 +494,10 @@
     const set7=aperti.filter(l=>l.data_prevista&&l.data_prevista>=oggi&&l.data_prevista<=lim7)
                      .sort((a,b)=>a.data_prevista.localeCompare(b.data_prevista));
     /* agenda: lavori aperti raggruppati per operatore */
-    const perOpe={};aperti.forEach(l=>{if(l.operatore_id)perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
+    /* 20 nov 2026 (collaudo Agenda) — una persona nel Cestino contava ancora:
+       la scheda diceva «Operatore · 4 lavori» senza nome. Adesso conta solo
+       chi c'e' (opeMap); i suoi lavori sono «senza nessuno», come nell'Agenda. */
+    const perOpe={};aperti.forEach(l=>{if(l.operatore_id&&(l.operatore_id in opeMap))perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
     const opeOrd=Object.keys(perOpe).sort((a,b)=>perOpe[b]-perOpe[a]);
     /* ===== 12 agosto 2026 — MEZZI E STRUMENTI SONO DUE COSE DIVERSE =====
        Stanno nella stessa tabella, distinti dalla colonna "categoria", e qui
@@ -880,7 +883,7 @@
 
     if(!tabNascosto("squadra"))C.push(rieCard({
       tab:"squadra", titolo:"Squadra", n:OPE.length, dati:OPE.length>0,
-      lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+(Math.round(oreMese*10)/10)+" h questo mese",
+      lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+String(Math.round(oreMese*10)/10).replace(".",",")+" h questo mese",   /* 20 nov 2026: «2,5 h», non «2.5 h» */
       tono:"neutro", vuoto:"Nessun operatore registrato",
       righe: OPE.slice(0,2).map(o=>({
         t:o.nome||"Operatore",

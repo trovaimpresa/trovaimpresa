@@ -659,12 +659,20 @@
     return v;
   }
   const AG_VUOTO=_SVGV+'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14h6"/></svg>';
+  /* 20 nov 2026 (collaudo Agenda dello studio) — nella pratica la tendina si
+     chiama «Collaboratore», non «Chi ci va»: il suggerimento mandava a cercare
+     una voce che lo studio non ha. */
+  function _agSugg(){
+    return ruoloUtente==='professionista'
+      ? "Assegna le pratiche a un collaboratore dalla scheda della pratica, voce «Collaboratore»."
+      : "Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».";
+  }
   async function renderAgenda(){
     if(!cur)return;
     const body=$("#ag-body"), sel=$("#ag-op-sel");
     if(!sb||!sbUid){
       if(sel)sel.innerHTML=`<option value="">Tutti</option>`;
-      if(body){body.style.display="block";body.innerHTML=tabVuoto("Niente da fare qui","Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO);}
+      if(body){body.style.display="block";body.innerHTML=tabVuoto("Niente da fare qui",_agSugg(),AG_VUOTO);}
       return;
     }
     /* elenco operatori della squadra del reparto (Supabase) */
@@ -687,11 +695,18 @@
        o «Tutti»). La tendina si riempie qui, dopo aver letto i lavori. */
     if(agFilter.op&&agFilter.op!=="_nessuno"&&!OPS.some(o=>o.id===agFilter.op))agFilter.op="";
     const _agN=id=>L.filter(l=>l.operatore_id===id).length;
-    const _agSenza=L.filter(l=>!l.operatore_id).length;
+    /* 20 nov 2026 (collaudo Agenda) — messa nel Cestino una persona, i suoi
+       lavori sparivano dalla tendina: non erano di nessuno in elenco e
+       nemmeno in «Nessuno assegnato» (Tutti 5 = Giulia 0 + nessuno 1). La
+       domanda di elimina dice «resteranno senza nessuno assegnato»: adesso
+       e' vero anche qui. Sulla riga resta scritto «… (nel cestino)». */
+    const _agOk=new Set(OPS.map(o=>o.id));
+    const _agNessuno=l=>!l.operatore_id||!_agOk.has(l.operatore_id);
+    const _agSenza=L.filter(_agNessuno).length;
     if(sel)sel.innerHTML=[`<option value=""${agFilter.op===""?" selected":""}>Tutti (${L.length})</option>`]
       .concat(OPS.map(d=>`<option value="${esc(d.id)}"${agFilter.op===d.id?" selected":""}>${esc(d.nome)} (${_agN(d.id)})</option>`))
       .concat([`<option value="_nessuno"${agFilter.op==="_nessuno"?" selected":""}>Nessuno assegnato (${_agSenza})</option>`]).join("");
-    if(agFilter.op==="_nessuno")L=L.filter(l=>!l.operatore_id);
+    if(agFilter.op==="_nessuno")L=L.filter(_agNessuno);
     else if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
     /* 18 nov 2026 — collaudo dell'Agenda operatore: in «Tutti» i lavori fatti
        stavano in cima (hanno le date piu' vecchie). Prima quelli da fare, i
@@ -717,7 +732,7 @@
     renderTabella({
       id:"ag", box:"#ag-body",
       vuoto:tabVuoto("Niente da fare qui",
-        agFilter.op==="_nessuno"?"Tutti i lavori hanno una persona.":agFilter.op?"Questa persona non ha lavori assegnati.":"Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO),
+        agFilter.op==="_nessuno"?(ruoloUtente==='professionista'?"Tutte le pratiche hanno un collaboratore.":"Tutti i lavori hanno una persona."):agFilter.op?(ruoloUtente==='professionista'?"Questo collaboratore non ha pratiche assegnate.":"Questa persona non ha lavori assegnati."):_agSugg(),AG_VUOTO),
       colonne:[{lab:"Lavoro",w:"34%"},{lab:"Dove",w:"26%",cls:"c-cli"},{lab:"Quando",w:"16%"},
                {lab:"Stato",w:"12%"},{lab:"Importo",w:"12%",cls:"c-imp"}],
       righe:L.map(l=>{

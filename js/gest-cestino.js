@@ -34,7 +34,8 @@
     {t:"gest_mestieri",    lab:"Reparti",           campo:"nome",           ic:"🗂"},
     /* 19 nov 2026 — il tipo si chiama come la voce del menu */
     {t:"gest_mezzi",       lab:"Strumenti", labImp:"Mezzi e attrezzature", campo:"nome", ic:"🚚"},
-    {t:"gest_operatori",   lab:"Persone",           campo:"nome",           ic:"👷"},
+    /* 20 nov 2026 — allo studio si chiamano «Collaboratori», come nel menu */
+    {t:"gest_operatori",   lab:"Collaboratori", labImp:"Persone", campo:"nome", ic:"👷"},
     {t:"gest_carte",       lab:"Carte aziendali",   campo:"nome",           ic:"💳"},
     {t:"gest_fornitori",   lab:"Fornitori",         campo:"nome",           ic:"🏪"},
     {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true},
@@ -791,7 +792,9 @@
   /* rimette a posto i figli buttati via nello stesso momento del padre.
      Torna quanti ne ha tirati su. Non fa rumore se qualcosa va storto: il
      padre e' gia' tornato, e un figlio in meno si ripesca a mano. */
-  async function cestFigli(tab,id,quando){
+  /* 20 nov 2026 — «conta» (facoltativo) raccoglie QUANTI figli per tipo sono
+     tornati, cosi' il messaggio dice «2 scadenze» invece di «2 cose». */
+  async function cestFigli(tab,id,quando,conta){
     const regole=CEST_FIGLI[tab];
     if(!regole||!quando)return 0;
     const t=new Date(quando).getTime();
@@ -804,10 +807,21 @@
           .eq("user_id",sbUid).eq(r[1],id)
           .gte("eliminato_il",da).lte("eliminato_il",a)
           .select("id");
-        n+=(data||[]).length;
+        const k=(data||[]).length;
+        n+=k;
+        if(conta&&k){ const ch=r[3]||r[0]; if(!conta[ch])conta[ch]={n:0,uno:r[2]||"cosa",tanti:r[3]||"cose"}; conta[ch].n+=k; }
       }catch(e){}
     }
     return n;
+  }
+  /* «2 scadenze e 1 fattura» — per lo studio il lavoro e' la pratica */
+  function cestContaTesto(conta){
+    const pro=ruoloUtente==='professionista';
+    return Object.keys(conta).map(function(ch){
+      const c=conta[ch]; let uno=c.uno, tanti=c.tanti;
+      if(pro&&uno==="lavoro"){uno="pratica";tanti="pratiche";}
+      return c.n+" "+(c.n===1?uno:tanti);
+    }).join(", ").replace(/, ([^,]*)$/," e $1");
   }
   async function cestRipristina(i){
     const x=cestCache[+i];if(!x)return;
@@ -838,20 +852,20 @@
         +"Rimetto a posto anche "+(uno?(fem?"lei":"lui"):"loro")+"?")))daTirareSu.length=0;
     }
 
-    let extra=0;
+    let extra=0; const _conta={};
     for(const d of daTirareSu){
       /* la data si legge PRIMA di rimettere a posto il padre: e' quella che dice
          "questi figli sono stati buttati via insieme a lui". */
       const quandoPadre=d.p.eliminato_il;
       const rp=await cestRiga(d.pa.tab,d.p.id);
       if(rp&&rp.error){toast("Errore: "+rp.error.message);return;}
-      extra+=1+await cestFigli(d.pa.tab,d.p.id,quandoPadre);
+      extra+=1+await cestFigli(d.pa.tab,d.p.id,quandoPadre,_conta);
     }
 
     const {data,error}=await cestRiga(x.tab,x.id);
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
-    extra+=await cestFigli(x.tab,x.id,x.quando);
+    extra+=await cestFigli(x.tab,x.id,x.quando,_conta);
 
     /* ⚠️ RIMETTERE A POSTO UNA PERSONA NON LE RIDAVA IL TELEFONO — 14/8/2026.
        Eliminando una persona il gestionale le toglie l'accesso
@@ -872,7 +886,7 @@
         const st=rm&&rm.data&&rm.data.stato;
         if(st==="revocato"){
           _avvisoAccesso=" — ma dal telefono NON entra: quando l'hai eliminata "
-            +"le è stato tolto l'accesso. In Squadra, sulla sua scheda, premi «Nuovo invito».";
+            +"le è stato tolto l'accesso. In "+(ruoloUtente==='professionista'?"Collaboratori":"Squadra")+", sulla sua scheda, premi «Nuovo invito».";
         }
       }catch(e){}
     }
@@ -885,21 +899,28 @@
        si ridisegna tutto invece di indovinare cosa è cambiato */
     _cestRicontaPallino();
     renderCestino();
-    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+    /* 20 nov 2026 (collaudo Agenda) — mancava «agenda»: rimessa a posto una
+       persona, l'Agenda la diceva ancora «(nel cestino)» */
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","agenda","fornitori","galleria","report","carte","crediti","calendario");
     if(x.tab==="gest_op_preventivi"&&typeof gpBanner==="function")try{gpBanner();}catch(e){}
     if(x.tab==="gest_mestieri"||daTirareSu.some(function(d){return d.pa.tab==="gest_mestieri";}))renderLanding();
     /* 19 nov 2026 — il lavoro o il cliente tornati su insieme NON «ci stavano
        dentro»: si dicono per nome; le cose dentro si contano a parte */
     const _proC=ruoloUtente==='professionista';
-    const _insieme=daTirareSu.map(function(d){return (_proC&&d.pa.lab==="lavoro")?"alla pratica":(d.pa.lab==="persona"?"alla persona":"al "+d.pa.lab);});
-    const _dentro=extra-daTirareSu.length;
+    /* 20 nov 2026 (collaudo Strumenti) — il messaggio non diceva COSA era
+       tornato: «Rimesso a posto ✔ — e con lui anche altre 2 cose…». Adesso
+       il nome fra «» e i figli contati per tipo («e con lui 2 scadenze»). */
+    const _insieme=daTirareSu.map(function(d){
+      const art=(_proC&&d.pa.lab==="lavoro")?"alla pratica":(d.pa.lab==="persona"?"alla persona":"al "+d.pa.lab);
+      return art+(d.nome?" «"+d.nome+"»":"");
+    });
     /* 19 nov 2026 (voce Pratiche) — la pratica e' femminile */
     /* 20 nov 2026 — e la persona («Persona messa nel Cestino») */
     const _fem=(_proC&&x.tab==="gest_lavori")||x.tab==="gest_operatori", _lui=_fem?"lei":"lui";
-    toast((_fem?"Rimessa a posto ✔":"Rimesso a posto ✔")
+    const _figli=cestContaTesto(_conta);
+    toast((_fem?"Rimessa a posto":"Rimesso a posto")+(x.nome&&x.nome!=="(senza nome)"?" «"+x.nome+"»":"")+" ✔"
       +(_insieme.length?" — insieme "+_insieme.join(" e "):"")
-      +(_dentro===1?(_insieme.length?" e a 1 cosa che ci stava dentro":" — e con "+_lui+" anche 1 cosa che ci stava dentro")
-       :_dentro>1?(_insieme.length?" e a "+_dentro+" cose che ci stavano dentro":" — e con "+_lui+" anche altre "+_dentro+" cose che ci stavano dentro"):"")
+      +(_figli?" — e con "+(_insieme.length?"loro":_lui)+" "+_figli:"")
       +_avvisoAccesso);
   }
 

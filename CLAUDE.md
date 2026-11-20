@@ -3999,8 +3999,33 @@ Sistemati anche (20 nov, sera, chiesto da Alex) il nome dell'icona e la schermat
 Banco `tools/banco-gestionale.js app`: ZERO difetti. Prova degli strumenti col database finto: 28 verdi su 28 (1440 e 375).
 ⬜ Non provati: l'app del collaboratore su un telefono vero con un account di studio; l'email del mattino con la taratura (arriva come le altre scadenze, letto nel codice). Le date scritte nel modulo dei MEZZI (assicurazione/revisione) entrano nell'email, la «verifica periodica» no (vecchio, impresa).
 
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: AGENDA
+
+Prova da geometra dal vivo (`?vedi=professionista` + `window._tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): collaboratrice Giulia, 4 pratiche (sopralluogo domani, rilievo in ritardo, DOCFA senza nessuno, APE fatta), 2,5 ore dal «Registro delle ore» della pratica, filtro per persona / «Nessuno assegnato» / «Tutti», assegnazione dalla pratica (torna all'Agenda ✔), persona nel Cestino e ritorno, pratica con scadenza nel Cestino e ritorno, telefono. Poi cancellato tutto: conteggi uguali a prima (lavori 5, persone 1, scadenze 2, ore 1, file 7).
+
+Codice: `renderAgenda` / `_agSugg` in `js/gest-elimina-reparto.js`, «Ore fatte» `renderOre` in `js/gest-ore-spese.js`, scheda Agenda dell'Assistente in `js/gest-riepilogo.js`.
+
+Sistemato:
+1. Cestino (visto il 20 nov sugli Strumenti): «Rimesso a posto ✔ — e con lui anche altre 2 cose» senza il nome. Ora «Rimessa a posto «Nome» ✔ — e con lei 1 scadenza» (`cestFigli(...,conta)` + `cestContaTesto`, figli contati per tipo, «pratica» allo studio). Provato dal vivo: persona e pratica con scadenza.
+2. Rimessa a posto una persona, l'Agenda restava «(nel cestino)»: `agenda` mancava in `rinfresca` di `cestRipristina`.
+3. ⛔ Persona nel Cestino → le sue pratiche sparivano dalla tendina (Tutti 5 = nessuno 1, lei non c'è). La domanda di elimina promette «resteranno senza nessuno assegnato»: ora «Nessuno assegnato» comprende chi è nel Cestino (`_agNessuno`); sulla riga resta «… (nel cestino)». Provato dal vivo (Nessuno assegnato 5).
+4. ⛔ Assistente, scheda Agenda: la persona nel Cestino contava ancora («Operatore · 4 lavori»). Ora conta solo chi c'è (`opeMap`).
+5. ⛔ «Ore fatte», totale: «−2h 29m» in arancio mescolando persone (una solo timbrate, una solo scritte). Ora la differenza conta solo chi ha tutte e due le misure.
+6. Parole dello studio: suggerimento «voce «Chi ci va»» → «voce «Collaboratore»» (nella pratica si chiama così); «tutta l'azienda» → «tutto lo studio» (`#ore-chi`); «Totale squadra» → «Totale dello studio»; elenco vuoto «Segna la giornata» → «Registro delle ore» della pratica; «Questo collaboratore non ha pratiche assegnate».
+7. Cestino: il tipo «Persone» allo studio si chiama «Collaboratori»; l'avviso dell'accesso dice «In Collaboratori» (era «In Squadra»).
+8. Assistente, scheda Collaboratori: «2.5 h» → «2,5 h».
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Versioni `?v=20nov-ag` (riepilogo, elimina-reparto, ore-spese, cestino).
+
+Funzioni nuove proposte con le foto (computer e telefono), in attesa del sì di Alex:
+- «Pratiche (3)» sulla scheda del collaboratore → apre l'Agenda filtrata su di lui.
+- «Ore fatte»: «Apri ↓» anche sulle ore scritte (giorno, pratica, cosa ha fatto) + «Apri le Giornate di …».
+- Assistente, scheda Agenda: «· 1 pratica senza nessuno».
+
+⬜ Non provato: la tendina col titolare («Alex (io)» nasce solo se gli scrivi ore); l'Agenda vista dall'app del collaboratore.
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4014,3 +4039,11 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Collaboratori ↔ app del collaboratore: ✔ dal 20 nov l'app parla da studio.
 - Pratiche ↔ app del collaboratore: ✔ «Pratiche di adesso», messaggi sulla pratica.
 - Si può unire: Strumenti resta voce sola (i Mezzi allo studio non ci sono).
+- Agenda ↔ Pratiche: ✔ «Apri» apre la pratica e «Indietro» torna all'Agenda; assegnare il collaboratore dalla pratica aggiorna la tendina.
+- Agenda ↔ Collaboratori: ✗ dalla scheda della persona non si arriva alle sue pratiche (proposto «Pratiche (N)»); persona nel Cestino → ora le sue pratiche stanno in «Nessuno assegnato» (20 nov).
+- Agenda ↔ Assistente: ✔ scheda «Agenda» con i numeri uguali (dal 20 nov non conta chi è nel Cestino). — Non dice le pratiche senza nessuno (proposto).
+- Agenda ↔ Calendario: ✔ le stesse pratiche con la data. — Il Calendario non dice chi ci va.
+- Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✗ le ore scritte non si aprono per pratica (proposto «Apri ↓» + link a «Giornate di …»).
+- Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
+- Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
+- Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
