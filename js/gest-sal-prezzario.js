@@ -199,6 +199,7 @@
   function salVoci(s){
     return [{lab:"✏ Apri",action:"sal-el-apri",data:{id:s.id}},
             {lab:"📄 PDF",action:"sal-pdf",data:{id:s.id}},
+            _salStudio()?{lab:"📄 Certificato di pagamento",action:"sal-cert",data:{id:s.id}}:null,
             _salStudio()?null:{lab:(s.fattura_id?"🧾 Rifai la fattura dell'acconto":"🧾 Crea la fattura dell'acconto"),
              action:"sal-fattura",data:{id:s.id}},
             {lab:"🗑 Elimina",action:"sal-del",data:{id:s.id},del:true}].filter(Boolean);
@@ -359,6 +360,23 @@
     await salForm(id);
   }
 
+  /* 20 nov 2026 (sì di Alex) — dalla PRATICA dello studio: apre il computo
+     (cosi' «← Torna al computo» sa dove tornare) e poi il SAL. Chiudendo il
+     computo si torna nella pratica (window._tornaPraticaDaComp, letto da «close»). */
+  async function salDaPratica(compId,salId,lavId){
+    const r=await sb.from("gest_computi").select("*").eq("id",compId).eq("user_id",sbUid).maybeSingle();
+    if(r.error){toast("Non riesco ad aprire il computo: "+r.error.message);return;}
+    const c=r.data; if(!c){toast("Questo computo non c'è più (potrebbe essere nel cestino)");return;}
+    const i=compCache.findIndex(x=>String(x.id)===String(c.id));
+    if(i<0)compCache.push(c); else compCache[i]=c;
+    await computoForm(c);
+    window._tornaPraticaDaComp=lavId?{comp:String(c.id),lav:String(lavId)}:null;
+    if(salId===undefined)return;
+    await renderSalList(c.id);
+    salDaElenco=false;
+    await salForm(salId||null);
+  }
+
   /* «← Torna»: dove si torna dipende da dove si era.
      Sta in una funzione sola perche' i punti che tornano indietro sono DUE
      (il pulsante in fondo alla scheda e la fine di salSalva): una regola che
@@ -402,9 +420,12 @@
          da 0 anche se il primo aveva 0,5%: si riprende quella dell'ultimo. */
       const _ult=salCache.slice().sort((a,b)=>(+b.numero||0)-(+a.numero||0))
         .find(x=>x.ritenuta_perc!=null);
+      /* 20 nov 2026 — l'impresa che esegue i lavori si riprende dal SAL di prima */
+      const _ultImp=salCache.slice().sort((a,b)=>(+b.numero||0)-(+a.numero||0)).find(x=>x.impresa_esecutrice);
       s={ numero: salCache.reduce((m,x)=>Math.max(m,+x.numero||0),0)+1,
           data: todayStr(),
           ritenuta_perc: _ult?(+_ult.ritenuta_perc||0):(comp.tipo==="pubblico"?0.5:0),
+          impresa_esecutrice: _ultImp?_ultImp.impresa_esecutrice:null,
           stato:"bozza" };
     }
     salApertoId=s.id||null;
@@ -517,9 +538,13 @@
          gia' tre pulsanti e su un telefono da 390 px il quarto usciva fuori.
          Classe .quick-add, quella coi bordi che si vedono. */
       +  ((isNew||_salStudio())?'':'<button type="button" class="quick-add" data-action="sal-fattura" data-id="'+esc(String(s.id))+'">→ Crea la fattura di questo acconto</button>')
+      /* 20 nov 2026 (sì di Alex) — allo studio: il Certificato di pagamento del direttore dei lavori */
+      +  ((!isNew&&_salStudio())?'<button type="button" class="quick-add" data-action="sal-cert" data-id="'+esc(String(s.id))+'">📄 Certificato di pagamento</button>'
+          +'<div class="sh-nota">Il foglio che firmi da direttore dei lavori: dice al committente quanto pagare all\'impresa per questo SAL.</div>':'')
       +  (s.fattura_id?'<div class="sh-nota">Da questo '+_sa('stato di avanzamento','acconto')+' hai <b>già creato una fattura</b>. Se ne fai un\'altra, stai chiedendo due volte gli stessi soldi.</div>':'')
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La scheda</div>'
+      +  (_salStudio()?'<div class="field"><label>Impresa che esegue i lavori</label><input type="text" id="sal-imp"'+_noAuto()+' value="'+esc(s.impresa_esecutrice||"")+'" placeholder="Nome dell\'impresa"></div>':'')
       +  '<div class="row2">'
       +    '<div class="field"><label>Numero</label><input type="number" id="sal-num" value="'+esc(String(s.numero||1))+'" style="max-width:120px"></div>'
       +    '<div class="field"><label>Data</label><input type="date" id="sal-data" value="'+esc(s.data||"")+'"></div>'
@@ -641,10 +666,18 @@
       stato:segVal("sal-stato")||"bozza",
       note:String(($("#sal-note")&&$("#sal-note").value)||"").trim()||null
     };
+    if($("#sal-imp"))testa.impresa_esecutrice=String($("#sal-imp").value||"").trim()||null;
 
     let res;
     if(id) res=await sb.from("gest_sal").update(testa).eq("id",id).eq("user_id",sbUid).select("id");
     else   res=await sb.from("gest_sal").insert(testa).select("id");
+    /* paracadute: se la colonna nuova non c'e' ancora si salva senza, e lo si dice */
+    if(res.error&&/impresa_esecutrice/i.test(res.error.message||"")&&("impresa_esecutrice" in testa)){
+      delete testa.impresa_esecutrice;
+      if(id) res=await sb.from("gest_sal").update(testa).eq("id",id).eq("user_id",sbUid).select("id");
+      else   res=await sb.from("gest_sal").insert(testa).select("id");
+      if(!res.error)toast("Salvato, ma senza l'impresa: manca l'aggiornamento del database (sql/2026-11-20-sal-impresa.sql)");
+    }
     if(res.error){
       toast(/gest_sal_numero_unico|duplicate key/i.test(res.error.message||"")
         ? _sa("C'è già un SAL con questo numero su questo computo: cambia numero.","C'è già un acconto con questo numero su questo computo: cambia numero.")
@@ -754,6 +787,7 @@
     if(val("sal-dal") !==null && (val("sal-dal")||"") !==(s.periodo_dal||""))return true;
     if(val("sal-al")  !==null && (val("sal-al")||"")  !==(s.periodo_al||""))return true;
     if(val("sal-note")!==null && String(val("sal-note")||"").trim()!==String(s.note||"").trim())return true;
+    if(val("sal-imp")!==null && String(val("sal-imp")||"").trim()!==String(s.impresa_esecutrice||"").trim())return true;
     if($("#sal-rit")  && q5(_numDa(val("sal-rit")||"0"))!==q5(s.ritenuta_perc))return true;
     if($("#sal-stato")&& (segVal("sal-stato")||"bozza")!==(s.stato||"bozza"))return true;
 
@@ -1157,6 +1191,112 @@
       : _sa("PDF dello stato di avanzamento scaricato ✅","PDF dell'acconto scaricato ✅"));
   }
 
+
+  /* ============================================================
+     IL CERTIFICATO DI PAGAMENTO — 20 nov 2026 (studio, sì di Alex)
+     ============================================================
+     Il foglio che il direttore dei lavori firma per dire al committente
+     quanto pagare all'impresa per questo SAL. ⛔ I conti NON si rifanno:
+     compRiepilogoDa + salConti, gli stessi del SAL a schermo e del suo PDF.
+     Il numero del certificato e' quello del SAL. */
+  async function salCertificatoPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    if(salModifiche(id)){toast("Hai delle modifiche non salvate: premi prima Salva, poi scarica il certificato.");return;}
+    const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(rs.error||!rs.data){toast("Non riesco a leggere il SAL"+(rs.error?": "+rs.error.message:""));return;}
+    const s=rs.data;
+    const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
+    if(rcp.error||!rcp.data){toast("Il computo di questo SAL non si trova");return;}
+    const comp=rcp.data;
+    const rt=await sb.from("gest_sal_totali").select("*").eq("sal_id",s.id).eq("user_id",sbUid).maybeSingle();
+    if(rt.error||!rt.data){toast("Non riesco a leggere i totali del SAL: il certificato uscirebbe senza il conto. Riprova fra un momento.");return;}
+    const t=rt.data;
+    if(!(+t.righe>0)){toast("Questo SAL non ha nessuna lavorazione contata: scrivi almeno una quantità e salva.");return;}
+    const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    const az=azLetta||{};
+    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,cap,citta,prov,paese,referente");
+    const oggi=compRiepilogoDa(t.maturato,t.oneri_sicurezza,t.importo_manodopera,comp);
+    const k=salConti(t,comp);
+    const impresa=String(s.impresa_esecutrice||"").trim();
+
+    const motivi=[];
+    if((s.stato||"bozza")!=="emesso")motivi.push("il SAL è ancora una BOZZA");
+    if(!impresa)motivi.push("manca l'impresa che esegue i lavori");
+    if(!az.nome)motivi.push("manca il nome dello studio");
+    const _bozza=motivi.length>0;
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=14, R=196;
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+    let y=20;
+    if(_bozza){
+      doc.setFillColor(192,57,43);doc.rect(0,0,210,11,"F");
+      doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9);
+      doc.text("NON DA CONSEGNARE: "+motivi.join(" · "),105,7.2,{align:"center"});
+      doc.setTextColor(0);y=26;
+    }
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text(az.nome||"(il nome dello studio va nei Dati azienda)",M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+    let hy=y+5.5;
+    [az.piva?"P.IVA "+az.piva:"", (typeof azAlbo==="function"?azAlbo(az):""), azIndirizzo(az),
+     [az.tel?"Tel "+az.tel:"", az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(function(r){doc.text(String(r),M,hy);hy+=4.2;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("CERTIFICATO DI PAGAMENTO N. "+(s.numero||1),R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("relativo al SAL n. "+(s.numero||1)+" del "+fdate(s.data||todayStr()),R,y+5.5,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+12)+3;doc.setDrawColor(210);doc.line(M,y,R,y);y+=8;
+
+    doc.setFontSize(10);
+    const riga=(etic,val)=>{ if(!val)return; doc.setFont("helvetica","bold");doc.text(etic,M,y);
+      doc.setFont("helvetica","normal");const L=doc.splitTextToSize(String(val),R-M-32);doc.text(L,M+32,y);y+=L.length*5+1.5; };
+    riga("Lavori:",(comp.oggetto||comp.titolo||"—")+(comp.luogo?" — "+comp.luogo:""));
+    riga("Committente:",cli.nome||"—");
+    riga("Impresa:",impresa||"—");
+    if(s.periodo_dal||s.periodo_al)riga("Periodo:",(s.periodo_dal?"dal "+fdate(s.periodo_dal):"")+(s.periodo_al?(s.periodo_dal?" al ":"fino al ")+fdate(s.periodo_al):""));
+    y+=4;
+
+    const voci=[["Lavori eseguiti a tutto il "+fdate(s.data||todayStr()),oggi.lordo,false,false]];
+    if(oggi.perc)voci.push(["Ribasso "+_pct(oggi.perc)+"%"+(oggi.sicurezza?" (non sui costi della sicurezza)":""),oggi.ribasso,true,false]);
+    voci.push(["Importo dei lavori eseguiti",k.maturato,false,true]);
+    voci.push([(t.numero_precedente!=null?"Già certificato fino al SAL n. "+t.numero_precedente:"Già certificato in precedenza"),k.precedente,true,false]);
+    voci.push(["Importo del presente stato di avanzamento",k.lordo,false,true]);
+    if(k.ritenuta)voci.push(["Ritenuta di garanzia "+_pct(k.perc)+"%",k.ritenuta,true,false]);
+    doc.setFontSize(10);
+    voci.forEach(function(v){
+      doc.setFont("helvetica",v[3]?"bold":"normal");
+      doc.text(String(v[0]),M,y);
+      doc.text((v[2]?"- ":"")+_eur(v[1]),R,y,{align:"right"});
+      y+=7;
+    });
+    doc.setDrawColor(31,111,92);doc.setLineWidth(.5);doc.line(M,y-3,R,y-3);doc.setLineWidth(.2);
+    doc.setFont("helvetica","bold");doc.setFontSize(12);
+    y+=3;doc.text("IMPORTO DEL PRESENTE CERTIFICATO",M,y);doc.text(_eur(k.netto),R,y,{align:"right"});
+    y+=12;
+    doc.setFont("helvetica","normal");doc.setFontSize(10);
+    const lett=(typeof euroInLettere==="function")?euroInLettere(k.netto):"";
+    const frase="Si certifica che all'impresa "+(impresa||"________________")+" può essere pagata la somma di "+_eur(k.netto)
+      +(lett?" ("+lett+")":"")+", oltre IVA, a titolo di acconto per i lavori eseguiti a tutto il "+fdate(s.data||todayStr())+".";
+    const fl=doc.splitTextToSize(frase,R-M);doc.text(fl,M,y);y+=fl.length*5+6;
+    if(s.note){const nl=doc.splitTextToSize("Note: "+s.note,R-M);doc.setTextColor(90);doc.setFontSize(9);doc.text(nl,M,y);y+=nl.length*4.5+4;doc.setTextColor(0);}
+    if(y>230){doc.addPage();y=20;}
+    y+=6;doc.setFontSize(9);doc.setTextColor(90);
+    doc.text((az.citta?az.citta+", ":"")+"lì "+fdate(s.data||todayStr()),M,y);doc.setTextColor(0);
+    if(typeof pdfFirme==="function"){
+      y=pdfFirme(doc,y,M,R,[{etichetta:"Il Direttore dei lavori",nome:(az.tecnico_firma||az.nome||"")},{etichetta:"Il Committente",nome:cli.nome||""}]);
+    }
+    doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+    doc.text("Importi al netto dell'IVA. Il conto è quello dello stato di avanzamento n. "+(s.numero||1)+".",M,286,{maxWidth:R-M});
+    doc.setTextColor(0);
+    doc.save((_bozza?"BOZZA-":"")+"CERTIFICATO-PAGAMENTO-"+(s.numero||1)+"-"
+      +String(comp.titolo||cli.nome||"lavori").replace(/[^a-z0-9]+/gi,"-").toLowerCase().replace(/^-|-$/g,"")+".pdf");
+    toast(_bozza?("Scaricato, ma sul foglio c'è la fascia rossa: "+motivi.join(" · ")+"."):"Certificato di pagamento scaricato ✅");
+  }
 
   /* ============================================================
      LA SEZIONE PREZZARIO

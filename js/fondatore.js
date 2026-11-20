@@ -287,6 +287,7 @@
     "2026-11-20-collaboratori-tariffa.sql": "gest_operatori.tariffa_oraria",
     "2026-11-20-strumenti-chi-ce-l-ha.sql": "gest_mezzi.operatore_id",
     "2026-11-20-giornata-didascalia.sql": "gest_rapportini.didascalia",
+    "2026-11-20-sal-impresa.sql": "gest_sal.impresa_esecutrice",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
     "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo gest_lavori.pratica_protocollo gest_lavori.pratica_comune gest_lavori.pratica_data_dep gest_lavori.pratica_stato gest_lavori.catasto_foglio gest_lavori.catasto_particella gest_lavori.catasto_sub",

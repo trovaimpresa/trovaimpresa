@@ -1049,9 +1049,68 @@
     return '<div class="sh-b">'
       +'<div class="field campo-titolo"><label>\u23F0 Scadenze di '+(pro?'questa pratica':'questo lavoro')+'</label>'
       +'<div class="lav-media" id="lav-scad">Sto controllando…</div>'
-      +'</div></div>';
+      +'</div></div>'
+      /* 20 nov 2026 (sì di Alex, foto prima) — SOLO STUDIO: computo e stati
+         di avanzamento di questa pratica (la direzione lavori). Prima il
+         computo si collegava alla pratica ma dalla pratica non si vedeva. */
+      +(pro?'<div class="sh-b"><div class="field campo-titolo"><label>\uD83D\uDCD0 Computo e stati di avanzamento</label>'
+        +'<div class="lav-media" id="lav-comp">Sto controllando…</div></div></div>':'');
+  }
+  /* il riquadro qui sopra: computi collegati a questa pratica e i loro SAL.
+     I conti passano da compRiepilogo / salConti, come nel resto: nessuna copia. */
+  async function renderLavComputi(){
+    const box=$("#lav-comp");if(!box)return;
+    const lav=editing&&editing.realId;
+    if(!lav){box.innerHTML='<div class="lm-vuoto">Salva prima la pratica: poi qui vedi il suo computo e i SAL.</div>';return;}
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+    try{
+      const rc=await sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("lavoro_id",lav).order("data",{ascending:false});
+      if(rc.error)throw rc.error;
+      const C=rc.data||[];
+      if(!C.length){
+        box.innerHTML='<div class="lm-conta">Nessun computo collegato a questa pratica</div>'
+          +'<div class="lm-vuoto">Nel computo, alla pagina «La scheda», scegli questa pratica: il computo e i suoi SAL compaiono qui.</div>';
+        return;
+      }
+      const ids=C.map(c=>c.id);
+      const [rv,rk,rs,rt]=await Promise.all([
+        sb.from("gest_computo_voci_calc").select("computo_id,capitolo_id,quantita,prezzo_unitario,importo,oneri_sicurezza,incidenza_manodopera").eq("user_id",sbUid).in("computo_id",ids),
+        sb.from("gest_computo_capitoli").select("id,computo_id,sicurezza").eq("user_id",sbUid).in("computo_id",ids),
+        sb.from("gest_sal").select("*").eq("user_id",sbUid).in("computo_id",ids).order("numero",{ascending:false}),
+        sb.from("gest_sal_totali").select("*").eq("user_id",sbUid).in("computo_id",ids)
+      ]);
+      if(rs.error||rt.error)throw (rs.error||rt.error);
+      const tot={};(rt.data||[]).forEach(t=>{tot[String(t.sal_id)]=t;});
+      let h='';
+      C.forEach(function(c){
+        let imp=null;
+        try{
+          if(!rv.error&&typeof compRiepilogo==="function"){
+            const V=(rv.data||[]).filter(v=>String(v.computo_id)===String(c.id));
+            const K=(rk.data||[]).filter(k=>String(k.computo_id)===String(c.id));
+            imp=compRiepilogo(V,c,K).netto;
+          }
+        }catch(_){imp=null;}
+        h+='<div class="lsc-r"><div class="lsc-info"><b>Computo — '+esc(c.titolo||"senza titolo")+'</b>'
+          +'<small>'+(c.ribasso_perc?('ribasso '+String(c.ribasso_perc).replace(".",",")+'%'):'senza ribasso')+'</small></div>'
+          +'<span class="lsc-q">'+(imp!=null?eur2(imp):'')+'</span>'
+          +'<button type="button" class="btn lsc-apri" data-action="lav-comp-apri" data-id="'+esc(String(c.id))+'" data-lav="'+esc(String(lav))+'">Apri</button></div>';
+        (rs.data||[]).filter(x=>String(x.computo_id)===String(c.id)).forEach(function(s){
+          const k=salConti(tot[String(s.id)],c);
+          h+='<div class="lsc-r"><div class="lsc-info"><b>SAL n. '+esc(String(s.numero||""))+' · '+((s.stato||"bozza")==="emesso"?'emesso':'bozza')+'</b>'
+            +'<small>'+esc(fdate(s.data))+' · eseguito finora '+eur2(k.maturato)+'</small></div>'
+            +'<span class="lsc-q">'+eur2(k.netto)+'</span>'
+            +'<button type="button" class="btn lsc-apri" data-action="lav-sal-apri" data-id="'+esc(String(s.id))+'" data-comp="'+esc(String(c.id))+'" data-lav="'+esc(String(lav))+'">Apri</button></div>';
+        });
+      });
+      h+='<button type="button" class="btn-ghost quick-add" data-action="lav-sal-nuovo" data-comp="'+esc(String(C[0].id))+'" data-lav="'+esc(String(lav))+'">+ Nuovo stato di avanzamento</button>';
+      box.innerHTML=h;
+    }catch(e){
+      box.innerHTML='<div class="lm-vuoto">Non riesco a leggere computo e SAL: controlla la connessione e riapri la pratica.</div>';
+    }
   }
   async function renderLavScadenze(){
+    try{ if(ruoloUtente==='professionista')renderLavComputi(); }catch(_){}
     const box=$("#lav-scad");if(!box)return;
     const lav=editing&&editing.realId;
     const pro=ruoloUtente==='professionista';

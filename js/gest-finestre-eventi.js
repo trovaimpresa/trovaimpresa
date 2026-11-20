@@ -174,6 +174,7 @@
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);
     if(a==="sal-pdf")return salPdf(id);
+    if(a==="sal-cert")return salCertificatoPdf(id);   /* 20 nov 2026 — studio */
     if(a==="sal-fattura")return salAFattura(id);
     if(a==="sal-fatt-intero")return salFatturaCon("intero");
     if(a==="sal-fatt-netto")return salFatturaCon("netto");
@@ -917,6 +918,14 @@
       if(lavId&&document.querySelector("#sheet #s-tit")&&$("#overlay").classList.contains("open"))_tornaAlLavoro=lavId;
       return;
     }
+    /* 20 nov 2026 (sì di Alex) — computo e SAL dentro la pratica dello studio */
+    if(a==="lav-comp-apri"||a==="lav-sal-apri"||a==="lav-sal-nuovo"){
+      let _cambiato=true;
+      try{_cambiato=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
+      if(_cambiato&&!(await gconfirm("Apro il computo al posto di questa pratica.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      const compId=(a==="lav-comp-apri")?id:t.dataset.comp;
+      return salDaPratica(compId,(a==="lav-comp-apri")?undefined:(a==="lav-sal-apri"?id:null),t.dataset.lav);
+    }
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
     if(a==="scad-persona"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -1136,6 +1145,11 @@
            «Annulla» e «Indietro» riportano al computo, non lo chiudono */
         if(document.querySelector("#sheet #cp-lista")&&typeof compVociCompId!=="undefined"&&compVociCompId)return compTornaAlComputo();
         if(document.querySelector("#sheet #sal-voci")&&typeof salTorna==="function")return salTorna();
+        /* 20 nov 2026 — computo aperto dalla pratica: chiuso, si torna nella pratica */
+        const _tp=window._tornaPraticaDaComp;
+        if(_tp&&document.querySelector("#sheet #co-nav")&&typeof compVociCompId!=="undefined"&&String(compVociCompId)===_tp.comp){
+          window._tornaPraticaDaComp=null; closeSheet(); return lavoroApri(_tp.lav);
+        }
       }catch(_e){}
       return closeSheet();
     }

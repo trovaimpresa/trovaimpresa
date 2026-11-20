@@ -4043,7 +4043,10 @@ Sistemato (`?v=20nov-sal`):
 
 Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni.
 ⬜ Da guardare: allo studio la ritenuta del SAL privato senza ribasso sulla sicurezza è voluta (regola delle gare pubbliche); cambiare il SAL n. 1 dopo aver fatto il n. 2 cambia il n. 2 (giusto, ma non lo dice).
-Funzioni nuove proposte con le foto (aspettano il sì di Alex): riquadro «Computo e stati di avanzamento» dentro la pratica; «Certificato di pagamento» (PDF del direttore dei lavori) con la casella «Impresa che esegue i lavori».
+Funzioni nuove (foto prima, «1 si 2 si pubblica» di Alex) — SOLO STUDIO:
+- **Computo e stati di avanzamento dentro la pratica** (`bloccoScadenzePratica` + `renderLavComputi` in `js/gest-scadenze-pratiche.js`, chiamata da `renderLavScadenze`): computi collegati (`gest_computi.lavoro_id`) col totale (`compRiepilogo`) e i loro SAL (`salConti`), «Apri» e «+ Nuovo stato di avanzamento». Le azioni `lav-comp-apri` / `lav-sal-apri` / `lav-sal-nuovo` (js/gest-finestre-eventi.js) passano da `salDaPratica()` (js/gest-sal-prezzario.js): apre PRIMA il computo (cosi' «← Torna al computo» sa dove tornare), poi il SAL. Chiudendo il computo si torna nella pratica (`window._tornaPraticaDaComp`, letto da «close» solo se il computo aperto e' quello).
+- **Certificato di pagamento** (`salCertificatoPdf`, azione `sal-cert`, pulsante nella scheda del SAL e nel menu «⋯»): stessi conti del SAL (`compRiepilogoDa` + `salConti`), importo anche in lettere (`euroInLettere`), firme Direttore dei lavori + Committente, fascia rossa se SAL in bozza o impresa mancante. Numero = numero del SAL.
+- **Impresa che esegue i lavori**: casella nella scheda del SAL (solo studio), colonna `gest_sal.impresa_esecutrice` (`sql/2026-11-20-sal-impresa.sql`, migrazione `sal_impresa_20nov2026` GIÀ ESEGUITA, riga in PROVE); un SAL nuovo la riprende dal SAL di prima. Paracadute se la colonna manca.
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
 Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento.
@@ -4070,7 +4073,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Collaboratori (Assistente) ↔ Ore fatte: ✗ le ore del mese della scheda vengono da gest_lavori.ore, non da gest_ore: da guardare a fine giro.
 - Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
 - Stati di avanzamento ↔ Computo metrico: ✔ il SAL vive dentro il computo (righe, prezzi, ribasso, capitoli); «Fai un SAL» apre il computo sulla linguetta giusta.
-- Stati di avanzamento ↔ Pratiche: — il computo si collega alla pratica, ma dalla pratica non si vedono computo e SAL (proposta: riquadro nella pratica).
+- Stati di avanzamento ↔ Pratiche: ✔ dal 20 nov riquadro «Computo e stati di avanzamento» nella pratica, «Apri» e chiudendo si torna nella pratica.
 - Stati di avanzamento ↔ Fatture: — allo studio giusto così dal 20 nov (la fattura del SAL la fa l'impresa). La parcella della direzione lavori non nasce dal SAL.
 - Stati di avanzamento ↔ Preventivi e parcella: — il preventivo nasce dal computo, non dal SAL (giusto).
 - Stati di avanzamento ↔ Assistente: ✔ scheda «Stati di avanzamento» con gli stessi conti (salConti); dal 20 nov senza l'allarme «non fatturati» allo studio.
