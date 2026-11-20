@@ -102,7 +102,12 @@ let mode=params.get("accedi")?"login":"register";
    (gestionale-app.html, inviteLink): qui si dice «studio» e «pratiche».
    Senza il parametro resta tutto com'era. */
 const STUDIO=params.get("studio")==="1";
+/* 20 nov 2026 — l'app del collaboratore si ricorda che e' di uno studio anche
+   PRIMA di entrare (schermata d'ingresso, nome dell'icona): js/op-studio.js */
+try{ if(STUDIO)localStorage.setItem("ti_op_studio","1"); }catch(_){}
+const AGENDA="gestionale-operatore.html"+(STUDIO?"?studio=1":"");
 if(STUDIO){
+  const _ag=document.querySelector('#done a.btn'); if(_ag)_ag.setAttribute("href",AGENDA);
   $("#redeem-hint").textContent="Te l'ha dato lo studio. Inseriscilo per collegarti.";
   $("#btn-redeem").textContent="Collegami allo studio";
   $("#done-txt").textContent="Da ora puoi aprire la tua agenda e vedere le pratiche che ti assegnano.";
@@ -120,7 +125,7 @@ function renderAuth(){
 async function refresh(session){
   if(session){
     const {data:membri}=await sb.from("gest_membri").select("impresa_id").eq("membro_id",session.user.id).eq("stato","attivo");
-    if(membri&&membri.length){location.href="gestionale-operatore.html";return;}
+    if(membri&&membri.length){location.href=AGENDA;return;}
     $("#codice").value=(params.get("codice")||"").toUpperCase(); show("redeem");
   }
   else { renderAuth(); show("auth"); }

@@ -21,6 +21,9 @@
   const OP_STUDIO_SALTA='textarea,input,select,option,.ch-t,.ch-n,.cli-card h3,.cli-info,.where,.op-voce,.op-voce-sez,.op-t,.op-cosa,.op-dove,.rap-nome,.sp-testo,.rv-scelta[data-lav],.istr,#lv-title,#lv-meta,#hd-name,#hd-imp,.job h3,.mg-r>div,.ti-orig';
   /* l'ordine conta: prima le frasi lunghe, poi i pezzi corti */
   const OP_STUDIO_FRASI=[
+    ["Non sei ancora collegato a un'impresa. Apri il link di invito.","Non sei ancora collegato a uno studio. Apri il link di invito."],
+    ["Non è la tua: qui entra il tuo operaio, con il suo account, e vede i lavori del giorno. Tu lo inviti dal gestionale: Squadra → «+ Nuova persona», poi apri la sua scheda e fagli inquadrare il QR.",
+     "Non è la tua: qui entra il tuo collaboratore, con il suo account, e vede le pratiche del giorno. Tu lo inviti dal gestionale: Collaboratori → «+ Nuova persona», poi apri la sua scheda e fagli inquadrare il QR."],
     ["Per entrare usa il link che ti ha mandato la tua impresa.","Per entrare usa il link che ti ha mandato lo studio."],
     ["Non hai messo le ore a nessuno: la manodopera di oggi su questo lavoro resta a zero, e il margine del cantiere esce più alto del vero.",
      "Non hai messo le ore a nessuno: il tempo di oggi su questa pratica resta a zero, e il margine della pratica esce più alto del vero."],
@@ -97,7 +100,7 @@
   ];
   /* le parole sole: un pulsante o un titolo che dice solo quella */
   const OP_STUDIO_SOLE={"Lavori":"Pratiche","Lavoro":"Pratica","Cantiere":"Pratica o sopralluogo","Materiali":"Cosa hai fatto","Materiale":"Cosa hai fatto","Squadra":"Collaboratori","Bolla o fattura":"Ricevuta o fattura","Fotografa la bolla":"Fotografa la ricevuta"};
-  const OP_STUDIO_TRIGGER=/lavor[oi]\b|Lavor[oi]\b|cantiere|Cantiere|squadra|Squadra|\bcapo\b|impresa|Materiali?|materiali|[Bb]olla|Segna come fatto/;
+  const OP_STUDIO_TRIGGER=/lavor[oi]\b|Lavor[oi]\b|cantiere|Cantiere|squadra|Squadra|\bcapo\b|impresa|operaio|Materiali?|materiali|[Bb]olla|Segna come fatto/;
 
   function opStudioFrase(s){
     if(!s||!OP_STUDIO_TRIGGER.test(s))return s;
@@ -109,10 +112,60 @@
        .replace(/\blavori? da fare\b/g,function(m){return m.indexOf("lavori")===0?"pratiche da fare":"pratica da fare";});
     return s;
   }
-  function opStudioAttivo(){ try{ return typeof MIO!=="undefined"&&MIO&&MIO.tipoStudio==='professionista'; }catch(_){ return false; } }
+  /* 20 nov 2026 (sera, chiesto da Alex) — PRIMA DI ENTRARE.
+     La schermata d'ingresso e il nome dell'icona arrivano prima che l'app sappia
+     chi e' il titolare. Allora ci si ricorda che e' di uno studio: lo scrive il
+     link dell'invito («&studio=1», gestionale-invito.html) e lo riscrive l'app
+     ogni volta che il titolare si sa (localStorage «ti_op_studio»).
+     Quando il titolare si sa, vince sempre lui. */
+  function opStudioRicordato(){
+    try{ if(new URLSearchParams(location.search).get("studio")==="1")return true; }catch(_){}
+    try{ return localStorage.getItem("ti_op_studio")==="1"; }catch(_){ return false; }
+  }
+  function opStudioAttivo(){
+    try{
+      if(typeof MIO!=="undefined"&&MIO&&MIO.tipoStudio)return MIO.tipoStudio==='professionista';
+      return opStudioRicordato();
+    }catch(_){ return false; }
+  }
+  /* il titolare adesso si sa: lo si scrive per la prossima volta */
+  function opStudioRicorda(){
+    try{
+      if(typeof MIO==="undefined"||!MIO||!MIO.tipoStudio)return;
+      if(MIO.tipoStudio==='professionista')localStorage.setItem("ti_op_studio","1");
+      else{
+        localStorage.removeItem("ti_op_studio");
+        /* ci si ricordava di uno studio, ma il titolare e' un'impresa: nome di prima */
+        const m=document.querySelector('link[rel="manifest"]');
+        if(m&&/studio/.test(m.getAttribute("href")||""))m.setAttribute("href","/manifest-operaio.json");
+        const t=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if(t&&t.getAttribute("content")==="Studio")t.setAttribute("content","Cantiere");
+      }
+    }catch(_){}
+  }
+  /* il nome sotto l'icona: «Studio» invece di «Cantiere». Vale per chi la mette
+     sul telefono da adesso (Android lo legge dal manifest, iPhone dalla riga
+     apple-mobile-web-app-title). Un'icona gia' messa non cambia nome da sola. */
+  function opStudioIcona(){
+    try{
+      const m=document.querySelector('link[rel="manifest"]');
+      if(m&&!/studio/.test(m.getAttribute("href")||""))m.setAttribute("href","/manifest-operaio-studio.json");
+      const t=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if(t&&t.getAttribute("content")!=="Studio")t.setAttribute("content","Studio");
+    }catch(_){}
+  }
 
   function opStudioGiro(root){
     if(!root||!opStudioAttivo())return;
+    /* finche' il titolare non si sa, ci si fida del ricordo SOLO per la
+       schermata d'ingresso: l'app vera aspetta di sapere chi e' (se no un
+       collaboratore passato a un'impresa vedrebbe «Pratiche» per sempre) */
+    try{
+      if(!(typeof MIO!=="undefined"&&MIO&&MIO.tipoStudio)){
+        const el=root.nodeType===1?root:root.parentElement;
+        if(!el||!el.closest||!el.closest("#gate"))return;
+      }
+    }catch(_){ return; }
     const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){
       return (t.parentElement&&t.parentElement.closest(OP_STUDIO_SALTA))?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
     const nodi=[];while(w.nextNode())nodi.push(w.currentNode);
@@ -127,7 +180,9 @@
   }
   let _oss=null, _inGiro=false;
   function opStudioAccendi(){
+    opStudioRicorda();
     if(!opStudioAttivo())return;
+    opStudioIcona();
     if(!/dello studio/.test(document.title))document.title=document.title.replace(/agenda/i,"agenda dello studio");
     ["#gate","#app","#rv-ov","#toast"].forEach(function(q){ opStudioGiro(document.querySelector(q)); });
     if(_oss)return;
@@ -163,6 +218,8 @@
   const _t=setInterval(function(){
     _giri++;
     try{ if(typeof MIO!=="undefined"&&MIO&&MIO.tipoStudio){ opStudioAccendi(); clearInterval(_t); } }catch(_){}
+    /* il cancello compare senza che il titolare si sappia: se ci si ricorda dello studio, si traduce */
+    try{ if(opStudioRicordato())opStudioAccendi(); }catch(_){}
     if(_giri>40)clearInterval(_t);
   },500);
 })();
