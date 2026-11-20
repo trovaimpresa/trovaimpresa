@@ -1799,7 +1799,9 @@
      automatici nella stessa riga si spartiscono lo spazio a caso. */
   function ctrTastoHTML(tipo){
     return '<button type="button" class="btn ctr-tasto" data-action="ctr-guarda" data-ctr="'+tipo+'">'
-         + (ruoloUtente==='professionista'?'Controlla prima di mandarlo':'Controlla che sia giusto')+'</button>'
+         /* 20 nov 2026 — «mandarlo» solo per le cose che vanno al cliente:
+            su un corso, un mezzo o una scadenza non si manda niente a nessuno */
+         + (ruoloUtente==='professionista'&&["preventivo","fattura","computo","capitolato"].indexOf(tipo)>=0?'Controlla prima di mandarlo':'Controlla che sia giusto')+'</button>'
          /* ⚠️ 19 agosto 2026 — IL TASTO DELL'AI SI VEDE SUBITO.
             Prima compariva solo dopo il controllo gratis, per non far
             spendere un credito per sbaglio. Ma nascosto vuol dire anche

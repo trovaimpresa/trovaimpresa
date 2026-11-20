@@ -3921,3 +3921,25 @@ Funzioni nuove (foto approvate, «si si pubblica»):
 - **«↩ Fai la nota di credito»** su una fattura emessa o pagata (`fattNotaCredito`, azione `fatt-nc`): copia cliente, voci, cassa, spese, ritenuta, sconto; nelle note «Nota di credito che storna la fattura n. X/AAAA del GG/MM/AAAA». Da quella riga (`fattRifStornata`) il file SDI scrive `<DatiFattureCollegate>`: se la si toglie dalle note il collegamento sparisce.
 - **Telefono (≤600 px)**: i pulsanti in testa alle finestre `.sh-head-az` due per riga (`css/gestionale-stile.css` v36, vale per tutte le finestre grandi).
 Da guardare: con spese anticipate in ordinario «Totale imponibile» comprende le spese fuori IVA (l'IVA è su un numero più piccolo); una nota di credito scritta a mano (non da «Fai la nota di credito») non dice quale fattura storna.
+
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CREDITI FORMATIVI
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): 6 corsi 2024-2026 (uno a dicembre, ancora da fare), «2,5» con la virgola, traguardo cambiato, Cestino e «Rimetti a posto», telefono. Poi cancellato tutto: →0← corsi di Alex (com'era), traguardo rimesso a →30←, nessun file nel deposito.
+
+Codice: `renderCrediti` / `credTraguardo` / `credForm` / `saveCred` / `delCred` in `js/gest-preventivi.js`; scheda del Riepilogo in `js/gest-riepilogo.js`; regole del controllore `ctrRegoleCorso` in `js/gest-ai-moduli.js`; tabella `gest_crediti` (niente `mestiere_id`: i corsi sono della persona, uguali in tutti i reparti).
+
+Sistemato:
+1. ⛔ Un corso con la data nel futuro (iscritto, non ancora fatto) contava subito: il riquadro poteva dire «sei a posto» prima del corso. Ora conta solo dal giorno del corso; nel riquadro «In programma: X CFP», nell'elenco etichetta blu «In programma». Stesso conto nel Riepilogo e in «Cambia il traguardo».
+2. ⛔ «−3» si salvava −3, «due» si salvava 0, vuoto si salvava 0 senza dirlo. Ora `saveCred` ferma con la casella rossa (`campoManca`): vuoto → «se non ne dà, scrivi 0»; lettere; sotto zero. Anche titolo e data mancanti: casella rossa (prima solo un messaggio).
+3. «Corso eliminato» → «Corso nel cestino: lo riprendi da lì» (come le altre voci).
+4. Tasto «Controlla prima di mandarlo» su un corso (non si manda a nessuno): «mandarlo» resta solo su preventivo, fattura, computo, capitolato (`ctrTastoHTML`).
+5. ⛔ Testo sbagliato in «Cambia il traguardo»: «30 per ingegneri e architetti, 20 per i geometri». Vero (cercato il 20 nov): ingegneri almeno 30 CFP sempre; architetti 60 in tre anni (12 deontologia); geometri 60 in tre anni (6 deontologia). Testo corretto.
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione).
+
+Funzioni nuove — FOTO MANDATE, ASPETTANO IL SÌ DI ALEX (non costruite):
+- **Conto sul triennio**: finestra «Come conta il tuo Ordine» (Ordine, ogni anno / in tre anni, anno di inizio, crediti da fare, di cui deontologia); riquadro «Triennio 2024–2026 · 48,5 di 60», «ti mancano X entro il 31/12/2026 (fra N giorni)», deontologia «5,5 di 6», un numero per anno. Serve SQL: `gest_azienda.cfp_ordine`, `cfp_periodo` (1/3), `cfp_inizio`, `cfp_deont`.
+- **Attestato** (PDF o foto) attaccato al corso, con Cestino che toglie anche il file.
+- **Avviso**: da ottobre dell'ultimo anno, se mancano crediti → scheda rossa nel Riepilogo e riga in Scadenze.
+- **Ricerca in alto** che trova anche i corsi (oggi no: `js/gest-ricerca.js` guarda clienti, pratiche, preventivi, fatture, fornitori).
+⬜ Non provato: la voce «Crediti formativi da fare ogni anno» nei Dati azienda (stessa colonna `cfp_obiettivo`).

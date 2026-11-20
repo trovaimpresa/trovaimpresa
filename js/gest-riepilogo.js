@@ -1117,7 +1117,8 @@
         const {data:CR,error:eCr}=await sb.from("gest_crediti").select("data,crediti").eq("user_id",sbUid);
         if(!eCr&&CR&&CR.length){
           const anno=oggi.slice(0,4);
-          const fatti=CR.filter(c=>String(c.data||"").slice(0,4)===anno).reduce((t,c)=>t+(+c.crediti||0),0);
+          /* 20 nov 2026 — i corsi con la data nel futuro non sono ancora fatti */
+          const fatti=CR.filter(c=>String(c.data||"").slice(0,4)===anno&&String(c.data||"")<=oggi).reduce((t,c)=>t+(+c.crediti||0),0);
           const ob=(AZ&&+AZ.cfp_obiettivo>0)?+AZ.cfp_obiettivo:30;
           C.push(rieCard({
             tab:"crediti", titolo:"Crediti formativi", n:String(Math.round(fatti*100)/100).replace(".",","), dati:true,

@@ -1223,7 +1223,14 @@
     const annoOggi=todayStr().slice(0,4);
     if(!credAnno)credAnno=anni.includes(annoOggi)?annoOggi:(anni[0]||annoOggi);
     const L=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno);
-    const fatti=L.reduce((s,c)=>s+(+c.crediti||0),0);
+    /* 20 nov 2026 — un corso con la data nel futuro e' un corso a cui sei
+       iscritto, non uno che hai fatto: prima contava subito e il riquadro
+       poteva dire «sei a posto» a dicembre con un convegno ancora da fare. */
+    const _oggiCr=todayStr();
+    const _giaFatto=c=>String(c.data||"")<=_oggiCr;
+    const LF=L.filter(_giaFatto);
+    const fatti=LF.reduce((s,c)=>s+(+c.crediti||0),0);
+    const inProgramma=L.filter(c=>!_giaFatto(c)).reduce((s,c)=>s+(+c.crediti||0),0);
     const mancano=Math.max(0,credObiettivo-fatti);
     const perc=credObiettivo?Math.min(100,Math.round(fatti/credObiettivo*100)):0;
 
@@ -1236,7 +1243,7 @@
        e basta. Non invento la quota: ogni Ordine ha la sua, quindi si avvisa e
        si rimanda al regolamento. */
     const perTipo={};
-    L.forEach(function(c){const t=(c.tipo||"Altro");perTipo[t]=(perTipo[t]||0)+(+c.crediti||0);});
+    LF.forEach(function(c){const t=(c.tipo||"Altro");perTipo[t]=(perTipo[t]||0)+(+c.crediti||0);});
     const _n2=v=>String(Math.round(v*100)/100).replace(".",",");
     const deont=perTipo["Deontologia"]||0;
     const rigaTipi=Object.keys(perTipo).filter(t=>perTipo[t]>0).sort((a,b)=>perTipo[b]-perTipo[a])
@@ -1252,6 +1259,7 @@
       +'<div class="cred-msg">'+(mancano===0
           ? "Obiettivo "+credAnno+" raggiunto: sei a posto."
           : "Ti mancano <b>"+String(Math.round(mancano*100)/100).replace(".",",")+" crediti</b> per chiudere il "+credAnno+".")
+      +(inProgramma>0?'<br>In programma: <b>'+_n2(inProgramma)+' CFP</b> di corsi non ancora fatti. Li conto il giorno del corso.':'')
       +(deont===0&&fatti>0
           ? '<br>Attenzione: nel '+credAnno+' non hai <b>nessun credito di Deontologia</b>. Quasi tutti gli Ordini ne chiedono una quota a parte: controlla il regolamento del tuo.'
           : '')
@@ -1276,7 +1284,7 @@
           id:c.id,
           click:{action:"edit-cred",data:{id:c.id}},
           celle:[
-            '<span class="lav-bar fatto"></span><span class="c-nome">'+esc(c.titolo||"Corso")+'</span>',
+            '<span class="lav-bar '+(_giaFatto(c)?'fatto':'in_corso')+'"></span><span class="c-nome">'+esc(c.titolo||"Corso")+'</span>'+(_giaFatto(c)?'':' <span class="stato" style="background:var(--info-bg);color:var(--info)">In programma</span>'),
             esc(c.ente||"—"),
             esc(c.tipo||"—"),
             '<b>'+String(+c.crediti||0).replace(".",",")+'</b>',
@@ -1291,7 +1299,9 @@
       cards:()=>L.map(function(c){
         return schedaJob({
           tono:"t-ok", titolo:esc(c.titolo||"Corso"),
-          destra:'<span class="stato" style="background:var(--ok-bg);color:var(--ok)">'+String(+c.crediti||0).replace(".",",")+' CFP</span>',
+          destra:_giaFatto(c)
+            ?'<span class="stato" style="background:var(--ok-bg);color:var(--ok)">'+String(+c.crediti||0).replace(".",",")+' CFP</span>'
+            :'<span class="stato" style="background:var(--info-bg);color:var(--info)">In programma · '+String(+c.crediti||0).replace(".",",")+' CFP</span>',
           meta:[c.ente?"🏛 "+esc(c.ente):"", c.tipo?"📚 "+esc(c.tipo):"", "📅 "+fdate(c.data)],
           nota:c.note?"📝 "+esc(c.note):"",
           azioni:[
@@ -1307,13 +1317,13 @@
      il controllore l'ha letto come «fisso a 30». Adesso si cambia dalla
      sezione. Stessa colonna, quindi Dati azienda e Riepilogo dicono lo stesso. */
   function credTraguardo(){
-    const fatti=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno).reduce((s,c)=>s+(+c.crediti||0),0);
+    const fatti=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno&&String(c.data||"")<=todayStr()).reduce((s,c)=>s+(+c.crediti||0),0);
     openSheetGrande("Il traguardo dei crediti",
       '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Quanti crediti ti servono ogni anno</div>'
       +'<div class="field"><label>Traguardo (CFP all\'anno)</label><input type="number" id="cr-trag" inputmode="numeric" min="1" max="999" value="'+credObiettivo+'" style="max-width:160px"></div>'
-      +'<p class="sh-nota" style="margin-bottom:0">Di norma <b>30</b> per ingegneri e architetti, <b>20</b> per i geometri. Controlla il regolamento del tuo Ordine.</p>'
+      +'<p class="sh-nota" style="margin-bottom:0">Gli ingegneri devono avere sempre almeno <b>30</b> CFP. Architetti e geometri ne fanno <b>60 in tre anni</b>: qui, per ora, il conto è dell\'anno. Controlla il regolamento del tuo Ordine.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
@@ -1380,11 +1390,20 @@
   async function saveCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const titolo=$("#cr-tit").value.trim();
-    if(!titolo){toast("Scrivi il titolo del corso");return;}
+    /* 20 nov 2026 — la casella sbagliata diventa rossa (prima solo un
+       messaggio), e i crediti non si salvano piu' negativi o a zero per
+       sbaglio: «-3» e «due» passavano e diventavano -3 e 0. */
+    const _manca=(sel,dice)=>{ if(typeof campoManca==="function")campoManca(sel,dice); else toast(dice); };
+    if(!titolo){_manca("#cr-tit","Manca il titolo del corso.");return;}
+    if(!$("#cr-data").value){_manca("#cr-data","Manca la data del corso. Senza, non entra in nessun anno.");return;}
+    const _cfpTxt=($("#cr-cfp").value||"").trim(), _cfp=_numIt("#cr-cfp");
+    if(!_cfpTxt){_manca("#cr-cfp","Mancano i crediti. Se il corso non ne dà, scrivi 0.");return;}
+    if(_cfp==null){_manca("#cr-cfp","Scrivi i crediti con un numero: per esempio 2,5.");return;}
+    if(_cfp<0){_manca("#cr-cfp","I crediti non possono essere sotto zero.");return;}
     const row={titolo, ente:$("#cr-ente").value.trim()||null,
       tipo:$("#cr-tipo")?$("#cr-tipo").value:null,
-      data:$("#cr-data").value||todayStr(),
-      crediti:_numIt("#cr-cfp")||0,
+      data:$("#cr-data").value,
+      crediti:_cfp,
       note:$("#cr-note").value.trim()||null};
     const {data,error}=id
       ?await sb.from("gest_crediti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
@@ -1405,7 +1424,7 @@
     const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
-    renderCrediti();toast("Corso eliminato");
+    renderCrediti();toast((window.cestinoAttivo&&window.cestinoAttivo())?"Corso nel cestino: lo riprendi da lì":"Corso eliminato");
   }
 
 
