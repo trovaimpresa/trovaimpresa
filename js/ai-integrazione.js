@@ -228,6 +228,33 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /* AI.didascalia — 20 novembre 2026 (Giornate)                         */
+  /* Il lavoro svolto in una giornata, per il cliente, guardando le foto */
+  /* prima e dopo e le note. Funzione «ai-didascalia», 1 credito.         */
+  /* foto = [{tipo:'image/jpeg', dati:<base64>, quando:'prima'|'dopo'}].  */
+  /* Restituisce il testo; null se i crediti sono finiti.                 */
+  /* ------------------------------------------------------------------ */
+  AI.didascalia = async function (testo, foto) {
+    const token = getToken();
+    if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
+    let res;
+    try {
+      res = await fetch(CANTIERE_URL.replace(/ai-cantiere$/, 'ai-didascalia'), {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: testo || '', foto: foto || [] }),
+      });
+    } catch (e) {
+      throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
+    }
+    const body = await res.json().catch(function () { return {}; });
+    if (res.status === 402) { await caricaStato(); mostraUpgrade(body.reason); return null; }
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    if (AI.stato && typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+    return String(body.result || '').trim();
+  };
+
+  /* ------------------------------------------------------------------ */
   /* AI.capitolato — 16 ottobre 2026                                     */
   /*                                                                     */
   /* La porta verso la funzione «ai-capitolato» (il capitolato scritto a */

@@ -51,6 +51,7 @@ let giorTariffe = {per:{},media:0};  /* costo orario: stessa costiOrari() del ma
 let giorProposte = [];
 let giorAvanz = {};         /* lavoro_id -> {importo, speso}: quanto ha gia' speso del suo valore */     /* le giornate mandate dagli operai, da approvare */
 let giorCdl = null;
+let giorDidaManca = false;   /* 20 nov 2026: la colonna gest_rapportini.didascalia non c'e' ancora */
 let giorSera = null;        /* {si:true|false, ora, perche} la domanda della sera su QUESTO telefono */
 let giorDallaSera = /[?&]sera=1/.test(location.search);  /* arrivato toccando la notifica */        /* {email,invio,ultimo} il consulente del lavoro */       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
 
@@ -234,7 +235,12 @@ async function giorCarica(){
   const ids=[...new Set(ore.map(o=>o.rapportino_id).filter(Boolean))];
   let rap={};
   if(ids.length){
-    const rr=await sb.from("gest_rapportini").select("id,note,materiali,data,lavoro_id,eliminato_il").in("id",ids);
+    /* 20 nov 2026 — anche la DIDASCALIA (il lavoro svolto, per il cliente).
+       Paracadute: se la colonna non c'e' ancora (migrazione non lanciata) si
+       rilegge senza, e le giornate si vedono lo stesso. */
+    let rr=await sb.from("gest_rapportini").select("id,note,materiali,data,lavoro_id,eliminato_il,didascalia").in("id",ids);
+    giorDidaManca=!!(rr.error&&/didascalia/i.test(rr.error.message||""));
+    if(giorDidaManca) rr=await sb.from("gest_rapportini").select("id,note,materiali,data,lavoro_id,eliminato_il").in("id",ids);
     if(rr.error) throw new Error(rr.error.message);
     (rr.data||[]).forEach(r=>{ rap[r.id]=r; });
   }
@@ -242,7 +248,8 @@ async function giorCarica(){
   Object.values(gruppi).forEach(g=>{
     const r=g.rapportino_id&&rap[g.rapportino_id];
     g.cosa=r?[r.note,r.materiali?("Materiali: "+r.materiali):""].filter(Boolean).join(" · "):"";
-    g.nota=r?(r.note||""):"";   /* 18 nov 2026: «modifica» cambia solo la nota (i materiali restano nella loro casella, se no si scrivevano due volte) */
+    g.nota=r?(r.note||""):"";
+    g.didascalia=r?(r.didascalia||""):"";   /* 20 nov 2026: il lavoro svolto, per il cliente */   /* 18 nov 2026: «modifica» cambia solo la nota (i materiali restano nella loro casella, se no si scrivevano due volte) */
   });
   giorRighe=Object.values(gruppi).sort((x,y)=>x.data.localeCompare(y.data));
   /* 13 nov 2026 (quarto giro) — UN LAVORO NEL CESTINO NON SI CONTA. Le sue
@@ -1119,6 +1126,8 @@ async function giorPdf(){
     if(t.km) tr.push(["Chilometri",Math.round(t.km).toLocaleString("it-IT")+" km"]); if(t.fatt) tr.push(["Fatture e bolle",E(t.fatt)]);
     if(tr.length) tabella("Totali del mese",["Voce","Totale"],tr,[90,90]);
   }
+  /* 20 nov 2026 (chiesto da Alex): in fondo le foto prima e dopo di ogni giornata */
+  if(typeof gxFotoMesePdf==="function"){ try{ toast("Metto le foto nel PDF…"); y=await gxFotoMesePdf(doc,y,M,W); }catch(e){} }
   doc.save("Giornate di lavoro - "+_gMeseNome(giorMese)+".pdf");
 }
 

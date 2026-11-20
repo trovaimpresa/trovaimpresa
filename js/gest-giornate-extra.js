@@ -35,6 +35,7 @@ const GX_IC = {
   foto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
   spesa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>',
   benz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h12M7 8h4"/><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 14l2 2 4-4"/></svg>',
   fatt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>'
 };
 
@@ -79,6 +80,10 @@ function gxDella(g, primaDelGiorno) {
   const L = String(g.lavoro_id || "");
   return {
     foto: gxDati.foto.filter(f => String(f.lavoro_id) === L && gxYmd(new Date(f.created_at)) === g.data),
+    /* 20 nov 2026 — PRIMA e DOPO, con gli stessi tipi della Galleria:
+       da_fare = prima del lavoro, fatto = a lavoro finito */
+    prima: gxDati.foto.filter(f => String(f.lavoro_id) === L && gxYmd(new Date(f.created_at)) === g.data && f.tipo === "da_fare"),
+    dopo: gxDati.foto.filter(f => String(f.lavoro_id) === L && gxYmd(new Date(f.created_at)) === g.data && f.tipo !== "da_fare"),
     spese: gxDati.spese.filter(s => String(s.lavoro_id) === L && gxGiorno(s) === g.data),
     rif: primaDelGiorno ? gxDati.rif.filter(r => r.data === g.data) : [],
     fatt: gxDati.fatt.filter(f => String(f.lavoro_id || "") === L && f.data === g.data)
@@ -106,7 +111,7 @@ function gxHtmlGiorno(g, primaDelGiorno) {
   if (!g || !g.lavoro_id) return "";
   const d = gxDella(g, primaDelGiorno), k = esc(g.k);
   const ha = [];
-  if (d.foto.length) ha.push('<button type="button" data-gx="vedi-foto" data-k="' + k + '">' + GX_IC.foto + d.foto.length + " foto" + '</button>');
+  if (d.foto.length) ha.push('<button type="button" data-gx="vedi-foto" data-k="' + k + '">' + GX_IC.foto + [d.prima.length ? d.prima.length + " foto prima" : "", d.dopo.length ? d.dopo.length + (d.prima.length ? " dopo" : " foto dopo") : ""].filter(Boolean).join(" · ") + '</button>');
   if (d.spese.length) ha.push('<button type="button" data-gx="spesa" data-k="' + k + '">' + GX_IC.spesa + d.spese.length + (d.spese.length === 1 ? " spesa" : " spese") + " · " + gxEuro(gxSomma(d.spese)) + '</button>');
   if (d.rif.length) {
     const km = d.rif.reduce((s, r) => s + (+r.km || 0), 0);
@@ -114,12 +119,15 @@ function gxHtmlGiorno(g, primaDelGiorno) {
     ha.push('<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + [gxSomma(d.rif) > 0 ? gxEuro(gxSomma(d.rif)) : "", km > 0 ? gxKm(km) : ""].filter(Boolean).join(" · ") + (mezzi.length ? " · " + esc(mezzi.join(", ")) : "") + '</button>');
   }
   if (d.fatt.length) ha.push('<span>' + GX_IC.fatt + d.fatt.length + (d.fatt.length === 1 ? " fattura" : " fatture") + " · " + gxEuro(gxSomma(d.fatt)) + '</span>');
-  return (ha.length ? '<div class="gx-ha">' + ha.join("") + '</div>' : "")
+  /* 20 nov 2026 — il lavoro svolto, per il cliente (gest_rapportini.didascalia) */
+  const dida = g.didascalia ? '<div class="gx-dida"><b>Lavoro svolto:</b> ' + esc(g.didascalia) + '</div>' : "";
+  return dida + (ha.length ? '<div class="gx-ha">' + ha.join("") + '</div>' : "")
     + '<div class="gx-btn">'
     + '<button type="button" data-gx="foto" data-k="' + k + '">' + GX_IC.foto + 'Foto</button>'
     + '<button type="button" data-gx="spesa" data-k="' + k + '">' + GX_IC.spesa + 'Spesa</button>'
     + '<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + 'Benzina e km</button>'
     + '<button type="button" data-gx="fatt" data-k="' + k + '">' + GX_IC.fatt + 'Fattura o bolla</button>'
+    + '<button type="button" class="gx-cli" data-gx="cliente" data-k="' + k + '">' + GX_IC.pdf + 'Per il cliente</button>'
     + '</div>';
 }
 
@@ -134,17 +142,18 @@ function gxTitolo(g) {
 /* ---------------------------------------------------------------------
    FOTO
    --------------------------------------------------------------------- */
-function gxScegliFoto(g) {
+/* 20 nov 2026 — la foto si carica come PRIMA (da_fare) o DOPO (fatto) */
+function gxScegliFoto(g, tipo) {
   let f = document.getElementById("gx-file");
   if (!f) {
     f = document.createElement("input"); f.type = "file"; f.id = "gx-file"; f.accept = "image/*"; f.multiple = true; f.style.display = "none";
     document.body.appendChild(f);
   }
   f.value = "";
-  f.onchange = function () { if (f.files && f.files.length) gxCaricaFoto(g, f.files); };
+  f.onchange = function () { if (f.files && f.files.length) gxCaricaFoto(g, f.files, tipo === "da_fare" ? "da_fare" : "fatto"); };
   f.click();
 }
-async function gxCaricaFoto(g, files) {
+async function gxCaricaFoto(g, files, tipo) {
   if (!sbUid) { toast("Devi essere loggato"); return; }
   let n = 0;
   toast("Carico le foto…");
@@ -155,7 +164,7 @@ async function gxCaricaFoto(g, files) {
     const path = sbUid + "/" + g.lavoro_id + "/" + Date.now() + "_" + safe;
     const up = await sb.storage.from("gestionale-foto").upload(path, p.file);
     if (up.error) { toast("Foto non caricata: " + up.error.message); continue; }
-    const riga = { user_id: sbUid, lavoro_id: g.lavoro_id, tipo: "fatto", operatore: "Capo", storage_path: path };
+    const riga = { user_id: sbUid, lavoro_id: g.lavoro_id, tipo: tipo || "fatto", operatore: "Capo", storage_path: path };
     /* la foto di un giorno passato resta su QUEL giorno */
     if (g.data !== gxYmd(new Date())) riga.created_at = new Date(g.data + "T12:00:00").toISOString();
     const ins = await sb.from("gest_foto").insert(riga).select("id");
@@ -165,19 +174,17 @@ async function gxCaricaFoto(g, files) {
     }
     n++;
   }
-  if (n) toast(n === 1 ? "Foto aggiunta ✔" : n + " foto aggiunte ✔");
+  const quando = tipo === "da_fare" ? " prima" : " dopo";
+  if (n) toast(n === 1 ? "Foto" + quando + " aggiunta ✔" : n + " foto" + quando + " aggiunte ✔");
   await gxRicarica();
+  /* se la finestra delle foto era aperta, si ridisegna con la foto nuova */
+  const ov = document.getElementById("overlay");
+  if (ov && ov.classList.contains("open") && document.getElementById("gx-pd")) { const gg = gxTrova(g.k); if (gg) gxVediFoto(gg); }
 }
-async function gxVediFoto(g) {
-  const d = gxDella(g, false);
-  openSheetGrande("Foto",
-    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
-    + '<div id="gx-griglia" class="gx-griglia"><div class="loading">Carico…</div></div></div>',
-    '<button class="btn b-cancel" data-action="close">Chiudi</button>'
-    + '<button class="btn-primary b-save" data-gx="foto" data-k="' + esc(g.k) + '">+ Aggiungi foto</button>');
-  const box = document.getElementById("gx-griglia"); if (!box) return;
+/* una colonna (Prima o Dopo) della finestra delle foto */
+async function gxColonnaFoto(box, lista, g) {
   const pezzi = [];
-  for (const f of d.foto) {
+  for (const f of lista) {
     try {
       const su = await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path, 3600);
       /* 18 nov 2026 (ok di Alex): sotto ogni foto «togli», col secondo tocco come spesa e benzina */
@@ -187,7 +194,23 @@ async function gxVediFoto(g) {
         + '</div>');
     } catch (e) {}
   }
-  if (document.getElementById("gx-griglia") === box) box.innerHTML = pezzi.length ? pezzi.join("") : '<div class="gx-vuoto">Le foto non si riescono ad aprire adesso. Riprova fra poco.</div>';
+  if (!box.isConnected) return;
+  box.innerHTML = !lista.length ? '<div class="gx-vuoto">Nessuna foto.</div>'
+    : pezzi.length ? pezzi.join("") : '<div class="gx-vuoto">Le foto non si riescono ad aprire adesso. Riprova fra poco.</div>';
+}
+/* 20 nov 2026 — la finestra delle foto: due colonne, Prima e Dopo */
+async function gxVediFoto(g) {
+  const d = gxDella(g, false), k = esc(g.k);
+  const col = (tit, tipo, n) => '<div class="gx-pd-col"><div class="gx-pd-t"><h4>' + tit + (n ? ' <span>(' + n + ')</span>' : '') + '</h4>'
+    + '<button type="button" class="btn" data-gx="foto" data-tipo="' + tipo + '" data-k="' + k + '">' + GX_IC.foto + (tipo === "da_fare" ? "+ Foto prima" : "+ Foto dopo") + '</button></div>'
+    + '<div class="gx-griglia" id="gx-g-' + tipo + '"><div class="loading">Carico…</div></div></div>';
+  openSheetGrande("Foto",
+    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
+    + '<div class="gx-pd" id="gx-pd">' + col("Prima del lavoro", "da_fare", d.prima.length) + col("Dopo il lavoro", "fatto", d.dopo.length) + '</div></div>',
+    '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+    + '<button class="btn-primary b-save" data-gx="cliente" data-k="' + k + '">Per il cliente</button>');
+  const bp = document.getElementById("gx-g-da_fare"), bd = document.getElementById("gx-g-fatto");
+  await Promise.all([bp && gxColonnaFoto(bp, d.prima, g), bd && gxColonnaFoto(bd, d.dopo, g)]);
 }
 
 async function gxFotoTogli(id, k) {
@@ -200,7 +223,7 @@ async function gxFotoTogli(id, k) {
   toast(nelCestino ? "Foto nel cestino: la riprendi da lì" : "Foto tolta");
   await gxRicarica();
   const g = gxTrova(k);
-  if (g && gxDella(g, false).foto.length) gxVediFoto(g); else closeSheet();
+  if (g) gxVediFoto(g); else closeSheet();
 }
 
 /* ---------------------------------------------------------------------
@@ -330,7 +353,16 @@ document.addEventListener("click", async function (e) {
   const b = e.target.closest && e.target.closest("[data-gx]"); if (!b) return;
   const a = b.dataset.gx;
   const g = b.dataset.k ? gxTrova(b.dataset.k) : null;
-  if (a === "foto") { if (g) gxScegliFoto(g); return; }
+  if (a === "foto") {
+    if (!g) return;
+    /* dalla riga della giornata si apre la finestra (si sceglie lì Prima o Dopo); dentro, il pulsante ha il suo tipo */
+    if (b.dataset.tipo) gxScegliFoto(g, b.dataset.tipo); else { gxTogli = null; gxVediFoto(g); }
+    return;
+  }
+  if (a === "cliente") { if (g) gxResoconto(g); return; }
+  if (a === "dida-ai") { if (g) gxDidaAI(g, b); return; }
+  if (a === "dida-salva") { if (g) { b.disabled = true; const ok = await gxDidaSalva(g); b.disabled = false; if (ok) { toast("Salvato ✔"); gxResoconto(gxTrova(g.k) || g); } } return; }
+  if (a === "dida-pdf") { if (g) { b.disabled = true; try { await gxPdfCliente(g); } finally { b.disabled = false; } } return; }
   if (a === "vedi-foto") { if (g) { gxTogli = null; gxVediFoto(g); } return; }
   if (a === "foto-togli") { gxTogli = "foto:" + b.dataset.id; if (g) gxVediFoto(g); return; }
   if (a === "foto-togli-si") { b.disabled = true; return gxFotoTogli(b.dataset.id, b.dataset.k); }
@@ -371,3 +403,176 @@ document.addEventListener("click", function (e) {
     if (++giri < 40) setTimeout(aspetta, 300);
   })();
 });
+
+/* =====================================================================
+   20 nov 2026 — PER IL CLIENTE: il lavoro svolto e il PDF «Resoconto del
+   lavoro». Chiesto da Alex, come sulla sua pagina «Giornate di cantiere».
+   ⛔ Nel PDF del cliente NON ci vanno: nomi degli operai, ore, spese, note
+      interne, luogo (in un giorno ci possono essere piu' clienti).
+      Ci vanno: nome e logo della ditta, la data, il lavoro svolto, le foto
+      prima e dopo, due per riga.
+   ⛔ Il lavoro svolto sta in gest_rapportini.didascalia (una giornata = un
+      rapportino). Se la colonna manca (migrazione non lanciata) si dice.
+   ===================================================================== */
+const GX_GIORNI = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+const GX_MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+function gxDataLunga(iso, conGiorno) { const d = new Date(iso + "T12:00"); return (conGiorno ? GX_GIORNI[d.getDay()] + " " : "") + d.getDate() + " " + GX_MESI[d.getMonth()] + " " + d.getFullYear(); }
+function gxColonnaManca(err) { return !!(err && /didascalia/i.test(err.message || "") && /column|colonna|schema/i.test(err.message || "")); }
+
+function gxResoconto(g) {
+  gxAperta = { lavoro_id: g.lavoro_id, data: g.data, k: g.k };
+  const d = gxDella(g, false), k = esc(g.k);
+  const senzaRap = !g.rapportino_id;
+  const manca = (typeof giorDidaManca !== "undefined" && giorDidaManca);
+  const fotoTxt = !d.foto.length ? "Nel PDF non ci sono foto." : "Nel PDF: " + [d.prima.length ? d.prima.length + " foto prima" : "", d.dopo.length ? d.dopo.length + " foto dopo" : ""].filter(Boolean).join(" e ") + ".";
+  openSheetGrande("Per il cliente",
+    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
+    + (senzaRap || manca
+      ? '<p class="gx-vuoto">' + (manca ? "Il lavoro svolto non si può ancora salvare: manca un aggiornamento del database. Il PDF esce lo stesso, con le foto." : "Questa giornata è stata segnata nel modo vecchio: il lavoro svolto non si può salvare. Il PDF esce lo stesso, con le foto.") + '</p>'
+      : '<div class="field"><label for="gx-dida">Lavoro svolto (lo legge il cliente)</label>'
+        + '<textarea id="gx-dida" rows="4" placeholder="Es. Rimosse le vecchie piastrelle e posate le nuove in gres nel bagno.">' + esc(g.didascalia || "") + '</textarea></div>'
+        + '<div class="gx-dida-ai"><button type="button" class="btn" data-gx="dida-ai" data-k="' + k + '">Scrivilo con l\'AI · 1 credito</button><span>guarda le foto e le note della giornata</span></div>')
+    + '<div class="gx-dida-foto">' + GX_IC.foto + '<span>' + esc(fotoTxt) + '</span> <button type="button" class="gx-link blu" data-gx="vedi-foto" data-k="' + k + '">Aggiungi o guarda le foto</button></div>'
+    + '<p class="gx-dida-nota">Nel PDF non ci sono i nomi degli operai, le ore, le spese, le note e l\'indirizzo.</p>'
+    + '</div>',
+    '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+    + (senzaRap || manca ? '' : '<button class="btn" data-gx="dida-salva" data-k="' + k + '">Salva</button>')
+    + '<button class="btn-primary b-save" data-gx="dida-pdf" data-k="' + k + '">Scarica il PDF</button>');
+}
+
+/* salva il testo della casella se e' cambiato. true = a posto (anche se non c'era niente da salvare) */
+async function gxDidaSalva(g) {
+  const ta = document.getElementById("gx-dida"); if (!ta || !g.rapportino_id) return true;
+  const t = (ta.value || "").trim().slice(0, 1500);
+  if (t === (g.didascalia || "")) return true;
+  const r = await sb.from("gest_rapportini").update({ didascalia: t || null }).eq("id", g.rapportino_id).select("id");
+  if (r.error || !r.data || !r.data.length) {
+    toast(gxColonnaManca(r.error) ? "Manca un aggiornamento del database: il lavoro svolto non si salva ancora." : "Non salvato: " + ((r.error && r.error.message) || "riprova"));
+    return false;
+  }
+  g.didascalia = t;
+  const gg = (giorRighe || []).find(x => x.k === g.k); if (gg) gg.didascalia = t;
+  if (typeof giorDisegna === "function") giorDisegna();
+  return true;
+}
+
+/* una foto del deposito, rimpicciolita: {url (dataURL jpeg), w, h}. null se non si apre */
+async function gxImmagine(path, maxPx, q) {
+  try {
+    const su = await sb.storage.from("gestionale-foto").createSignedUrl(path, 600);
+    const u = su && su.data && su.data.signedUrl; if (!u) return null;
+    const res = await fetch(u); if (!res.ok) return null;
+    const blob = await res.blob();
+    const img = await new Promise((ok, ko) => { const im = new Image(); const ou = URL.createObjectURL(blob); im.onload = () => { ok(im); setTimeout(() => URL.revokeObjectURL(ou), 1000); }; im.onerror = ko; im.src = ou; });
+    const k = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const cx = c.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h); cx.drawImage(img, 0, 0, w, h);
+    return { url: c.toDataURL("image/jpeg", q || 0.8), w, h };
+  } catch (e) { return null; }
+}
+
+async function gxDidaAI(g, btn) {
+  if (!window.AI || typeof window.AI.didascalia !== "function") { toast("L'assistente non è pronto: ricarica la pagina."); return; }
+  const d = gxDella(g, false);
+  const nota = [g.nota || "", (typeof giorLavoro === "function" && giorLavoro(g.lavoro_id) ? "Lavoro: " + (giorLavoro(g.lavoro_id).descrizione || "") : "")].filter(Boolean).join("\n");
+  if (!d.foto.length && nota.trim().length < 3) { toast("Aggiungi prima qualche foto, così l'AI vede cosa avete fatto."); return; }
+  const testoBtn = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "Guardo le foto…"; }
+  try {
+    const foto = [];
+    for (const [lista, quando] of [[d.prima.slice(0, 3), "prima"], [d.dopo.slice(0, 3), "dopo"]]) {
+      for (const f of lista) {
+        const im = await gxImmagine(f.storage_path, 1024, 0.7);
+        if (im) foto.push({ tipo: "image/jpeg", dati: im.url.split(",")[1], quando });
+      }
+    }
+    const t = await window.AI.didascalia(nota, foto);
+    if (t == null) return;   /* crediti finiti: l'avviso l'ha gia' dato */
+    const ta = document.getElementById("gx-dida");
+    if (ta) { ta.value = t; ta.focus(); }
+    toast("Controlla il testo e premi «Salva».");
+  } catch (e) {
+    toast(e.message || "L'assistente non ha risposto. Riprova.");
+  } finally {
+    if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = testoBtn; }
+  }
+}
+
+/* le foto nel PDF, due per riga. st = {y, M, W}; restituisce y */
+async function gxGrigliaPdf(doc, st, lista, maxPx, q) {
+  const gap = 6, cw = (st.W - 2 * st.M - gap) / 2, ch = cw * 0.75;
+  for (let i = 0; i < lista.length; i += 2) {
+    if (st.y + ch > 284) { doc.addPage(); st.y = 18; }
+    for (let j = 0; j < 2 && i + j < lista.length; j++) {
+      const x = st.M + j * (cw + gap);
+      const im = await gxImmagine(lista[i + j].storage_path, maxPx, q);
+      doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3); doc.rect(x, st.y, cw, ch);
+      if (!im) { doc.setFontSize(10); doc.setTextColor(120); doc.text("Foto non disponibile", x + cw / 2, st.y + ch / 2, { align: "center" }); doc.setTextColor(0); continue; }
+      const k = Math.min(cw / im.w, ch / im.h), w = im.w * k, h = im.h * k;
+      doc.addImage(im.url, "JPEG", x + (cw - w) / 2, st.y + (ch - h) / 2, w, h);
+    }
+    st.y += ch + gap;
+  }
+  return st.y;
+}
+
+async function gxPdfCliente(g) {
+  if (!(await gxDidaSalva(g))) return;
+  const d = gxDella(g, false), dida = (g.didascalia || "").trim();
+  if (!d.foto.length && !dida) { toast("Scrivi il lavoro svolto o aggiungi le foto, poi scarica il PDF."); return; }
+  if (!(await caricaJsPDF())) { toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova"); return; }
+  const J = window.jspdf && window.jspdf.jsPDF; if (!J) return;
+  toast("Preparo il PDF…");
+  const doc = new J({ unit: "mm", format: "a4" }); const W = 210, M = 15;
+  const T = x => String(x == null ? "" : x).replace(/[^\x00-\xFF€]/g, "");
+  const st = { y: 18, M, W };
+  if (typeof window.gestLogoPdf === "function") { try { st.y = await window.gestLogoPdf(doc, M, st.y) || st.y; } catch (e) {} }
+  /* il nome della ditta: Dati azienda; se e' vuoto, il nome del profilo */
+  let nome = "";
+  try { const ra = await sb.from("gest_azienda").select("nome,ragione_sociale").eq("user_id", sbUid).maybeSingle(); nome = (ra && ra.data && (ra.data.nome || ra.data.ragione_sociale)) || ""; } catch (e) {}
+  if (!nome) { try { const ri = await sb.from("imprese").select("nome_attivita").eq("user_id", sbUid).maybeSingle(); nome = (ri && ri.data && ri.data.nome_attivita) || ""; } catch (e) {} }
+  if (nome) { doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(10, 42, 77); doc.text(T(nome), M, st.y + 2); doc.setTextColor(0); st.y += 9; }
+  doc.setDrawColor(255, 136, 0); doc.setLineWidth(0.8); doc.line(M, st.y, W - M, st.y); st.y += 11;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(21); doc.text("Resoconto del lavoro", M, st.y); st.y += 7.5;
+  const data = gxDataLunga(g.data, true);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(12); doc.setTextColor(90); doc.text(T(data.charAt(0).toUpperCase() + data.slice(1)), M, st.y); doc.setTextColor(0); st.y += 10;
+  if (dida) {
+    doc.setFontSize(12.5); const righe = doc.splitTextToSize(T(dida), W - 2 * M);
+    righe.forEach(r => { if (st.y > 280) { doc.addPage(); st.y = 18; } doc.text(r, M, st.y); st.y += 6; });
+    st.y += 6;
+  }
+  for (const [tit, lista] of [["Prima del lavoro", d.prima], ["Dopo il lavoro", d.dopo]]) {
+    if (!lista.length) continue;
+    if (st.y + 60 > 284) { doc.addPage(); st.y = 18; }
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(tit, M, st.y); st.y += 5;
+    await gxGrigliaPdf(doc, st, lista, 1200, 0.75);
+    st.y += 4;
+  }
+  doc.save("Lavoro del " + gxDataLunga(g.data, false) + ".pdf");
+}
+
+/* nel PDF del mese (giorPdf): in fondo «Foto dei lavori», giornata per giornata.
+   Questo PDF e' per te o per il consulente: qui il cantiere si scrive. */
+async function gxFotoMesePdf(doc, y, M, W) {
+  const T = x => String(x == null ? "" : x).replace(/[^\x00-\xFF€]/g, "");
+  const st = { y, M, W };
+  const giornate = [...(giorRighe || [])].sort((a, b) => a.data.localeCompare(b.data)).map(g => ({ g, d: gxDella(g, false) })).filter(x => x.d.foto.length);
+  if (!giornate.length) return y;
+  doc.addPage(); st.y = 20;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text("Foto dei lavori", M, st.y); st.y += 9;
+  for (const { g, d } of giornate) {
+    if (st.y + 70 > 284) { doc.addPage(); st.y = 20; }
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+    doc.text(doc.splitTextToSize(T(gxTitolo(g).replace(/\u2014/g, "-")), W - 2 * M)[0], M, st.y); st.y += 6;
+    if (g.didascalia) { doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.splitTextToSize(T(g.didascalia), W - 2 * M).forEach(r => { doc.text(r, M, st.y); st.y += 5; }); st.y += 1; }
+    for (const [tit, lista] of [["Prima", d.prima], ["Dopo", d.dopo]]) {
+      if (!lista.length) continue;
+      if (st.y + 50 > 284) { doc.addPage(); st.y = 20; }
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(90); doc.text(tit, M, st.y); doc.setTextColor(0); st.y += 3;
+      await gxGrigliaPdf(doc, st, lista, 1000, 0.72);
+    }
+    st.y += 6;
+  }
+  return st.y;
+}

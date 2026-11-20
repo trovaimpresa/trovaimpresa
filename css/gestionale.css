@@ -6444,3 +6444,30 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
    il link «Apri le Giornate di …» sotto le ore scritte di «Ore fatte». */
 .rie-card .rc-nota{color:#92400E;font-weight:700}
 .ore-g .ore-link{background:none;border:0;padding:11px 0;min-height:44px;font:inherit;font-weight:700;color:var(--blu,#0066ff);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+
+/* 20 nov 2026 — GIORNATE: foto PRIMA e DOPO, il lavoro svolto e il PDF per il cliente (js/gest-giornate-extra.js) */
+#giornate .gx-btn{ grid-template-columns:repeat(5,1fr); }
+#giornate .gx-dida{ font-size:17px; color:#0b1220; background:#FFF7ED; border:0 !important; border-left:4px solid #FF8800 !important; border-radius:8px !important; padding:10px 14px; overflow-wrap:anywhere; }
+#giornate .gx-dida b{ color:#9a3412; }
+.gx-pd{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.gx-pd-col{ min-width:0; border:1px solid var(--bordo,#e2e8f0) !important; border-radius:12px; padding:16px; background:#fff; }
+.gx-pd-t{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.gx-pd-t h4{ margin:0; font-size:21px; color:#0a2a4d; }
+.gx-pd-t h4 span{ font-weight:600; color:#475569; }
+.gx-pd-t .btn{ display:inline-flex; align-items:center; gap:8px; min-height:46px; font-size:16px; }
+.gx-pd-t .btn svg{ width:20px; height:20px; }
+.gx-pd .gx-griglia{ grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+.gx-dida-ai{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 18px; }
+.gx-dida-ai .btn{ min-height:48px; font-size:17px; font-weight:700; }
+.gx-dida-ai span{ font-size:16px; color:#475569; }
+.gx-dida-foto{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:17px; color:#0b1220; background:#EEF4FB; border:0 !important; border-radius:10px; padding:12px 16px; }
+.gx-dida-foto svg{ width:22px; height:22px; flex:none; color:#0a2a4d; }
+.gx-link.blu{ color:#0066ff; }
+.gx-dida-nota{ font-size:16px; color:#475569; margin:12px 0 0; }
+@media(max-width:1100px){ #giornate .gx-btn{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:760px){
+  #giornate .gx-btn{ grid-template-columns:1fr 1fr; }
+  #giornate .gx-btn .gx-cli{ grid-column:1 / -1; }
+  .gx-pd{ grid-template-columns:1fr; gap:16px; }
+  .gx-pd .gx-griglia{ grid-template-columns:1fr 1fr; }
+}

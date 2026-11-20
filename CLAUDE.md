@@ -4048,3 +4048,14 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
 - Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
+
+# 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
+
+Chiesto da Alex (come sulla sua pagina personale «Giornate di cantiere»), foto approvate. Punti 1-3 del suo elenco; 4 (spesa con la carta aziendale) e 5 (app operatore) nel secondo giro.
+- **Foto Prima/Dopo**: stessi tipi della Galleria (`da_fare` = prima, `fatto` = dopo). «Foto» della giornata apre la finestra a due colonne (`gxVediFoto`, `gxColonnaFoto`), ognuna col suo «+ Foto prima / dopo» (`gxScegliFoto(g,tipo)` → `gxCaricaFoto(g,files,tipo)`). Pillola «2 foto prima · 3 dopo». `gxDella()` dà anche `prima` e `dopo`.
+- **Lavoro svolto** (didascalia per il cliente): colonna `gest_rapportini.didascalia` (`sql/2026-11-20-giornata-didascalia.sql`, migrazione `giornata_didascalia_20nov2026` GIÀ ESEGUITA, riga in PROVE). Letta in `giorCarica` con paracadute (`giorDidaManca`: se la colonna manca si rilegge senza). Si vede sotto la giornata (`.gx-dida`). Una giornata senza rapportino (modo vecchio) non la può salvare: il PDF esce lo stesso.
+- **Pulsante «Per il cliente»** (5° pulsante, `gxResoconto`): casella, «Scrivilo con l'AI · 1 credito» (`gxDidaAI` → `AI.didascalia` in `js/ai-integrazione.js` → Edge Function NUOVA `ai-didascalia`, Haiku, fino a 3 foto prima + 3 dopo rimpicciolite a 1024 px; deployata il 20 nov), «Salva» (`gxDidaSalva`), «Scarica il PDF» (salva prima).
+- **PDF per il cliente** (`gxPdfCliente`): logo (`gestLogoPdf`) + nome ditta (Dati azienda, se no `imprese.nome_attivita`), «Resoconto del lavoro», data lunga, lavoro svolto, foto prima e dopo due per riga (`gxGrigliaPdf`, 1200 px q .75). ⛔ NIENTE operai, ore, spese, note, luogo. File «Lavoro del 20 novembre 2026.pdf».
+- **PDF del mese** (`giorPdf`): in fondo «Foto dei lavori» giornata per giornata (`gxFotoMesePdf`, 1000 px q .72); qui il cantiere si scrive (è per te/consulente).
+- Anteprime col banco: `/tmp/anteprima/foto.js` (copia del sito + storage finto + jspdf locale). Banco `tools/banco-gestionale.js app`: ZERO difetti.
+- ⬜ Da fare nel secondo giro: spesa con la carta aziendale collegata alla giornata (un posto solo per i soldi, come `js/op-spese-foto.js`); foto prima/dopo, lavoro svolto e spesa con carta nell'app operatore.
