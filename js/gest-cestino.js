@@ -877,6 +877,10 @@
       }catch(e){}
     }
 
+    /* 20 nov 2026 — una persona tornata su: la memoria delle persone
+       (dipCache) va riletta PRIMA, se no lo Scadenzario dice «(persona non
+       più in squadra)» accanto alle sue scadenze appena tornate */
+    if(x.tab==="gest_operatori"&&typeof renderDip==="function"){ try{ await renderDip(); }catch(e){} }
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
        si ridisegna tutto invece di indovinare cosa è cambiato */
     _cestRicontaPallino();

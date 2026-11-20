@@ -429,7 +429,7 @@
     const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)")):"";
     /* dipCache tiene solo chi c'e' adesso in squadra: se il nome non si trova,
        quella persona e' stata tolta. Si dice, invece di lasciare il vuoto. */
-    const opeNome=s.operatore_id?(((dipCache||[]).find(o=>String(o.id)===String(s.operatore_id))||{}).nome||"(persona non più in squadra)"):"";
+    const opeNome=s.operatore_id?(((dipCache||[]).find(o=>String(o.id)===String(s.operatore_id))||{}).nome||(ruoloUtente==='professionista'?"(persona non più nello studio)":"(persona non più in squadra)")):"";
     let bg="var(--sfondo)",fg="var(--testo-2)",lab="In tempo",tono="t-neutro";
     if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
     else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
