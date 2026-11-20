@@ -8,7 +8,7 @@
 // ⛔ Le due righe vanno insieme: l'import di `schedule` e
 //    `exports.handler = schedule(...)` in fondo.
 const { schedule } = require('@netlify/functions');
-const { SITO, MARCHI, marchioDelGiorno } = require('./lib/fb-testi');
+const { SITO, MARCHI, marchioDelGiorno, GESTIONALE, gestionaleDelGiorno } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -59,10 +59,13 @@ const handler = async () => {
   // home, a giro. Cosi' la pagina ha un post anche nei giorni senza novita'.
   const mk = marchioDelGiorno();
   righe.push(riga('🛠️ Pubblicità —', MARCHI[mk].nome, '', 'mar', mk));
+  // 20 nov 2026 (Alex): e una cosa del gestionale, a giro.
+  const gk = gestionaleDelGiorno();
+  righe.push(riga('💼 Gestionale —', GESTIONALE[gk].titolo, '', 'ges', gk));
 
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
     <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Da pubblicare su Facebook</h2>
-    <p style="font-size:16px;color:#475569;margin:0 0 8px">${nuovi ? 'Arrivati nelle ultime 24 ore, più il marchio di oggi.' : 'Niente di nuovo ieri: c\'è il marchio di oggi.'} Tocca «Prepara il post»: il testo è già scritto.</p>
+    <p style="font-size:16px;color:#475569;margin:0 0 8px">${nuovi ? 'Arrivati nelle ultime 24 ore, più il marchio e il gestionale di oggi.' : 'Niente di nuovo ieri: ci sono il marchio e il gestionale di oggi.'} Tocca «Prepara il post»: il testo è già scritto.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${righe.join('')}</table>
   </div>`;
   const r = await fetch('https://api.resend.com/emails', {

@@ -126,4 +126,46 @@ function testoMarchio(chiave) {
   return { titolo: `Pubblicità — ${m.nome}`, testo: righe.join('\n'), link };
 }
 
-module.exports = { SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio };
+// 20 nov 2026 (Alex: «inseriamo il gestionale?»): ogni giorno anche una cosa
+// del gestionale, a giro. Il link porta alla pagina che la spiega.
+// ⛔ Scrivere solo cose che il gestionale fa DAVVERO oggi.
+const GESTIONALE = {
+  preventivo: { titolo: 'Il preventivo in 2 minuti', pagina: '/gestionale',
+    righe: ['📝 Il preventivo in 2 minuti, anche dal telefono', 'Scrivi o detta il lavoro: l\'AI prepara le voci, tu metti i tuoi prezzi.', 'Il cliente lo apre da un link e lo firma col dito.'] },
+  fattura: { titolo: 'La fattura elettronica', pagina: '/software-fatturazione-elettronica-edilizia',
+    righe: ['🧾 Fattura elettronica allo SDI con un clic', 'Dal preventivo accettato nasce la fattura: niente da riscrivere.', 'Ti avvisa anche quando un cliente è in ritardo coi pagamenti.'] },
+  computo: { titolo: 'Il computo metrico', pagina: '/software-computo-metrico',
+    righe: ['📐 Computo metrico col prezzario della tua regione', 'Misure, capitoli, stati di avanzamento (SAL) e PDF pronti da firmare.', 'Legge anche il computo che ti manda il geometra, in Excel o PDF.'] },
+  giornate: { titolo: 'Le giornate di cantiere', pagina: '/app-rapportini-cantiere',
+    righe: ['📸 Le giornate di cantiere, con le foto prima e dopo', 'Chi c\'era, cosa avete fatto, le spese del giorno.', 'Al cliente mandi un PDF con il lavoro fatto e le foto.'] },
+  scadenze: { titolo: 'Le scadenze', pagina: '/gestionale',
+    righe: ['⏰ Non perdere più una scadenza', 'DURC, revisioni dei mezzi, assicurazioni, fatture dei fornitori.', 'La mattina ti arriva un\'email con quello che scade.'] },
+  operai: { titolo: 'L\'app per gli operai', pagina: '/software-gestione-ore-operai',
+    righe: ['👷 L\'app per i tuoi operai', 'Vedono i lavori del giorno, timbrano le ore e mandano le foto.', 'Tu vedi tutto dal gestionale, senza telefonate.'] },
+  mezzi: { titolo: 'Mezzi e attrezzature', pagina: '/software-gestione-mezzi-attrezzature',
+    righe: ['🚚 Mezzi e attrezzature sotto controllo', 'Chi ha cosa, in quale cantiere, quando va fatta la revisione.', 'Anche i pieni e i chilometri, mezzo per mezzo.'] },
+  cantieri: { titolo: 'I cantieri e i conti', pagina: '/software-gestione-cantieri',
+    righe: ['🏗️ Ogni cantiere coi suoi conti', 'Spese, fatture dei fornitori e ore: vedi subito quanto guadagni.', 'Calendario e mappa dei cantieri, anche sul telefono.'] }
+};
+const GIRO_GEST = Object.keys(GESTIONALE);
+function gestionaleDelGiorno(d = new Date()) {
+  const g = Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 864e5);
+  return GIRO_GEST[g % GIRO_GEST.length];
+}
+function testoGestionale(chiave) {
+  const x = GESTIONALE[chiave];
+  if (!x) return null;
+  const link = SITO + x.pagina;
+  const righe = [
+    ...x.righe,
+    '',
+    '✅ Gratis per sempre per chi si iscrive a TrovaImpresa, senza carta di credito.',
+    '👉 Provalo:',
+    link,
+    '',
+    '#gestionale #edilizia #imprese #artigiani #trovaimpresa'
+  ];
+  return { titolo: `Gestionale — ${x.titolo}`, testo: righe.join('\n'), link };
+}
+
+module.exports = { SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale };
