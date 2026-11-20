@@ -1489,12 +1489,6 @@
 # 20 nov 2026 — link corti dei marchi per i post Facebook (/vai/<marchio> → Awin).
 # Stessi marchi di netlify/functions/lib/fb-testi.js: se ne entra uno, aggiungerlo qui.
 [[redirects]]
-  from = "/vai/plenitude"
-  to = "https://www.awin1.com/cread.php?awinmid=9529&awinaffid=3137864&clickref=facebook"
-  status = 302
-  force = true
-
-[[redirects]]
   from = "/vai/vevor"
   to = "https://www.awin1.com/cread.php?awinmid=118433&awinaffid=3137864&clickref=facebook"
   status = 302

@@ -97,7 +97,9 @@ const MARCHI = {
   comet:     { id: 23030,  nome: 'Comet',      tag: 'comet',     frase: 'Elettrodomestici, climatizzatori e illuminazione per la casa nuova.' },
   kasanova:  { id: 17198,  nome: 'Kasanova',   tag: 'kasanova',  frase: 'Casalinghi, cucina e arredo per completare la casa dopo i lavori.' }
 };
-const GIRO = ['plenitude', 'vevor', 'gagliardi', 'trotec', 'vonroc', 'lampade', 'comet', 'kasanova'];
+// ⛔ Plenitude NO: nel suo programma Awin c'e' scritto «Le attivita' sui social
+// (Instagram e Facebook) sono assolutamente vietate» (controllato il 20 nov 2026).
+const GIRO = ['vevor', 'gagliardi', 'trotec', 'vonroc', 'lampade', 'comet', 'kasanova'];
 // il marchio del giorno: uno diverso ogni giorno, in giro
 function marchioDelGiorno(d = new Date()) {
   const g = Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 864e5);
