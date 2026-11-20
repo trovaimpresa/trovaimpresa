@@ -35,6 +35,9 @@ function riga(icona, nome, dove, t, id) {
 }
 
 const handler = async () => {
+  // gira alle 4 e alle 5 UTC: parte solo quando a Roma sono le 6 (inverno e estate)
+  const oraRoma = Number(new Intl.DateTimeFormat('it-IT', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()));
+  if (oraRoma !== 6) return { statusCode: 200 };
   if (!SERVICE_KEY || !RESEND_KEY) { console.error('[fb-riepilogo] chiavi mancanti'); return { statusCode: 500 }; }
   const da = encodeURIComponent(new Date(Date.now() - 864e5).toISOString());
   const righe = [];
@@ -68,5 +71,5 @@ const handler = async () => {
   return { statusCode: 200, body: JSON.stringify({ righe: righe.length }) };
 };
 
-// ogni mattina alle 6:40 UTC (7:40 in inverno, 8:40 d'estate)
-exports.handler = schedule('40 6 * * *', handler);
+// ogni mattina alle 6 ora italiana (deciso da Alex il 20 nov 2026)
+exports.handler = schedule('0 4,5 * * *', handler);
