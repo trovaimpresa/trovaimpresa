@@ -285,6 +285,7 @@
     "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_ore gest_crediti",
     "2026-11-20-crediti-triennio-attestato.sql": "gest_azienda.cfp_ordine gest_azienda.cfp_periodo gest_azienda.cfp_inizio gest_azienda.cfp_deont gest_crediti.attestato_path gest_crediti.attestato_nome",
     "2026-11-20-collaboratori-tariffa.sql": "gest_operatori.tariffa_oraria",
+    "2026-11-20-strumenti-chi-ce-l-ha.sql": "gest_mezzi.operatore_id",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
     "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo gest_lavori.pratica_protocollo gest_lavori.pratica_comune gest_lavori.pratica_data_dep gest_lavori.pratica_stato gest_lavori.catasto_foglio gest_lavori.catasto_particella gest_lavori.catasto_sub",

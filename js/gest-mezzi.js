@@ -59,6 +59,13 @@
   /* 12 nov 2026 (secondo giro) — i noleggi aperti di ogni mezzo: nel Noleggio
      l'escavatore era «In ritardo · 73 giorni», qui «Disponibile» in verde. */
   let mezziNolMap={};
+  /* 20 nov 2026 (voce Strumenti) — usi nelle pratiche/lavori e nomi di chi ce l'ha */
+  let mezziUsiMap={}, mezziOpNomi={};
+  function mezzoChiUso(m){
+    const pro=(ruoloUtente==='professionista'), n=mezziUsiMap[m.id]||0;
+    const chi=m.operatore_id&&mezziOpNomi[String(m.operatore_id)];
+    return [chi?"Ce l'ha "+chi:"", n?("usat"+(m.categoria==="attrezzatura"&&!pro?"a":"o")+" in "+n+" "+(pro?(n===1?"pratica":"pratiche"):(n===1?"lavoro":"lavori"))):""].filter(Boolean).join(" · ");
+  }
 
   /* Mezzi e attrezzature stanno in due sezioni diverse: un furgone e un
      ponteggio non hanno niente in comune. La lettura dal database è una
@@ -78,9 +85,14 @@
          richiede la versione corta e si tira avanti. */
     const _MZCOL="id,nome,categoria,tipo,targa,stato,note,noleggiabile,codice,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi,fuori_servizio";
     const _MZCORTO="id,nome,categoria,tipo,targa,stato,note";
-    const _leggiMezzi=async col=>await sb.from("gest_mezzi").select(col).eq("user_id",sbUid).or(_cliOr(mid)).order("nome");
-    const [rmz,{data:vw},{data:cb},rsx,rnl]=await Promise.all([
-      _leggiMezzi(_MZCOL).then(r=>(r.error&&/column|schema cache/i.test(r.error.message||""))?_leggiMezzi(_MZCORTO):r),
+    /* 20 nov 2026 (voce Strumenti) — regola di Alex: in cima l'ultimo salvato.
+       Prima in ordine di nome: lo strumento appena aggiunto finiva in mezzo. */
+    const _leggiMezzi=async col=>await sb.from("gest_mezzi").select(col).eq("user_id",sbUid).or(_cliOr(mid)).order("created_at",{ascending:false});
+    /* 20 nov 2026 (voce Strumenti) — «Chi ce l'ha» (operatore_id, sql/2026-11-20-strumenti-chi-ce-l-ha.sql):
+       se la colonna manca si rilegge senza, poi la versione corta come prima */
+    const _colErr=r=>r.error&&/column|schema cache/i.test(r.error.message||"");
+    const [rmz,{data:vw},{data:cb},rsx,rnl,rlm,rop,rtar]=await Promise.all([
+      _leggiMezzi(_MZCOL+",operatore_id").then(r=>_colErr(r)?_leggiMezzi(_MZCOL):r).then(r=>_colErr(r)?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid),
@@ -88,8 +100,19 @@
       sb.from("gest_scadenze").select("mezzo_id,titolo,tipo_pratica,data_scadenza,stato").eq("user_id",sbUid)
         .not("mezzo_id","is",null).lt("data_scadenza",todayStr()),
       /* i noleggi: se la tabella non c'e' o non risponde, rnl resta vuoto e non cambia niente */
-      Promise.resolve(sb.from("nol_noleggi").select("mezzo_id,fase,data_uscita,data_rientro_prevista,data_rientro_effettivo").eq("user_id",sbUid).not("mezzo_id","is",null)).then(r=>r,()=>null)
+      Promise.resolve(sb.from("nol_noleggi").select("mezzo_id,fase,data_uscita,data_rientro_prevista,data_rientro_effettivo").eq("user_id",sbUid).not("mezzo_id","is",null)).then(r=>r,()=>null),
+      /* 20 nov 2026 — in quante pratiche/lavori e' usato, e i nomi di chi ce l'ha */
+      Promise.resolve(sb.from("gest_lavoro_mezzi").select("mezzo_id").eq("user_id",sbUid)).then(r=>r,()=>null),
+      Promise.resolve(sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)).then(r=>r,()=>null),
+      /* la prossima taratura ancora aperta di ogni strumento: la mostra il modulo */
+      Promise.resolve(sb.from("gest_scadenze").select("id,mezzo_id,data_scadenza,ripeti_mesi,stato").eq("user_id",sbUid)
+        .eq("tipo_pratica","Taratura strumento").not("mezzo_id","is",null).neq("stato","fatta").order("data_scadenza",{ascending:true})).then(r=>r,()=>null)
     ]);
+    window._mzTaratura={};
+    ((rtar&&!rtar.error&&rtar.data)||[]).forEach(x=>{ if(!window._mzTaratura[x.mezzo_id])window._mzTaratura[x.mezzo_id]=x; });
+    mezziUsiMap={};
+    ((rlm&&!rlm.error&&rlm.data)||[]).forEach(x=>{ mezziUsiMap[x.mezzo_id]=(mezziUsiMap[x.mezzo_id]||0)+1; });
+    mezziOpNomi=Object.fromEntries(((rop&&!rop.error&&rop.data)||[]).map(o=>[String(o.id),o.nome||""]));
     window._mezziKo=!!(!rmz||rmz.error);
     mezziCache=(rmz&&rmz.data)||[];
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
@@ -204,7 +227,7 @@
           click:{action:"edit-mezzo",data:{id:m.id}},
           celle:[
             `<span class="c-nome">${esc(m.nome||"—")}</span>`,
-            esc(m.tipo||"—"),
+            esc(m.tipo||"—")+(mezzoChiUso(m)?`<span class="cli-dove">${esc(mezzoChiUso(m))}</span>`:""),
             esc(m.targa||"—"),
             `<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
             cellaScadenza(md)
@@ -309,7 +332,7 @@
     return schedaJob({
       tono, titolo:esc(m.nome),
       destra:`<span class="stato" style="background:${etic.bg};color:${etic.fg}">${etic.lab}</span>`,
-      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", carbTesto, scTesto],
+      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", mezzoChiUso(m)?"👤 "+esc(mezzoChiUso(m)):"", carbTesto, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[
         /* 18 nov 2026 — i rifornimenti sono dei mezzi: sulla betoniera non si offrono (come gia' nella tabella) */
@@ -336,6 +359,14 @@
     /* i tipi già usati diventano suggerimenti: non un elenco chiuso */
     const tipiUsati=[...new Set(mezziCache.map(x=>(x.tipo||"").trim()).filter(Boolean))].sort();
     const tipoSugg=tipiUsati.map(t=>`<option value="${esc(t)}">`).join("");
+    /* 20 nov 2026 (voce Strumenti) — «Chi ce l'ha» (tutte le facce) e, per lo
+       studio, la prossima taratura che diventa una scadenza vera */
+    const _pers=Object.entries(mezziOpNomi).sort((a,b)=>a[1].localeCompare(b[1]));
+    const _pro=(ruoloUtente==='professionista');
+    const chiOpts=`<option value="">— ${_pro?"in studio":"in azienda"} —</option>`+_pers.map(p=>`<option value="${esc(p[0])}" ${String(m.operatore_id||"")===p[0]?"selected":""}>${esc(p[1])}</option>`).join("");
+    const _tar=STRU?((window._mzTaratura||{})[m.id]||null):null;
+    const _ripOpts=(typeof SCAD_RIPETI!=="undefined"?SCAD_RIPETI:[[0,"Non si ripete"],[12,"Ogni anno"],[24,"Ogni 2 anni"]])
+      .map(r=>`<option value="${r[0]}" ${((_tar?(+_tar.ripeti_mesi||0):12)===r[0])?"selected":""}>${r[1]}</option>`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
       .map(k=>`<option value="${k}" ${((m.stato||"disponibile")===k)?"selected":""}>${MEZZO_STATI[k].lab}</option>`).join("");
     /* 9 agosto 2026 — finestra grande a due colonne (regola fissa sulle finestre) */
@@ -352,12 +383,20 @@
           <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
         <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
         </div>
+        <div class="sh-b">
+        <div class="sh-tit">Chi ce l'ha</div>
+        <div class="field"><label>${_pro?"Collaboratore":"Persona"}</label><select id="m-chi">${chiOpts}</select></div>
+        <p class="sh-nota" style="margin-top:0">${_pers.length?"Lo vedi sulla scheda: «Ce l'ha …».":(_pro?"Aggiungi i collaboratori nella voce Collaboratori.":"Aggiungi le persone nella voce Squadra.")} ${_pro?"Le pratiche dove si usa le colleghi dalla pratica, nel riquadro «Strumenti usati».":"I lavori dove si usa li colleghi dal lavoro."}</p>
+        </div>
         </div><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">${STRU?"La taratura":"Dove sta di casa"}</div>
         ${STRU
           ? `<input type="hidden" id="m-cat" value="${esc(cat)}">
-             <p class="sh-nota" style="margin-top:0">La <b>taratura</b> e le verifiche periodiche si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda dello strumento: l'Assistente ti avvisa prima che scadano, e una misura presa con uno strumento fuori taratura non vale.</p>`
+             <div class="row2">
+               <div class="field"><label>Prossima taratura</label><input type="date" id="m-tar-data" value="${esc((_tar&&_tar.data_scadenza)||"")}"></div>
+               <div class="field"><label>Si ripete</label><select id="m-tar-ripeti">${_ripOpts}</select></div></div>
+             <p class="sh-nota" style="margin-top:0">Diventa una scadenza «Taratura strumento»: la vedi nello Scadenzario e ti arriva l'email 30 e 7 giorni prima. Quando la segni fatta, quella dopo nasce da sola. Le altre (manutenzione, verifica) dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>`
           : `<label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
           <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
           <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
@@ -411,7 +450,14 @@
       ?await sb.from("gest_mezzi").update(campi).eq("id",id).eq("user_id",sbUid).select("id")
       :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),...campi}).select("id");
     const _base={nome,categoria,tipo,targa,stato,note};
+    /* 20 nov 2026 — chi ce l'ha: se la colonna manca si salva senza e si dice */
+    const _chiEl=$("#m-chi"); let _senzaChi=false;
+    if(_chiEl)_base.operatore_id=_chiEl.value||null;
     let {data,error}=await _scrivi({..._base,..._extra});
+    if(error&&_chiEl&&/operatore_id/i.test(error.message||"")){
+      delete _base.operatore_id; _senzaChi=true;
+      ({data,error}=await _scrivi({..._base,..._extra}));
+    }
     /* se sql/mezzi-una-lista-sola.sql non e' ancora passato, quelle colonne
        non ci sono: il mezzo si salva lo stesso, e si dice cosa manca */
     if(error&&/column|schema cache/i.test(error.message||"")
@@ -421,7 +467,29 @@
     }
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+    /* 20 nov 2026 (voce Strumenti) — la prossima taratura diventa una scadenza
+       vera (email, Scadenzario, Cestino insieme allo strumento). Se ce n'e' gia'
+       una aperta si aggiorna quella, non se ne fa una seconda. */
+    let _tarMsg="";
+    const _td=$("#m-tar-data");
+    if(_td){
+      const _mid=data[0].id, _dt=_td.value||null, _rip=+(($("#m-tar-ripeti")||{}).value||0)||0;
+      const _ap=(window._mzTaratura||{})[_mid];
+      try{
+        if(_ap&&_dt&&(_ap.data_scadenza!==_dt||(+_ap.ripeti_mesi||0)!==_rip)){
+          const r=await sb.from("gest_scadenze").update({data_scadenza:_dt,ripeti_mesi:_rip}).eq("id",_ap.id).eq("user_id",sbUid).select("id");
+          if(r.error||!r.data||!r.data.length)_tarMsg=" — la taratura però non è aggiornata, riprova dalla scadenza";
+        }else if(!_ap&&_dt){
+          const r=await sb.from("gest_scadenze").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo:"Taratura strumento",tipo_pratica:"Taratura strumento",
+            mezzo_id:_mid,data_scadenza:_dt,ripeti_mesi:_rip,avvisa:true,stato:"aperta"}).select("id");
+          if(r.error||!r.data||!r.data.length)_tarMsg=" — la taratura però non è salvata: aggiungila con «＋ Scadenza»";
+        }
+      }catch(e){ _tarMsg=" — la taratura però non è salvata"; }
+      try{ renderScadenze(); rinfresca("calendario","riepilogo"); }catch(e){}
+    }
     closeSheet();renderMezzi();renderAttrezzature();
+    if(_senzaChi){toast("Salvato, ma «Chi ce l'ha» no: manca sql/2026-11-20-strumenti-chi-ce-l-ha.sql");return;}
+    if(_tarMsg){toast((id?"Aggiornato":"Strumento aggiunto")+_tarMsg);return;}
     const _pro=(ruoloUtente==='professionista');
     /* 18 nov 2026 — spostato da una parte all'altra: spariva dall'elenco senza dire dove andava */
     const _era=id?((mezziCache.find(x=>String(x.id)===String(id))||{}).categoria==="attrezzatura"?"attrezzatura":"mezzo"):null;

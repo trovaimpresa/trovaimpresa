@@ -65,6 +65,10 @@
      le stesse della vista gest_mezzi_scadenze.
      ============================================================ */
   const SCAD_MEZZO=[["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]];
+  /* 20 nov 2026 (voce Strumenti) — icona e parola di una scadenza attaccata a
+     un mezzo o a uno strumento (la categoria la legge renderScadenze) */
+  function _mzIcona(id){ const c=(window._mezCat||{})[id]; return c==="attrezzatura"?"🔧":"🚚"; }
+  function _mzEliminato(){ return ruoloUtente==='professionista'?"(strumento eliminato)":"(mezzo eliminato)"; }
   async function scadenzeMezzi(mid){
     if(!sb||!sbUid)return [];
     try{
@@ -74,8 +78,9 @@
       const out=[];
       (mz||[]).forEach(function(m){
         const att=m.categoria==="attrezzatura"; /* 18 nov: era m.tipo, che e' testo libero («Trapano») */
-        const base={_mezzo:true,_mzId:m.id,_tab:att?"attrezzature":"mezzi",_nome:m.nome||(att?"Attrezzatura":"Mezzo"),
-                    tipo_pratica:att?"Attrezzatura":"Mezzo",stato:"aperta"};
+        const _attN=(ruoloUtente==='professionista')?"Strumento":"Attrezzatura";
+        const base={_mezzo:true,_mzId:m.id,_tab:att?"attrezzature":"mezzi",_nome:m.nome||(att?_attN:"Mezzo"),
+                    tipo_pratica:att?_attN:"Mezzo",stato:"aperta"};
         SCAD_MEZZO.forEach(function(t){
           if(m[t[0]])out.push(Object.assign({id:"mz:"+m.id+":"+t[0],titolo:t[1],data_scadenza:m[t[0]]},base));
         });
@@ -201,7 +206,7 @@
          non si rompe (stessa scelta già fatta per le pratiche). */
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
-      sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
+      sb.from("gest_mezzi").select("id,nome,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
       /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache è piena
          solo se l'utente ha già aperto la sezione Pratiche, altrimenti ogni
          scadenza collegata sembrerebbe (ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)") pur esistendo. */
@@ -213,6 +218,9 @@
     scadCache=sc||[];
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));
+    /* 20 nov 2026 (voce Strumenti) — la stazione totale usciva col camion 🚚 e
+       «(mezzo eliminato)»: icona e parola si decidono dalla categoria */
+    window._mezCat=Object.fromEntries((mz||[]).map(m=>[m.id,m.categoria||"mezzo"]));
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
@@ -237,7 +245,7 @@
       id:"scad", box:"#scad-list",
       viste:"#scad-viste", visteDef:SCAD_VISTE, vista:scadVista, conta:conta, azioneVista:"scad-vista",
       vuoto:tabVuoto("Le scadenze da non dimenticare",
-        "DURC, assicurazioni, revisioni dei mezzi, pratiche. Quelle gi\u00e0 passate finiscono in cima al Riepilogo, cos\u00ec le vedi appena apri.",
+        (ruoloUtente==='professionista'?"Pratiche, tarature degli strumenti, polizze.":"DURC, assicurazioni, revisioni dei mezzi, pratiche.")+" Quelle gi\u00e0 passate finiscono in cima al Riepilogo, cos\u00ec le vedi appena apri.",
         _SVGV+'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>',
         {t:"+ Aggiungi la prima scadenza",a:"new-scad"}),
       colonne:[{lab:"Scadenza",w:"32%"},{lab:"Tipo",w:"18%",cls:"c-chi"},
@@ -248,7 +256,7 @@
         const rif=s._persona?s._nome
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
-                 :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+                 :s.mezzo_id?(mezMap[s.mezzo_id]||_mzEliminato()):"";
         if(s._cred){
           const apriCr={action:"vai-sezione",data:{go:"crediti"}};
           return {
@@ -312,10 +320,10 @@
             celle:[
               `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
               esc(s.tipo_pratica),
-              `🚚 ${esc(s._nome)}`,
+              `${s._tab==="attrezzature"?"🔧":"🚚"} ${esc(s._nome)}`,
               {h:q.testo,cls:q.classe}
             ],
-            menu:[{lab:"🚚 Apri la scheda del mezzo",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
+            menu:[{lab:(s._tab==="attrezzature"?"🔧 "+(ruoloUtente==='professionista'?"Apri la scheda dello strumento":"Apri la scheda dell'attrezzatura"):"🚚 Apri la scheda del mezzo"),action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
           };
         }
         if(s._persona){
@@ -408,7 +416,7 @@
       return schedaJob({
         tono:tonoM, titolo:esc(s.titolo),
         destra:`<span class="stato" style="background:${bgM};color:${fgM}">${labM}</span>`,
-        meta:["🚚 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
+        meta:[(s._tab==="attrezzature"?"🔧 ":"🚚 ")+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
         azioni:[{lab:"Apri",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
       });
     }
@@ -425,7 +433,7 @@
     }
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
-    const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
+    const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||_mzEliminato()):"";
     const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)")):"";
     /* dipCache tiene solo chi c'e' adesso in squadra: se il nome non si trova,
        quella persona e' stata tolta. Si dice, invece di lasciare il vuoto. */
@@ -440,7 +448,7 @@
       meta:[(s.tipo_pratica&&s.tipo_pratica!==s.titolo)?"📄 "+esc(s.tipo_pratica):"",
             lavNome?"📁 "+esc(lavNome):"",
             cliNome?"👤 "+esc(cliNome):"",
-            mezNome?"🚚 "+esc(mezNome):"",
+            mezNome?_mzIcona(s.mezzo_id)+" "+esc(mezNome):"",
             opeNome?"👷 "+esc(opeNome):"",
             "📅 "+fdate(s.data_scadenza),
             ((+s.ripeti_mesi||0)?"🔁 "+((SCAD_RIPETI.find(r=>r[0]===+s.ripeti_mesi)||[0,""])[1]||"").toLowerCase():""),
@@ -461,9 +469,13 @@
     if(sb&&sbUid){
       const [{data:dc},{data:dm}]=await Promise.all([
         sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
-        sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).or(_cliOr(mid)).order("nome")
+        sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(mid)).order("nome")
       ]);
       cl=dc||[];mz=dm||[];
+      /* 20 nov 2026 (voce Strumenti) — allo studio senza Mezzi nel menu, nella tendina
+         «Strumento» uscivano anche escavatore e furgone. Quello gia' scelto resta. */
+      if(ruoloUtente==='professionista'&&typeof tabNascosto==='function'&&tabNascosto("mezzi"))
+        mz=mz.filter(m=>m.categoria==="attrezzatura"||String(m.id)===String(s&&s.mezzo_id||""));
     }
     const pro=ruoloUtente==='professionista';
     const PAROLA=pro?"pratica":"lavoro";
@@ -500,7 +512,7 @@
       +`<label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:2px 0 10px;cursor:pointer"><input type="checkbox" id="s-avvisa" ${avvisaOn?"checked":""} style="width:20px;height:20px"><span>Avvisami per email</span></label>`
       +`<div class="field"><label>Si ripete</label><select id="s-ripeti">`
       +  SCAD_RIPETI.map(r=>'<option value="'+r[0]+'"'+((+s.ripeti_mesi||0)===r[0]?' selected':'')+'>'+r[1]+'</option>').join("")
-      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola.</div></div>`
+      +`</select><div class="sh-nota">${pro?"Taratura, polizza, rinnovo dell'iscrizione":"Revisione, DURC, assicurazione, taratura, visita medica"}: quando la segni fatta, quella dopo nasce da sola.</div></div>`
       +'<p class="sh-nota">Ti arriva una email 30 giorni prima, 7 giorni prima e il giorno prima, all\'indirizzo con cui entri qui. Una sola email al giorno con tutte le scadenze vicine, non una per ognuna.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -512,7 +524,7 @@
       +`<div class="field"><label>${pro?"Strumento":"Mezzo / attrezzatura"} (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>`
       /* 15 agosto 2026 — la persona. I nomi arrivano da dipCache, la squadra
          gia' letta: nessuna domanda in piu' al database. */
-      +`<div class="field"><label>Persona (facoltativo)</label><select id="s-ope"><option value="">— nessuna —</option>${opeOpts}</select><div class="campo-aiuto">Per le cose che scadono addosso a una persona: patentino del muletto, piattaforma aerea, primo soccorso.</div></div>`
+      +`<div class="field"><label>Persona (facoltativo)</label><select id="s-ope"><option value="">— nessuna —</option>${opeOpts}</select><div class="campo-aiuto">Per le cose che scadono addosso a una persona: ${pro?"polizza, iscrizione all'albo, corso sulla sicurezza":"patentino del muletto, piattaforma aerea, primo soccorso"}.</div></div>`
       +'</div>'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Note</div>'
@@ -574,6 +586,9 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderScadenze();renderMezzi();
+    /* 20 nov 2026 (voce Strumenti) — salvata la taratura, la scheda dello strumento
+       restava «Disponibile» senza scadenza finche' non si cambiava pagina */
+    try{ renderAttrezzature(); }catch(e){}
     /* 12 agosto 2026 (sera) — da stamattina le scadenze si vedono sul calendario
        e nel Riepilogo, ma nessuno diceva a quelle due schermate di ridisegnarsi:
        creavi una scadenza, andavi sul calendario e non c'era. */

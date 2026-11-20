@@ -520,6 +520,19 @@
       return MZS.filter(v=>ids.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)))
                 .sort((a,b)=>String(a.prossima_data||"9999").localeCompare(String(b.prossima_data||"9999")));
     };
+    /* 20 nov 2026 (voce Strumenti) — con una taratura scaduta e una
+       manutenzione fra 10 giorni la riga diceva «Stazione totale · Manutenzione
+       strumento»: prossimo_titolo e' la PROSSIMA, non quella passata. Se c'e'
+       una scaduta, il nome e' il suo (la piu' vecchia ancora aperta). */
+    const _oggiMz=todayStr();
+    const _titMz=v=>{
+      if(v.scadute>0){
+        const x=SC.filter(r=>String(r.mezzo_id)===String(v.mezzo_id)&&r.stato!=="fatta"&&r.data_scadenza&&r.data_scadenza<_oggiMz)
+                  .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza))[0];
+        if(x)return x.titolo||"Scadenza";
+      }
+      return v.prossimo_titolo||"";
+    };
     const mzAvvisa=_scadDi(MZveicoli);
     const stAvvisa=_scadDi(MZstrum);
     /* squadra: quanti lavori aperti ha ciascuno */
@@ -586,14 +599,14 @@
        cliccare per andare in una sezione che per lui non esiste.
        Le tarature dei suoi strumenti restano: sono la riga qui sotto. */
     if(!_pro && mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
-                                  d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
+                                  d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(_titMz(mzScaduti[0])?" · "+_titMz(mzScaduti[0]):""),go:"mezzi"});
     /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
        Per lo studio tecnico e' l'avviso della taratura, quello promesso. */
     const stScaduti = stAvvisa.filter(v=>v.scadute>0);
     if(stScaduti.length) DA.push({g:1,male:1,
       t:nn(stScaduti.length, _pro?"strumento con scadenza passata":"attrezzatura con scadenza passata",
                              _pro?"strumenti con scadenza passata":"attrezzature con scadenza passata"),
-      d:(mzNome[stScaduti[0].mezzo_id]||(_pro?"Strumento":"Attrezzatura"))+(stScaduti[0].prossimo_titolo?" · "+stScaduti[0].prossimo_titolo:""),
+      d:(mzNome[stScaduti[0].mezzo_id]||(_pro?"Strumento":"Attrezzatura"))+(_titMz(stScaduti[0])?" · "+_titMz(stScaduti[0]):""),
       go:"attrezzature"});
     if(inPerdita.length) DA.push({g:1,male:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
@@ -847,7 +860,7 @@
       tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
       vuoto: MZveicoli.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
       righe: mzAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
-        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        t:mzNome[v.mezzo_id]+(_titMz(v)?" · "+_titMz(v):""),
         v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
     }));
 
@@ -861,7 +874,7 @@
       vuoto: MZstrum.length?"Nessuna taratura o verifica in arrivo"
                            :(_pro?"Nessuno strumento registrato":"Nessuna attrezzatura registrata"),
       righe: stAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
-        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        t:mzNome[v.mezzo_id]+(_titMz(v)?" · "+_titMz(v):""),
         v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
     }));
 

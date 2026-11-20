@@ -349,7 +349,7 @@
         var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
         var _b=_secA.querySelector('.btn.add'); if(_b)_b.textContent='+ Nuovo strumento';
         var _i=_secA.querySelector('.gal-intro');
-        if(_i)_i.textContent="Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche. Il Riepilogo ti avvisa prima che scadano.";
+        if(_i)_i.textContent="Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche. L'Assistente ti avvisa prima che scadano.";
       }
       /* intestazione del gruppo: "Azienda" -> "Studio" */
       document.querySelectorAll('.side-group').forEach(function(g){

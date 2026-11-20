@@ -843,17 +843,24 @@
       const {count:nSc}=await sb.from("gest_scadenze").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("mezzo_id",id);
       /* 12 nov 2026 (secondo giro) — regola 22: la domanda dice QUALE mezzo e DOVE va */
       const _mzD=((typeof mezziCache!=="undefined"?mezziCache:[])||[]).find(x=>String(x.id)===String(id));
-      const _nmD=_mzD&&_mzD.nome?"«"+_mzD.nome+"»":"questo mezzo";
+      /* 20 nov 2026 (voce Strumenti) — allo studio la domanda parlava di
+         «revisione, assicurazione, bollo» e il messaggio di «Mezzo nel cestino»
+         per una stazione totale. Adesso: mezzo, attrezzatura (lei) o strumento. */
+      const _attD=!!(_mzD&&_mzD.categoria==="attrezzatura"), _proD=(ruoloUtente==='professionista');
+      const _fD=_attD&&!_proD;   /* l'attrezzatura e' femminile */
+      const _cosaD=_attD?(_proD?"strumento":"attrezzatura"):"mezzo";
+      const _nmD=_mzD&&_mzD.nome?"«"+_mzD.nome+"»":(_fD?"questa attrezzatura":"questo "+_cosaD);
       const _cestD=!!(window.cestinoAttivo&&window.cestinoAttivo());
-      const _sottoD=(usi?`È collegato a ${usi} ${usi===1?"lavoro":"lavori"}. `:"")
-          +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (revisione, assicurazione, bollo…): ${nSc===1?"va":"vanno"} nel Cestino insieme a lui e ${nSc===1?"torna":"tornano"} se lo rimetti a posto. `:"");
-      if(!(await window.chiediVia(_nmD,true,_cestD?(_sottoD+"Lo riprendi dal Cestino quando vuoi."):undefined)))return;
+      const _quali=_attD?(_proD?"taratura, manutenzione…":"verifiche, manutenzione…"):"revisione, assicurazione, bollo…";
+      const _sottoD=(usi?`È collegat${_fD?"a":"o"} a ${usi} ${usi===1?(_proD?"pratica":"lavoro"):(_proD?"pratiche":"lavori")}. `:"")
+          +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (${_quali}): ${nSc===1?"va":"vanno"} nel Cestino insieme a ${_fD?"lei":"lui"} e ${nSc===1?"torna":"tornano"} se ${_fD?"la":"lo"} rimetti a posto. `:"");
+      if(!(await window.chiediVia(_nmD,true,_cestD?(_sottoD+(_fD?"La":"Lo")+" riprendi dal Cestino quando vuoi."):undefined)))return;
       const {data,error}=await sb.from("gest_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
       try{ await sb.from("gest_scadenze").delete().eq("mezzo_id",id).eq("user_id",sbUid); }catch(e){}
       renderMezzi();renderAttrezzature();renderScadenze();
-      toast(_cestD?("Mezzo nel cestino"+(nSc?(" con "+nSc+(nSc===1?" scadenza":" scadenze")):"")+": lo riprendi da lì"):"Eliminato");return;
+      toast(_cestD?((_cosaD.charAt(0).toUpperCase()+_cosaD.slice(1))+" nel cestino"+(nSc?(" con "+nSc+(nSc===1?" scadenza":" scadenze")):"")+": "+(_fD?"la":"lo")+" riprendi da lì"):(_fD?"Eliminata":"Eliminato"));return;
     }
     if(a==="new-carta")return cartaForm(null);
     if(a==="edit-carta")return cartaForm(carteCache.find(c=>String(c.id)===String(id)));
@@ -869,11 +876,11 @@
     if(a==="lm-add")return mezzoLavoroAdd();
     if(a==="lm-del"){
       if(!sbUid){toast("Devi essere loggato");return;}
-      if(!(await tiChiedi("Togliere questo mezzo dal lavoro?")))return;
+      if(!(await tiChiedi(ruoloUtente==='professionista'?"Togliere questo strumento dalla pratica?":"Togliere questo mezzo dal lavoro?")))return;
       const {data,error}=await sb.from("gest_lavoro_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non rimosso: nessuna riga eliminata");return;}
-      renderMezziBlock(mezziLavoroId);return;
+      renderMezziBlock(mezziLavoroId);try{renderAttrezzature();renderMezzi();}catch(e){}return;
     }
     if(a==="new-scad")return scadForm(null);
     /* "+ Aggiungi una scadenza" dalla scheda della pratica: nasce già collegata.

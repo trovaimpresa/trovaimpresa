@@ -3972,3 +3972,45 @@ Provato col banco (pagina vera, database finto, faccia studio, 1440 e 375) e `to
 Pubblicato (→e64897b←, online) e riprovato sul sito vero col database vero (1440 e 375): liste e permessi dello studio, tariffa salvata (35 €), parcella dalle ore (Giulia 35 €, titolare vuoto), «Tempo speso» e «costo medio dello studio» nel margine, scheda «Tu», WhatsApp e link `&studio=1`, ricerca «giulia» (persona + pratica), elimina con «Ha 1 scadenza aperta» e «Rimetti a posto» con la scadenza che torna: tutto ✔. Pulito: conteggi uguali a prima.
 ⛔ Trovato dopo il push: rimessa a posto la persona, lo Scadenzario diceva «(persona non più in squadra)» accanto alla sua scadenza (dipCache vecchia; e la frase sta in `.c-chi`, che il traduttore salta). Sistemato in `cestRipristina` (rilegge `renderDip` prima di rinfrescare) e in `scadCard` (frase dello studio alla fonte). ⚠️ NON ancora online: parte col prossimo push (commit locale, versioni `?v=20nov-col2`).
 ⬜ La pagina dell'invito con `&studio=1` è controllata nel file online ma non vista disegnata: aprendola col conto di Alex (membro attivo) rimanda all'app dell'operaio.
+
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: STRUMENTI (+ APP DEL COLLABORATORE)
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): stazione totale, GPS, drone, distanziometro; taratura scaduta, manutenzioni, Scadenzario, Assistente, Calendario, Cestino e «Rimetti a posto» (le 2 scadenze vanno e tornano con lo strumento ✔), telefono. Per vedere lo studio «puro» (senza Mezzi) col conto di Alex: `window._tiTipoVero='professionista'; adattaMenuProfessionista()`. Poi cancellato tutto: conteggi uguali a prima (mezzi 2, scadenze 2, lavori 5, persone 1, file 16).
+
+Codice: `js/gest-mezzi.js` (lista, scheda, modulo, salvataggio), Scadenzario `js/gest-scadenze-pratiche.js`, elimina `js/gest-finestre-eventi.js` (`del-mezzo`), strumenti nella pratica `renderMezziBlock` in `js/gest-richieste-chat.js`, Assistente `js/gest-riepilogo.js`.
+
+Sistemato:
+1. ⛔ Salvata una taratura dalla scheda, lo strumento restava «Disponibile» senza scadenza finché non si cambiava pagina (`_saveScad` non ridisegnava gli Strumenti).
+2. ⛔ Assistente: «Stazione totale · Manutenzione strumento» per una TARATURA scaduta (mostrava la prossima, non quella passata). Ora `_titMz` (vale anche per i mezzi dell'impresa).
+3. Parole da cantiere allo studio: domanda di elimina «(revisione, assicurazione, bollo…)» e «Mezzo nel cestino» → strumento/attrezzatura (al femminile) /mezzo; Scadenzario col camion 🚚, «Apri la scheda del mezzo», «(mezzo eliminato)», tipo «Attrezzatura» → chiave inglese, «strumento»; modulo scadenza «Revisione, DURC…» e «patentino del muletto» → frasi dello studio; elenco vuoto «DURC, revisioni dei mezzi» → «Pratiche, tarature, polizze».
+4. Nella tendina «Strumento» della scadenza uscivano escavatore e furgone (allo studio senza Mezzi): ora solo strumenti (quello già scelto resta).
+5. Ultimi salvati in cima (era in ordine di nome), anche per i mezzi dell'impresa.
+6. Intro: «Il Riepilogo ti avvisa» → «L'Assistente» (come nel menu).
+
+Funzioni nuove (foto prima, sì di Alex):
+- **Prossima taratura nel modulo dello strumento** (solo studio): data + «Si ripete» → crea/aggiorna UNA scadenza «Taratura strumento» (`window._mzTaratura`, letta in `caricaMezziCache`). Email, Scadenzario e Cestino come le altre.
+- **Chi ce l'ha** (`gest_mezzi.operatore_id`, `sql/2026-11-20-strumenti-chi-ce-l-ha.sql`, migrazione `strumenti_chi_ce_l_ha_20nov2026` GIÀ ESEGUITA, riga in `js/fondatore.js`), tutte le facce. Scheda: «Ce l'ha Giulia · usato in 2 pratiche» (`mezzoChiUso`). Paracadute se la colonna manca.
+- **Strumenti usati in questa pratica**: il riquadro `#mezzi-wrap` era spento allo studio; ora acceso con parole sue e solo strumenti.
+- Ricerca degli strumenti: Alex ha detto NO (per ora).
+
+**APP DEL COLLABORATORE dello studio** (foto prima, sì di Alex): `js/op-studio.js` (nuovo, caricato in fondo a `gestionale-operatore.html`). Parte SOLO se `MIO.tipoStudio==='professionista'`: elenco di frasi fisse (pratiche, titolare, studio, «Cosa hai fatto», «Pratica o sopralluogo», ricevuta al posto di bolla) su testi, suggerimenti e aria-label, con osservatore. NON tocca nomi, descrizioni, indirizzi, chat, note, caselle (`OP_STUDIO_SALTA`). Si aggancia a `adattaParole()`. Provato col banco (studio e impresa: per l'impresa non cambia una parola).
+⚠️ Restano da cantiere: il nome dell'icona sul telefono («Cantiere», nel manifest) e il cancello «Per entrare usa il link della tua impresa» (prima di entrare non si sa chi è il titolare).
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Prova degli strumenti col database finto: 28 verdi su 28 (1440 e 375).
+⬜ Non provati: l'app del collaboratore su un telefono vero con un account di studio; l'email del mattino con la taratura (arriva come le altre scadenze, letto nel codice). Le date scritte nel modulo dei MEZZI (assicurazione/revisione) entrano nell'email, la «verifica periodica» no (vecchio, impresa).
+
+# STUDIO — MAPPA DI CHI PARLA CON CHI
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti.
+(✔ parlano · ✗ parlano male · — non parlano)
+- Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
+- Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
+- Strumenti ↔ Calendario: ✔ le scadenze ci sono (icona orologio).
+- Strumenti ↔ Pratiche: ✔ dal 20 nov «Strumenti usati in questa pratica»; la scheda dice «usato in N pratiche». — Dalla pratica non si vede la taratura dello strumento (si potrebbe avvisare «strumento fuori taratura»).
+- Strumenti ↔ Collaboratori: ✔ «Chi ce l'ha». — La scheda del collaboratore non dice quali strumenti ha.
+- Strumenti ↔ Cestino: ✔ le scadenze vanno e tornano con lo strumento.
+- Strumenti ↔ Ricerca in alto: — (Alex: no per ora).
+- Strumenti ↔ email del mattino: ✔ le tarature arrivano come scadenze.
+- Strumenti ↔ app del collaboratore: — il collaboratore non vede gli strumenti che ha.
+- Collaboratori ↔ app del collaboratore: ✔ dal 20 nov l'app parla da studio.
+- Pratiche ↔ app del collaboratore: ✔ «Pratiche di adesso», messaggi sulla pratica.
+- Si può unire: Strumenti resta voce sola (i Mezzi allo studio non ci sono).

@@ -752,29 +752,36 @@
     /* 9 agosto 2026 — a uno studio i Mezzi sono nascosti dal menu, ma questo
        riquadro compariva lo stesso dentro la pratica, e diceva pure
        "aggiungilo dalla scheda Mezzi": una scheda che lui non ha. */
-    if(ruoloUtente==='professionista'){wrap.style.display="none";return;}
+    /* 20 nov 2026 (voce Strumenti, sì di Alex) — adesso lo studio ha la voce
+       Strumenti: il riquadro torna, con le sue parole, e propone solo gli
+       strumenti (i mezzi allo studio sono nascosti). */
+    const _pro=(ruoloUtente==='professionista');
+    const _soloStru=_pro&&typeof tabNascosto==="function"&&tabNascosto("mezzi");
     wrap.style.display="block";
+    const _lab=wrap.querySelector("label");
+    if(_lab)_lab.textContent=_pro?"🔧 Strumenti usati in questa pratica":"🚚 Mezzi e attrezzature usati in questo lavoro";
     const [{data:usati},{data:tutti}]=await Promise.all([
       sb.from("gest_lavoro_mezzi").select("id,mezzo_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId),
-      sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome")
+      sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome")
     ]);
-    const U=usati||[], T=tutti||[];
+    const U=usati||[], T=(tutti||[]).filter(m=>!_soloStru||m.categoria==="attrezzatura"||U.some(x=>x.mezzo_id===m.id));
     const etichetta=m=>esc(m.nome)+(m.targa?" ("+esc(m.targa)+")":"");
     const nomi=Object.fromEntries(T.map(m=>[m.id,etichetta(m)]));
-    $("#lm-list").innerHTML=U.length?U.map(x=>`<div class="spesa-row"><span style="flex:1">${nomi[x.mezzo_id]||"(mezzo eliminato)"}</span><button type="button" class="sdel" data-action="lm-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">Nessun mezzo collegato a questo lavoro.</p>`;
+    $("#lm-list").innerHTML=U.length?U.map(x=>`<div class="spesa-row"><span style="flex:1">${nomi[x.mezzo_id]||(_pro?"(strumento eliminato)":"(mezzo eliminato)")}</span><button type="button" class="sdel" data-action="lm-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">${_pro?"Nessuno strumento collegato a questa pratica.":"Nessun mezzo collegato a questo lavoro."}</p>`;
     const usati_ids=new Set(U.map(x=>x.mezzo_id));
     const liberi=T.filter(m=>!usati_ids.has(m.id));
     $("#lm-sel").innerHTML=liberi.length
-      ?`<option value="">— scegli un mezzo —</option>`+liberi.map(m=>`<option value="${m.id}">${etichetta(m)}</option>`).join("")
-      :`<option value="">${T.length?"Tutti i mezzi sono già collegati":"Nessun mezzo: aggiungilo dalla scheda Mezzi"}</option>`;
+      ?`<option value="">${_pro?"— scegli uno strumento —":"— scegli un mezzo —"}</option>`+liberi.map(m=>`<option value="${m.id}">${etichetta(m)}</option>`).join("")
+      :`<option value="">${_pro?(T.length?"Tutti gli strumenti sono già collegati":"Nessuno strumento: aggiungilo dalla voce Strumenti"):(T.length?"Tutti i mezzi sono già collegati":"Nessun mezzo: aggiungilo dalla scheda Mezzi")}</option>`;
   }
   async function mezzoLavoroAdd(){
     if(!sbUid||!mezziLavoroId)return;
-    const mezzo_id=$("#lm-sel").value;if(!mezzo_id){toast("Scegli un mezzo");return;}
+    const _pro=(ruoloUtente==='professionista');
+    const mezzo_id=$("#lm-sel").value;if(!mezzo_id){toast(_pro?"Scegli uno strumento":"Scegli un mezzo");return;}
     const {data,error}=await sb.from("gest_lavoro_mezzi").insert({user_id:sbUid,lavoro_id:mezziLavoroId,mezzo_id}).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga aggiunta");return;}
-    renderMezziBlock(mezziLavoroId);toast("Mezzo aggiunto ✔");
+    renderMezziBlock(mezziLavoroId);try{renderAttrezzature();renderMezzi();}catch(e){}toast(_pro?"Strumento aggiunto ✔":"Mezzo aggiunto ✔");
   }
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
