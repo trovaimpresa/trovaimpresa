@@ -15,6 +15,7 @@
   .btn{display:block;width:100%;box-sizing:border-box;border:0;border-radius:12px;padding:16px;font-size:19px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;margin-top:10px}
   .copia{background:#0a2a4d;color:#fff}
   .fb{background:#1877f2;color:#fff}
+  .gr{background:#fff;color:#1877f2;border:2px solid #1877f2}
   .nota{font-size:15px;color:#475569;margin:10px 0 0;line-height:1.5}
   .err{font-size:18px;color:#b91c1c}
 </style>
@@ -30,6 +31,7 @@
 </div>
 <script>
 (function(){
+  var GRUPPO="https://www.facebook.com/groups/2063761304562584/";
   var p=new URLSearchParams(location.search), box=document.getElementById("box");
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   function copia(t,btn){
@@ -50,7 +52,10 @@
         '<button class="btn copia" id="copia">Copia il testo</button>'+
         '<div class="passo">2. Apri Facebook e incolla</div>'+
         '<a class="btn fb" href="'+esc(share)+'" target="_blank" rel="noopener">Apri Facebook</a>'+
-        '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>';
+        '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>'+
+        '<div class="passo">3. Mettilo anche nel gruppo</div>'+
+        '<a class="btn gr" href="'+GRUPPO+'" target="_blank" rel="noopener">Apri il gruppo</a>'+
+        '<p class="nota">Il testo è ancora copiato: tocca <b>«Scrivi qualcosa…»</b>, incolla e premi <b>Pubblica</b>.</p>';
       document.getElementById("copia").onclick=function(){copia(d.testo,this);};
     })
     .catch(function(){box.innerHTML='<h1>Post per Facebook</h1><p class="err">Non riesco a collegarmi. Riprova fra poco.</p>';});
