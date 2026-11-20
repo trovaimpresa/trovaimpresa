@@ -980,7 +980,9 @@
                  un conto gia' consegnato al committente, e finche' non diventa
                  fattura quei soldi non li ha chiesti nessuno. Un SAL in BOZZA
                  non e' un problema: e' un lavoro ancora in corso. */
-              const daFatt2=SA.filter(x=>x.stato==="emesso"&&!x.fattura_id);
+              /* 20 nov 2026 — allo studio i SAL non si fatturano (li fattura
+                 l'impresa): niente allarme «non ancora fatturati» */
+              const daFatt2=(ruoloUtente==='professionista')?[]:SA.filter(x=>x.stato==="emesso"&&!x.fattura_id);
               C.push(rieCard({
                 tab:"sal", titolo:(ruoloUtente==='professionista'?"Stati di avanzamento":"Acconti a lavoro fatto"), n:SA.length, dati:SA.length>0,
                 lab: daFatt2.length
@@ -988,7 +990,7 @@
                       : _plur(SA.length,"stato di avanzamento","stati di avanzamento"),
                 tono: daFatt2.length?"attesa":(SA.length?"ok":"neutro"),
                 stato: daFatt2.length>0?"attesa":"bene",
-                vuoto:"Nessuno stato di avanzamento",
+                vuoto:(ruoloUtente==='professionista'?"Nessuno stato di avanzamento":"Nessun acconto"),
                 /* i conti passano da salConti + compRiepilogoDa, come nell'elenco,
                    nella scheda e nel PDF: nessuna formula copiata */
                 righe: SA.slice(0,2).map(x=>({

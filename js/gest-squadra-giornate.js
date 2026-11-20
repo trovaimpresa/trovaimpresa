@@ -188,20 +188,22 @@ async function sqgPersDisegna() {
   const perLav = {};
   d.righe.forEach(function (x) { const k = String(x.lavoro_id || ""); perLav[k] = perLav[k] || new Set(); perLav[k].add(x.data); });
   const c2 = document.getElementById("sqg-corpo"); if (!c2) return;
+  const studio = (typeof ruoloUtente !== "undefined" && ruoloUtente === 'professionista');   /* allo studio: pratiche, non cantieri */
+  const unoNome = studio ? "Pratica" : "Cantiere";
   c2.innerHTML = nav
     + '<div class="acq-tot"><div><b>' + date.length + '</b><span>' + (date.length === 1 ? "Giorno" : "Giorni") + '</span></div>'
     + '<div><b>' + sqgNum(d.ore) + '</b><span>Ore</span></div>'
-    + '<div><b>' + d.lavori.size + '</b><span>' + (d.lavori.size === 1 ? "Cantiere" : "Cantieri") + '</span></div></div>'
+    + '<div><b>' + d.lavori.size + '</b><span>' + (d.lavori.size === 1 ? unoNome : (studio ? "Pratiche" : "Cantieri")) + '</span></div></div>'
     + sqgStriscia(sqgPers.mese, d.giorni)
     + '<div class="sh-cols"><div class="sh-col"><div class="sh-b"><div class="sh-tit">Giorno per giorno</div><div class="gx-lista">'
     + date.map(function (iso) {
-      const dove = [...new Set(d.righe.filter(function (x) { return x.data === iso; }).map(function (x) { return nomi[String(x.lavoro_id)] || "Cantiere"; }))].join(", ");
+      const dove = [...new Set(d.righe.filter(function (x) { return x.data === iso; }).map(function (x) { return nomi[String(x.lavoro_id)] || unoNome; }))].join(", ");
       const ore = d.giorni[iso];
-      return '<div class="gx-riga"><span class="t">' + esc(sqgData(iso)) + '<small>' + esc(dove) + '</small></span><b>' + (ore === 8 ? "1 giorno" : sqgNum(ore) + " ore") + '</b></div>';
+      return '<div class="gx-riga"><span class="t">' + esc(sqgData(iso)) + '<small>' + esc(dove) + '</small></span><b>' + (ore === 8 ? "1 giorno" : sqgNum(ore) + (ore === 1 ? " ora" : " ore")) + '</b></div>';
     }).join("") + '</div></div></div>'
     + '<div class="sh-col"><div class="sh-b"><div class="sh-tit">Dove ha lavorato</div><div class="gx-lista">'
     + Object.keys(perLav).sort(function (a, b) { return perLav[b].size - perLav[a].size; }).map(function (k) {
-      return '<div class="gx-riga"><span class="t">' + esc(nomi[k] || "Cantiere") + '</span><b>' + sqgGiorniTxt(perLav[k].size) + '</b></div>';
+      return '<div class="gx-riga"><span class="t">' + esc(nomi[k] || unoNome) + '</span><b>' + sqgGiorniTxt(perLav[k].size) + '</b></div>';
     }).join("") + '</div></div></div></div>';
 }
 

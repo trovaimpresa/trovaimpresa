@@ -178,6 +178,9 @@
     gest_carte            :[_REP],
     gest_scadenze         :[_REP,["gest_mezzi","mezzo_id","mezzo"],_LAV,["gest_operatori","operatore_id","persona"]],
     gest_computi          :[_REP],
+    /* 20 nov 2026 (collaudo SAL) — un SAL rimesso a posto col suo computo
+       ancora nel Cestino non si vedeva da nessuna parte */
+    gest_sal              :[["gest_computi","computo_id","computo"]],
     gest_fornitori        :[_REP],
     gest_rapportini       :[_REP,_LAV],
     gest_fatture_fornitori:[["gest_fornitori","fornitore_id","fornitore"]],
@@ -775,7 +778,7 @@
       cestScegli=false;cestScelti.clear();
       _cestRicontaPallino();
       await renderCestino();
-      rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+      rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
     }
     const resto=[];
     if(fisc)resto.push(fisc+(fisc===1?" fattura già emessa: è":" fatture già emesse: sono")+" un documento fiscale, resta nel cestino.");
@@ -901,7 +904,9 @@
     renderCestino();
     /* 20 nov 2026 (collaudo Agenda) — mancava «agenda»: rimessa a posto una
        persona, l'Agenda la diceva ancora «(nel cestino)» */
-    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","agenda","fornitori","galleria","report","carte","crediti","calendario");
+    /* 20 nov 2026 (collaudo SAL dello studio) — anche «computi» e «sal»:
+       rimesso a posto un SAL, l'elenco degli Stati di avanzamento restava vecchio */
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","agenda","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
     if(x.tab==="gest_op_preventivi"&&typeof gpBanner==="function")try{gpBanner();}catch(e){}
     if(x.tab==="gest_mestieri"||daTirareSu.some(function(d){return d.pa.tab==="gest_mestieri";}))renderLanding();
     /* 19 nov 2026 — il lavoro o il cliente tornati su insieme NON «ci stavano
@@ -1089,7 +1094,7 @@
     await cestPulisciFile(x, fatto.file);
     _cestRicontaPallino();
     renderCestino();
-    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
     toast("Eliminato per sempre");
   }
 
@@ -1125,7 +1130,7 @@
     await cestPulisciFile(x);
     _cestRicontaPallino();
     renderCestino();
-    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
     toast("Eliminato per sempre");
   }
 

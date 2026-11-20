@@ -4024,9 +4024,29 @@ Funzioni nuove (foto prima, computer e telefono; «si si e si pubblica» di Alex
 Versioni `?v=20nov-ag` anche per `gestionale.css`, `gest-squadra-giornate.js`, `gest-riepilogo-schede.js`. Banco: ZERO difetti.
 
 ⬜ Non provato: la tendina col titolare («Alex (io)» nasce solo se gli scrivi ore); l'Agenda vista dall'app del collaboratore.
+Pubblicato 879a6ae, Netlify ok, riprovato sul sito vero 1440 e 375 (misure): Pratiche (2) → Agenda filtrata, ore scritte aperte per pratica + Apri le Giornate, Totale dello studio senza falso allarme, «1 pratica senza nessuno» ambra, persona nel Cestino → Nessuno assegnato (3), Cestino col nome e «e con lei 1 scadenza». Pulito: conteggi uguali.
+Rimasti fuori da 879a6ae e sistemati il 20 nov (sera): finestra «Giornate di …» (`sqgPersDisegna`) allo studio «Pratica/Pratiche» invece di «Cantiere/Cantieri»; «1 ora» invece di «1 ore». Versione `gest-squadra-giornate.js?v=20nov-ag2`.
+
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: STATI DI AVANZAMENTO
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): computo con ribasso 10%, capitolo della sicurezza, pratica collegata; SAL n. 1 (120 + «600,5» + «0,5», ritenuta «0,5») e SAL n. 2 (con «1.250» = 1250, oltre il computo). Conti a schermo = vista `gest_sal_totali` = PDF: SAL 1 16.631,38 − 1.663,14 = 14.968,24, ritenuta 74,84, netto 14.893,40; SAL 2 netto 13.903,64. PDF letto con `jsPDF.API.save` (fascia BOZZA, firma «Il Direttore dei lavori»). Cestino e «Rimetti a posto», telefono (niente fuori schermo, niente sotto 13 px). Poi cancellato tutto: conteggi uguali a prima.
+
+Codice: `js/gest-sal-prezzario.js` (elenco, scheda, conto, PDF, fattura), scheda dell'Assistente in `js/gest-riepilogo.js`, `js/gest-cestino.js`.
+
+Sistemato (`?v=20nov-sal`):
+1. ⛔ Lo studio poteva fare «Crea la fattura di questo acconto» (14.968 € di lavori sulla SUA partita IVA). Allo studio il SAL lo certifica il direttore dei lavori, la fattura la fa l'impresa: tolta dal menu, dalla scheda e bloccata in `salAFattura` (`_salStudio()`). Filtri dello studio «Tutti / Bozze / Emessi» (`SAL_VISTE_STUDIO`) invece di «Non fatturati / Fatturati»; l'Assistente allo studio non dice più «emessi e non ancora fatturati».
+2. ⛔ SAL nuovo con le caselle vuote: si apriva a −14.968 € con l'avviso rosso, e una lavorazione non toccata si salvava a 0 (SAL negativo). Ora un SAL nuovo parte dalle quantità del SAL di prima (sono «dall'inizio») e la nota lo dice. Vale per tutte le facce.
+3. ⛔ Buttando nel Cestino un SAL che ha SAL dopo, quello dopo si ricalcolava in silenzio (n. 2 da 13.903 a 28.797 €). Ora la domanda lo dice; messaggio «SAL nel cestino: lo riprendi da lì».
+4. Rimesso a posto un SAL, l'elenco restava vecchio: `computi` e `sal` aggiunti ai `rinfresca` del Cestino. `CEST_PADRE.gest_sal` = il computo (un SAL rimesso a posto col computo nel Cestino non si vedeva).
+5. Parole dello studio: «Lavori eseguiti», «Eseguito dall'inizio», «Già liquidato coi SAL prima», «Netto da pagare all'impresa», «eseguito finora / già liquidato / ritenuta» nell'elenco, nota della ritenuta («trattiene all'impresa»), pagina vuota («certifica i lavori eseguiti: su quella cifra l'impresa chiede l'acconto»). Impresa e artigiano: invariati («Nessun acconto» nell'Assistente).
+6. Giornate (resto dell'Agenda): «Pratica/Pratiche» e «1 ora».
+
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni.
+⬜ Da guardare: allo studio la ritenuta del SAL privato senza ribasso sulla sicurezza è voluta (regola delle gare pubbliche); cambiare il SAL n. 1 dopo aver fatto il n. 2 cambia il n. 2 (giusto, ma non lo dice).
+Funzioni nuove proposte con le foto (aspettano il sì di Alex): riquadro «Computo e stati di avanzamento» dentro la pratica; «Certificato di pagamento» (PDF del direttore dei lavori) con la casella «Impresa che esegue i lavori».
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4047,7 +4067,17 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✔ dal 20 nov le ore scritte si aprono pratica per pratica, con «Apri le Giornate di …».
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
+- Collaboratori (Assistente) ↔ Ore fatte: ✗ le ore del mese della scheda vengono da gest_lavori.ore, non da gest_ore: da guardare a fine giro.
 - Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
+- Stati di avanzamento ↔ Computo metrico: ✔ il SAL vive dentro il computo (righe, prezzi, ribasso, capitoli); «Fai un SAL» apre il computo sulla linguetta giusta.
+- Stati di avanzamento ↔ Pratiche: — il computo si collega alla pratica, ma dalla pratica non si vedono computo e SAL (proposta: riquadro nella pratica).
+- Stati di avanzamento ↔ Fatture: — allo studio giusto così dal 20 nov (la fattura del SAL la fa l'impresa). La parcella della direzione lavori non nasce dal SAL.
+- Stati di avanzamento ↔ Preventivi e parcella: — il preventivo nasce dal computo, non dal SAL (giusto).
+- Stati di avanzamento ↔ Assistente: ✔ scheda «Stati di avanzamento» con gli stessi conti (salConti); dal 20 nov senza l'allarme «non fatturati» allo studio.
+- Stati di avanzamento ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto»; il computo è il padre del SAL.
+- Stati di avanzamento ↔ Ricerca in alto: — i SAL non si trovano (si trova il computo? da guardare a fine giro).
+- Stati di avanzamento ↔ Clienti: ✔ il cliente arriva dal computo (PDF «Spett.le», elenco).
+- Si può unire: Stati di avanzamento dentro Computo metrico? NO per ora: l'elenco di tutti i SAL serve (chiesto da Alex il 20 ago); con il riquadro nella pratica si parlano senza unirle.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

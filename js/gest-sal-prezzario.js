@@ -31,6 +31,12 @@
      Impresa e artigiano leggono «acconto»; lo studio tecnico legge «SAL» e
      «stato di avanzamento» come prima. I PDF non passano di qui. */
   function _sa(studio,semplice){ return (typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?studio:semplice; }
+  /* 20 nov 2026 (collaudo SAL dello studio) — allo studio il SAL lo firma il
+     direttore dei lavori: CERTIFICA quello che l'impresa ha eseguito. I soldi
+     non li chiede lo studio e la fattura del SAL non la fa lo studio (la fa
+     l'impresa). Prima lo studio si trovava «Crea la fattura di questo acconto»
+     per 14.968 € di lavori sulla SUA partita IVA, e «Da chiedere adesso». */
+  function _salStudio(){ return typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista"; }
 
   function _salManca(err){
     const m=(err&&(err.message||err.details||""))||"";
@@ -88,9 +94,9 @@
         h+='<div class="spesa-row sal-el" data-action="sal-apri" data-id="'+esc(String(s.id))+'" style="cursor:pointer;align-items:flex-start">'
           +'<span><b>'+_sa('SAL','Acconto')+' n. '+esc(String(s.numero))+'</b>'+(s.stato==="bozza"?' · bozza':'')
           +  '<small class="sp-forn">'+fdate(s.data)
-          +    ' · fatto finora '+eur2(k.maturato)
-          +    (k.precedente?(' · già chiesto '+eur2(k.precedente)):'')
-          +    (k.ritenuta?(' · trattenuto '+eur2(k.ritenuta)):'')
+          +    _sa(' · eseguito finora ',' · fatto finora ')+eur2(k.maturato)
+          +    (k.precedente?(_sa(' · già liquidato ',' · già chiesto ')+eur2(k.precedente)):'')
+          +    (k.ritenuta?(_sa(' · ritenuta ',' · trattenuto ')+eur2(k.ritenuta)):'')
           +    (s.fattura_id?' · <b>già fatturato</b>':'')
           +  '</small></span>'
           +'<b>'+eur2(k.netto)+'</b>'
@@ -134,11 +140,15 @@
      non c'e' (o e' nel cestino) il SAL non si mostra proprio.
      ============================================================ */
   const SAL_VISTE=[{k:"tutti",lab:"Tutti"},{k:"da",lab:"Non fatturati"},{k:"fatt",lab:"Fatturati"}];
+  /* allo studio i SAL non si fatturano: si guardano bozze ed emessi */
+  const SAL_VISTE_STUDIO=[{k:"tutti",lab:"Tutti"},{k:"bozza",lab:"Bozze"},{k:"emesso",lab:"Emessi"}];
   let salTuttiCache=[], salTuttiComp={}, salTuttiTot={}, salTuttiCli={}, salFiltro="tutti";
 
   function salFiltra(L,k){
     if(k==="da")  return L.filter(s=>!s.fattura_id);
     if(k==="fatt")return L.filter(s=>!!s.fattura_id);
+    if(k==="bozza") return L.filter(s=>(s.stato||"bozza")!=="emesso");
+    if(k==="emesso")return L.filter(s=>s.stato==="emesso");
     return L;
   }
   /* due cifre sono «la stessa» se lo sono al centesimo: sono tutte e due
@@ -151,13 +161,13 @@
     const comp=salTuttiComp[String(s.computo_id)]||{};
     const k=salConti(salTuttiTot[String(s.id)],comp);
     const q=quando(s.data,{neutro:true});
-    const fatturato=!!s.fattura_id;
+    const fatturato=!!s.fattura_id&&!_salStudio();
     const bozza=(s.stato||"bozza")!=="emesso";
     const periodo=(s.periodo_dal||s.periodo_al)
       ? ("🗓 dal "+(s.periodo_dal?fdate(s.periodo_dal):"—")+" al "+(s.periodo_al?fdate(s.periodo_al):"—"))
       : "";
     return schedaJob({
-      tono: fatturato?"t-ok":"t-attesa",
+      tono: (fatturato||(_salStudio()&&!bozza))?"t-ok":"t-attesa",
       titolo: _sa("SAL","Acconto")+" n. "+esc(String(s.numero||"—"))+" — "+esc(comp.titolo||"(computo senza titolo)"),
       destra: '<span class="stato '+(fatturato?"fatto":(bozza?"da_fare":"in_corso"))+'">'
               +(fatturato?"Fatturato":(bozza?"Bozza":"Emesso"))+'</span>',
@@ -170,9 +180,9 @@
            «fatto finora» e il totale in grassetto sono la STESSA cifra:
            uno dei due non aggiunge niente. In quel caso sparisce.
            (Visto sullo schermo di Alessio: 231,25 € scritto due volte.) */
-        _salUguali(k.maturato,k.netto)?"":("🧱 fatto finora "+eur2(k.maturato)),
-        k.precedente?("↩ già chiesto "+eur2(k.precedente)):"",
-        k.ritenuta?("🔒 trattenuto "+eur2(k.ritenuta)+" ("+_pct(k.perc)+"%)"):"",
+        _salUguali(k.maturato,k.netto)?"":(_sa("🧱 eseguito finora ","🧱 fatto finora ")+eur2(k.maturato)),
+        k.precedente?(_sa("↩ già liquidato ","↩ già chiesto ")+eur2(k.precedente)):"",
+        k.ritenuta?(_sa("🔒 ritenuta ","🔒 trattenuto ")+eur2(k.ritenuta)+" ("+_pct(k.perc)+"%)"):"",
         '<b>'+eur2(k.netto)+'</b>',
         comp.tipo==="pubblico"?"🏛 lavori pubblici":""
       ],
@@ -189,9 +199,9 @@
   function salVoci(s){
     return [{lab:"✏ Apri",action:"sal-el-apri",data:{id:s.id}},
             {lab:"📄 PDF",action:"sal-pdf",data:{id:s.id}},
-            {lab:(s.fattura_id?"🧾 Rifai la fattura dell'acconto":"🧾 Crea la fattura dell'acconto"),
+            _salStudio()?null:{lab:(s.fattura_id?"🧾 Rifai la fattura dell'acconto":"🧾 Crea la fattura dell'acconto"),
              action:"sal-fattura",data:{id:s.id}},
-            {lab:"🗑 Elimina",action:"sal-del",data:{id:s.id},del:true}];
+            {lab:"🗑 Elimina",action:"sal-del",data:{id:s.id},del:true}].filter(Boolean);
   }
 
   async function renderSalTutti(){
@@ -241,13 +251,15 @@
 
     const cnt=$("#cnt-sal");if(cnt)cnt.textContent=salTuttiCache.length?String(salTuttiCache.length):"";
 
-    const conta={};SAL_VISTE.forEach(v=>conta[v.k]=salFiltra(salTuttiCache,v.k).length);
+    const _vd=_salStudio()?SAL_VISTE_STUDIO:SAL_VISTE;
+    if(!_vd.some(v=>v.k===salFiltro))salFiltro="tutti";
+    const conta={};_vd.forEach(v=>conta[v.k]=salFiltra(salTuttiCache,v.k).length);
     const L=salFiltra(salTuttiCache,salFiltro);
     const somma=L.reduce((a,s)=>a+salConti(salTuttiTot[String(s.id)],salTuttiComp[String(s.computo_id)]||{}).netto,0);
 
     renderTabella({
       id:"sal", box:"#sal-list",
-      viste:"#sal-viste", visteDef:SAL_VISTE, vista:salFiltro, conta:conta, azioneVista:"sal-filtro",
+      viste:"#sal-viste", visteDef:(_salStudio()?SAL_VISTE_STUDIO:SAL_VISTE), vista:salFiltro, conta:conta, azioneVista:"sal-filtro",
       vuoto:salTuttiCache.length
         ? tabVuoto(_sa("Nessuno stato di avanzamento con questo filtro","Nessun acconto con questo filtro"),"Prova a cambiare vista qui sopra.",
             _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',null)
@@ -298,12 +310,12 @@
     const C=Object.values(salTuttiComp||{});
     const ico=_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>';
     if(!C.length) return tabVuoto(_sa("Ancora nessuno stato di avanzamento","Ancora nessun acconto"),
-      _sa("Il SAL è un acconto a metà lavoro: conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno.","Conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno."),
+      _sa("Lo stato di avanzamento certifica i lavori eseguiti fin qui: su quella cifra l'impresa chiede l'acconto. Si fa dentro un computo, e tu non ne hai ancora nessuno.","Conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno."),
       ico,{t:"Vai ai computi",a:"sal-vai-computi"});
     C.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
     return '<div class="salv">'
       +'<div class="salv-tit">'+_sa('Ancora nessuno stato di avanzamento','Ancora nessun acconto')+'</div>'
-      +'<div class="salv-txt">'+_sa('Il SAL è un <b>acconto a metà lavoro</b>: conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.','Conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.')+'</div>'
+      +'<div class="salv-txt">'+_sa('Lo stato di avanzamento <b>certifica i lavori eseguiti</b> fin qui: su quella cifra l\'impresa chiede l\'acconto. Si fa dentro un computo: scegli quale.','Conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.')+'</div>'
       +'<div class="salv-lista">'
       +C.map(c=>'<div class="salv-r">'
           +'<span class="salv-nome">'+(c.numero?"N. "+esc(String(c.numero))+" — ":"")+esc(c.titolo||"Computo")+'</span>'
@@ -454,8 +466,12 @@
     const titoloCap=g=>_soloSenza?"":('<div class="sal-cap ti-orig" style="font-weight:700;font-size:15px;padding:12px 2px 4px;border-bottom:2px solid var(--bordo,#e6e9ee)">'
       +(g.cap?((g.cap.numero?esc(String(g.cap.numero))+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")):"Senza capitolo")+'</div>');
     const rigaVoce=v=>{
-      const fatto=salRigheCache[String(v.id)];
       const prima=salPrec[String(v.id)];
+      /* 20 nov 2026 (collaudo SAL dello studio) — un SAL NUOVO parte dalle
+         quantita' dell'ultimo. Le quantita' sono «dall'inizio»: con le caselle
+         vuote il SAL n. 2 si apriva a −14.968 € con l'avviso rosso, e una
+         lavorazione non toccata si salvava a 0 (il SAL veniva negativo). */
+      const fatto=(isNew&&salRigheCache[String(v.id)]==null&&prima!=null)?prima:salRigheCache[String(v.id)];
       return '<div class="sal-riga" data-voce="'+esc(String(v.id))+'" data-prezzo="'+esc(String(v.prezzo_unitario||0))+'"'
         +' data-sic="'+esc(String(v.oneri_sicurezza||0))+'"'+((v.capitolo_id&&capSic[String(v.capitolo_id)])?' data-capsic="1"':'')+' data-mano="'+esc(String(v.incidenza_manodopera||0))+'"'
         +' data-qta="'+esc(String(v.quantita||0))+'"'
@@ -481,14 +497,15 @@
         +  '<b class="sal-imp" style="margin-left:auto">'+eur2((+fatto||0)*(+v.prezzo_unitario||0))+'</b>'
         +'</div>'
         +'<div class="sal-avviso" style="display:none;color:var(--err,#c0392b);font-size:14px;margin-top:4px">'
-        +  'Hai contato più di quello che c\'era nel computo.</div>'
+        +  _sa('Contato più di quanto previsto nel computo.','Hai contato più di quello che c\'era nel computo.')+'</div>'
         +'</div>';
     };
 
     openSheetGrande(isNew?_sa("Nuovo stato di avanzamento","Nuovo acconto"):(_sa("SAL","Acconto")+" n. "+(s.numero||"")),
        '<div class="sh-cols"><div class="sh-col">'
-      +'<div class="sh-b"><div class="sh-tit">Quello che hai fatto</div>'
-      +  '<div class="sh-nota">In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non dall\'ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.</div>'
+      +'<div class="sh-b"><div class="sh-tit">'+_sa('Lavori eseguiti','Quello che hai fatto')+'</div>'
+      +  '<div class="sh-nota">'+_sa('In ogni casella scrivi <b>quanto è stato eseguito dall\'inizio dei lavori</b>, non dall\'ultimo SAL. Il gestionale toglie da solo quanto già liquidato.','In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non dall\'ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.')
+      +  (isNew&&Object.keys(salPrec).length?_sa(' Le caselle partono dal SAL di prima: cambia solo quello che è andato avanti.',' Le caselle partono dall\'acconto di prima: cambia solo quello che è andato avanti.'):'')+'</div>'
       +  '<div id="sal-voci">'+(salVociCache.length
           ? salGruppi.map(g=>titoloCap(g)+g.voci.map(rigaVoce).join("")).join("")
           : '<div class="lm-vuoto">Questo computo non ha ancora lavorazioni.</div>')+'</div>'
@@ -499,7 +516,7 @@
       /* il pulsante sta QUI e non in fondo alla finestra: nel piede ci sono
          gia' tre pulsanti e su un telefono da 390 px il quarto usciva fuori.
          Classe .quick-add, quella coi bordi che si vedono. */
-      +  (isNew?'':'<button type="button" class="quick-add" data-action="sal-fattura" data-id="'+esc(String(s.id))+'">→ Crea la fattura di questo acconto</button>')
+      +  ((isNew||_salStudio())?'':'<button type="button" class="quick-add" data-action="sal-fattura" data-id="'+esc(String(s.id))+'">→ Crea la fattura di questo acconto</button>')
       +  (s.fattura_id?'<div class="sh-nota">Da questo '+_sa('stato di avanzamento','acconto')+' hai <b>già creato una fattura</b>. Se ne fai un\'altra, stai chiedendo due volte gli stessi soldi.</div>':'')
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La scheda</div>'
@@ -514,7 +531,7 @@
       +  '<div class="field"><label>Ritenuta di garanzia (%)</label>'
       +    '<input type="text" inputmode="decimal" id="sal-rit"'+_noAuto()
       +    ' value="'+(s.ritenuta_perc!=null?String(s.ritenuta_perc).replace(".",","):"")+'" placeholder="0" style="max-width:160px"></div>'
-      +  '<div class="sh-nota">È la fetta di ogni acconto che il committente tiene da parte e ti ridà a fine lavori, a collaudo fatto. Nelle gare pubbliche è lo <b>0,50%</b>. Sui lavori privati, se non l\'avete pattuita, metti 0.</div>'
+      +  '<div class="sh-nota">'+_sa('È la parte di ogni acconto che il committente trattiene all\'impresa e le restituisce a fine lavori, a collaudo fatto. Nelle gare pubbliche è lo <b>0,50%</b>. Sui lavori privati, se non è pattuita, metti 0.','È la fetta di ogni acconto che il committente tiene da parte e ti ridà a fine lavori, a collaudo fatto. Nelle gare pubbliche è lo <b>0,50%</b>. Sui lavori privati, se non l\'avete pattuita, metti 0.')+'</div>'
       +  '<div class="field"><div class="seg" id="sal-stato">'
       +    '<button data-v="bozza"'+((s.stato||"bozza")==="bozza"?' class="on"':'')+'>Bozza</button>'
       +    '<button data-v="emesso"'+(s.stato==="emesso"?' class="on"':'')+'>Emesso</button>'
@@ -580,16 +597,16 @@
     const _og=compRiepilogoDa(lordo,sic,mano,comp);
     box.innerHTML=
        (_og.ribasso
-         ? '<div class="qe-r"><span>Quello che hai fatto, ai prezzi del computo</span><b>'+eur2(_og.lordo)+'</b></div>'
+         ? '<div class="qe-r"><span>'+_sa('Lavori eseguiti, ai prezzi del computo','Quello che hai fatto, ai prezzi del computo')+'</span><b>'+eur2(_og.lordo)+'</b></div>'
           +'<div class="qe-r"><span>Ribasso del computo '+String(_og.perc).replace(".",",")+'%'+(_og.sicurezza?' (non sui costi della sicurezza)':'')+'</span><b>−'+eur2(_og.ribasso)+'</b></div>'
          : '')
-      +'<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
-      +'<div class="qe-r"><span>'+_sa('Già chiesto coi SAL prima','Già chiesto con gli acconti prima')+'</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
+      +'<div class="qe-r"><span>'+_sa('Eseguito dall\'inizio','Fatto dall\'inizio')+'</span><b>'+eur2(k.maturato)+'</b></div>'
+      +'<div class="qe-r"><span>'+_sa('Già liquidato coi SAL prima','Già chiesto con gli acconti prima')+'</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
       +'<div class="qe-r"><span>'+_sa('Questo stato di avanzamento','Questo acconto')+'</span><b>'+eur2(k.lordo)+'</b></div>'
       +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>'+(k.ritenuta>0?'−'+eur2(k.ritenuta):eur2(-k.ritenuta))+'</b></div>':'')
-      +'<div class="qe-r qe-r--tot"><span><b>Da chiedere adesso</b></span><b>'+eur2(k.netto)+'</b></div>'
+      +'<div class="qe-r qe-r--tot"><span><b>'+_sa('Netto da pagare all\'impresa','Da chiedere adesso')+'</b></span><b>'+eur2(k.netto)+'</b></div>'
       +(oltre?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+(oltre===1?'C\'è <b>1</b> lavorazione contata':'Ci sono <b>'+oltre+'</b> lavorazioni contate')+' oltre il computo. Non è vietato — i lavori cambiano — ma controlla che sia voluto.</div>':'')
-      +(k.lordo<0?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+_sa('Questo SAL viene <b>negativo</b>: hai contato meno del SAL precedente.','Questo acconto viene <b>negativo</b>: hai contato meno dell\'acconto prima.')+' Ricorda che le quantità sono quelle fatte <b>dall\'inizio</b>.</div>':'');
+      +(k.lordo<0?'<div class="sh-nota" style="color:var(--err,#c0392b)">'+_sa('Questo SAL viene <b>negativo</b>: le quantità sono meno del SAL precedente.','Questo acconto viene <b>negativo</b>: hai contato meno dell\'acconto prima.')+' Ricorda che le quantità sono quelle fatte <b>dall\'inizio</b>.</div>':'');
   }
 
   /* legge un numero scritto a mano (virgola o punto), senza passare dal DOM */
@@ -672,11 +689,16 @@
   async function salElimina(id){
     /* 13 nov 2026 (quarto giro) — la domanda dice QUALE stato di avanzamento */
     const _sl=salCache.find(x=>String(x.id)===String(id))||salTuttiCache.find(x=>String(x.id)===String(id));
-    if(!(await window.chiediVia(_sa("lo stato di avanzamento","l'acconto")+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi.")))return;
+    /* 20 nov 2026 (collaudo SAL dello studio) — buttando un SAL che ha altri
+       SAL DOPO, quello dopo si ricalcola senza: il n. 2 passava in silenzio da
+       13.903 a 28.797 € (contava tutto dall'inizio). Adesso la domanda lo dice. */
+    const _fra=(salDaElenco?salTuttiCache:salCache).filter(x=>_sl&&String(x.computo_id||_sl.computo_id)===String(_sl.computo_id||x.computo_id)&&(+x.numero||0)>(+_sl.numero||0)).map(x=>x.numero).sort((a,b)=>a-b);
+    const _dopo=_fra.length?(" Attenzione: "+(_fra.length===1?_sa("il SAL n. ","l'acconto n. ")+_fra[0]+" viene dopo e si ricalcola senza questo (conterà anche la sua parte).":_sa("i SAL n. ","gli acconti n. ")+_fra.join(", ")+" vengono dopo e si ricalcolano senza questo (conteranno anche la sua parte).")):"";
+    if(!(await window.chiediVia(_sa("lo stato di avanzamento","l'acconto")+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi."+_dopo)))return;
     const res=await sb.from("gest_sal").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-    toast("Nel cestino ✔");
+    toast(_sa("SAL nel cestino: lo riprendi da lì","Acconto nel cestino: lo riprendi da lì"));
     /* ⚠️ dall'elenco unico #co-sal non esiste: renderSalList uscirebbe subito
        e la riga appena buttata resterebbe li' a schermo, come se non fosse
        successo niente. */
@@ -780,6 +802,7 @@
 
   async function salAFattura(id){
     if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    if(_salStudio()){toast("La fattura del SAL la fa l'impresa: lo studio certifica i lavori, non li fattura.");return;}
     if(salModifiche(id)){
       toast("Hai delle modifiche non salvate: premi prima Salva, poi crea la fattura. La fattura nasce da quello che è salvato.");
       return;
