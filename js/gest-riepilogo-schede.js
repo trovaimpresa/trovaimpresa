@@ -324,7 +324,7 @@
          +       ' title="'+TIT[stato]+'"'
          +       ' aria-label="'+TIT[stato]+'"></i></div>'
          +   '<div class="rc-n'+(/^0(,00)?(\s|\u00a0)*€?$/.test(String(o.n))?' zero-grigio':'')+'">'+esc(String(o.n))+'</div>'
-         +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
+         +   '<div class="rc-l">'+esc(o.lab||"")+(o.labNota?' · <b class="rc-nota">'+esc(o.labNota)+'</b>':'')+'</div>'   /* 20 nov 2026: «· 1 pratica senza nessuno» */
          +   corpoOk
          + '</div>';
   }

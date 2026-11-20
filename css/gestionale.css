@@ -6438,3 +6438,9 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #sheet .spesa-row.sal-el > b{ margin-right:auto; align-self:center; }
   #sheet .spesa-row.sal-el > .quick-add{ width:auto; flex:0 0 auto; }
 }
+
+/* 20 nov 2026 (collaudo Agenda dello studio) — «· 1 pratica senza nessuno»
+   nella scheda Agenda dell'Assistente (stesso ambra di .rc-motivo.attesa) e
+   il link «Apri le Giornate di …» sotto le ore scritte di «Ore fatte». */
+.rie-card .rc-nota{color:#92400E;font-weight:700}
+.ore-g .ore-link{background:none;border:0;padding:11px 0;min-height:44px;font:inherit;font-weight:700;color:var(--blu,#0066ff);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}

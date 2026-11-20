@@ -24,12 +24,14 @@ const SQG_IC = {
   giorni: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
   msg: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   scheda: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  prat: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14h6"/></svg>',
   invia: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>'
 };
 
 let sqgMese = "";          /* "AAAA-MM" che si vede sulle schede */
 let sqgDati = {};          /* operatore_id -> {giorni:{data:ore}, ore, lavori:Set} */
 let sqgPers = null;        /* la persona aperta: {id,nome,mese} */
+let sqgPrat = {};          /* 20 nov 2026 — operatore_id -> lavori/pratiche DA FARE del reparto */
 
 function sqgMeseNome(m, corto) {
   const p = String(m).split("-"); const n = SQG_MESI[(+p[1] || 1) - 1];
@@ -66,6 +68,20 @@ async function sqgLeggi(m) {
     g.righe.push(x);
   });
   return out;
+}
+
+/* 20 nov 2026 (collaudo Agenda dello studio, si' di Alex) — quante pratiche
+   (o lavori) DA FARE ha ogni persona nel reparto: e' lo stesso conto della
+   tendina dell'Agenda con «Da fare». Se la lettura cade, il tasto non c'e'. */
+async function sqgLeggiPrat() {
+  sqgPrat = {};
+  try {
+    if (!sb || !sbUid || typeof curMestiere !== "function") return;
+    if (typeof tabNascosto === "function" && tabNascosto("agenda")) return;
+    const r = await sb.from("gest_lavori").select("operatore_id,stato").eq("user_id", sbUid).eq("mestiere_id", curMestiere());
+    if (r.error) return;
+    (r.data || []).forEach(function (l) { if (l.operatore_id && l.stato !== "fatto") { const k = String(l.operatore_id); sqgPrat[k] = (sqgPrat[k] || 0) + 1; } });
+  } catch (e) {}
 }
 
 /* la striscia: un quadretto per ogni giorno del mese */
@@ -114,6 +130,8 @@ function sqgCard(o) {
     + (o.nuovi ? '<div class="sqg-avv rosso">' + o.nuovi + (o.nuovi === 1 ? " messaggio nuovo" : " messaggi nuovi") + '</div>' : "")
     + '<div class="sqg-btn">'
     + '<button type="button" class="pri" data-sqg="apri" data-id="' + id + '" data-nome="' + nome + '">' + SQG_IC.giorni + 'Giornate</button>'
+    /* 20 nov 2026 — «Pratiche (3)»: apre l'Agenda solo con le sue */
+    + (sqgPrat[String(o.id)] ? '<button type="button" data-sqg="pratiche" data-id="' + id + '">' + SQG_IC.prat + (ruoloUtente === 'professionista' ? 'Pratiche' : 'Lavori') + ' (' + sqgPrat[String(o.id)] + ')</button>' : '')
     + (io ? '' : '<button type="button" data-action="chat-squadra" data-id="' + id + '" data-nome="' + nome + '">' + SQG_IC.msg + 'Messaggi</button>')
     + '<button type="button" data-action="sq-edit" data-id="' + id + '">' + SQG_IC.scheda + 'Scheda</button>'
     /* 18 nov 2026 — «Mandagli l'app» solo se l'invito e' ancora buono; se e'
@@ -129,7 +147,7 @@ async function sqgDisegna(L, box, vuoto) {
   box.style.display = "block";
   if (!L.length) { box.innerHTML = vuoto || ""; return; }
   if (!sqgMese) sqgMese = todayStr().slice(0, 7);
-  const dati = await sqgLeggi(sqgMese);
+  const [dati] = await Promise.all([sqgLeggi(sqgMese), sqgLeggiPrat()]);
   sqgDati = dati || {};
   const tot = L.reduce(function (s, o) { const d = sqgDati[String(o.id)]; return s + (d ? Object.keys(d.giorni).length : 0); }, 0);
   box.innerHTML = '<div class="sqg-testa"><div class="sqg-nav"><button type="button" data-sqg="mese-prima" aria-label="Mese prima">‹</button><b>' + esc(sqgMeseNome(sqgMese)) + '</b><button type="button" data-sqg="mese-dopo" aria-label="Mese dopo">›</button></div>'
@@ -194,6 +212,15 @@ document.addEventListener("click", function (e) {
   if (a === "apri") return sqgApri(b.dataset.id, b.dataset.nome);
   if (a === "mese-prima" || a === "mese-dopo") { sqgMese = sqgSposta(sqgMese || todayStr().slice(0, 7), a === "mese-prima" ? -1 : 1); if (typeof renderDip === "function") renderDip(); return; }
   if (a === "p-prima" || a === "p-dopo") { if (!sqgPers) return; sqgPers.mese = sqgSposta(sqgPers.mese, a === "p-prima" ? -1 : 1); return sqgPersDisegna(); }
+  if (a === "pratiche") {
+    /* l'Agenda filtrata su questa persona, linguetta «Pratiche», «Da fare» */
+    try { agFilter.op = b.dataset.id; agFilter.stato = "aperti"; if (typeof segmOn === "function") { segmOn("#ag-stato", "aperti"); segmOn("#ag-vista", "lavori"); } } catch (x) {}
+    const pl = document.getElementById("ag-parte-lavori"), po = document.getElementById("ag-parte-ore");
+    if (pl) pl.style.display = ""; if (po) po.style.display = "none";
+    const v = document.querySelector('nav.tabs button[data-tab="agenda"]'); if (v) v.click();
+    if (typeof renderAgenda === "function") renderAgenda();
+    return;
+  }
   if (a === "vai-giornate") {
     if (typeof closeSheet === "function") closeSheet();
     const v = document.querySelector('nav.tabs button[data-tab="giornate"]'); if (v) v.click();

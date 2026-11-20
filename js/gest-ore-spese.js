@@ -99,7 +99,7 @@
            del mese finiva nel mese PRIMA, come giornata rimasta aperta. Il
            mese adesso e' quello dell'orologio di qui. */
         .gte("quando", new Date(q.a, q.m, 1).toISOString()).lt("quando", new Date(q.a, q.m+1, 1).toISOString()),
-      sb.from("gest_ore").select("ore,operatore_id,data")
+      sb.from("gest_ore").select("ore,operatore_id,data,lavoro_id,nota")
         .eq("user_id", sbUid).is("eliminato_il", null)
         .gte("data", dal).lte("data", al)
     ]);
@@ -138,6 +138,19 @@
        buttavano via, e il totale «Ore scritte a mano» veniva piu' basso di
        quello vero. Adesso hanno la loro riga, «Ore senza nome». */
     ORE.forEach(r => { const k = r.operatore_id || SENZA; scritte[k] = (scritte[k]||0) + (+r.ore||0); });
+    /* 20 nov 2026 (collaudo Agenda dello studio, si' di Alex) — le ore scritte
+       si aprono giorno per giorno, col nome della pratica (o del lavoro) e
+       «cosa ha fatto». Prima «Apri ↓» c'era solo per le timbrature. */
+    const scrRighe = {};
+    ORE.forEach(r => { const k = r.operatore_id || SENZA; (scrRighe[k] = scrRighe[k] || []).push(r); });
+    const LAVN = {};
+    const _lavIds = Array.from(new Set(ORE.map(r => r.lavoro_id).filter(Boolean)));
+    if(_lavIds.length){
+      try{
+        const rL = await (typeof sb.raw === "function" ? sb.raw("gest_lavori") : sb.from("gest_lavori")).select("id,descrizione,eliminato_il").eq("user_id", sbUid).in("id", _lavIds);
+        ((rL && rL.data) || []).forEach(l => { LAVN[l.id] = (l.descrizione || "—") + (l.eliminato_il ? " (nel cestino)" : ""); });
+      }catch(e){}
+    }
 
     /* chi far vedere: chi ha timbrato, chi ha ore scritte, e tutta la squadra */
     const ids = Array.from(new Set(OPS.map(o=>o.id).concat(Object.keys(perPersona)).concat(Object.keys(scritte))));
@@ -152,8 +165,9 @@
         det.push({ giorno:g, ms:c.ms, pezzi:c.pezzi, buco:c.buchi[0] || null });
       });
       const scrMs = (scritte[id] || 0) * 3600000;
+      const scr = (scrRighe[id] || []).slice().sort((a,b) => String(b.data||"").localeCompare(String(a.data||"")));
       return { id:id, nome:NOMI[id] || "Persona non in elenco", ms:ms, giorni:nGiorni,
-               scrMs:scrMs, det:det, buchi:buchi, niente:(ms === 0 && scrMs === 0 && buchi.length === 0) };
+               scrMs:scrMs, scr:scr, det:det, buchi:buchi, niente:(ms === 0 && scrMs === 0 && buchi.length === 0) };
     }).sort((a,b) => b.ms - a.ms || a.nome.localeCompare(b.nome));
 
     ORE_ULTIMO = { mese: MESI_L[q.m] + " " + q.a, pers: PERS };
@@ -219,9 +233,22 @@
         + '<span class="c3 ore-forte">' + (p.ms ? _oreHM(p.ms) : "—") + '</span>'
         + '<span class="c4">' + (p.scrMs ? _oreHM(p.scrMs) : "—") + '</span>'
         + '<span class="c5">' + diff + '</span>'
-        + '<span class="c6">' + (p.det.length ? (aperto ? "Chiudi ↑" : "Apri ↓") : "") + '</span>'
+        + '<span class="c6">' + (p.det.length || p.scr.length ? (aperto ? "Chiudi ↑" : "Apri ↓") : "") + '</span>'
         + '</div>';
 
+      if(aperto && p.scr.length){
+        const _pro = ruoloUtente === 'professionista';
+        H += '<div class="ore-giorni">';
+        p.scr.forEach(r => {
+          const cosa = [r.lavoro_id ? (LAVN[r.lavoro_id] || (_pro ? "pratica nel cestino" : "lavoro nel cestino")) : "", String(r.nota || "").trim()].filter(Boolean).join(" · ");
+          H += '<div class="ore-g"><span class="d">' + _oreGiornoIt(r.data) + '</span>'
+            + '<span class="t">' + esc(cosa || "Ore scritte a mano") + '</span>'
+            + '<span class="h">' + _oreHM((+r.ore || 0) * 3600000) + '</span></div>';
+        });
+        if(p.id !== SENZA && !String(p.nome).includes("(nel cestino)"))
+          H += '<div class="ore-g"><span class="d"></span><span class="t"><button type="button" class="ore-link" data-sqg="apri" data-id="' + esc(p.id) + '" data-nome="' + esc(p.nome) + '">Apri le Giornate di ' + esc(p.nome) + ' →</button></span><span class="h"></span></div>';
+        H += '</div>';
+      }
       if(aperto && p.det.length){
         H += '<div class="ore-giorni">';
         p.det.forEach(d => {

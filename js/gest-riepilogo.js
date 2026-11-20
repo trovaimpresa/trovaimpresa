@@ -499,6 +499,9 @@
        chi c'e' (opeMap); i suoi lavori sono «senza nessuno», come nell'Agenda. */
     const perOpe={};aperti.forEach(l=>{if(l.operatore_id&&(l.operatore_id in opeMap))perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
     const opeOrd=Object.keys(perOpe).sort((a,b)=>perOpe[b]-perOpe[a]);
+    /* 20 nov 2026 (si' di Alex) — quanti lavori/pratiche aperti non hanno nessuno
+       (anche quelli di una persona nel Cestino). Si dice solo se c'e' una squadra. */
+    const senzaNessuno=OPE.length?aperti.filter(l=>!l.operatore_id||!(l.operatore_id in opeMap)).length:0;
     /* ===== 12 agosto 2026 — MEZZI E STRUMENTI SONO DUE COSE DIVERSE =====
        Stanno nella stessa tabella, distinti dalla colonna "categoria", e qui
        il Riepilogo li contava insieme: la scheda diceva "2 mezzi in azienda",
@@ -841,8 +844,9 @@
     }));
 
     if(!tabNascosto("agenda"))C.push(rieCard({
-      tab:"agenda", titolo:"Agenda", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
+      tab:"agenda", titolo:"Agenda", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id)||senzaNessuno>0,
       lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
+      labNota:senzaNessuno?(senzaNessuno+(ruoloUtente==='professionista'?(senzaNessuno===1?" pratica senza nessuno":" pratiche senza nessuno"):(senzaNessuno===1?" lavoro senza nessuno":" lavori senza nessuno"))):"",
       vuoto:"Nessun lavoro assegnato",
       righe: opeOrd.slice(0,2).map(k=>({
         t:opeMap[k]||"Operatore", v:perOpe[k]+(perOpe[k]===1?" lavoro":" lavori")}))

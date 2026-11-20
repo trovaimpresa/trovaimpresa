@@ -4017,10 +4017,11 @@ Sistemato:
 
 Banco `tools/banco-gestionale.js app`: ZERO difetti. Versioni `?v=20nov-ag` (riepilogo, elimina-reparto, ore-spese, cestino).
 
-Funzioni nuove proposte con le foto (computer e telefono), in attesa del sì di Alex:
-- «Pratiche (3)» sulla scheda del collaboratore → apre l'Agenda filtrata su di lui.
-- «Ore fatte»: «Apri ↓» anche sulle ore scritte (giorno, pratica, cosa ha fatto) + «Apri le Giornate di …».
-- Assistente, scheda Agenda: «· 1 pratica senza nessuno».
+Funzioni nuove (foto prima, computer e telefono; «si si e si pubblica» di Alex) — valgono per tutte le facce (impresa: «Lavori (N)», «lavoro senza nessuno»):
+- **«Pratiche (N)» sulla scheda del collaboratore** (`js/gest-squadra-giornate.js`: `sqgLeggiPrat` conta le DA FARE del reparto, tasto `data-sqg="pratiche"` → `agFilter.op`, «Da fare», linguetta Pratiche, poi la voce Agenda). Non c'è se la persona non ha niente da fare o se l'Agenda è nascosta (artigiano).
+- **«Ore fatte»: «Apri ↓» anche sulle ore scritte** (`renderOre`: `gest_ore` legge anche `lavoro_id,nota`; righe giorno · pratica · cosa ha fatto · ore, ultime in cima; sotto «Apri le Giornate di …» = `data-sqg="apri"`, stessa finestra della scheda Collaboratori). Pratica nel Cestino → «(nel cestino)».
+- **Assistente, scheda Agenda: «· N pratiche senza nessuno»** (`labNota` in `rieCard`, classe `.rc-nota` ambra #92400E come `.rc-motivo.attesa`; conta anche chi è nel Cestino; solo se c'è almeno una persona). La scheda compare anche se nessuna pratica è assegnata ma ce n'è una senza nessuno.
+Versioni `?v=20nov-ag` anche per `gestionale.css`, `gest-squadra-giornate.js`, `gest-riepilogo-schede.js`. Banco: ZERO difetti.
 
 ⬜ Non provato: la tendina col titolare («Alex (io)» nasce solo se gli scrivi ore); l'Agenda vista dall'app del collaboratore.
 
@@ -4040,10 +4041,10 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Pratiche ↔ app del collaboratore: ✔ «Pratiche di adesso», messaggi sulla pratica.
 - Si può unire: Strumenti resta voce sola (i Mezzi allo studio non ci sono).
 - Agenda ↔ Pratiche: ✔ «Apri» apre la pratica e «Indietro» torna all'Agenda; assegnare il collaboratore dalla pratica aggiorna la tendina.
-- Agenda ↔ Collaboratori: ✗ dalla scheda della persona non si arriva alle sue pratiche (proposto «Pratiche (N)»); persona nel Cestino → ora le sue pratiche stanno in «Nessuno assegnato» (20 nov).
-- Agenda ↔ Assistente: ✔ scheda «Agenda» con i numeri uguali (dal 20 nov non conta chi è nel Cestino). — Non dice le pratiche senza nessuno (proposto).
+- Agenda ↔ Collaboratori: ✔ dal 20 nov «Pratiche (N)» sulla scheda apre l'Agenda filtrata; persona nel Cestino → ora le sue pratiche stanno in «Nessuno assegnato» (20 nov).
+- Agenda ↔ Assistente: ✔ scheda «Agenda» con i numeri uguali (dal 20 nov non conta chi è nel Cestino). dal 20 nov dice anche «N pratiche senza nessuno».
 - Agenda ↔ Calendario: ✔ le stesse pratiche con la data. — Il Calendario non dice chi ci va.
-- Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✗ le ore scritte non si aprono per pratica (proposto «Apri ↓» + link a «Giornate di …»).
+- Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✔ dal 20 nov le ore scritte si aprono pratica per pratica, con «Apri le Giornate di …».
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
 - Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
