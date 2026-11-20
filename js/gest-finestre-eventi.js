@@ -518,7 +518,7 @@
        TUTTE quelle lunghe del gestionale: le altre (scegli un lavoro, scegli
        un preventivo, il tipo di fattura) sono tre righe in croce e a tutto
        schermo diventerebbero un lenzuolo bianco. */
-    if(s.querySelector(".sh-cols,.copag,.cp-riga")) s.classList.add("sh-lunga");
+    if(s.querySelector(".sh-cols,.copag,.cp-riga,.grp-riep")) s.classList.add("sh-lunga");   /* 20 nov 2026: + il Riepilogo delle Giornate */
     const _b=s.querySelector(".sh-body");
     if(_b){
       /* Le emoji diventano icone SVG subito dopo l'apertura: il contenuto cambia

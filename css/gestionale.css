@@ -5848,8 +5848,19 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .gx-foto{ display:flex; flex-direction:column; align-items:center; gap:2px; }
 .gx-foto a{ display:block; width:100%; }
 .gx-griglia img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; border:1px solid var(--bordo,#e2e8f0); display:block; }
+/* 20 nov 2026 — il Riepilogo del mese (giorRiepilogo in js/gest-giornate.js): i totali blu anche nella finestra */
+.grp-riep .gx-tot{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:0 0 16px; }
+.grp-riep .gx-tot div{ background:#0a2a4d; border-radius:12px; padding:12px 16px; }
+.grp-riep .gx-tot b{ display:block; font-size:24px; color:#fff; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.grp-riep .gx-tot span{ font-size:16px; color:#dbe6f3; }
+.grp-riep .gx-riga b{ font-size:18px; }
+.grp-riep .grp-d{ font-weight:800; font-size:17px; color:#0a2a4d; text-transform:capitalize; margin-bottom:4px; }
+.grp-riep .grp-w{ font-weight:700; }
+.grp-riep .grp-c{ font-size:16px; color:#475569; margin-bottom:6px; }
 @media(max-width:760px){
   #giornate .gx-btn{ grid-template-columns:1fr 1fr; }
+  .grp-riep .gx-tot{ grid-template-columns:1fr 1fr; }
+  .grp-riep .gx-tot b{ font-size:19px; }
   #giornate .gx-tot{ grid-template-columns:1fr 1fr; }
   #giornate .gx-tot b{ font-size:19px; }
   #giornate .gx-tot div{ padding:12px 12px; }

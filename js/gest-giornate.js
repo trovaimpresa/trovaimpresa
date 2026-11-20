@@ -461,7 +461,7 @@ function giorDisegna(msg){
 
   h+=`<div class="gb"><h4>Il mese</h4>`;
   /* 7 nov 2026: il PDF del mese si offre solo se nel mese c'e' qualcosa */
-  { const bp=document.querySelector('[data-gior="pdf"]'); if(bp) bp.style.display=date.length?"":"none"; }
+  document.querySelectorAll('[data-gior="pdf"],[data-gior="riep"]').forEach(bp=>{ bp.style.display=date.length?"":"none"; });
   if(!date.length) h+=`<div class="gvuoto">Nessuna giornata in ${esc(_gMeseNome(giorMese))}.</div>`;
   if(date.length&&typeof gxHtmlTotali==="function") h+=gxHtmlTotali();
   date.forEach(d=>{
@@ -1109,8 +1109,67 @@ async function giorPdf(){
   tabella("2. Giorni per cantiere",["Cantiere","Giorni"],Object.entries(luoghi).map(([l,n])=>[l,String(n)]),[140,40]);
   tabella("3. Giorno per giorno",["Giorno","Cantiere / lavoro","Chi ha lavorato"],
     giorRighe.map(g=>[_gData(g.data),_gNomeLav(giorLavoro(g.lavoro_id))+(g.cosa?" - "+g.cosa:""),[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))].join(", ")]),[32,88,60]);
+  /* 20 nov 2026 (chiesto da Alex): spese, benzina, fatture e bolle anche nel PDF, coi totali — come nel Riepilogo */
+  const q=giorQuarta();
+  if(q.righe.length){
+    const E=n=>_gEuro(n).replace(/\u00a0/g," ");
+    tabella("4. Spese, benzina, fatture e bolle",["Giorno","Tipo","Cosa","Euro"],q.righe.map(r=>[r.giorno,r.tipo,r.cosa,r.euro?E(r.euro):""]),[30,40,82,28]);
+    const t=q.tot, tr=[];
+    if(t.spese) tr.push(["Spese",E(t.spese)]); if(t.benz) tr.push(["Benzina",E(t.benz)]);
+    if(t.km) tr.push(["Chilometri",Math.round(t.km).toLocaleString("it-IT")+" km"]); if(t.fatt) tr.push(["Fatture e bolle",E(t.fatt)]);
+    if(tr.length) tabella("Totali del mese",["Voce","Totale"],tr,[90,90]);
+  }
   doc.save("Giornate di lavoro - "+_gMeseNome(giorMese)+".pdf");
 }
+
+/* ---------------------------------------------------------------------
+   20 nov 2026 — LA PARTE 4: spese, benzina, fatture e bolle del mese.
+   Le righe sono quelle che legge gest-giornate-extra.js (gxDati): un posto
+   solo. La usano tutti e due, il PDF e il Riepilogo a schermo.
+   --------------------------------------------------------------------- */
+function giorQuarta(){
+  const D=(typeof gxDati!=="undefined"&&gxDati)||{spese:[],rif:[],fatt:[]};
+  const giorno=r=>(typeof gxGiorno==="function"?gxGiorno(r):r.data)||"";
+  const lav=id=>{ const l=giorLavoro(id); return l?_gNomeLav(l):""; };
+  const righe=[];
+  (D.spese||[]).forEach(r=>righe.push({d:giorno(r),tipo:"Spesa",cosa:[r.descrizione||"Spesa",lav(r.lavoro_id)].filter(Boolean).join(" - "),euro:+r.importo||0}));
+  (D.rif||[]).forEach(r=>righe.push({d:r.data||"",tipo:"Benzina e km",cosa:[typeof gxNomeMezzo==="function"?gxNomeMezzo(r.mezzo_id):"",r.km?Math.round(+r.km).toLocaleString("it-IT")+" km":"",r.distributore||""].filter(Boolean).join(" - ")||"Benzina",euro:+r.importo||0}));
+  (D.fatt||[]).forEach(r=>righe.push({d:r.data||"",tipo:"Fattura o bolla",cosa:[r.numero?"n. "+r.numero:"",lav(r.lavoro_id)].filter(Boolean).join(" - ")||"Fattura o bolla",euro:+r.importo||0}));
+  righe.sort((a,b)=>a.d.localeCompare(b.d));
+  righe.forEach(r=>{ r.giorno=r.d?_gData(r.d):""; });
+  const somma=a=>(a||[]).reduce((s,x)=>s+(+x.importo||0),0);
+  return {righe,tot:{spese:somma(D.spese),benz:somma(D.rif),km:(D.rif||[]).reduce((s,x)=>s+(+x.km||0),0),fatt:somma(D.fatt)}};
+}
+
+/* ---------------------------------------------------------------------
+   20 nov 2026 — IL RIEPILOGO DEL MESE A SCHERMO (chiesto da Alex).
+   «Vedere le giornate senza dover scaricare il PDF»: le stesse parti del
+   PDF, nella finestra grande, e in fondo «Scarica il PDF» se serve.
+   --------------------------------------------------------------------- */
+function giorRiepilogo(){
+  const {per,luoghi}=giorTotali(giorRighe);
+  const riga=(a,b)=>'<div class="gx-riga"><span class="t">'+esc(a)+'</span><b>'+esc(b)+'</b></div>';
+  const sez=(t,c)=>'<div class="sh-b sh-centro"><div class="sh-tit">'+esc(t)+'</div>'+c+'</div>';
+  const oreTxt=t=>t.g+(t.g===1?" giorno":" giorni")+(t.o&&t.o!==t.g*GIOR_ORE_GIORNO?" ("+String(Math.round(t.o*10)/10).replace(".",",")+" ore)":"");
+  const ord=[...giorRighe].sort((a,b)=>a.data.localeCompare(b.data));
+  const date=[...new Set(ord.map(g=>g.data))];
+  let h=sez("1. Giorni per lavoratore",'<div class="gx-lista">'+Object.entries(per).sort((a,b)=>b[1].g-a[1].g||a[0].localeCompare(b[0])).map(([n,t])=>riga(n,oreTxt(t))).join("")+'</div>')
+    +sez("2. Giorni per cantiere",'<div class="gx-lista">'+Object.entries(luoghi).sort((a,b)=>b[1]-a[1]).map(([l,n])=>riga(l,n+(n===1?" giorno":" giorni"))).join("")+'</div>')
+    +sez("3. Giorno per giorno",'<div class="gx-lista">'+date.map(d=>'<div class="gx-riga grp-g"><div class="t"><div class="grp-d">'+esc(_gData(d))+'</div>'
+      +ord.filter(g=>g.data===d).map(g=>'<div class="grp-w">'+esc([...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))].join(", "))+'</div><div class="grp-c">'+esc(_gNomeLav(giorLavoro(g.lavoro_id))+(g.cosa?" — "+g.cosa:""))+'</div>').join("")
+      +'</div></div>').join("")+'</div>');
+  const q=giorQuarta();
+  if(q.righe.length){
+    h+=sez("4. Spese, benzina, fatture e bolle",(typeof gxHtmlTotali==="function"?gxHtmlTotali():"")
+      +'<div class="gx-lista">'+q.righe.map(r=>'<div class="gx-riga"><div class="t"><div class="grp-w">'+esc(r.cosa)+'</div><div class="grp-c">'+esc(r.giorno+" · "+r.tipo)+'</div></div>'+(r.euro?'<b>'+esc(_gEuro(r.euro))+'</b>':'')+'</div>').join("")+'</div>');
+  }
+  openSheetGrande("Riepilogo di "+esc(_gMeseNome(giorMese)),'<div class="grp-riep">'+h+'</div>',
+    '<button class="btn b-cancel" data-action="close">Chiudi</button><button class="btn-primary b-save" data-gior-riep="pdf">Scarica il PDF</button>');
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest('[data-gior-riep="pdf"]'); if(!b) return;
+  giorPdf();
+});
 
 /* ---------------------------------------------------------------------
    I CLIC
@@ -1186,6 +1245,7 @@ document.addEventListener("click",async e=>{
   if(a==="cdl-salva"){ b.disabled=true; await giorCdlSalva(); b.disabled=false; return; }
   if(a==="cdl-prova"){ b.disabled=true; await giorCdlProva(); b.disabled=false; return; }
   if(a==="pdf") return giorPdf();
+  if(a==="riep") return giorRiepilogo();
   if(a==="del"){ giorConferma=b.dataset.k; giorModifica=null; giorDisegna(); return; }
   if(a==="del-no"){ giorConferma=null; giorDisegna(); return; }
   if(a==="del-si"){ b.disabled=true; await giorCancella(b.dataset.k); return; }
