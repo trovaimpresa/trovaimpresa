@@ -388,6 +388,13 @@ exports.handler = async function(event) {
   </tr></table>
 </td></tr></table></td></tr>
 
+<tr><td class="pad" style="padding:12px 20px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:#e8f1fe;border:2px solid #1877f2;border-radius:16px;padding:16px 18px">
+  <div style="font-size:19px;font-weight:800;color:#1877f2;line-height:1.2">Ti trovano anche su Facebook</div>
+  <div style="font-size:15px;line-height:1.5;color:#0a2a4d;margin-top:6px">Quando la tua scheda è completa, ti presentiamo sulla pagina Facebook <b>Trova impresa</b>, gratis.</div>
+  <div style="font-size:15px;line-height:1.5;color:#0a2a4d;margin-top:6px">Vuoi farti vedere di più? <b>Rispondi a questa email</b> con le foto dei tuoi lavori, la tua locandina o il link del tuo sito: li pubblichiamo noi sulla pagina, gratis.</div>
+  <a href="https://www.facebook.com/profile.php?id=61575390415610" style="display:inline-block;margin-top:10px;background:#1877f2;color:#ffffff;font-size:15px;font-weight:800;text-decoration:none;padding:11px 20px;border-radius:9px">Segui la pagina &rarr;</a>
+</td></tr></table></td></tr>
+
 <tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
   ${pillole}
 </td></tr>
@@ -426,6 +433,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: 'TrovaImpresa <info@trovaimpresa.com>',
         to: [email],
+        reply_to: 'info@trovaimpresa.com',
         subject,
         html
       })

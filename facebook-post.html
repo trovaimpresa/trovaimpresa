@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Post per Facebook — TrovaImpresa</title>
+<style>
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f1f5f9;color:#0f172a;padding:24px 16px;box-sizing:border-box}
+  .box{background:#fff;border-radius:16px;box-shadow:0 6px 24px rgba(10,42,77,.12);padding:28px 24px;max-width:640px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 6px;color:#0a2a4d}
+  .sub{font-size:17px;color:#475569;margin:0 0 18px}
+  .passo{font-size:18px;font-weight:700;color:#0a2a4d;margin:18px 0 8px}
+  .testo{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:17px;line-height:1.5;background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin:0}
+  .btn{display:block;width:100%;box-sizing:border-box;border:0;border-radius:12px;padding:16px;font-size:19px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;margin-top:10px}
+  .copia{background:#0a2a4d;color:#fff}
+  .fb{background:#1877f2;color:#fff}
+  .nota{font-size:15px;color:#475569;margin:10px 0 0;line-height:1.5}
+  .err{font-size:18px;color:#b91c1c}
+</style>
+</head>
+<body>
+<!-- 20 nov 2026: la apre Alessio dall'email del mattino «Da pubblicare su
+     Facebook». Il testo lo prepara netlify/functions/fb-testo.js.
+     Facebook non lascia scrivere il testo del post da un link: per questo
+     prima si copia, poi si incolla. -->
+<div class="box" id="box">
+  <h1 id="tit">Post per Facebook</h1>
+  <p class="sub" id="sub">Sto preparando il testo…</p>
+</div>
+<script>
+(function(){
+  var p=new URLSearchParams(location.search), box=document.getElementById("box");
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function copia(t,btn){
+    var ok=false;
+    try{var a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove();}catch(_){}
+    if(!ok&&navigator.clipboard){navigator.clipboard.writeText(t).then(function(){btn.textContent="✔ Copiato";});return;}
+    btn.textContent=ok?"✔ Copiato":"Tieni premuto sul testo e copialo";
+  }
+  fetch("/.netlify/functions/fb-testo?t="+encodeURIComponent(p.get("t")||"")+"&id="+encodeURIComponent(p.get("id")||""),{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.testo){box.innerHTML='<h1>Post per Facebook</h1><p class="err">'+esc((d&&d.errore)||"Non riesco a preparare il post.")+'</p>';return;}
+      var share="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(d.link);
+      box.innerHTML='<h1>'+esc(d.titolo)+'</h1>'+
+        '<p class="sub">Due tocchi e il post è sulla pagina «Trova impresa».</p>'+
+        '<div class="passo">1. Copia il testo</div>'+
+        '<pre class="testo" id="testo">'+esc(d.testo)+'</pre>'+
+        '<button class="btn copia" id="copia">Copia il testo</button>'+
+        '<div class="passo">2. Apri Facebook e incolla</div>'+
+        '<a class="btn fb" href="'+esc(share)+'" target="_blank" rel="noopener">Apri Facebook</a>'+
+        '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>';
+      document.getElementById("copia").onclick=function(){copia(d.testo,this);};
+    })
+    .catch(function(){box.innerHTML='<h1>Post per Facebook</h1><p class="err">Non riesco a collegarmi. Riprova fra poco.</p>';});
+})();
+</script>
+</body>
+</html>
