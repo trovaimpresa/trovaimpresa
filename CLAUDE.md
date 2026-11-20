@@ -3947,3 +3947,25 @@ Funzioni nuove (sì di Alex a tutte e 4, foto prima):
 Provato prima del push col banco del gestionale (pagina vera, database finto, faccia studio, 1440 e 375): triennio 48,5 di 60, deontologia 5,5 di 6, finestra con «Collegio dei Geometri» che riempie 60/3/6, salvataggio, attestato caricato/vuoto rifiutato/tolto, Scadenzario, ricerca, Riepilogo, niente fuori schermo né sotto 13 px. `tools/banco-gestionale.js app`: ZERO difetti.
 Pubblicato (→5402bfc←, Netlify riuscito) e riprovato sul sito vero col database vero (1440 e 375): «Collegio dei Geometri» salvato (60/3/2024/6), riquadro 48,5 di 60, attestato caricato e riletto dal deposito, ricerca «ordinamento» → apre il corso, Scadenzario e Riepilogo con l'avviso: tutto ✔. Pulito: →0← corsi di prova, →0← attestati nel deposito, traguardo di Alex rimesso a 30 / anno.
 ⬜ Non provato: la casella del traguardo nei Dati azienda (stessa colonna `cfp_obiettivo`); un collaboratore che prova ad aprire un attestato (serve un suo account).
+
+# 20 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: COLLABORATORI
+
+Prova da geometra dal vivo (`?vedi=professionista`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): persona nuova (Disegnatore CAD, 18,50 €/h), ore su una pratica (lei 3,5 + titolare 2), ore → parcella (tariffa dello studio messa a 50 e rimessa vuota), permessi (Segreteria), scadenza della persona, invito (link e pagina dell'invito), Cestino e «Rimetti a posto», ricerca, telefono. Attestati CFP: simulato in SQL un collaboratore attivo vero → `gest_puo_file(... '/attestati/...')` = false in lettura e caricamento (controllo: un file di lavoro = true). Poi cancellato tutto.
+
+Codice: `js/gest-squadra.js` (scheda, permessi, elimina), `js/gest-squadra-giornate.js` (`sqgCard`), `js/gest-ore-spese.js` (`orePortaInParcella`), `js/gest-cestino.js` (`CEST_FIGLI`/`CEST_PADRE`), `js/gest-ricerca.js`, `js/gest-reparti.js` (`inviteLink`, `_FRASI`), `gestionale-invito.html`.
+
+Sistemato:
+1. Liste dello studio scritte alla fonte (`_sqPro()`): ruolo nello studio (Geometra, Disegnatore CAD, Praticante…, era Muratore/Gruista), contratti (Partita IVA, Praticantato), attestati (Iscrizione all'albo, Polizza RC, CSP/CSE…), ruolo nell'app «Collaboratore / Coordinatore / Segreteria» (`sqRuoloNome`, il valore salvato resta operaio/preposto/segretaria).
+2. Permessi: testi da studio (`PERMS_D_PRO`, «Va insieme a Pratiche»; prima «Va insieme a Lavori» sotto la casella «Pratiche»). «Pagamenti» (carta aziendale) nascosto allo studio, che le Carte non le ha (`permNascosto`).
+3. Invito: WhatsApp «Ti ho aggiunto ai collaboratori dello studio» (`sqTestoInvito`); il link porta `&studio=1` e `gestionale-invito.html` dice «lo studio» / «le pratiche» invece di «la tua impresa» / «i lavori».
+4. ⛔ Persona nel Cestino: le sue scadenze aperte restavano vive («(persona non più in squadra)» e l'email del mattino). Ora vanno nel Cestino con lei e tornano con lei (`dipElimina` + `CEST_FIGLI.gest_operatori`, padre `persona` in `CEST_PADRE.gest_scadenze`). Vale anche per impresa e artigiano. «Rimessa a posto» al femminile.
+5. ⛔ La scheda del titolare: scegliendo «Alex (io)» nelle ore nasce la persona del titolare, che poi in elenco era «Collaboratore · Senza invito · Nuovo invito» (invitare se stesso) e «Messaggi» con se stesso. Ora `dipSonoIo` (id di `_gIo()`): «Tu», «Titolare», niente invito/messaggi, niente «Cosa vede sul telefono». Tutte le facce. ⚠️ `_gIo` è nel browser: su un altro telefono la scheda torna normale.
+6. Domanda di elimina: «dai collaboratori dello studio», «servono al margine delle pratiche e alla parcella».
+7. Frasi dello studio (`_FRASI`): «non più nello studio», «costo medio dello studio», «Tempo speso:» nel margine della pratica, «I collaboratori lo usano per scriverti».
+
+Funzioni nuove (foto prima, sì di Alex):
+- **Tariffa al cliente per persona**: colonna `gest_operatori.tariffa_oraria` (`sql/2026-11-20-collaboratori-tariffa.sql`, migrazione `collaboratori_tariffa_20nov2026`, già eseguita), casella nella scheda (tutte le facce). «Porta le ore nella parcella» usa la tariffa della persona, se vuota quella dei Dati azienda (`tariffaDi`). Paracadute `_senzaTariffa` se la colonna manca.
+- **Ricerca in alto trova le persone** (nome, ruolo, telefono, email → apre la scheda con `sq-edit`) e, scrivendo il nome, anche le pratiche assegnate a lei (👤 nel sotto-riga). Gruppo «Collaboratori» (studio) / «Squadra».
+
+Provato col banco (pagina vera, database finto, faccia studio, 1440 e 375) e `tools/banco-gestionale.js app`: ZERO difetti.
+⬜ Non provato: l'app del collaboratore aperta da un telefono vero (serve un account suo); l'app del collaboratore (`gestionale-operatore.html`) parla ancora da cantiere («lavori») anche per lo studio.

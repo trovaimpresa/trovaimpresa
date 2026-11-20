@@ -80,13 +80,13 @@
   <!-- inserimento codice -->
   <div id="redeem" class="card hidden">
     <h2>Inserisci il codice invito</h2>
-    <div class="hint">Te l'ha dato la tua impresa. Inseriscilo per collegarti.</div>
+    <div class="hint" id="redeem-hint">Te l'ha dato la tua impresa. Inseriscilo per collegarti.</div>
     <div class="field"><label>Codice</label><input type="text" id="codice" placeholder="ES. A1B2C3" style="text-transform:uppercase"></div>
     <button class="btn" id="btn-redeem">Collegami all'impresa</button>
   </div>
 
   <!-- successo -->
-  <div id="done" class="card hidden"><div class="big-ok"><div class="e"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</p><a class="btn" href="gestionale-operatore.html" style="display:inline-block;text-decoration:none;text-align:center">Apri la tua agenda →</a></div></div>
+  <div id="done" class="card hidden"><div class="big-ok"><div class="e"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px;margin-bottom:16px"><span id="done-txt">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</span></p><a class="btn" href="gestionale-operatore.html" style="display:inline-block;text-decoration:none;text-align:center">Apri la tua agenda →</a></div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -98,12 +98,21 @@ const $=s=>document.querySelector(s);
 const params=new URLSearchParams(location.search);
 /* 10 nov 2026 — dall'app dell'operaio («Entra») si arriva gia' su Accedi */
 let mode=params.get("accedi")?"login":"register";
+/* 20 nov 2026 — il link dell'invito di uno STUDIO TECNICO porta «&studio=1»
+   (gestionale-app.html, inviteLink): qui si dice «studio» e «pratiche».
+   Senza il parametro resta tutto com'era. */
+const STUDIO=params.get("studio")==="1";
+if(STUDIO){
+  $("#redeem-hint").textContent="Te l'ha dato lo studio. Inseriscilo per collegarti.";
+  $("#btn-redeem").textContent="Collegami allo studio";
+  $("#done-txt").textContent="Da ora puoi aprire la tua agenda e vedere le pratiche che ti assegnano.";
+}
 function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");}
 
 function show(which){["auth","redeem","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
 function renderAuth(){
   $("#auth-title").textContent=mode==="register"?"Registrati":"Accedi";
-  $("#auth-hint").textContent=mode==="register"?"Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa.":"Bentornato, accedi col tuo account.";
+  $("#auth-hint").textContent=mode==="register"?(STUDIO?"Crea il tuo accesso gratuito per entrare nel gestionale dello studio.":"Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa."):"Bentornato, accedi col tuo account.";
   $("#btn-auth").textContent=mode==="register"?"Crea account":"Entra";
   $("#switch").innerHTML=mode==="register"?'Hai già un account? <a id="sw">Accedi</a>':'Sei nuovo? <a id="sw">Registrati</a>';
   $("#sw").onclick=()=>{mode=mode==="register"?"login":"register";renderAuth();};
@@ -139,7 +148,7 @@ $("#btn-redeem").onclick=async()=>{
   const {data,error}=await sb.rpc("gest_redeem_invito",{_codice:codice});
   if(error){msg("Errore: "+error.message);return;}
   if(data&&data.ok){show("done");}
-  else{msg((data&&data.err)||"Codice non valido o già usato. Chiedi all'impresa di mandartene uno nuovo.");}
+  else{msg((data&&data.err)||"Codice non valido o già usato. Chiedi "+(STUDIO?"allo studio":"all'impresa")+" di mandartene uno nuovo.");}
 };
 </script>
 <script src="/js/freccia-indietro.js"></script>

@@ -44,7 +44,9 @@
     fornitori:["nome","categoria","telefono","email","indirizzo","piva","note"],
     fattforn:["numero","note"],
     /* 20 nov 2026 — i corsi dei crediti formativi (si' di Alex) */
-    crediti:["titolo","ente","tipo","note","attestato_nome"]
+    crediti:["titolo","ente","tipo","note","attestato_nome"],
+    /* 20 nov 2026 — le persone (Collaboratori / Squadra), si' di Alex */
+    persone:["nome","mansione","telefono","email"]
   };
   const CT_ST_PREV={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
   const CT_ST_FATT={bozza:"Bozza",emessa:"Emessa",pagata:"Pagata",insoluta:"Insoluta",annullata:"Annullata"};
@@ -74,10 +76,12 @@
        «Crediti formativi» c'e' nel menu */
     const _tbCr=document.querySelector("#tab-crediti");
     const _conCr=!!(_tbCr&&_tbCr.style.display!=="none");
-    const [rc,rl,rp,rf,ro,rff,rcr]=await Promise.all([
+    const [rc,rl,rp,rf,ro,rff,rcr,rop]=await Promise.all([
       leggi("gest_clienti"),leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture"),
       leggi("gest_fornitori"),leggi("gest_fatture_fornitori"),
-      _conCr?sb.from("gest_crediti").select("*").eq("user_id",sbUid).limit(CT_TETTO):Promise.resolve({data:[]})
+      _conCr?sb.from("gest_crediti").select("*").eq("user_id",sbUid).limit(CT_TETTO):Promise.resolve({data:[]}),
+      /* 20 nov 2026 — le persone del reparto (niente costi: si legge solo quello che si mostra) */
+      sb.from("gest_operatori").select("id,nome,mansione,telefono,email").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO)
     ]);
     /* ⚠️ UNA TABELLA CHE NON SI APRE NON DEVE SPEGNERE TUTTA LA RICERCA.
        Un collaboratore puo' avere il permesso sui lavori e non sulle fatture:
@@ -91,7 +95,8 @@
       preventivi:prendi(rp,"preventivi"), fatture:prendi(rf,"fatture"),
       /* i fornitori sono in piu': se non si leggono la ricerca di prima resta com'era */
       fornitori:(ro&&!ro.error&&ro.data)||[], fattforn:(rff&&!rff.error&&rff.data)||[],
-      crediti:(rcr&&!rcr.error&&rcr.data)||[]
+      crediti:(rcr&&!rcr.error&&rcr.data)||[],
+      persone:(rop&&!rop.error&&rop.data)||[]
     };
     ctTroncato=[rc,rl,rp,rf].some(r=>(r.data||[]).length>=CT_TETTO);
     if(ctMancanti.length===4)return "Non riesco a leggere i dati: "+(rc.error||rl.error||rp.error||rf.error).message;
@@ -138,9 +143,14 @@
     /* la riga senza cliente non deve pescare il testo di nessuno: con
        cliente_id nullo si cerca solo dentro la riga */
     const suo=r=>(r.cliente_id!=null&&testoCli[String(r.cliente_id)])?(" "+testoCli[String(r.cliente_id)]):"";
+    /* 20 nov 2026 — scrivendo il nome di una persona escono anche i lavori/le
+       pratiche assegnati a lei (gest_lavori.operatore_id), come per il cliente */
+    const nomeOp={};
+    (ctDati.persone||[]).forEach(o=>{nomeOp[String(o.id)]=o.nome||"";});
+    const suaPers=l=>(l.operatore_id!=null&&nomeOp[String(l.operatore_id)])?(" "+ctPiatto(nomeOp[String(l.operatore_id)])):"";
     return {
       clienti:ctDati.clienti.filter(c=>dentro(ctTesto(c,CT_CAMPI.clienti))),
-      lavori:ctDati.lavori.filter(l=>dentro(ctTesto(l,CT_CAMPI.lavori)+ctCatasto(l)+suo(l))),
+      lavori:ctDati.lavori.filter(l=>dentro(ctTesto(l,CT_CAMPI.lavori)+ctCatasto(l)+suo(l)+suaPers(l))),
       preventivi:ctDati.preventivi.filter(p=>dentro(ctTesto(p,CT_CAMPI.preventivi)+suo(p))),
       fatture:ctDati.fatture.filter(f=>dentro(ctTesto(f,CT_CAMPI.fatture)+suo(f))),
       fornitori:(ctDati.fornitori||[]).filter(o=>dentro(ctTesto(o,CT_CAMPI.fornitori))),
@@ -150,7 +160,8 @@
         return dentro(ctTesto(x,CT_CAMPI.fattforn)+(o?" "+ctPiatto(o.nome):""));
       }),
       crediti:(ctDati.crediti||[]).filter(c=>dentro(ctTesto(c,CT_CAMPI.crediti))),
-      nomeCli:nomeCli
+      persone:(ctDati.persone||[]).filter(o=>dentro(ctTesto(o,CT_CAMPI.persone))),
+      nomeCli:nomeCli, nomeOp:nomeOp
     };
   }
   function ctMeta(){
@@ -167,7 +178,7 @@
      schermo, che e' vuota se in quella sezione non ci sei mai entrato. */
   function ctRiga(tipo,id,titolo,sotto){
     /* 19 nov 2026: «forn» apre la scheda del fornitore (forn-scheda la rilegge dal database) */
-    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda",cred:"edit-cred"};
+    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda",cred:"edit-cred",pers:"sq-edit"};
     return '<button type="button" class="ct-riga" data-ct="'+esc(tipo)+'" data-id="'+esc(String(id))+'"'
       +(AZ[tipo]?' data-action="'+AZ[tipo]+'"':'')+'>'
       +'<span class="ct-t">'+esc(titolo)+'</span>'
@@ -191,7 +202,8 @@
         ctRiga("cli",c.id,c.nome||"(cliente senza nome)",ctMeta(c.citta||"",c.telefono||""))));
     h+=ctBlocco(_lav(), r.lavori.map(l=>
         ctRiga("lav",l.id,l.descrizione||(pro?"Pratica":"Lavoro"),
-          ctMeta(nome(l.cliente_id),l.dove||"",l.data_prevista?fdate(l.data_prevista):"",statoLabel[l.stato]||""))));
+          ctMeta(nome(l.cliente_id),l.dove||"",l.data_prevista?fdate(l.data_prevista):"",statoLabel[l.stato]||"",
+            (l.operatore_id!=null&&r.nomeOp[String(l.operatore_id)])?("👤 "+r.nomeOp[String(l.operatore_id)]):""))));
     h+=ctBlocco("Preventivi", r.preventivi.map(p=>
         ctRiga("prev",p.id,p.titolo||"Preventivo",
           ctMeta(nome(p.cliente_id),CT_ST_PREV[p.stato]||p.stato||""))));
@@ -215,6 +227,9 @@
         return ctRiga("forn",x.fornitore_id,(x.numero?("n. "+x.numero):"Fattura")+(o.nome?" — "+o.nome:""),
           ctMeta(eur(x.importo),pag?"pagata":(x.scadenza?((x.scadenza<oggiCt?"scaduta il ":"da pagare entro il ")+fdate(x.scadenza)):"senza scadenza")));
       }));
+    /* 20 nov 2026 — le persone: la riga apre la sua scheda (sq-edit la rilegge dal database) */
+    h+=ctBlocco(pro?"Collaboratori":"Squadra", r.persone.map(o=>
+        ctRiga("pers",o.id,o.nome||"(senza nome)",ctMeta(o.mansione||"",o.telefono||""))));
     h+=ctBlocco("Corsi (crediti formativi)", r.crediti.map(c=>
         ctRiga("cred",c.id,c.titolo||"Corso",
           ctMeta(c.ente||"",c.data?fdate(c.data):"",String(+c.crediti||0).replace(".",",")+" CFP",c.attestato_path?"📎 attestato":""))));

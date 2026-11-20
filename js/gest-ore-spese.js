@@ -1158,12 +1158,24 @@
       visto[k].ore+=(+x.ore||0);
     });
     const nomeDi=function(id){const d=(dipCache||[]).find(y=>String(y.id)===String(id));return d?d.nome:"";};
+    /* 20 nov 2026 (si' di Alex, foto prima) — LA TARIFFA DI OGNI PERSONA.
+       Prima tutte le righe prendevano la tariffa dei Dati azienda: l'ora del
+       praticante costava al cliente quanto quella del titolare. Adesso se la
+       persona ha la sua tariffa (gest_operatori.tariffa_oraria, scheda della
+       persona) vale quella; se e' vuota, quella dei Dati azienda come prima. */
+    const tariffaDi=function(id){
+      const d=(dipCache||[]).find(y=>String(y.id)===String(id));
+      if(d&&d.tariffa_oraria!=null&&d.tariffa_oraria!=="")return +d.tariffa_oraria||0;
+      return tariffa;
+    };
     const voce=pro?"Ore di studio":"Ore di lavoro";
+    let _sueTariffe=0;
     const _righe=perChi.map(function(g,i){
-      const chi=nomeDi(g.chi);
+      const chi=nomeDi(g.chi), tp=tariffaDi(g.chi);
+      if(tp!==tariffa)_sueTariffe++;
       return {descrizione: chi?(voce+" — "+chi):voce,
               qta: Math.round(g.ore*100)/100,
-              prezzo: (tariffa===null?"":tariffa),
+              prezzo: (tp===null?"":tp),
               unita:"ora",
               sezione:false, ordine:i};
     });
@@ -1180,10 +1192,12 @@
       cliente_id:cliente_id,
       titolo:desc||(pro?"Parcella":"Preventivo"),
       _righe:_righe,
-      _noteOre:(tariffa===null
+      _noteOre:(_righe.some(r=>r.prezzo==="")
         ? "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto). "
-          +"Il prezzo dell'ora non c'è: scrivilo qui, oppure mettilo una volta sola nei Dati azienda, alla voce «Quanto chiedi all'ora»."
-        : "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto), al prezzo scritto nei Dati azienda. Cambialo pure riga per riga.")
+          +"Dove il prezzo dell'ora manca scrivilo qui, oppure mettilo una volta sola: nella scheda della persona («Tariffa al cliente») o nei Dati azienda («Quanto chiedi all'ora»)."
+        : (_sueTariffe
+          ? "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto), ognuna al prezzo della sua persona (scheda della persona, se no Dati azienda). Cambialo pure riga per riga."
+          : "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto), al prezzo scritto nei Dati azienda. Cambialo pure riga per riga."))
     });
     toast(_righe.length===1?"Una riga portata dalle ore":(_righe.length+" righe portate dalle ore"));
   }

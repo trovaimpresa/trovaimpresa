@@ -153,7 +153,10 @@
     gest_mezzi    :[["gest_scadenze","mezzo_id","scadenza","scadenze"]],
     /* 19 nov 2026 (voce Pratiche) — le scadenze aperte del lavoro/pratica
        vanno via con lui (del-job-supa) e tornano su con lui. */
-    gest_lavori   :[["gest_scadenze","lavoro_id","scadenza","scadenze"]]
+    gest_lavori   :[["gest_scadenze","lavoro_id","scadenza","scadenze"]],
+    /* 20 nov 2026 (voce Collaboratori) — le scadenze aperte della persona
+       (polizza, corso, visita) vanno via con lei (dipElimina) e tornano con lei. */
+    gest_operatori:[["gest_scadenze","operatore_id","scadenza","scadenze"]]
   };
   /* 19 nov 2026 (collaudo Cestino) — un padre solo non bastava.
      Rimettendo a posto una foto col suo lavoro ancora nel Cestino, la foto
@@ -172,7 +175,7 @@
     gest_mezzi            :[_REP],
     gest_operatori        :[_REP],
     gest_carte            :[_REP],
-    gest_scadenze         :[_REP,["gest_mezzi","mezzo_id","mezzo"],_LAV],
+    gest_scadenze         :[_REP,["gest_mezzi","mezzo_id","mezzo"],_LAV,["gest_operatori","operatore_id","persona"]],
     gest_computi          :[_REP],
     gest_fornitori        :[_REP],
     gest_rapportini       :[_REP,_LAV],
@@ -826,8 +829,10 @@
     if(daTirareSu.length){
       /* 19 nov 2026 (voce Pratiche) — per lo studio il «lavoro» e' la pratica (femminile) */
       const _praP=d=>ruoloUtente==='professionista'&&d.pa.lab==="lavoro";
-      const el=daTirareSu.map(function(d){return "\u2022 "+(_praP(d)?"la pratica":"il "+d.pa.lab)+(d.nome?" «"+d.nome+"»":"");}).join("\n");
-      const uno=daTirareSu.length===1, fem=uno&&_praP(daTirareSu[0]);
+      /* 20 nov 2026 — anche «la persona» e' femminile */
+      const _femP=d=>_praP(d)||d.pa.lab==="persona";
+      const el=daTirareSu.map(function(d){return "\u2022 "+(_praP(d)?"la pratica":(_femP(d)?"la ":"il ")+d.pa.lab)+(d.nome?" «"+d.nome+"»":"");}).join("\n");
+      const uno=daTirareSu.length===1, fem=uno&&_femP(daTirareSu[0]);
       if(!(await gconfirm("È ancora nel cestino:\n"+el+"\n\n"
         +"Se rimetto a posto solo questa, non "+(uno?(fem?"la":"lo"):"li")+" ritrovi.\n\n"
         +"Rimetto a posto anche "+(uno?(fem?"lei":"lui"):"loro")+"?")))daTirareSu.length=0;
@@ -882,10 +887,11 @@
     /* 19 nov 2026 — il lavoro o il cliente tornati su insieme NON «ci stavano
        dentro»: si dicono per nome; le cose dentro si contano a parte */
     const _proC=ruoloUtente==='professionista';
-    const _insieme=daTirareSu.map(function(d){return (_proC&&d.pa.lab==="lavoro")?"alla pratica":"al "+d.pa.lab;});
+    const _insieme=daTirareSu.map(function(d){return (_proC&&d.pa.lab==="lavoro")?"alla pratica":(d.pa.lab==="persona"?"alla persona":"al "+d.pa.lab);});
     const _dentro=extra-daTirareSu.length;
     /* 19 nov 2026 (voce Pratiche) — la pratica e' femminile */
-    const _fem=_proC&&x.tab==="gest_lavori", _lui=_fem?"lei":"lui";
+    /* 20 nov 2026 — e la persona («Persona messa nel Cestino») */
+    const _fem=(_proC&&x.tab==="gest_lavori")||x.tab==="gest_operatori", _lui=_fem?"lei":"lui";
     toast((_fem?"Rimessa a posto ✔":"Rimesso a posto ✔")
       +(_insieme.length?" — insieme "+_insieme.join(" e "):"")
       +(_dentro===1?(_insieme.length?" e a 1 cosa che ci stava dentro":" — e con "+_lui+" anche 1 cosa che ci stava dentro")

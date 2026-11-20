@@ -86,6 +86,8 @@ function sqgCard(o) {
   const av = (typeof dipAvvisi === "function") ? dipAvvisi(o) : [];
   const scaduti = av.filter(function (x) { return x.scaduto; });
   const id = esc(String(o.id)), nome = esc(o.nome || "");
+  /* 20 nov 2026 — la scheda del titolare («Tu»): niente Messaggi, niente invito */
+  const io = (typeof dipSonoIo === "function") && dipSonoIo(o);
   let avviso = "";
   if (scaduti.length) avviso = '<div class="sqg-avv rosso">' + esc(scaduti.length === 1 ? scaduti[0].lab + " " + scaduti[0].fin : scaduti.map(function (x) { return x.lab; }).join(", ") + ": scaduti") + '</div>';
   /* 18 nov 2026 — con una cosa scaduta, quella che sta per scadere spariva */
@@ -102,21 +104,21 @@ function sqgCard(o) {
     + '<div class="sqg-top"><div><h3>' + (nome || "—") + '</h3>'
     /* 11 nov 2026 — collaudo 3.8: «Operaio3519095949» attaccati (il punto
        si metteva solo con la mansione scritta a mano); il numero si tocca */
-    + '<div class="sqg-sotto">' + [esc(o.mansione || (typeof SQ_RUOLO !== "undefined" && SQ_RUOLO[o.ruolo]) || ""),
+    + '<div class="sqg-sotto">' + [esc(o.mansione || (io ? "Titolare" : "") || (typeof sqRuoloNome === "function" && sqRuoloNome(o.ruolo)) || ""),
         o.telefono ? (/\d/.test(String(o.telefono)) ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : esc(o.telefono)) : ""
       ].filter(Boolean).join(" · ") + '</div></div>'
-    + '<div class="sqg-dx"><span class="stato ' + (o.attivo ? "fatto" : (o.acc === "scaduto" ? "da_fare" : "bozza")) + '">' + (typeof dipStato === "function" ? dipStato(o) : (o.attivo ? "Attivo" : "Invitato")) + '</span>' + altro + '</div></div>'
+    + '<div class="sqg-dx"><span class="stato ' + (o.attivo || io ? "fatto" : (o.acc === "scaduto" ? "da_fare" : "bozza")) + '">' + (typeof dipStato === "function" ? dipStato(o) : (o.attivo ? "Attivo" : "Invitato")) + '</span>' + altro + '</div></div>'
     + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
     + sqgStriscia(sqgMese, d.giorni)
     + avviso
     + (o.nuovi ? '<div class="sqg-avv rosso">' + o.nuovi + (o.nuovi === 1 ? " messaggio nuovo" : " messaggi nuovi") + '</div>' : "")
     + '<div class="sqg-btn">'
     + '<button type="button" class="pri" data-sqg="apri" data-id="' + id + '" data-nome="' + nome + '">' + SQG_IC.giorni + 'Giornate</button>'
-    + '<button type="button" data-action="chat-squadra" data-id="' + id + '" data-nome="' + nome + '">' + SQG_IC.msg + 'Messaggi</button>'
+    + (io ? '' : '<button type="button" data-action="chat-squadra" data-id="' + id + '" data-nome="' + nome + '">' + SQG_IC.msg + 'Messaggi</button>')
     + '<button type="button" data-action="sq-edit" data-id="' + id + '">' + SQG_IC.scheda + 'Scheda</button>'
     /* 18 nov 2026 — «Mandagli l'app» solo se l'invito e' ancora buono; se e'
        scaduto, tolto o non c'e' mai stato si offre «Nuovo invito» */
-    + (!o.attivo && o.codice && (o.acc === undefined || o.acc === "invitato") ? '<button type="button" class="invito" data-action="sq-wa" data-wa="' + esc(o.wa || "") + '">' + SQG_IC.invia + 'Mandagli l\'app</button>'
+    + (io ? '' : !o.attivo && o.codice && (o.acc === undefined || o.acc === "invitato") ? '<button type="button" class="invito" data-action="sq-wa" data-wa="' + esc(o.wa || "") + '">' + SQG_IC.invia + 'Mandagli l\'app</button>'
       : (!o.attivo && o.acc ? '<button type="button" class="invito" data-action="sq-invito" data-id="' + id + '">' + SQG_IC.invia + 'Nuovo invito</button>' : ""))
     + '</div></div>';
 }

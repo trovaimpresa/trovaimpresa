@@ -256,6 +256,7 @@
     'cosa è stato fatto': 'Cosa hai fatto DAVVERO, a lavoro finito. E’ diverso da «cosa c’e’ da fare»: serve quando il cliente contesta, e per fatturare quello che hai fatto e non quello che avevi previsto.',
     'ore lavorate': 'Le ore che ci hai messo. Con il costo orario della persona, il gestionale ti dice quanto ti e’ costata la manodopera e quanto ci guadagni davvero.',
     'costo orario (€)': 'Quanto ti costa un’ora di questa persona: paga, contributi e tutto il resto. Non e’ quello che le dai in busta: e’ quello che esce dalla cassa. Entra nel margine di ogni lavoro.',
+    'tariffa al cliente (€ l\'ora)': 'Quanto fai pagare al cliente un’ora di questa persona. Quando porti le ore in un preventivo o in una parcella, la sua riga prende questo prezzo. Vuota: vale quella dei Dati azienda.',
     'mansione in cantiere': 'Cosa fa in cantiere: muratore, aiuto, gruista. E’ diverso dal «ruolo nell’app», che dice cosa vede sul telefono.',
     'permessi': 'Cosa vede e cosa puo’ fare dal telefono. Senza nessuna spunta apre l’app e trova il lucchetto: le spunte servono, non sono decorazione.',
     'ruolo nell\'app': 'Riempie i permessi con la scelta piu’ comune per quel ruolo. Puoi sempre cambiarli uno per uno qui sotto.',

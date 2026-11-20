@@ -130,10 +130,10 @@
       const link=inviteLink(inv.codice||"");
       return Object.assign({},o,{ruolo:dc.ruolo||"operaio",docs:dc.docs||[],nuovi:nB[o.id]||0,
         attivo:inv.stato==="attivo",acc:invitoStato(inv),codice:inv.codice||"",link:link,
-        wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)});
+        wa:"https://wa.me/?text="+encodeURIComponent(sqTestoInvito(link))});
     });
     if(dipQ){const q=dipQ.toLowerCase();
-      L=L.filter(o=>[o.nome,o.telefono,o.mansione,SQ_RUOLO[o.ruolo]].some(x=>(x||"").toLowerCase().includes(q)));}
+      L=L.filter(o=>[o.nome,o.telefono,o.mansione,sqRuoloNome(o.ruolo)].some(x=>(x||"").toLowerCase().includes(q)));}
     /* 10 nov 2026 — la Squadra fatta come le Giornate: una scheda grande
        per persona coi giorni del mese (js/gest-squadra-giornate.js). Se quel
        file non si e' caricato resta la tabella di prima, qui sotto. */
@@ -157,7 +157,7 @@
         click:{action:"sq-edit",data:{id:o.id}},
         celle:[
           `<span class="c-nome">${esc(o.nome||"—")}</span>`+dipNuovi(o),
-          esc(o.mansione||SQ_RUOLO[o.ruolo]||"—"),
+          esc(o.mansione||sqRuoloNome(o.ruolo)||"—"),
           esc(o.telefono||"—"),
           dipBadge(o),
           `<span class="stato ${o.attivo?"fatto":(o.codice?"da_fare":"bozza")}">${dipStato(o)}</span>`,
@@ -179,6 +179,23 @@
     "Imbianchino","Cartongessista","Elettricista","Idraulico","Fabbro","Falegname","Gruista",
     "Escavatorista","Autista","Operatore macchine","Geometra","Impiegato","Altro"];
   const CONTRATTI=["Tempo indeterminato","Tempo determinato","Apprendistato","Part-time","Stagionale","A chiamata","Collaborazione","Altro"];
+  /* 20 nov 2026 (studio, voce Collaboratori) — LE LISTE DELLO STUDIO.
+     Il suggerimento grigio diceva «Es. Disegnatore CAD», ma la tendina offriva
+     Muratore, Gruista, Escavatorista. E «Operaio / Preposto» nel ruolo dell'app.
+     Per lo studio le voci si scrivono alla fonte: il valore salvato del ruolo
+     resta operaio/preposto/segretaria (lo legge l'app del collaboratore e il
+     database), cambia solo come si legge. */
+  const _sqPro=()=>(typeof ruoloUtente!=="undefined"&&ruoloUtente==='professionista');
+  const MANSIONI_PRO=["Geometra","Architetto","Ingegnere","Disegnatore CAD","Praticante","Topografo","Tecnico di cantiere","Certificatore energetico","Segreteria","Amministrazione","Altro"];
+  const CONTRATTI_PRO=["Partita IVA","Praticantato / tirocinio","Tempo indeterminato","Tempo determinato","Part-time","Collaborazione","Altro"];
+  const SQ_RUOLO_PRO={operaio:"Collaboratore",preposto:"Coordinatore",segretaria:"Segreteria"};
+  /* il messaggio WhatsApp dell'invito: allo studio non si entra «in squadra» */
+  function sqTestoInvito(link){
+    return _sqPro()
+      ? "Ciao! Ti ho aggiunto ai collaboratori dello studio. Apri questo link per collegarti: "+link
+      : "Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link;
+  }
+  function sqRuoloNome(r){ return (_sqPro()?SQ_RUOLO_PRO[r]:SQ_RUOLO[r])||""; }
 
   /* ============================================================
      11 ottobre 2026 — ATTESTATI, PATENTINI E CORSI: UNA TABELLA VERA
@@ -200,6 +217,9 @@
   const DOC_SUGGERITI=["Patentino muletto","Piattaforma aerea (PLE)","Primo soccorso","Antincendio",
     "Lavori in quota","Montaggio ponteggi","Spazi confinati","Rischio elettrico (PES/PAV)",
     "Escavatore / terna","Gru","Patente B","Patente C","Patente CQC","Preposto","RLS","Amianto","Formazione specifica","Corso sicurezza"];
+  /* 20 nov 2026 — allo studio niente patentino del muletto o della gru */
+  const DOC_SUGGERITI_PRO=["Iscrizione all'albo","Polizza RC professionale","Coordinatore sicurezza (CSP/CSE)","Aggiornamento coordinatore sicurezza",
+    "Certificatore energetico","Prevenzione incendi (ex 818)","Patentino drone","Primo soccorso","Antincendio","Patente B","Corso sicurezza"];
   const DOC_TAB="gest_operatore_documenti";
   let _doc={opId:null,rows:[],nuovi:[],edit:null,del:null,vecchi:[]};
   function docMappa(d){
@@ -261,8 +281,8 @@
     const v=function(x){return esc(x||"");};
     return '<div class="dt-form">'
       +'<div class="dt-tit">'+(d.id?"Modifica":"Nuovo attestato o corso")+'</div>'
-      +'<div class="field"><label>Nome</label><input id="dd-tipo" list="d-doc-sugg" maxlength="80" value="'+v(d.tipo)+'" placeholder="Es. Patentino muletto"></div>'
-      +'<datalist id="d-doc-sugg">'+DOC_SUGGERITI.map(function(s){return '<option value="'+esc(s)+'"></option>';}).join("")+'</datalist>'
+      +'<div class="field"><label>Nome</label><input id="dd-tipo" list="d-doc-sugg" maxlength="80" value="'+v(d.tipo)+'" placeholder="'+(_sqPro()?"Es. Polizza RC professionale":"Es. Patentino muletto")+'"></div>'
+      +'<datalist id="d-doc-sugg">'+(_sqPro()?DOC_SUGGERITI_PRO:DOC_SUGGERITI).map(function(s){return '<option value="'+esc(s)+'"></option>';}).join("")+'</datalist>'
       +'<div class="row2">'
       +'<div class="field"><label>Data di inizio</label><input id="dd-ini" type="date" value="'+v(d.inizio)+'"></div>'
       +'<div class="field"><label>Data di scadenza</label><input id="dd-scad" type="date" value="'+v(d.scadenza)+'"></div>'
@@ -481,6 +501,9 @@
     /* un costo orario sotto zero entrerebbe nel margine dei lavori e lo
        gonfierebbe: le altre due caselle dei soldi i negativi li rifiutano gia' */
     if(n<0)return "Il costo orario non può essere negativo";
+    /* 20 nov 2026 — la tariffa al cliente, stesse regole */
+    const et=$("#d-tariffa"), tt=et?String(et.value||"").trim():"";
+    if(tt!==""){ const nt=_numIt("#d-tariffa"); if(nt==null)return "Non ho capito la tariffa: scrivila come 35,00"; if(nt<0)return "La tariffa non può essere negativa"; }
     return "";
   }
   /* 15 nov 2026 (sesto giro, DIFFICILE 7) — il costo orario: due decimali e una
@@ -497,6 +520,14 @@
     if(n==null||!(+n>COSTO_ORARIO_ALTO))return true;
     const t=new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n);
     return await tiChiedi("Hai scritto "+t+" l'ora di costo orario. È giusto?",{si:"Sì, è giusto",no:"No, lo correggo"});
+  }
+  /* se la colonna tariffa_oraria manca (sql/2026-11-20-collaboratori-tariffa.sql
+     non eseguito) si riprova senza e lo si dice: la persona non si perde */
+  function _senzaTariffa(error,extra){
+    if(!/tariffa_oraria/i.test(String(error&&error.message||"")))return false;
+    delete extra.tariffa_oraria;
+    toast("La tariffa non è salvata: manca l'aggiornamento del database (sql/2026-11-20-collaboratori-tariffa.sql)");
+    return true;
   }
   function dipCampiExtra(){
     const v=function(id){const e=$(id);return e?String(e.value||"").trim():"";};
@@ -515,6 +546,9 @@
          null e' un refuso: lo intercetta dipCampiOk, qui sotto, se no si
          cancellava il costo con il messaggio "Aggiornato ✔". */
       costo_orario:costoOrarioTondo(_numIt("#d-costo")),
+      /* 20 nov 2026 (si' di Alex) — la tariffa al cliente di questa persona:
+         vuota = quella dei Dati azienda (orePortaInParcella) */
+      tariffa_oraria:($("#d-tariffa")?costoOrarioTondo(_numIt("#d-tariffa")):undefined),
       visita_medica_scadenza:o(v("#d-visita")),
       formazione_scadenza:o(v("#d-formazione")),
       /* 11 ott 2026 — attestati e corsi non passano da qui: hanno la loro tabella */
@@ -539,7 +573,19 @@
   /* 14 nov 2026 (quinto giro, n. 5) — LO STATO DELLA PERSONA, in un posto solo.
      Chi nasce da «＋ Un'altra persona…» nelle ore non ha nessun invito: usciva
      «Invitato» lo stesso. Senza codice d'invito adesso dice «Senza invito». */
+  /* 20 nov 2026 (voce Collaboratori) — LA SCHEDA DEL TITOLARE.
+     Scegliendo «Alex (io)» nelle ore il gestionale crea la persona del
+     titolare (cosi' Giornate e margine contano anche le sue ore). Ma poi in
+     elenco era una persona qualsiasi: «Collaboratore · Senza invito» e il
+     pulsante «Nuovo invito», cioe' il titolare che invita se stesso, e
+     «Messaggi» con se stesso. Adesso quella scheda dice «Tu» e non offre
+     invito ne' messaggi. Si riconosce dall'id che Giornate tiene da parte
+     (_gIo, js/gest-giornate.js). */
+  function dipSonoIo(o){
+    try{ const io=(typeof _gIo==="function")?_gIo():""; return !!(o&&io&&io!=="-"&&String(io)===String(o.id)); }catch(e){ return false; }
+  }
   function dipStato(o){
+    if(dipSonoIo(o))return "Tu";
     if(o&&o.acc==="scaduto")return "Invito scaduto";
     if(o&&o.acc==="tolto")return "Accesso tolto";
     return o&&o.attivo?"Attivo":(o&&o.codice?"Invitato":"Senza invito");
@@ -585,9 +631,11 @@
     await renderDip();
     toast("Invito nuovo pronto: vale "+INVITO_GIORNI+" giorni ✔");
     const link=inviteLink(codice);
-    mostraQrInvito(link,o.nome||"","https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link));
+    mostraQrInvito(link,o.nome||"","https://wa.me/?text="+encodeURIComponent(sqTestoInvito(link)));
   }
   function dipVoci(o){
+    /* il titolare: niente messaggi con se stesso, niente invito a se stesso */
+    if(dipSonoIo(o))return [{lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}},{sep:true},{lab:"🗑 Elimina",action:"sq-del",data:{id:o.id},del:true}];
     const v=[{lab:"\ud83d\udcac Messaggi"+(o.nuovi?" ("+o.nuovi+")":""),action:"chat-squadra",data:{id:o.id,nome:o.nome||""}},
              {lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
     const vivo=invitoVivo(o);
@@ -658,9 +706,24 @@
     {key:"rapportini",label:"Rapportini", d:"Può scrivere il rapportino di fine giornata: le ore di tutta la squadra su quel lavoro, i materiali usati. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Lavori."}
   ];
   const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti","rapportini"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
+  /* 20 nov 2026 (studio, voce Collaboratori) — I PERMESSI DETTI DA STUDIO.
+     Le descrizioni parlavano di «lavori», «squadra», «materiali» e due righe
+     dicevano «Va insieme a Lavori» sotto una casella che allo studio si chiama
+     «Pratiche». E «Pagamenti» apriva la carta aziendale, che lo studio non ha
+     (la voce Carte e' nascosta): la casella si nasconde e il ruolo non la
+     accende. Il valore salvato non cambia nome: lo legge l'app. */
+  const PERMS_D_PRO={
+    lavori:"Vede l'agenda e le scadenze, apre le pratiche che gli assegni e le segna fatte. Vede anche le sue giornate del mese.",
+    calendario:"Può girare fra i giorni e i mesi. Senza, vede solo oggi. Va insieme a Pratiche.",
+    foto:"Può aggiungere foto e video del sopralluogo. Quelle che carica lui le vede comunque. Va insieme a Pratiche.",
+    note:"Può scrivere cosa ha fatto sulla pratica. Senza, le legge e basta. Va insieme a Pratiche.",
+    rapportini:"Può scrivere il resoconto della giornata: le ore di chi ci ha lavorato su quella pratica. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Pratiche."
+  };
+  function permDescr(p){ return (_sqPro()&&PERMS_D_PRO[p.key])||p.d; }
+  function permNascosto(k){ return _sqPro()&&k==="pagamenti"; }
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
-    $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
+    $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm)&&!permNascosto(ch.dataset.perm));
     permAvviso();
   }
   /* l'avviso vivo sotto le caselle: Calendario, Foto e Note da sole non aprono
@@ -673,9 +736,9 @@
     const spente=PERMS.filter(p=>!p.sez&&on[p.key]).map(p=>p.label);
     let t="";
     if(!sezioni.length&&!spente.length) t="⚠️ Senza nessuna spunta questa persona apre l'app e trova il lucchetto.";
-    else if(!sezioni.length) t="⚠️ "+spente.join(" e ")+": da sole non aprono nessuna schermata. Accendi anche <b>Lavori</b>, Clienti, Fatture o Pagamenti, se no trova il lucchetto.";
+    else if(!sezioni.length) t="⚠️ "+spente.join(" e ")+": da sole non aprono nessuna schermata. Accendi anche "+(_sqPro()?"<b>Pratiche</b>, Clienti o Fatture":"<b>Lavori</b>, Clienti, Fatture o Pagamenti")+", se no trova il lucchetto.";
     else if(on.pagamenti&&sezioni.length===1) t="Vedrà solo la sua carta aziendale: niente agenda, niente lavori.";
-    else if((on.calendario||on.foto||on.note)&&!on.lavori) t="Calendario, Foto e Note lavorano dentro la scheda di un lavoro: senza <b>Lavori</b> restano spente.";
+    else if((on.calendario||on.foto||on.note)&&!on.lavori) t=_sqPro()?"Calendario, Foto e Note lavorano dentro la scheda di una pratica: senza <b>Pratiche</b> restano spente.":"Calendario, Foto e Note lavorano dentro la scheda di un lavoro: senza <b>Lavori</b> restano spente.";
     box.innerHTML=t;box.style.display=t?"":"none";
   }
   /* la persona creata da un tentativo il cui invito non è partito: serve a
@@ -762,11 +825,17 @@ ${vecchi?`
         <div class="row2">
           <div class="field"><label>Mansione in cantiere</label>
             <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
-            <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
+            <datalist id="d-mansioni-list">${(_sqPro()?MANSIONI_PRO:MANSIONI).map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
           <div class="field"><label>Costo orario (\u20ac)</label>
             <input id="d-costo" type="text" inputmode="decimal" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(_numTesto(op.costo_orario)):""}" placeholder="Es. 22,50" data-euro></div>
         </div>
-        <div class="sh-nota">Il costo orario serve per calcolare la manodopera sui lavori.</div>
+        <div class="row2">
+          <div class="field"><label>Tariffa al cliente (\u20ac l'ora)</label>
+            <input id="d-tariffa" type="text" inputmode="decimal" value="${op.tariffa_oraria!=null&&op.tariffa_oraria!==""?esc(_numTesto(op.tariffa_oraria)):""}" placeholder="${_sqPro()?"Es. 35,00":"Es. 30,00"}" data-euro></div>
+          <div></div>
+        </div>
+        <div class="sh-nota">Il <b>costo orario</b> è quanto ti costa un'ora sua. La <b>tariffa</b> è quanto la fai pagare al cliente quando porti le sue ore ${_sqPro()?"nella parcella":"nel preventivo"}: se la lasci vuota vale quella dei Dati azienda.</div>
+        ${dipSonoIo(op)?'<div class="sh-nota" style="font-size:15px">Questa scheda sei tu, il titolare: le tue ore entrano nel margine. Tu vedi già tutto, quindi qui non servono invito e permessi.</div>':''}
       </div>
 
       <div class="sh-b">
@@ -788,17 +857,17 @@ ${vecchi?`
 
       </div><div class="sh-col">
 
-      <div class="sh-b">
+      <div class="sh-b"${dipSonoIo(op)?' style="display:none"':''}>
         <div class="sh-tit">Cosa vede sul telefono</div>
         ${(!isNew&&op.acc&&op.acc!=="attivo"&&op.acc!=="invitato")?`<p class="sh-nota" style="margin:0 0 10px;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px">${op.acc==="senza"?"Non ha ancora l'app: ruolo e permessi valgono dopo che premi <b>Nuovo invito</b> sulla sua scheda.":(op.acc==="tolto"?"Le hai tolto l'accesso: dal telefono non entra. Per ridarglielo premi <b>Nuovo invito</b> sulla sua scheda.":"L'invito è scaduto (vale 14 giorni): premi <b>Nuovo invito</b> sulla sua scheda.")}</p>`:""}
         <div class="field"><label>Ruolo nell'app</label><select id="d-ruolo">
-          <option value="operaio">Operaio</option>
-          <option value="preposto">Preposto</option>
-          <option value="segretaria">Segretaria</option></select></div>
+          <option value="operaio">${sqRuoloNome("operaio")}</option>
+          <option value="preposto">${sqRuoloNome("preposto")}</option>
+          <option value="segretaria">${sqRuoloNome("segretaria")}</option></select></div>
         <div class="field"><label>Permessi</label><div id="d-perms">
-          ${PERMS.map(p=>`<label class="perm-row"><span><b>${p.label}</b><small>${p.d}</small></span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div>
+          ${PERMS.map(p=>`<label class="perm-row"${permNascosto(p.key)?' style="display:none"':''}><span><b>${p.label}</b><small>${permDescr(p)}</small></span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div>
           <p class="sh-nota" id="d-perms-avviso" style="margin:10px 0 0;display:none;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px"></p>
-          <p class="sh-nota" style="margin:10px 0 0">Decide cosa vede e cosa può fare <b>dal telefono</b>. Le prime quattro aprono una schermata; le altre quattro cambiano cosa può fare dentro. Il ruolo qui sopra riempie le caselle con la scelta più comune: poi le cambi come vuoi.</p></div>
+          <p class="sh-nota" style="margin:10px 0 0">Decide cosa vede e cosa può fare <b>dal telefono</b>. Le prime ${_sqPro()?"tre":"quattro"} aprono una schermata; le altre quattro cambiano cosa può fare dentro. Il ruolo qui sopra riempie le caselle con la scelta più comune: poi le cambi come vuoi.</p></div>
       </div>
 
       <div class="sh-b">
@@ -813,7 +882,7 @@ ${vecchi?`
             <div class="field"><label>Data di assunzione</label><input id="d-assunzione" type="date" value="${esc(op.data_assunzione||"")}"></div>
             <div class="field"><label>Tipo di contratto</label>
               <input id="d-contratto" list="d-contratti-list" value="${esc(op.tipo_contratto||"")}" placeholder="Es. Tempo indeterminato">
-              <datalist id="d-contratti-list">${CONTRATTI.map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
+              <datalist id="d-contratti-list">${(_sqPro()?CONTRATTI_PRO:CONTRATTI).map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
           </div>
           <div class="row2">
             <div class="field"><label>In emergenza chiamare</label><input id="d-emerg-nome" value="${esc(op.emergenza_nome||"")}" placeholder="Es. Maria (moglie)"></div>
@@ -902,7 +971,9 @@ ${vecchi?`
     }
     let opId=_sqOpAppenaCreato;
     if(!opId){
-      const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
+      let {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
+      /* paracadute: colonna della tariffa non ancora nel database */
+      if(error&&_senzaTariffa(error,extra)){ ({data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single()); }
       if(error){toast("Errore: "+error.message);return;}
       opId=op.id;
       _sqOpAppenaCreato=opId;
@@ -936,7 +1007,8 @@ ${vecchi?`
     if(!(await costoOrarioSicuro(costoOrarioTondo(_numIt("#d-costo"))))){ const _ec=$("#d-costo"); if(_ec){ try{_ec.focus();_ec.select();}catch(_){} } return; }
     if(docNonSalvato()){toast("Hai scritto un attestato ma non l'hai salvato: premi Salva sotto la tabella, oppure Annulla.");return;}
     const extra=dipCampiExtra();
-    const {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");
+    let {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");
+    if(error&&_senzaTariffa(error,extra)){ ({data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id")); }
     if(error){toast("Errore: "+error.message);return;}
     if(!okOp||!okOp.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     const {data:okMem,error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
@@ -945,7 +1017,7 @@ ${vecchi?`
     /* 18 nov 2026 — chi non ha mai avuto un invito non ha la riga dei permessi:
        non e' un errore («Salvato, ma ruolo e permessi non aggiornati» usciva a
        ogni Salva). Si dice cosa manca davvero. */
-    if(!okMem||!okMem.length){toast("Aggiornato ✔ — non ha ancora l'app: ruolo e permessi valgono dopo «Nuovo invito»");return;}
+    if((!okMem||!okMem.length)&&!dipSonoIo({id:id})){toast("Aggiornato ✔ — non ha ancora l'app: ruolo e permessi valgono dopo «Nuovo invito»");return;}
     toast("Aggiornato ✔");
   }
 
@@ -1039,24 +1111,42 @@ ${vecchi?`
         return count||0;
       }catch(e){incerto=true;return 0;}
     };
-    const [a,b,c,d,acc]=await Promise.all([
+    /* ⚠️ 20 nov 2026 (studio, voce Collaboratori) — LE SCADENZE DELLA PERSONA.
+       Come per la pratica (19 nov) e il mezzo (14 ago): col Cestino il «set
+       null» del database non scatta mai, e le scadenze aperte di una persona
+       buttata via (la polizza, il corso, la visita) restavano vive: nello
+       Scadenzario «(persona non più in squadra)» e l'email del mattino
+       continuava ad avvisare. Adesso vanno nel Cestino con lei e tornano su
+       con lei (CEST_FIGLI.gest_operatori in gest-cestino.js). Quelle gia'
+       «fatte» restano dove sono: sono storia. */
+    const _nScad=async function(){
+      try{
+        const {count,error}=await sb.from("gest_scadenze").select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).eq("operatore_id",id).neq("stato","fatta");
+        if(error)return 0;
+        return count||0;
+      }catch(e){ return 0; }
+    };
+    const [a,b,c,d,acc,nSc]=await Promise.all([
       _sommaOre(),
       _n("gest_lavori","operatore_id",id),
       _nFile("gest_foto"),
       _nFile("gest_video"),
-      _haAccesso()
+      _haAccesso(),
+      _nScad()
     ]);
     ore=a;lav=b;file=c+d;
     const voci=[];
     /* «96 ore» e non «96,00 ore»: le ore si scrivono come si dicono */
-    if(ore) voci.push(_numTesto(Math.round(ore*100)/100)+(ore===1?" ora registrata":" ore registrate")+" — servono al margine dei lavori");
+    if(ore) voci.push(_numTesto(Math.round(ore*100)/100)+(ore===1?" ora registrata":" ore registrate")+(_sqPro()?" — servono al margine delle pratiche e alla parcella":" — servono al margine dei lavori"));
     if(file)voci.push(file+(file===1?" foto o video caricato":" foto e video caricati"));
     if(lav) voci.push(lav+(lav===1?" lavoro a suo nome, che resterà senza nessuno assegnato"
                                   :" lavori a suo nome, che resteranno senza nessuno assegnato"));
-    let msg="Eliminare «"+nome+"» dalla squadra?\n\n";
+    let msg="Eliminare «"+nome+"» "+(_sqPro()?"dai collaboratori dello studio":"dalla squadra")+"?\n\n";
     if(voci.length){
       msg+="Quello che ha fatto RESTA dov'è:\n"+voci.map(v=>"  •  "+v).join("\n")+"\n\n";
     }
+    if(nSc&&_cestOn())msg+=(nSc===1?"Ha 1 scadenza aperta: va nel cestino insieme a lei.":"Ha "+nSc+" scadenze aperte: vanno nel cestino insieme a lei.")+"\n\n";
     if(incerto)msg+="ATTENZIONE: non sono riuscito a controllare tutto, la connessione non ha risposto.\n\n";
     if(acc)msg+="Perde anche l'accesso al gestionale dal telefono.\n\n";
     msg+=fraseCestino()+"\n\nContinuare?";
@@ -1122,7 +1212,12 @@ ${vecchi?`
             +"sua scheda premi «Nuovo invito»."));
       return;
     }
+    /* col Cestino acceso questa «delete» scrive solo la data: tornano su con lei */
+    let _scVia=0;
+    if(nSc&&_cestOn()){
+      try{ const rs=await sb.from("gest_scadenze").delete().eq("user_id",sbUid).eq("operatore_id",id).neq("stato","fatta").select("id"); _scVia=(rs&&rs.data||[]).length; }catch(_){}
+    }
     renderDip();
     rinfresca("riepilogo","agenda","squadra","scadenzario","galleria","lavori");
-    toast(_cestOn()?"Persona messa nel Cestino ✔ — la rimetti a posto da lì":"Persona eliminata");
+    toast(_cestOn()?("Persona messa nel Cestino ✔"+(_scVia?(" con "+_scVia+(_scVia===1?" scadenza":" scadenze")):"")+" — la rimetti a posto da lì"):"Persona eliminata");
   }

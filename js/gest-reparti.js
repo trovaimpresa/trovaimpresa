@@ -19,7 +19,10 @@
     }catch(e){ return {}; }
   }
   const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
-  const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;
+  /* 20 nov 2026 — allo studio il link porta «&studio=1»: la pagina dell'invito
+     dice «studio» e «pratiche» invece di «impresa» e «lavori» (il codice resta
+     lo stesso, la pagina non legge altro) */
+  const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c+(ruoloUtente==='professionista'?"&studio=1":"");
   function copyLink(txt){
     const ok=()=>toast("Link copiato ✔");
     const fb=()=>{const a=document.createElement("textarea");a.value=txt;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.focus();a.select();let d=false;try{d=document.execCommand("copy");}catch(_){}document.body.removeChild(a);d?ok():prompt("Copia il link a mano:",txt);};
@@ -203,7 +206,7 @@
       /* la ricerca unica: allo studio tecnico non si dice «lavoro», si dice
          «pratica» — come in tutto il resto del suo pannello */
       const ctq=document.querySelector('#ct-q');
-      if(ctq)ctq.placeholder="Cerca un nome: cliente, pratica, preventivo, fattura";
+      if(ctq)ctq.placeholder="Cerca un nome: cliente, pratica, preventivo, fattura, collaboratore";
       /* 6 nov 2026 — L'ERRORE «renderScadenze is not defined».
          Il tipo arriva dal database e a volte arriva PRIMA che il browser
          abbia finito di leggere i file che vengono dopo questo
@@ -716,8 +719,8 @@
        ⛔ «Carta cantiere Nord» va qui, PRIMA della regola corta su
           «cantiere»: con quella sola diventava «Carta pratica Nord». */
     ['Es. Carta Mario, Carta cantiere Nord','Es. Carta Mario, Carta studio Nord'],
-    ['Cerca un nome: cliente, lavoro, preventivo, fattura',
-     'Cerca un nome: cliente, pratica, preventivo, fattura'],
+    ['Cerca un nome: cliente, lavoro, preventivo, fattura, persona',
+     'Cerca un nome: cliente, pratica, preventivo, fattura, collaboratore'],
     ['Cerca cliente, indirizzo, lavoro','Cerca cliente, indirizzo, pratica'],
     ['Apri il lavoro','Apri la pratica'],
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
@@ -890,6 +893,18 @@
        il singolare non sta in questo elenco lo studio tecnico legge la parola
        da cantiere. */
     ['persona in squadra','persona nello studio'],
+    /* 20 nov 2026 (voce Collaboratori) — le frasi con «squadra» che restavano:
+       nello Scadenzario «(persona non più in squadra)», nel margine della
+       pratica «al costo medio della squadra», «una persona che non è più in
+       squadra», «chi c'è adesso in squadra». E «Manodopera:» col due punti
+       (solo quella riga del margine: la parola nuda resta, è quella di legge
+       nell'analisi dei prezzi del computo). */
+    ['non più in squadra','non più nello studio'],
+    ['non è più in squadra','non è più nello studio'],
+    ['adesso in squadra','adesso nello studio'],
+    ['costo medio della squadra','costo medio dello studio'],
+    ['Manodopera: ','Tempo speso: '],
+    ['La squadra lo usa per scriverti','I collaboratori lo usano per scriverti'],
     ['operatore con lavori assegnati','collaboratore con pratiche assegnate'],
     ['operatori con lavori assegnati','collaboratori con pratiche assegnate'],
     ['cantiere aperto con un indirizzo','pratica aperta con un indirizzo'],
