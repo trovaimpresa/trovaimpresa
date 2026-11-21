@@ -398,7 +398,7 @@
       ? FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
           .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0)
       : L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
-    const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
+    let oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
     /* anche le spese delle carte entrano nel conto: prima erano invisibili
        e l'utile risultava più alto del vero */
@@ -885,6 +885,23 @@
         v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
     }));
 
+    /* 21 nov 2026 (studio, voce Report) — LE ORE DEL MESE COME IL REPORT. La
+       scheda guardava solo la casella «ore» del lavoro: con le ore scritte riga
+       per riga («Registro delle ore», Giornate) diceva «0 h questo mese» mentre
+       il Report diceva 5 h per la stessa persona. Stessa regola del Report e
+       della manodopera: se un lavoro ha righe di ore valgono quelle (contate
+       col loro giorno), se no vale la sua casella. Se la lettura cade resta il
+       conto di prima. */
+    if(!tabNascosto("squadra")&&L.length){
+      try{
+        const ro=await sb.from("gest_ore").select("lavoro_id,ore,data").eq("user_id",sbUid).in("lavoro_id",L.map(l=>l.id));
+        if(!ro.error){
+          const conRighe=new Set((ro.data||[]).map(o=>String(o.lavoro_id)));
+          oreMese=(ro.data||[]).filter(o=>thisMonth(o.data)).reduce((s,o)=>s+(+o.ore||0),0)
+                 +L.filter(l=>!conRighe.has(String(l.id))&&(thisMonth(l.data_fatto)||thisMonth(l.data_prevista))).reduce((s,l)=>s+(+l.ore||0),0);
+        }
+      }catch(_){}
+    }
     if(!tabNascosto("squadra"))C.push(rieCard({
       tab:"squadra", titolo:"Squadra", n:OPE.length, dati:OPE.length>0,
       lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+String(Math.round(oreMese*10)/10).replace(".",",")+" h questo mese",   /* 20 nov 2026: «2,5 h», non «2.5 h» */

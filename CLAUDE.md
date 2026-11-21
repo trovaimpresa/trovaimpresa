@@ -4077,8 +4077,23 @@ Banco `tools/banco-gestionale.js app`: ZERO difetti (rifatto dopo le funzioni nu
 ⬜ Non provato dal vivo: «Fotografa una fattura» (AI, 1 credito); l'email del mattino con la fattura scaduta; il ritorno nella pratica dopo «Salva» col file vero (provato solo «Apri» e il salvataggio).
 ⬜ Da guardare: nella pratica dello studio restano parole da cantiere fuori da questa voce («Rapportini di giornata… li scrive la squadra»), e «Rimborso spese (trasferte, materiali)» nella fattura. La tendina «Strumenti usati in questa pratica» col conto di Alex mostra «escavatore» (conto misto impresa/studio).
 
+# 21 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: REPORT
+
+Prova da geometra dal vivo (`?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati, letti e cancellati in UNA chiamata (`window._provaRep(leggi)` scritta nella pagina): cliente srl, collaboratrice Giulia 20 €/h con 5 ore sulla pratica, 2 pratiche pagate (frazionamento 2.500 a novembre, APE 300,50 a febbraio), visure 45,30, 4 fornitori dello studio (topografo 610, laboratorio 244,40, geologo 488 a febbraio, software 120,99 senza pratica).
+Conti giusti e UGUALI: Report novembre incassato 2.500 · spese 1.020,69 · utile 1.479,31 = Assistente (scheda Report 1.479,31, `_tiMese.inc` 2.500) = PDF = file per Excel; anno 2.800,50; margine totale 1.191,81; frazionamento +1.500,30, APE −187,50; Fornitori «365,39 da pagare» = Assistente. Fatture pagate: provate SOLO in memoria (finto `sb.from` per `gest_fatture`): parcella 2.300,50 + cassa 5% + spese 150 → 2.565,53 nel Report e nell'Assistente ✔. Nessuna fattura emessa, niente SDI. Pulito: 0 righe di prova, Cestino com'era, nessun file.
+
+Sistemato (`?v=21nov-rep`):
+1. ⛔ Fatture «Da fatturare» 3.661 € (3 pratiche) contro 860,50 € (1) dell'Assistente: contava anche le pratiche segnate a mano «pagata»/«emessa» (che il Report conta già come incassate). Ora `fattLavLiberi` salta `fatt_stato` emessa/pagata, come l'Assistente. Tutte le facce.
+2. ⛔ Assistente, scheda Collaboratori «0 h questo mese» con 5 ore scritte nel Registro (il Report diceva 5 h): leggeva solo la casella «ore» della pratica. Ora stessa regola del Report (righe di `gest_ore` col loro giorno, se no la casella). Chiude il ✗ della mappa. Tutte le facce.
+3. Parole da cantiere allo studio scritte alla FONTE (`_repPro()` / `_repW()` in `js/gest-report.js`): schermo («Importo della pratica», «ogni pratica… sulla sua parcella», «Tempo speso» nella riga della pratica, «Spese nelle pratiche», «Tempo speso dai collaboratori», «per valore delle pratiche», aiuti vuoti); PDF e file per Excel (che il traduttore non raggiunge: «Guadagno o perdita per pratica», «Pratica», «Ore per collaboratore», colonne «Collaboratore», «Tempo speso», «Data fine», file `report-pratiche-…csv`).
+4. Allo studio (niente Carte) la riga «Spese con le carte 0,00» non c'è più (schermo, PDF, Excel); torna se ci sono spese di carte (conto misto).
+5. Messaggio «CSV esportato» → «File per Excel scaricato» (come il pulsante). Tutte le facce.
+Provato sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione) e sul telefono 375: niente fuori schermo, niente sotto 13 px.
+⬜ Da guardare: le spese anticipate in nome del cliente (art. 15) entrano nell'«incassato» del Report e dell'Assistente (`fattImponibile`), quindi l'utile del mese le conta come guadagno. Tasse e fisco conta solo fatture pagate (voluto): uno studio senza fatture vede l'incassato nel Report e 0 in Tasse.
+⬜ Non provato: reparto con fatture VERE pagate (vietato emetterle); `?vedi=professionista` sul conto misto mostra ancora «Mezzi» nell'Assistente.
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4099,7 +4114,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✔ dal 20 nov le ore scritte si aprono pratica per pratica, con «Apri le Giornate di …».
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
-- Collaboratori (Assistente) ↔ Ore fatte: ✗ le ore del mese della scheda vengono da gest_lavori.ore, non da gest_ore: da guardare a fine giro.
+- Collaboratori (Assistente) ↔ Ore fatte: ✔ dal 21 nov le ore del mese della scheda leggono anche gest_ore (stessa regola del Report).
 - Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
 - Stati di avanzamento ↔ Computo metrico: ✔ il SAL vive dentro il computo (righe, prezzi, ribasso, capitoli); «Fai un SAL» apre il computo sulla linguetta giusta.
 - Stati di avanzamento ↔ Pratiche: ✔ dal 20 nov riquadro «Computo e stati di avanzamento» nella pratica, «Apri» e chiudendo si torna nella pratica.
@@ -4122,6 +4137,16 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Fornitori ↔ Commercialista: ✔ avviso «senza partita IVA il commercialista non sa…».
 - Fornitori ↔ Collaboratori / Strumenti: — non c'entrano.
 - Si può unire: NO, Fornitori resta voce sola.
+
+- Report ↔ Assistente: ✔ utile e incassato del mese uguali (scheda Report, «Il tuo mese»); ore dei collaboratori uguali dal 21 nov.
+- Report ↔ Fatture: ✔ incassato = imponibile delle fatture pagate (IVA esclusa); il riquadro di Fatture «Entrato in cassa» è IVA compresa e ritenuta tolta (nome diverso, voluto). «Da fatturare» uguale all'Assistente dal 21 nov.
+- Report ↔ Fornitori: ✔ le fatture dei fornitori entrano tutte nelle spese (pagate e no, per data) e nel margine della pratica.
+- Report ↔ Pratiche: ✔ guadagno o perdita per pratica = margine della scheda (parcella − spese − fornitori − tempo speso). — dal Report non si apre la pratica (la riga non si clicca).
+- Report ↔ Collaboratori / Agenda: ✔ «Ore per collaboratore» dalle righe del Registro delle ore.
+- Report ↔ Tasse e fisco: ✗ voluto: Tasse conta solo le fatture pagate di tutti i reparti; il Report, senza fatture, le pratiche segnate «pagata». Spese anticipate art. 15 dentro l'incassato del Report: da guardare.
+- Report ↔ Clienti: ✔ «Migliori clienti» per valore delle pratiche. — dal Report non si apre il cliente.
+- Report ↔ Preventivi e parcella: — il Report non conta i preventivi (giusto: non sono soldi).
+- Si può unire: Report NO (è la voce dei numeri); la scheda «Report» dell'Assistente lo riassume.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

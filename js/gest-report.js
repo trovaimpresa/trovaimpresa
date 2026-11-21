@@ -20,6 +20,27 @@
      ============================================================ */
 
   let repData=null;
+  /* 21 nov 2026 (studio, voce Report) — le parole dello studio scritte alla
+     FONTE. Il traduttore della pagina cambiava solo alcune frasi dello schermo
+     («Manodopera 100,00 €», «Spese nei lavori», «ogni lavoro» restavano) e non
+     arriva per niente al PDF e al file per Excel, che uscivano da cantiere
+     («Ore per operatore», «Guadagno o perdita per lavoro»). */
+  function _repPro(){ return typeof ruoloUtente!=="undefined" && ruoloUtente==="professionista"; }
+  function _repW(){
+    const p=_repPro();
+    return {
+      lav:   p?"Pratica":"Lavoro",
+      perLav:p?"Guadagno o perdita per pratica":"Guadagno o perdita per lavoro",
+      imp:   p?"Importo della pratica":"Importo del lavoro",
+      md:    p?"Tempo speso":"Manodopera",
+      mdTot: p?"Tempo speso dai collaboratori (ore × costo orario)":"Manodopera (ore × costo orario)",
+      spLav: p?"Spese nelle pratiche":"Spese nei lavori",
+      uscite:p?"Uscite = spese + fornitori + tempo speso.":"Uscite = spese + fornitori + manodopera.",
+      valore:p?"Valore delle pratiche":"Valore dei lavori",
+      oreTit:p?"Ore per collaboratore":"Ore per operatore",
+      chi:   p?"Collaboratore":"Operatore"
+    };
+  }
   /* 12 nov 2026 — regola 19: uno zero è grigio e senza segno (prima «−0,00 €») */
   function _repZero(v,segno){
     return (+v||0)===0 ? '<td style="color:#5f6b7a">'+eur(0)+'</td>'   /* lo stesso grigio di .fp-zero in Tasse e fisco */
@@ -244,7 +265,7 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.cost/mlMax*100,m.cost?1:0)}%"></div></div>
-      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · Manodopera "+eur(m.md):""}</div></div>`;
+      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div></div>`;
     }).join("");
     /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i
        margini di questa pagina (e i Totali storici, e il CSV) sono scritti
@@ -255,8 +276,8 @@
       : "";
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       ${avvisoOre}
-      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Importo del lavoro</span><span><i class="rep-i-sp"></i>Spese, fornitori e manodopera</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
-      <p class="rep-sub" style="margin:0 0 10px">Il guadagno di ogni lavoro è sul suo prezzo, anche se non è ancora stato pagato.</p>
+      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>${_repW().imp}</span><span><i class="rep-i-sp"></i>Spese, fornitori e manodopera</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
+      <p class="rep-sub" style="margin:0 0 10px">${_repPro()?"Il guadagno di ogni pratica è sulla sua parcella, anche se non è ancora stata pagata.":"Il guadagno di ogni lavoro è sul suo prezzo, anche se non è ancora stato pagato."}</p>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     /* 19 nov 2026 — i numeri dello schermo, uguali, per il PDF e per il file Excel */
@@ -281,15 +302,15 @@
         <p class="rep-sub">Da quando usi il gestionale. Il margine è: soldi incassati meno tutte le spese.</p><table class="rep-table">
         <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td>${_repZero(incAnno,"")}</tr>
         <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td>${_repZero(totInc,"")}</tr>
-        <tr><td>Spese nei lavori</td>${_repZero(totSp,"−")}</tr>
-        <tr><td>Spese con le carte</td>${_repZero(totCarte,"−")}</tr>
+        <tr><td>${_repW().spLav}</td>${_repZero(totSp,"−")}</tr>
+        ${(_repPro()&&!totCarte)?"":`<tr><td>Spese con le carte</td>${_repZero(totCarte,"−")}</tr>`}
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
         ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
         ${totNol?`<tr><td>Noleggio interno <span style="font-size:13px;color:var(--testo-3)">(mezzi del tuo Noleggio)</span></td><td style="color:var(--testo)">−${eur(totNol)}</td></tr>`:""}
-        ${totMD?`<tr><td>Manodopera <span style="font-size:13px;color:var(--testo-3)">(ore × costo orario)</span></td><td style="color:var(--testo)">−${eur(totMD)}</td></tr>`:""}
+        ${totMD?`<tr><td>${_repPro()?"Tempo speso dai collaboratori":"Manodopera"} <span style="font-size:13px;color:var(--testo-3)">(ore × costo orario)</span></td><td style="color:var(--testo)">−${eur(totMD)}</td></tr>`:""}
         <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totNol-totMD>=0?'var(--ok)':'var(--err)'}">${(m=>(m<0?'−':'')+eur(Math.abs(m)))(totInc-totSp-totCarte-totRif-totFF-totNol-totMD)}</td></tr></table></div>
-      <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per valore dei lavori)</h3><table class="rep-table">
-        ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
+      <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per ${_repPro()?"valore delle pratiche":"valore dei lavori"})</h3><table class="rep-table">
+        ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">${_repPro()?"Collega i clienti alle pratiche per vedere la classifica.":"Collega i clienti ai lavori per vedere la classifica."}</td></tr>`}</table></div>
       ${ruoloUtente==='professionista'?"":`
       <div class="rep-card"><h3>${_ICO_CARTA}Spese con le carte aziendali</h3>
         <p class="rep-sub">Soldi usciti dalle carte, non legati a un lavoro preciso. Sono compresi nel margine qui sopra.</p>
@@ -301,7 +322,7 @@
           : `<tr><td colspan="2" style="color:var(--muted)">Nessuna spesa registrata sulle carte.</td></tr>`}
         </table></div>`}
       <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
-        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||(id?"—":"Senza nome"))}</td><td>${String(Math.round(v*10)/10).replace(".",",")} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
+        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||(id?"—":"Senza nome"))}</td><td>${String(Math.round(v*10)/10).replace(".",",")} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">${_repPro()?"Scrivi le ore nel «Registro delle ore» della pratica per vedere il totale per persona.":"Segna le ore nei lavori per vedere il totale per persona."}</td></tr>`}</table></div>
     </div>`;
   }
 
@@ -322,7 +343,8 @@
     ((repData.md&&repData.md.righe)||[]).forEach(o=>{if(!o.lavoro_id)return;const k=String(o.lavoro_id);conRighe[k]=1;orePer[k]=(orePer[k]||0)+(+o.ore||0);});
     const oreLav=l=>conRighe[String(l.id)]?orePer[String(l.id)]:(+l.ore||0);
     const fattLab={none:"",emessa:"Emessa",pagata:"Pagata"};
-    const rows=[["Descrizione","Stato","Data prevista","Data fatto","Cliente","Operatore","Ore","Importo","Spese","Fatture fornitori","Manodopera","Margine","Fattura"]];
+    const W=_repW();
+    const rows=[[_repPro()?"Pratica":"Descrizione","Stato","Data prevista",_repPro()?"Data fine":"Data fatto","Cliente",W.chi,"Ore","Importo","Spese","Fatture fornitori",W.md,"Margine","Fattura"]];
     repData.L.forEach(l=>{
       const sp=speseMap[l.id]||0, ff=ffMap[l.id]||0, md=mdMap[String(l.id)]||0;
       rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",String(Math.round(oreLav(l)*10)/10).replace(".",","),num(l.importo),num(sp),num(ff),num(md),num(margineLavoro(l.importo,sp,ff,md)),fattLab[l.fatt_stato||"none"]!=null?fattLab[l.fatt_stato||"none"]:(l.fatt_stato||"")]);
@@ -332,16 +354,16 @@
     if(T){
       rows.push([]); rows.push(["Totali di questo reparto"]);
       [["Incassato "+T.anno+" (IVA esclusa)",T.incAnno],["Incassato totale (IVA esclusa)",T.totInc],
-       ["Spese nei lavori",-T.totSp],["Spese con le carte",-T.totCarte],["Rifornimenti pagati in contanti",-T.totRif],
-       ["Fatture dei fornitori",-T.totFF],["Noleggio interno",-T.totNol],["Manodopera (ore x costo orario)",-T.totMD],
-       ["Margine totale",T.marg]].forEach(([n,v])=>{ if(v||/Incassato|Margine|lavori|carte/.test(n)) rows.push([n,num(v)]); });
+       [W.spLav,-T.totSp],["Spese con le carte",-T.totCarte],["Rifornimenti pagati in contanti",-T.totRif],
+       ["Fatture dei fornitori",-T.totFF],["Noleggio interno",-T.totNol],[W.mdTot.replace("×","x"),-T.totMD],
+       ["Margine totale",T.marg]].forEach(([n,v])=>{ if(v||/Incassato|Margine|lavori|pratiche/.test(n)||(/carte/.test(n)&&!_repPro())) rows.push([n,num(v)]); });
       if(repData.mese){const M=repData.mese; rows.push([]); rows.push([M.nome+" - incassato",num(M.inc)]); rows.push([M.nome+" - spese",num(-M.sp)]); rows.push([M.nome+" - utile",num(M.ut)]);}
     }
     const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
-    a.download="report-lavori-"+todayStr()+".csv";a.click();URL.revokeObjectURL(a.href);
-    toast("CSV esportato ⬇");
+    a.download=(_repPro()?"report-pratiche-":"report-lavori-")+todayStr()+".csv";a.click();URL.revokeObjectURL(a.href);
+    toast("File per Excel scaricato ⬇");
   }
 
   /* ===== 19 nov 2026 (sì di Alex) — IL REPORT IN PDF =====
@@ -390,18 +412,20 @@
     const t=repData.tot, ms=repData.mese;
     if(!repData.oreLette){ doc.setTextColor(200,0,0); doc.setFontSize(10); doc.text(T("Attenzione: le ore non si sono potute leggere, la manodopera non e' contata."),M,y); doc.setTextColor(0); y+=8; }
     tabella(ms.nome+" (questo mese)",["Voce","Importo"],[["Incassato",E(ms.inc)],["Spese",E(-ms.sp)],Object.assign(["Utile",E(ms.ut)],{_b:1})],[130,50]);
-    const tr=[["Incassato "+t.anno+" (IVA esclusa)",E(t.incAnno)],["Incassato totale (IVA esclusa)",E(t.totInc)],["Spese nei lavori",E(-t.totSp)],["Spese con le carte",E(-t.totCarte)]];
+    const PW=_repW();
+    const tr=[["Incassato "+t.anno+" (IVA esclusa)",E(t.incAnno)],["Incassato totale (IVA esclusa)",E(t.totInc)],[PW.spLav,E(-t.totSp)]];
+    if(!_repPro()||t.totCarte) tr.push(["Spese con le carte",E(-t.totCarte)]);
     if(t.totRif) tr.push(["Rifornimenti pagati in contanti",E(-t.totRif)]);
     if(t.totFF)  tr.push(["Fatture dei fornitori",E(-t.totFF)]);
     if(t.totNol) tr.push(["Noleggio interno",E(-t.totNol)]);
-    if(t.totMD)  tr.push(["Manodopera (ore x costo orario)",E(-t.totMD)]);
+    if(t.totMD)  tr.push([PW.mdTot.replace("×","x"),E(-t.totMD)]);
     tr.push(Object.assign(["Margine totale",E(t.marg)],{_b:1}));
     tabella("Totali di questo reparto",["Voce","Importo"],tr,[130,50],"Da quando usi il gestionale. Margine = soldi incassati meno tutte le spese.");
     tabella("Ultimi 12 mesi",["Mese","Incassato","Spese"],repData.mesi.slice().reverse().map(m=>[(x=>x.charAt(0).toUpperCase()+x.slice(1))(mesi[+m.k.slice(5,7)-1])+" "+m.k.slice(0,4),E(m.inc),E(-m.sp)]),[80,50,50]);
     if((repData.ML||[]).length)
-      tabella("Guadagno o perdita per lavoro",["Lavoro","Importo","Uscite","Margine"],repData.ML.map(m=>[m.d,E(m.inc),E(-m.cost),E(m.marg)]),[80,34,34,32],"Uscite = spese + fornitori + manodopera.");
-    if((repData.topCli||[]).length) tabella("Migliori clienti",["Cliente","Valore dei lavori"],repData.topCli.map(([n,v])=>[n,E(v)]),[130,50]);
-    if((repData.oreOp||[]).length) tabella("Ore per operatore",["Persona","Ore"],repData.oreOp.map(([n,v])=>[n,String(Math.round(v*10)/10).replace(".",",")+" h"]),[130,50]);
+      tabella(PW.perLav,[PW.lav,"Importo","Uscite","Margine"],repData.ML.map(m=>[m.d,E(m.inc),E(-m.cost),E(m.marg)]),[80,34,34,32],PW.uscite);
+    if((repData.topCli||[]).length) tabella("Migliori clienti",["Cliente",PW.valore],repData.topCli.map(([n,v])=>[n,E(v)]),[130,50]);
+    if((repData.oreOp||[]).length) tabella(PW.oreTit,["Persona","Ore"],repData.oreOp.map(([n,v])=>[n,String(Math.round(v*10)/10).replace(".",",")+" h"]),[130,50]);
     doc.save("Report"+(rep?" - "+rep:"")+" - "+todayStr()+".pdf");
   }
 

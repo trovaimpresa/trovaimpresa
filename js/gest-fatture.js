@@ -690,7 +690,7 @@
       sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
       sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      sb.from("gest_lavori").select("id,descrizione,dove,stato,importo,data_fatto,data_prevista,cliente_id")
+      sb.from("gest_lavori").select("id,descrizione,dove,stato,importo,data_fatto,data_prevista,cliente_id,fatt_stato")
         .eq("user_id",sbUid).eq("mestiere_id",mid).eq("stato","fatto")
     ]); }catch(e){}
     /* 11 nov 2026 — senza rete non si dice «nessuna fattura» e i riquadri non
@@ -721,7 +721,12 @@
        sono il "da fatturare" e la sorgente del selettore */
     const dentro=new Set();
     Object.values(fattLavori).forEach(a=>a.forEach(x=>dentro.add(String(x))));
-    fattLavLiberi=(lav||[]).filter(l=>+l.importo>0 && !dentro.has(String(l.id)));
+    /* 21 nov 2026 (studio, voce Report) — STESSA REGOLA DELL'ASSISTENTE: un
+       lavoro segnato a mano «emessa» o «pagata» (fatturato fuori, o pagato
+       senza fattura) non e' «da fatturare». Prima qui contava, e lo stesso
+       euro era «incassato» nel Report e «da fatturare» qui: 3.661 € contro
+       860,50 € dell'Assistente sugli stessi dati. */
+    fattLavLiberi=(lav||[]).filter(l=>+l.importo>0 && !dentro.has(String(l.id)) && !["emessa","pagata"].includes(l.fatt_stato||"none"));
 
     const gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
     const anno=todayStr().slice(0,4);
