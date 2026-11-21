@@ -249,7 +249,7 @@
        esattamente lo stipendio della squadra. */
     const totMD=Object.keys(_md.per).reduce(function(s,k){return s+(+_md.per[k]||0);},0);
     let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]||ffPer[l.id]||_md.per[String(l.id)])
-      .map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
+      .map(l=>({id:l.id,d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
                 ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0}));
     ML.forEach(m=>{m.marg=margineLavoro(m.inc,m.sp,m.ff,m.md);
       /* 19 nov 2026 — la barra grigia e' TUTTO quello che e' uscito (spese +
@@ -265,7 +265,8 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.cost/mlMax*100,m.cost?1:0)}%"></div></div>
-      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div></div>`;
+      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div>
+      <button class="btn rep-apri" data-action="edit-job" data-id="${esc(String(m.id))}">${_repPro()?"Apri la pratica ›":"Apri il lavoro ›"}</button></div>`;
     }).join("");
     /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i
        margini di questa pagina (e i Totali storici, e il CSV) sono scritti
@@ -274,6 +275,27 @@
     const avvisoOre=(_md.oreLette===false)
       ? `<p class="fatt-empty" style="margin:0 0 12px;color:var(--err);font-weight:700">⚠️ Non sono riuscito a leggere le ore: in questa pagina <b>la manodopera non è contata</b>, quindi i margini qui sotto sono più alti del vero. Ricarica la pagina.</p>`
       : "";
+    /* 21 nov 2026 (sì di Alex, foto approvata) — ANNO PER ANNO: incassato,
+       spese e utile di ogni anno, per la dichiarazione. Stessi conti del mese
+       qui sotto (incassato − spese; la manodopera e' un costo interno e resta
+       solo nel margine dei lavori), solo con la chiave dell'anno. */
+    const _anniSet=new Set([String(now.getFullYear())]);
+    const _annoDi=d=>{const a=String(d||"").slice(0,4);if(/^\d{4}$/.test(a))_anniSet.add(a);};
+    (_daLavori?L.filter(l=>l.fatt_stato==="pagata").map(l=>l.data_fatto):pagate.map(_dataInc)).forEach(_annoDi);
+    SP.forEach(x=>_annoDi(x.data)); CM.forEach(m=>_annoDi(m.data||m.created_at)); RIF.forEach(r=>_annoDi(r.data)); FF.forEach(f=>_annoDi(f.data)); NOL.forEach(n=>_annoDi(n.data_uscita));
+    const ANNI=[..._anniSet].sort().reverse().slice(0,6).map(a=>{
+      const i=_incassoIn(a,4);
+      const sp=SP.filter(x=>String(x.data||"").slice(0,4)===a).reduce((s,x)=>s+(+x.importo||0),0)
+        +CM.filter(m=>String(m.data||m.created_at||"").slice(0,4)===a).reduce((s,m)=>s+(+m.importo||0),0)
+        +rifIn(a,4)+ffIn(a,4)+nolIn(a,4);
+      return {a,inc:i,sp,ut:i-sp};});
+    const _utCol=v=>`color:${v>0?"var(--ok)":v<0?"var(--err)":"#5f6b7a"}`;
+    const _utTxt=v=>(v<0?"−":"")+eur(Math.abs(v));
+    const anniCard=`<div class="rep-card rep-anni"><h3>${_ICO_LISTA}Anno per anno</h3>
+      <p class="rep-sub">Quello che ti serve per la dichiarazione: incassato, spese e utile di ogni anno.</p>
+      <table class="rep-table rep-anni-pc"><tr><td><b>Anno</b></td><td><b>Incassato</b></td><td><b>Spese</b></td><td><b>Utile</b></td></tr>
+      ${ANNI.map(r=>`<tr><td>${r.a}</td><td>${eur(r.inc)}</td><td>${r.sp?"−"+eur(r.sp):eur(0)}</td><td style="${_utCol(r.ut)}"><b>${_utTxt(r.ut)}</b></td></tr>`).join("")}</table>
+      <table class="rep-table rep-anni-tel">${ANNI.map(r=>`<tr><td><b>${r.a}</b><br><span class="rep-anni-sub">incassato ${eur(r.inc)} · spese ${r.sp?"−"+eur(r.sp):eur(0)}</span></td><td style="${_utCol(r.ut)}"><b>${_utTxt(r.ut)}</b></td></tr>`).join("")}</table></div>`;
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       ${avvisoOre}
       <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>${_repW().imp}</span><span><i class="rep-i-sp"></i>Spese, fornitori e manodopera</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
@@ -285,13 +307,14 @@
     if(repData){
       repData.tot={anno,incAnno,totInc,totSp,totCarte,totRif,totFF,totNol,totMD,marg:_marg};
       repData.mese={nome:mNome,inc:mInc,sp:mSp,ut:mUt};
-      repData.ML=ML; repData.mesi=mkeys.map((k,i)=>({k,inc:inc[i],sp:spm[i]}));
+      repData.anni=ANNI; repData.ML=ML; repData.mesi=mkeys.map((k,i)=>({k,inc:inc[i],sp:spm[i]}));
       repData.topCli=topCli.map(([id,v])=>[cliMap[id]||"—",v]);
       repData.oreOp=opRows.map(([id,v])=>[opMap[id]||(id?"—":"Senza nome"),v]);
       repData.oreLette=_md.oreLette!==false;
     }
     box.innerHTML=`<div class="rep-grid">
       ${mlCard}
+      ${anniCard}
       <div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_TREND}Incassi e spese — ultimi 12 mesi</h3>
         ${meseBox}
         <div class="rep-bar-wrap">${bars}</div>
@@ -357,6 +380,7 @@
        [W.spLav,-T.totSp],["Spese con le carte",-T.totCarte],["Rifornimenti pagati in contanti",-T.totRif],
        ["Fatture dei fornitori",-T.totFF],["Noleggio interno",-T.totNol],[W.mdTot.replace("×","x"),-T.totMD],
        ["Margine totale",T.marg]].forEach(([n,v])=>{ if(v||/Incassato|Margine|lavori|pratiche/.test(n)||(/carte/.test(n)&&!_repPro())) rows.push([n,num(v)]); });
+      if((repData.anni||[]).length){ rows.push([]); rows.push(["Anno","Incassato","Spese","Utile"]); repData.anni.forEach(r=>rows.push([r.a,num(r.inc),num(-r.sp),num(r.ut)])); }
       if(repData.mese){const M=repData.mese; rows.push([]); rows.push([M.nome+" - incassato",num(M.inc)]); rows.push([M.nome+" - spese",num(-M.sp)]); rows.push([M.nome+" - utile",num(M.ut)]);}
     }
     const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
@@ -421,6 +445,7 @@
     if(t.totMD)  tr.push([PW.mdTot.replace("×","x"),E(-t.totMD)]);
     tr.push(Object.assign(["Margine totale",E(t.marg)],{_b:1}));
     tabella("Totali di questo reparto",["Voce","Importo"],tr,[130,50],"Da quando usi il gestionale. Margine = soldi incassati meno tutte le spese.");
+    if((repData.anni||[]).length) tabella("Anno per anno",["Anno","Incassato","Spese","Utile"],repData.anni.map(r=>Object.assign([r.a,E(r.inc),E(-r.sp),E(r.ut)])),[45,45,45,45],"Per la dichiarazione: incassato meno spese di ogni anno.");
     tabella("Ultimi 12 mesi",["Mese","Incassato","Spese"],repData.mesi.slice().reverse().map(m=>[(x=>x.charAt(0).toUpperCase()+x.slice(1))(mesi[+m.k.slice(5,7)-1])+" "+m.k.slice(0,4),E(m.inc),E(-m.sp)]),[80,50,50]);
     if((repData.ML||[]).length)
       tabella(PW.perLav,[PW.lav,"Importo","Uscite","Margine"],repData.ML.map(m=>[m.d,E(m.inc),E(-m.cost),E(m.marg)]),[80,34,34,32],PW.uscite);

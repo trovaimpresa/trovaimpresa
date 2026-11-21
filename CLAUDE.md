@@ -4089,6 +4089,9 @@ Sistemato (`?v=21nov-rep`):
 4. Allo studio (niente Carte) la riga «Spese con le carte 0,00» non c'è più (schermo, PDF, Excel); torna se ci sono spese di carte (conto misto).
 5. Messaggio «CSV esportato» → «File per Excel scaricato» (come il pulsante). Tutte le facce.
 Provato sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione) e sul telefono 375: niente fuori schermo, niente sotto 13 px.
+Funzioni nuove (foto prima, «Sì si pubblica» di Alex) — tutte le facce, `?v=21nov-rep2`, css `?v=21nov-rep`:
+- **Anno per anno** (`anniCard` in `renderReport`): incassato, spese, utile di ogni anno (fino a 6, dall'anno di adesso indietro), stessi conti del mese (incassato − spese; la manodopera resta solo nel margine dei lavori, quindi l'utile dell'anno ≠ «Margine totale»). Computer 4 colonne (`.rep-anni-pc`), telefono a righe (`.rep-anni-tel`, ≤600 px). Anche nel PDF e in fondo al file per Excel (`repData.anni`). Provato: 2026 2.800,50 / −1.508,69 / 1.291,81; 2025 1.000.
+- **«Apri la pratica ›» / «Apri il lavoro ›»** su ogni riga di «Guadagno o perdita» (`data-action="edit-job"`, `ML[].id`): apre la scheda; chiudendo si resta nel Report.
 ⬜ Da guardare: le spese anticipate in nome del cliente (art. 15) entrano nell'«incassato» del Report e dell'Assistente (`fattImponibile`), quindi l'utile del mese le conta come guadagno. Tasse e fisco conta solo fatture pagate (voluto): uno studio senza fatture vede l'incassato nel Report e 0 in Tasse.
 ⬜ Non provato: reparto con fatture VERE pagate (vietato emetterle); `?vedi=professionista` sul conto misto mostra ancora «Mezzi» nell'Assistente.
 
@@ -4141,7 +4144,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Report ↔ Assistente: ✔ utile e incassato del mese uguali (scheda Report, «Il tuo mese»); ore dei collaboratori uguali dal 21 nov.
 - Report ↔ Fatture: ✔ incassato = imponibile delle fatture pagate (IVA esclusa); il riquadro di Fatture «Entrato in cassa» è IVA compresa e ritenuta tolta (nome diverso, voluto). «Da fatturare» uguale all'Assistente dal 21 nov.
 - Report ↔ Fornitori: ✔ le fatture dei fornitori entrano tutte nelle spese (pagate e no, per data) e nel margine della pratica.
-- Report ↔ Pratiche: ✔ guadagno o perdita per pratica = margine della scheda (parcella − spese − fornitori − tempo speso). — dal Report non si apre la pratica (la riga non si clicca).
+- Report ↔ Pratiche: ✔ guadagno o perdita per pratica = margine della scheda (parcella − spese − fornitori − tempo speso); dal 21 nov «Apri la pratica ›».
 - Report ↔ Collaboratori / Agenda: ✔ «Ore per collaboratore» dalle righe del Registro delle ore.
 - Report ↔ Tasse e fisco: ✗ voluto: Tasse conta solo le fatture pagate di tutti i reparti; il Report, senza fatture, le pratiche segnate «pagata». Spese anticipate art. 15 dentro l'incassato del Report: da guardare.
 - Report ↔ Clienti: ✔ «Migliori clienti» per valore delle pratiche. — dal Report non si apre il cliente.

@@ -6482,3 +6482,9 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .gx-pd{ grid-template-columns:1fr; gap:16px; }
   .gx-pd .gx-griglia{ grid-template-columns:1fr 1fr; }
 }
+
+/* 21 nov 2026 — Report: «Anno per anno» (4 colonne sul computer, a righe sul telefono) e «Apri la pratica» */
+#report .rep-anni-tel{display:none}
+#report .rep-anni-sub{font-size:14px;color:var(--testo-3,#5f6b7a);font-weight:400}
+#report .rep-apri{margin-top:8px}
+@media (max-width:600px){ #report .rep-anni-pc{display:none} #report .rep-anni-tel{display:table} }
