@@ -1,12 +1,13 @@
 // FACEBOOK — la coda dei post che Make.com pubblica DA SOLO sulla pagina
 // «Trova impresa» (23 novembre 2026, passo 2 deciso con Alex).
 //
-// Make chiama questo indirizzo 3 volte al giorno (8, 13, 19 ora italiana):
-//   /.netlify/functions/fb-coda?chiave=...
-// e riceve i post di quel turno:
-//   mattina (prima delle 11) → Vetrina 1 + nuovi iscritti, subappalti, offerte
-//   pranzo  (11-16)          → Vetrina 2 + il marchio del giorno
-//   sera    (dalle 16)       → Vetrina 3 + il post del gestionale del giorno
+// Make (piano gratis: un solo orario al giorno per scenario) chiama questo
+// indirizzo OGNI ORA: /.netlify/functions/fb-coda?chiave=...
+// Sono le ore a decidere il turno, e ogni post esce una volta sola:
+//   dalle 8 alle 12  → Vetrina 1 + nuovi iscritti, subappalti, offerte
+//   dalle 13 alle 18 → Vetrina 2 + il marchio del giorno
+//   dalle 19 alle 21 → Vetrina 3 + il post del gestionale del giorno
+//   di notte (22-7)  → niente
 //
 // Ogni post consegnato si scrive in fb_pubblicati: se Make richiama, quel
 // post non torna (niente doppioni sulla pagina).
@@ -50,7 +51,8 @@ exports.handler = async (event) => {
   const ora = new Date();
   const giorno = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(ora);
   const h = Number(new Intl.DateTimeFormat('it-IT', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(ora));
-  const turno = h < 11 ? 1 : h < 16 ? 2 : 3;
+  if (h < 8 || h >= 22) return risposta(200, { giorno, turno: 0, prova, post: [] });
+  const turno = h < 13 ? 1 : h < 19 ? 2 : 3;
   const post = [];
   try {
     const v = await vetrina(giorno, turno);
