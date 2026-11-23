@@ -1,6 +1,6 @@
 {
   "_cosa_e": "Fotografia delle imprese per citta (e per regione), usata da genera-mestiere-citta.js quando la shell non arriva su internet. Presa da imprese_pubbliche con l MCP Supabase.",
-  "fotografia_del": "2026-11-16",
+  "fotografia_del": "2026-11-23",
   "citta": {
     "Roma": [
       {
@@ -108,7 +108,7 @@
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -124,7 +124,7 @@
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Falegnameria generale restauro infissi serramenti vecchi mobili su misura librerie serramenti scale cucine porte"
       },
@@ -141,7 +141,7 @@
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Installiamo tutti i tipi di infissi per un grande risparmio energetico certificato di posa FQ3\nRISOLVIAMO PROBLEMATICHE DA CANTIERE"
       },
@@ -266,6 +266,35 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 367,
+        "nome": "TECNOPROGETTI srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 378,
+        "nome": "Mirko Foglietta",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Ditta individuale ​specializzata in rifiniture d'interni e ristrutturazioni leggere. Realizzo tinteggiature complete di appartamenti, opere su misura in cartongesso e pitture decorative personalizzate. Mi distinguo per l'estrema attenzione ai dettagli, la serietà professionale e la cura nella pulizia"
       }
     ],
     "Milano": [
@@ -561,6 +590,63 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "NITU EDILIZIA – Impresa edile e ristrutturazioni**\n\nNitu Edilizia offre servizi professionali nel settore dell'edilizia, occupandosi di manutenzioni, ristrutturazioni e lavori di finitura per abitazioni e locali commerciali.\n\nI nostri servizi comprendono:\n- Imbiancatura e tinteggiatura interna ed est"
+      },
+      {
+        "id": 356,
+        "nome": "RAM SRL",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Cologno Monzese",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "La qualità del nostro operato è già stata scelta da importanti realtà di rilievo nazionale, per le quali gestiamo \nattualmente diversi cantieri in tutta Italia. Tra le nostre principali collaborazioni vantiamo partnership con \naziende come Milani S.p.A., FGS S.r.l., Ferrara S.p.A., SV Sistemi di Sicu"
+      },
+      {
+        "id": 358,
+        "nome": "Massimiliano",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Senago",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Lavoro in questo settore da 40anni, ho imparato a fare l idraulico, l Elettricista,  il muratore, riparare caldaie clima elettrodomestici,  sono il cosidetto operaio a tutto tondo , o tuttologo"
+      },
+      {
+        "id": 373,
+        "nome": "MILANO RISTRUTTURAZIONI",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 381,
+        "nome": "Tailor house ristrutturazioni srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Peschiera Borromeo",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Torino": [
@@ -768,6 +854,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Idraulico con esperienza trentennale esegue ristrutturazioni per imparazioni sostituzione boiler e sopra luoghi per certificati gas e apertura contatori gas"
+      },
+      {
+        "id": 366,
+        "nome": "I.Ricci di Stefano Ricci",
+        "mestiere": "Pavimenti e piastrelle",
+        "mestieri": [
+          "Pavimenti e piastrelle"
+        ],
+        "tipo": "artigiano",
+        "citta": "Nichelino",
+        "regione": "Piemonte",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Napoli": [
@@ -873,6 +974,48 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "EDILE ART – Lavori edili e finiture in tutta la Campania\n\nEDILE ART è un’attività con sede a San Gennaro Vesuviano, in provincia di Napoli, specializzata in lavori di cartongesso, tinteggiatura e piccole manutenzioni edili.\n\nCi occupiamo di migliorare e valorizzare gli ambienti, offrendo soluzioni cu"
+      },
+      {
+        "id": 352,
+        "nome": "SD IMPIANTI",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Napoli",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "SD Impianti di Salvatore Denza, impresa artigiana di Napoli attiva dal 2024 nell’installazione e nella manutenzione di impianti elettrici civili, industriali e del terziario.\nCon una struttura di 15 addetti, organizzata in squadre autonome dotate di mezzi e attrezzature proprie, operiamo su tutto il "
+      },
+      {
+        "id": 357,
+        "nome": "Parisi Building srls",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "San Gennaro Vesuviano",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 368,
+        "nome": "Sea Smart Service Srl",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Piano di Sorrento",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Rieti": [
@@ -921,7 +1064,7 @@
         "citta": "Palermo",
         "regione": "Sicilia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ristrutturazione completa \nE tanto altro"
       },
@@ -940,6 +1083,22 @@
         "piano": "premium",
         "verificata": false,
         "descrizione": "💥 LA TUA CASA NON È UN POSTO QUALUNQUE. È IL TUO MANIFESTO. 💥\nBasta accontentarsi di spazi standard. È il momento di pretendere l'eccellenza.\nIn Ad Maiora System non arrediamo. Rivoluzioniamo. Prendiamo la tua visione e la trasformiamo in una realtà tangibile, fondendo la potenza dell'alto artigianat"
+      },
+      {
+        "id": 353,
+        "nome": "Caviglia Elettrosolutions",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Climatizzazione / Caldaie"
+        ],
+        "tipo": "artigiano",
+        "citta": "Casteldaccia",
+        "regione": "Sicilia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "# CAVIGLIA ELETTROSOLUTIONS\n**Ditta impiantistica disponibile per subappalti e collaborazioni con imprese edili**\n\nCaviglia Elettrosolutions, con sede operativa nell'area di Palermo e provincia, offre la propria disponibilità a collaborare con imprese edili, general contractor, società di ristruttura"
       }
     ],
     "Genova": [
@@ -1123,6 +1282,36 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Specialista nella Posa in Opera e Montaggio di Serramenti, Infissi, Porte e Zanzariere.\nOpero con professionalità, precisione e massima cura dei dettagli offrendo servizi specializzati di posa in opera e montaggio per show-room, rivenditori, imprese edili e clienti privati.\nInstallazioni eseguite a r"
+      },
+      {
+        "id": 359,
+        "nome": "Maksim Osiyan",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 362,
+        "nome": "Passione in opera",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Firenze": [
@@ -1139,7 +1328,7 @@
         "citta": "Firenze",
         "regione": "Toscana",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -1245,6 +1434,19 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 375,
+        "nome": "Art Service Bari",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Bari",
+        "regione": "Puglia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Catania": [
@@ -1265,14 +1467,16 @@
         "id": 292,
         "nome": "Valentino",
         "mestiere": "Ristrutturazione",
-        "mestieri": null,
+        "mestieri": [
+          "Ristrutturazione"
+        ],
         "tipo": "impresa",
         "citta": "Catania",
         "regione": "Sicilia",
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": null
+        "descrizione": ""
       }
     ],
     "Verona": [
@@ -1335,9 +1539,24 @@
         "citta": "Venezia",
         "regione": "Veneto",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Chi Siamo: Santechnic S.R.L.S. \nSantechnic S.R.L.S. è un'azienda specializzata nella vendita e installazione di impianti \ntermoidraulici e di climatizzazione, offrendo soluzioni avanzate ad alta efficienza energetica \nper contesti residenziali, commerciali e industriali. \nCi distinguiamo per la selez"
+      },
+      {
+        "id": 376,
+        "nome": "amici srl",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica"
+        ],
+        "tipo": "artigiano",
+        "citta": "Venezia",
+        "regione": "Veneto",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Siamo un’impresa specializzata nel montaggio di tubazioni e nei lavori di isolamento dello scafo e delle tubazioni. Abbiamo oltre 10 anni di esperienza nel settore e offriamo squadre qualificate e affidabili per lavori in subappalto. Lavoriamo con attenzione alla qualità, alla sicurezza e al rispetto"
       }
     ],
     "Messina": [
@@ -1391,6 +1610,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Ciao e grazie per la tua visita! \nLa ditta BIS-MAS si occupa di fornitura e posa di serramenti in ALLUMINIO e PVC. Offriamo la massima ASSISTENZA e manutenzione anche nei prodotti non forniti da noi!\nIl nostro punto di forza è il PASSAPAROLA perché la nostra  conoscenza e COMPETENZA in materia fa di "
+      },
+      {
+        "id": 355,
+        "nome": "FEM SRL",
+        "mestiere": "Movimento terra",
+        "mestieri": [
+          "Movimento terra"
+        ],
+        "tipo": "impresa",
+        "citta": "Padova",
+        "regione": "Veneto",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Impresa edile e dinamica esegue lavori di scavi e movimentazione terra, muratura in generale e realizzazione di impianti fognari e acque bianche compreso posa pozzetti e linee corrugati."
       }
     ],
     "Trieste": [],
@@ -1499,6 +1733,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": ""
+      },
+      {
+        "id": 369,
+        "nome": "Talarico impianti",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Camposanto",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Siamo una piccola azienda ,ci occupiamo di ristrutturazioni chiavi in mano.\nIl nostro sogno?la vostra soddisfazione"
       }
     ],
     "Reggio Emilia": [],
@@ -1518,7 +1767,7 @@
         "citta": "Arezzo",
         "regione": "Toscana",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Sono una ditta edile seria che fa tutti tipi di lavori edile, tetti, facciata, imbiancatura, interno, esterno pavimentazione.,,, con prezzi giusti e moderati"
       }
@@ -1559,6 +1808,22 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 354,
+        "nome": "LYTIMER",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "Grassobbio",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "LYtimer – Trasformiamo i tuoi spazi, realizziamo le tue idee\n\nLYtimer è il tuo partner di fiducia per ristrutturazioni, manutenzioni e lavori di miglioramento della casa.\n\nOffriamo soluzioni complete per abitazioni, uffici e locali commerciali, con attenzione alla qualità del lavoro, alla cura dei de"
       }
     ],
     "Biella": [],
@@ -1599,7 +1864,23 @@
       }
     ],
     "Campobasso": [],
-    "Caserta": [],
+    "Caserta": [
+      {
+        "id": 364,
+        "nome": "CUBICO S.R.L.",
+        "mestiere": "Costruzione nuova",
+        "mestieri": [
+          "Costruzione nuova"
+        ],
+        "tipo": "impresa",
+        "citta": "Orta di Atella",
+        "regione": "Campania",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Cubico S.r.l. è una società di costruzioni costituita nel 2019 con sede legale a Napoli (Piazza dei Martiri, 30) e sede operativa a Orta di Atella (CE). L'azienda fa parte del Gruppo D'Ambra, esecutore diretto per commesse pubbliche e private.\nAttestazione SOA (Lavori Pubblici)\nLa società possiede l'"
+      }
+    ],
     "Catanzaro": [],
     "Chieti": [
       {
@@ -1617,6 +1898,22 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Serramenti tapparelle zanzariere da oltre 30 anni"
+      },
+      {
+        "id": 379,
+        "nome": "Frasca Andrea",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica",
+          "Climatizzazione / Caldaie"
+        ],
+        "tipo": "artigiano",
+        "citta": "Vasto",
+        "regione": "Abruzzo",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "azienda di impianti idraulici di seconda generazione. effettuata impianti idraulici e tecnologici di qualsiasi genere e inoltre esegue anche assistenza su caldaie, climatizzatori, pdc e impianti più complessi\nconduzione centrali termiche"
       }
     ],
     "Como": [
@@ -1631,7 +1928,7 @@
         "citta": "Como",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Azienda individuale che si occupa della manutenzione dagli spazi verdi"
       },
@@ -1712,6 +2009,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 380,
+        "nome": "Impresa individuale",
+        "mestiere": "Pulizie / Disinfestazioni",
+        "mestieri": [
+          "Pulizie / Disinfestazioni"
+        ],
+        "tipo": "artigiano",
+        "citta": "Crotone",
+        "regione": "Calabria",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Cuneo": [
@@ -1729,6 +2041,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Ristrutturazione"
+      },
+      {
+        "id": 377,
+        "nome": "Dushku srls",
+        "mestiere": "Facciate e cappotto termico",
+        "mestieri": [
+          "Facciate e cappotto termico"
+        ],
+        "tipo": "impresa",
+        "citta": "Bra",
+        "regione": "Piemonte",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": ""
       }
     ],
     "Enna": [],
@@ -1750,6 +2077,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Multiservice Ianzano puntualità affidabilità professionalità"
+      },
+      {
+        "id": 363,
+        "nome": "LC IMPIANTI",
+        "mestiere": "Fotovoltaico / Pannelli solari",
+        "mestieri": [
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Foggia",
+        "regione": "Puglia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Forlì": [
@@ -1855,7 +2197,7 @@
         "citta": "La Spezia",
         "regione": "Liguria",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       }
@@ -2039,7 +2381,7 @@
         "citta": "Matera",
         "regione": "Basilicata",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       }
@@ -2122,6 +2464,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Duowatt S.r.l. è distributore specializzato in fotovoltaico, inverter, accumuli e colonnine EV in pronta consegna. Offriamo un servizio a 360° con gestione pratiche per professionisti."
+      },
+      {
+        "id": 361,
+        "nome": "AG GROUP srl",
+        "mestiere": "Coperture e tetti",
+        "mestieri": [
+          "Coperture e tetti"
+        ],
+        "tipo": "impresa",
+        "citta": "Desio",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "AG Group SRL opera nel settore edile da più di tre generazioni. Grazie a tutti\nquesti anni di esperienza, abbiamo acquisito e sviluppato la competenza e la\nprofessionalità che oggi ci contraddistinguono.\nLa nostra storia è spinta dalla dedizione, dalla passione per il lavoro e\ndalla voglia di crescer"
       }
     ],
     "Novara": [
@@ -2217,6 +2574,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Servizi di idraulica e termoidraulica a Gualdo Cattaneo e dintorni. Riparazioni, perdite d'acqua, termosifoni, sanitari, scaldabagni e ristrutturazione completa del bagno. 15 anni di esperienza, serie"
+      },
+      {
+        "id": 374,
+        "nome": "sole force srl",
+        "mestiere": "Muratura e strutture",
+        "mestieri": [
+          "Muratura e strutture"
+        ],
+        "tipo": "impresa",
+        "citta": "Magione",
+        "regione": "Umbria",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "SOLE FORCE SRL è un’impresa con sede a Perugia, disponibile per lavori di carpenteria edile in subappalto in Umbria, Toscana e Lazio.\n\nDisponiamo di una squadra da 5 a 10 operai specializzati, con caposquadra esperto.\n\nEseguiamo montaggio e smontaggio casseforme, posa ferro e armature, realizzazione "
       }
     ],
     "Pesaro": [],
@@ -2457,7 +2829,23 @@
         "descrizione": null
       }
     ],
-    "Rovigo": [],
+    "Rovigo": [
+      {
+        "id": 365,
+        "nome": "D.G.A. di Geraci Daniele",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici"
+        ],
+        "tipo": "artigiano",
+        "citta": "Rovigo",
+        "regione": "Veneto",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Salve, \ngarantiamo autonomia operativa e ottima lettura degli schemi elettrici ed eseguiamo le seguenti lavorazioni:\n\n1. Impianti Civili\n\nPredisposizione impiantistica completa\n\nPosa di tubazioni e cavi\n\nInstallazione di punti luce, interruttori, prese, frutti e cablaggio derivazioni\n\nCablaggio e con"
+      }
+    ],
     "Salerno": [
       {
         "id": 104,
@@ -2575,7 +2963,7 @@
         "citta": "Sassari",
         "regione": "Sardegna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       },
@@ -3001,7 +3389,7 @@
         "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 139,
@@ -3014,7 +3402,7 @@
         "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 142,
@@ -3028,7 +3416,7 @@
         "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 156,
@@ -3156,6 +3544,29 @@
         "mestiere": "Ristrutturazione",
         "mestieri": null,
         "tipo": "impresa",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "piano": "free"
+      },
+      {
+        "id": 367,
+        "nome": "TECNOPROGETTI srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Roma",
+        "regione": "Lazio",
+        "piano": "free"
+      },
+      {
+        "id": 378,
+        "nome": "Mirko Foglietta",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
         "citta": "Roma",
         "regione": "Lazio",
         "piano": "free"
@@ -3307,7 +3718,7 @@
         "tipo": "artigiano",
         "citta": "Como",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 152,
@@ -3730,6 +4141,76 @@
         "citta": "Milano",
         "regione": "Lombardia",
         "piano": "free"
+      },
+      {
+        "id": 354,
+        "nome": "LYTIMER",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "Grassobbio",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 356,
+        "nome": "RAM SRL",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Cologno Monzese",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 358,
+        "nome": "Massimiliano",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Senago",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 361,
+        "nome": "AG GROUP srl",
+        "mestiere": "Coperture e tetti",
+        "mestieri": [
+          "Coperture e tetti"
+        ],
+        "tipo": "impresa",
+        "citta": "Desio",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 373,
+        "nome": "MILANO RISTRUTTURAZIONI",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Milano",
+        "regione": "Lombardia",
+        "piano": "free"
+      },
+      {
+        "id": 381,
+        "nome": "Tailor house ristrutturazioni srl",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Peschiera Borromeo",
+        "regione": "Lombardia",
+        "piano": "free"
       }
     ],
     "Liguria": [
@@ -3754,7 +4235,7 @@
         "tipo": "professionista",
         "citta": "La Spezia",
         "regione": "Liguria",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 253,
@@ -3910,7 +4391,7 @@
         "tipo": "artigiano",
         "citta": "Gravellona Toce",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 149,
@@ -4051,6 +4532,30 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "piano": "free"
+      },
+      {
+        "id": 366,
+        "nome": "I.Ricci di Stefano Ricci",
+        "mestiere": "Pavimenti e piastrelle",
+        "mestieri": [
+          "Pavimenti e piastrelle"
+        ],
+        "tipo": "artigiano",
+        "citta": "Nichelino",
+        "regione": "Piemonte",
+        "piano": "free"
+      },
+      {
+        "id": 377,
+        "nome": "Dushku srls",
+        "mestiere": "Facciate e cappotto termico",
+        "mestieri": [
+          "Facciate e cappotto termico"
+        ],
+        "tipo": "impresa",
+        "citta": "Bra",
+        "regione": "Piemonte",
+        "piano": "free"
       }
     ],
     "Sardegna": [
@@ -4096,7 +4601,7 @@
         "tipo": "professionista",
         "citta": "Sassari",
         "regione": "Sardegna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 171,
@@ -4240,6 +4745,28 @@
         "citta": "Bari",
         "regione": "Puglia",
         "piano": "free"
+      },
+      {
+        "id": 363,
+        "nome": "LC IMPIANTI",
+        "mestiere": "Fotovoltaico / Pannelli solari",
+        "mestieri": [
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Foggia",
+        "regione": "Puglia",
+        "piano": "free"
+      },
+      {
+        "id": 375,
+        "nome": "Art Service Bari",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Bari",
+        "regione": "Puglia",
+        "piano": "free"
       }
     ],
     "Marche": [
@@ -4305,7 +4832,7 @@
         "tipo": "artigiano",
         "citta": "Firenze",
         "regione": "Toscana",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 144,
@@ -4317,7 +4844,7 @@
         "tipo": "impresa",
         "citta": "Arezzo",
         "regione": "Toscana",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 224,
@@ -4486,7 +5013,7 @@
         "tipo": "impresa",
         "citta": "Palermo",
         "regione": "Sicilia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 158,
@@ -4527,7 +5054,9 @@
         "id": 292,
         "nome": "Valentino",
         "mestiere": "Ristrutturazione",
-        "mestieri": null,
+        "mestieri": [
+          "Ristrutturazione"
+        ],
         "tipo": "impresa",
         "citta": "Catania",
         "regione": "Sicilia",
@@ -4566,6 +5095,19 @@
         ],
         "tipo": "artigiano",
         "citta": "Caltanissetta",
+        "regione": "Sicilia",
+        "piano": "free"
+      },
+      {
+        "id": 353,
+        "nome": "Caviglia Elettrosolutions",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Climatizzazione / Caldaie"
+        ],
+        "tipo": "artigiano",
+        "citta": "Casteldaccia",
         "regione": "Sicilia",
         "piano": "free"
       }
@@ -4702,6 +5244,51 @@
         "citta": "San Gennaro Vesuviano",
         "regione": "Campania",
         "piano": "free"
+      },
+      {
+        "id": 352,
+        "nome": "SD IMPIANTI",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici",
+          "Fotovoltaico / Pannelli solari"
+        ],
+        "tipo": "artigiano",
+        "citta": "Napoli",
+        "regione": "Campania",
+        "piano": "free"
+      },
+      {
+        "id": 357,
+        "nome": "Parisi Building srls",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "San Gennaro Vesuviano",
+        "regione": "Campania",
+        "piano": "free"
+      },
+      {
+        "id": 364,
+        "nome": "CUBICO S.R.L.",
+        "mestiere": "Costruzione nuova",
+        "mestieri": [
+          "Costruzione nuova"
+        ],
+        "tipo": "impresa",
+        "citta": "Orta di Atella",
+        "regione": "Campania",
+        "piano": "free"
+      },
+      {
+        "id": 368,
+        "nome": "Sea Smart Service Srl",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Piano di Sorrento",
+        "regione": "Campania",
+        "piano": "free"
       }
     ],
     "Veneto": [
@@ -4766,7 +5353,7 @@
         "tipo": "artigiano",
         "citta": "Venezia",
         "regione": "Veneto",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 202,
@@ -4822,6 +5409,42 @@
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Treviso",
+        "regione": "Veneto",
+        "piano": "free"
+      },
+      {
+        "id": 355,
+        "nome": "FEM SRL",
+        "mestiere": "Movimento terra",
+        "mestieri": [
+          "Movimento terra"
+        ],
+        "tipo": "impresa",
+        "citta": "Padova",
+        "regione": "Veneto",
+        "piano": "free"
+      },
+      {
+        "id": 365,
+        "nome": "D.G.A. di Geraci Daniele",
+        "mestiere": "Impianti elettrici",
+        "mestieri": [
+          "Impianti elettrici"
+        ],
+        "tipo": "artigiano",
+        "citta": "Rovigo",
+        "regione": "Veneto",
+        "piano": "free"
+      },
+      {
+        "id": 376,
+        "nome": "amici srl",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica"
+        ],
+        "tipo": "artigiano",
+        "citta": "Venezia",
         "regione": "Veneto",
         "piano": "free"
       }
@@ -5062,6 +5685,52 @@
         "citta": "Medicina",
         "regione": "Emilia-Romagna",
         "piano": "free"
+      },
+      {
+        "id": 359,
+        "nome": "Maksim Osiyan",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
+      },
+      {
+        "id": 362,
+        "nome": "Passione in opera",
+        "mestiere": "Pittura e tinteggiatura",
+        "mestieri": [
+          "Pittura e tinteggiatura"
+        ],
+        "tipo": "artigiano",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
+      },
+      {
+        "id": 369,
+        "nome": "Talarico impianti",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Camposanto",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
+      },
+      {
+        "id": 370,
+        "nome": "Patrik Bonafede",
+        "mestiere": "altro",
+        "mestieri": null,
+        "tipo": "professionista",
+        "citta": "Reggio nell'Emilia",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
       }
     ],
     "Abruzzo": [
@@ -5099,6 +5768,19 @@
         "citta": "L'Aquila",
         "regione": "Abruzzo",
         "piano": "free"
+      },
+      {
+        "id": 379,
+        "nome": "Frasca Andrea",
+        "mestiere": "Idraulica",
+        "mestieri": [
+          "Idraulica",
+          "Climatizzazione / Caldaie"
+        ],
+        "tipo": "artigiano",
+        "citta": "Vasto",
+        "regione": "Abruzzo",
+        "piano": "free"
       }
     ],
     "Basilicata": [
@@ -5110,7 +5792,7 @@
         "tipo": "professionista",
         "citta": "Matera",
         "regione": "Basilicata",
-        "piano": "premium"
+        "piano": "free"
       }
     ],
     "Umbria": [
@@ -5135,6 +5817,18 @@
         "citta": "Gualdo Cattaneo",
         "regione": "Umbria",
         "piano": "free"
+      },
+      {
+        "id": 374,
+        "nome": "sole force srl",
+        "mestiere": "Muratura e strutture",
+        "mestieri": [
+          "Muratura e strutture"
+        ],
+        "tipo": "impresa",
+        "citta": "Magione",
+        "regione": "Umbria",
+        "piano": "free"
       }
     ],
     "Calabria": [
@@ -5157,6 +5851,18 @@
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Cotronei",
+        "regione": "Calabria",
+        "piano": "free"
+      },
+      {
+        "id": 380,
+        "nome": "Impresa individuale",
+        "mestiere": "Pulizie / Disinfestazioni",
+        "mestieri": [
+          "Pulizie / Disinfestazioni"
+        ],
+        "tipo": "artigiano",
+        "citta": "Crotone",
         "regione": "Calabria",
         "piano": "free"
       }
