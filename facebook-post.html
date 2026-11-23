@@ -16,6 +16,7 @@
   .copia{background:#0a2a4d;color:#fff}
   .fb{background:#1877f2;color:#fff}
   .gr{background:#fff;color:#1877f2;border:2px solid #1877f2}
+  .passi{font-size:17px;line-height:1.6;color:#0f172a;margin:10px 0 0;padding-left:24px}
   .nota{font-size:15px;color:#475569;margin:10px 0 0;line-height:1.5}
   .err{font-size:18px;color:#b91c1c}
 </style>
@@ -32,6 +33,10 @@
 <script>
 (function(){
   var GRUPPO="https://www.facebook.com/groups/2063761304562584/";
+  // 23 nov 2026: dal telefono il link «condividi» di Facebook apre il post sul
+  // profilo personale, non sulla pagina. Sul telefono si apre la PAGINA.
+  var PAGINA="https://www.facebook.com/profile.php?id=61575390415610";
+  var TELEFONO=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
   var p=new URLSearchParams(location.search), box=document.getElementById("box");
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   function copia(t,btn){
@@ -50,9 +55,14 @@
         '<div class="passo">1. Copia il testo</div>'+
         '<pre class="testo" id="testo">'+esc(d.testo)+'</pre>'+
         '<button class="btn copia" id="copia">Copia il testo</button>'+
-        '<div class="passo">2. Apri Facebook e incolla</div>'+
-        '<a class="btn fb" href="'+esc(share)+'" target="_blank" rel="noopener">Apri Facebook</a>'+
-        '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>'+
+        '<div class="passo">2. Apri la pagina e incolla</div>'+
+        (TELEFONO
+          ? '<a class="btn fb" href="'+PAGINA+'" target="_blank" rel="noopener">Apri la pagina Trova impresa</a>'+
+            '<ol class="passi"><li>Se in alto vedi <b>«Passa a Trova impresa»</b>, toccalo.</li>'+
+            '<li>Tocca <b>«Crea post»</b> (o «A cosa stai pensando?»).</li>'+
+            '<li>Tieni premuto, tocca <b>Incolla</b>, poi <b>Pubblica</b>.</li></ol>'
+          : '<a class="btn fb" href="'+esc(share)+'" target="_blank" rel="noopener">Apri Facebook</a>'+
+            '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>')+
         '<div class="passo">3. Mettilo anche nel gruppo</div>'+
         '<a class="btn gr" href="'+GRUPPO+'" target="_blank" rel="noopener">Apri il gruppo</a>'+
         '<p class="nota">Il testo è ancora copiato: tocca <b>«Scrivi qualcosa…»</b>, incolla e premi <b>Pubblica</b>.</p>';
