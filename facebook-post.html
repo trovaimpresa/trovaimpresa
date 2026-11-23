@@ -36,7 +36,6 @@
   // 23 nov 2026: dal telefono il link «condividi» di Facebook apre il post sul
   // profilo personale, non sulla pagina. Sul telefono si apre la PAGINA.
   var PAGINA="https://www.facebook.com/profile.php?id=61575390415610";
-  var TELEFONO=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
   var p=new URLSearchParams(location.search), box=document.getElementById("box");
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   function copia(t,btn){
@@ -49,21 +48,20 @@
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.testo){box.innerHTML='<h1>Post per Facebook</h1><p class="err">'+esc((d&&d.errore)||"Non riesco a preparare il post.")+'</p>';return;}
-      var share="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(d.link);
       box.innerHTML='<h1>'+esc(d.titolo)+'</h1>'+
-        '<p class="sub">Due tocchi e il post è sulla pagina «Trova impresa».</p>'+
+        '<p class="sub">Copia, apri la pagina, incolla.</p>'+
         '<div class="passo">1. Copia il testo</div>'+
         '<pre class="testo" id="testo">'+esc(d.testo)+'</pre>'+
         '<button class="btn copia" id="copia">Copia il testo</button>'+
         '<div class="passo">2. Apri la pagina e incolla</div>'+
-        (TELEFONO
-          ? '<a class="btn fb" href="'+PAGINA+'" target="_blank" rel="noopener">Apri la pagina Trova impresa</a>'+
-            '<ol class="passi"><li>Se in alto vedi <b>«Passa a Trova impresa»</b>, toccalo.</li>'+
-            '<li>Tocca <b>«Crea post»</b> (o «A cosa stai pensando?»).</li>'+
-            '<li>Tieni premuto, tocca <b>Incolla</b>, poi <b>Pubblica</b>.</li></ol>'
-          : '<a class="btn fb" href="'+esc(share)+'" target="_blank" rel="noopener">Apri Facebook</a>'+
-            '<p class="nota">In Facebook, in alto scegli <b>«Condividi su una Pagina»</b> → <b>Trova impresa</b>, incolla il testo e premi <b>Pubblica</b>.</p>')+
-        '<div class="passo">3. Mettilo anche nel gruppo</div>'+
+        // 23 nov 2026: anche sul computer la finestra «Condividi» di Facebook
+        // restava ferma su «Pubblicazione in corso». Dalla pagina invece va.
+        '<a class="btn fb" href="'+PAGINA+'" target="_blank" rel="noopener">Apri la pagina Trova impresa</a>'+
+        '<ol class="passi"><li>Se in alto vedi <b>«Passa a Trova impresa»</b>, toccalo.</li>'+
+        '<li>Tocca <b>«A cosa stai pensando?»</b> (o «Crea post»).</li>'+
+        '<li>Incolla il testo (sul computer <b>Ctrl + V</b>), poi <b>Avanti</b>.</li>'+
+        '<li>Tocca <b>«Condividi nei gruppi»</b> e scegli il gruppo, poi <b>Pubblica</b>.</li></ol>'+
+        '<div class="passo">3. Se il gruppo non compariva, mettilo a mano</div>'+
         '<a class="btn gr" href="'+GRUPPO+'" target="_blank" rel="noopener">Apri il gruppo</a>'+
         '<p class="nota">Il testo è ancora copiato: tocca <b>«Scrivi qualcosa…»</b>, incolla e premi <b>Pubblica</b>.</p>';
       document.getElementById("copia").onclick=function(){copia(d.testo,this);};

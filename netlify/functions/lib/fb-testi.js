@@ -24,11 +24,14 @@ function testoSubappalto(a) {
     a.lavoro ? `🔧 ${taglia(primaRiga(a.lavoro), 160)}` : null,
     a.citta ? `📍 ${taglia(a.citta, 80)}` : null,
     '',
-    '👉 Leggi l\'annuncio e contatta direttamente l\'impresa:',
-    link,
-    '',
+    // 23 nov 2026: Facebook fa il riquadro con l'ULTIMO link del testo
+    // (visto incollando: usciva «iscriviti» invece dell'impresa).
+    // Quindi il link vero va sempre in fondo, prima degli hashtag.
     'Pubblica anche tu un subappalto o un\'offerta di lavoro, gratis:',
     `${SITO}/lavoro-edilizia`,
+    '',
+    '👉 Leggi l\'annuncio e contatta direttamente l\'impresa:',
+    link,
     '',
     '#subappalti #edilizia #lavoroedilizia #trovaimpresa'
   ];
@@ -47,11 +50,14 @@ function testoOfferta(o) {
     o.tipo_contratto ? `📄 ${taglia(o.tipo_contratto, 60)}` : null,
     o.stipendio ? `💶 ${taglia(o.stipendio, 60)}` : null,
     '',
-    '👉 Leggi l\'offerta e candidati:',
-    link,
-    '',
+    // 23 nov 2026: Facebook fa il riquadro con l'ULTIMO link del testo
+    // (visto incollando: usciva «iscriviti» invece dell'impresa).
+    // Quindi il link vero va sempre in fondo, prima degli hashtag.
     'Altri subappalti e offerte di lavoro, gratis:',
     `${SITO}/lavoro-edilizia`,
+    '',
+    '👉 Leggi l\'offerta e candidati:',
+    link,
     '',
     '#lavoro #edilizia #offertedilavoro #trovaimpresa'
   ];
@@ -72,11 +78,14 @@ function testoIscritto(i) {
     mestiere ? `🔧 ${mestiere}` : null,
     citta ? `📍 ${citta}${i.provincia && pulisci(i.provincia) !== citta ? ' (' + pulisci(i.provincia) + ')' : ''}` : null,
     '',
-    '👉 Guarda la scheda e chiedi un preventivo, gratis:',
-    link,
-    '',
+    // 23 nov 2026: Facebook fa il riquadro con l'ULTIMO link del testo
+    // (visto incollando: usciva «iscriviti» invece dell'impresa).
+    // Quindi il link vero va sempre in fondo, prima degli hashtag.
     'Hai un\'impresa o sei un artigiano? La tua vetrina su TrovaImpresa è gratis:',
     `${SITO}/iscriviti`,
+    '',
+    '👉 Guarda la scheda e chiedi un preventivo, gratis:',
+    link,
     '',
     '#edilizia #artigiani' + (tagCitta ? ' #' + tagCitta : '') + ' #trovaimpresa'
   ];
@@ -115,11 +124,14 @@ function testoMarchio(chiave) {
     `🛠️ ${m.nome}`,
     m.frase,
     '',
-    '👉 Guarda le offerte:',
-    link,
-    '',
+    // 23 nov 2026: Facebook fa il riquadro con l'ULTIMO link del testo
+    // (visto incollando: usciva «iscriviti» invece dell'impresa).
+    // Quindi il link vero va sempre in fondo, prima degli hashtag.
     'Stai facendo lavori? Trova l\'impresa o l\'artigiano giusto, gratis:',
     SITO,
+    '',
+    '👉 Guarda le offerte:',
+    link,
     '',
     `Pubblicità · link affiliato #adv #${m.tag} #casa #edilizia #trovaimpresa`
   ];
