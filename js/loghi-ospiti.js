@@ -1,6 +1,6 @@
 /* js/loghi-ospiti.js — 4 nov 2026
  *
- * PROVA DEI LOGHI: per tre mesi (fino al 4 febbraio 2027) i loghi delle
+ * PROVA DEI LOGHI: per tre mesi (fino al 31 dicembre 2026) i loghi delle
  * imprese iscritte compaiono gratis negli spazi liberi delle pagine che
  * stanno su Google:
  *   - pagine citta'           (imprese-roma.html)      -> tutte le imprese della citta'
@@ -24,7 +24,7 @@
 (function () {
   'use strict';
 
-  var FINE_PROVA = '2027-02-04';
+  var FINE_PROVA = '2026-12-31'; // 23 nov 2026 (Alex): il regalo finisce il 1° gennaio 2027, non piu' il 4 febbraio
   var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
   var LARGA = 340;          // misura della scheda sul computer (fascia "hero")

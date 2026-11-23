@@ -180,4 +180,30 @@ function testoGestionale(chiave) {
   return { titolo: `Gestionale — ${x.titolo}`, testo: righe.join('\n'), link };
 }
 
-module.exports = { SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale };
+// 23 nov 2026 (Alex): la VETRINA — ogni giorno un'impresa con le foto dei suoi
+// lavori, scelta a turno da fb_vetrina_del_giorno() su Supabase. Regalo a
+// tutti fino al 31/12/2026, poi solo a chi ha uno spazio pagato.
+function testoVetrina(i, foto) {
+  const link = linkImpresa(i.id);
+  const nome = pulisci(i.nome_attivita) || pulisci(i.nome);
+  const mestiere = maiuscola(i.mestiere) || TIPI[i.tipo] || '';
+  const citta = pulisci(i.citta);
+  const tagCitta = hashtag(citta), tagMest = hashtag(i.mestiere);
+  const righe = [
+    '📣 Vetrina TrovaImpresa',
+    '',
+    nome ? `👷 ${nome}` : null,
+    mestiere ? `🔧 ${mestiere}` : null,
+    citta ? `📍 ${citta}${i.provincia && pulisci(i.provincia) !== citta ? ' (' + pulisci(i.provincia) + ')' : ''}` : null,
+    '',
+    foto && foto.length ? 'Ecco alcuni dei suoi lavori 👇' : null,
+    // il link vero in fondo (vedi la nota del 23 nov sopra)
+    '👉 Guarda la scheda e chiedi un preventivo, gratis:',
+    link,
+    '',
+    '#edilizia' + (tagMest ? ' #' + tagMest : '') + (tagCitta ? ' #' + tagCitta : '') + ' #trovaimpresa'
+  ];
+  return { titolo: `Vetrina — ${nome || 'senza nome'}`, testo: righe.filter(r => r !== null).join('\n'), link, foto: foto || [] };
+}
+
+module.exports = { testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale };

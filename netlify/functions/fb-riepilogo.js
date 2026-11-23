@@ -54,6 +54,22 @@ const handler = async () => {
     imp.forEach(i => righe.push(riga('👷 Nuovo iscritto —', i.nome_attivita || i.nome || 'senza nome', i.citta, 'imp', i.id)));
   } catch (e) { console.error('[fb-riepilogo] iscritti', e.message); }
 
+  // 23 nov 2026 (Alex): la Vetrina del giorno, un'impresa con le foto, a turno.
+  // Va in cima: e' il post piu' bello della mattina.
+  try {
+    const giorno = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date());
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/fb_vetrina_del_giorno`, {
+      method: 'POST',
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_giorno: giorno }), signal: AbortSignal.timeout(8000)
+    });
+    const vid = r.ok ? await r.json() : null;
+    if (vid) {
+      const v = await sb(`imprese_pubbliche?id=eq.${vid}&select=id,nome_attivita,nome,citta`);
+      if (v[0]) righe.unshift(riga('📣 Vetrina —', v[0].nome_attivita || v[0].nome || 'senza nome', v[0].citta, 'vet', v[0].id));
+    }
+  } catch (e) { console.error('[fb-riepilogo] vetrina', e.message); }
+
   const nuovi = righe.length;
   // 20 nov 2026 (Alex): ogni giorno anche un marchio della pubblicita' della
   // home, a giro. Cosi' la pagina ha un post anche nei giorni senza novita'.

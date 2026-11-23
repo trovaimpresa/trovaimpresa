@@ -16,6 +16,10 @@
   .copia{background:#0a2a4d;color:#fff}
   .fb{background:#1877f2;color:#fff}
   .gr{background:#fff;color:#1877f2;border:2px solid #1877f2}
+  .foto{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .foto img{width:100%;height:90px;object-fit:cover;border-radius:8px;display:block}
+  @media(max-width:500px){.foto{grid-template-columns:repeat(2,1fr)}.foto img{height:120px}}
+  .scarica{background:#fff;color:#0a2a4d;border:2px solid #0a2a4d}
   .passi{font-size:17px;line-height:1.6;color:#0f172a;margin:10px 0 0;padding-left:24px}
   .nota{font-size:15px;color:#475569;margin:10px 0 0;line-height:1.5}
   .err{font-size:18px;color:#b91c1c}
@@ -48,8 +52,14 @@
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.testo){box.innerHTML='<h1>Post per Facebook</h1><p class="err">'+esc((d&&d.errore)||"Non riesco a preparare il post.")+'</p>';return;}
+      // 23 nov 2026: la Vetrina porta anche le foto dei lavori dell'impresa
+      var F=(d.foto||[]);
       box.innerHTML='<h1>'+esc(d.titolo)+'</h1>'+
         '<p class="sub">Copia, apri la pagina, incolla.</p>'+
+        (F.length ? '<div class="passo">Prima: scarica le foto</div>'+
+          '<div class="foto">'+F.map(function(u){return '<img src="'+esc(u)+'" alt="">';}).join('')+'</div>'+
+          '<button class="btn scarica" id="scarica">Scarica le '+F.length+' foto</button>'+
+          '<p class="nota">Poi, quando scrivi il post su Facebook, tocca l\'icona <b>Foto</b> e scegli queste.</p>' : '')+
         '<div class="passo">1. Copia il testo</div>'+
         '<pre class="testo" id="testo">'+esc(d.testo)+'</pre>'+
         '<button class="btn copia" id="copia">Copia il testo</button>'+
@@ -65,6 +75,20 @@
         '<a class="btn gr" href="'+GRUPPO+'" target="_blank" rel="noopener">Apri il gruppo</a>'+
         '<p class="nota">Il testo è ancora copiato: tocca <b>«Scrivi qualcosa…»</b>, incolla e premi <b>Pubblica</b>.</p>';
       document.getElementById("copia").onclick=function(){copia(d.testo,this);};
+      var bs=document.getElementById("scarica");
+      if(bs) bs.onclick=async function(){
+        var b=this; b.textContent="Sto scaricando…";
+        for(var i=0;i<F.length;i++){
+          try{
+            var bl=await fetch(F[i]).then(function(r){return r.blob();});
+            var a=document.createElement("a"); a.href=URL.createObjectURL(bl);
+            a.download="vetrina-"+(i+1)+"."+((bl.type.split("/")[1]||"jpg").replace("jpeg","jpg"));
+            document.body.appendChild(a); a.click(); a.remove();
+            await new Promise(function(r){setTimeout(r,400);});
+          }catch(_){ window.open(F[i],"_blank"); }
+        }
+        b.textContent="✔ Foto scaricate";
+      };
     })
     .catch(function(){box.innerHTML='<h1>Post per Facebook</h1><p class="err">Non riesco a collegarmi. Riprova fra poco.</p>';});
 })();

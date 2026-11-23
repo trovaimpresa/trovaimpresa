@@ -280,7 +280,7 @@
      Se le imprese sono piu' degli spazi, girano un giorno alla volta.
      Dopo PROVA_LOGHI_FINO gli spazi liberi tornano alle locandine da soli.
      Sul telefono non si vedono (come le locandine: li' solo chi paga). */
-  var PROVA_LOGHI_FINO = '2027-02-04';
+  var PROVA_LOGHI_FINO = '2026-12-31'; // 23 nov 2026 (Alex): fine del regalo anticipata al 1° gennaio 2027
   var OSPITI = [];
 
   async function cercaOspiti() {

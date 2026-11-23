@@ -4,7 +4,7 @@
 // Legge solo cose GIA' pubbliche: subappalti attivi, offerte attive, imprese
 // della vista imprese_pubbliche (che esclude prove, email non confermate e
 // vetrine spente). Non scrive niente.
-const { testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale } = require('./lib/fb-testi');
+const { testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -47,6 +47,15 @@ exports.handler = async (event) => {
     } else if (t === 'off') {
       riga = await una(`offerte_lavoro?id=eq.${id}&attiva=eq.true&select=id,titolo,nome_azienda,citta,provincia,tipo_contratto,stipendio`);
       if (riga) post = testoOfferta(riga);
+    } else if (t === 'vet') {
+      riga = await una(`imprese_pubbliche?id=eq.${id}&select=id,user_id,tipo,nome_attivita,nome,mestiere,citta,provincia`);
+      if (riga) {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/lavori_foto?owner_id=eq.${riga.user_id}&pubblico=eq.true&select=foto&order=ordine.desc,created_at.desc&limit=4`, {
+          headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` }, signal: AbortSignal.timeout(8000)
+        });
+        const foto = r.ok ? (await r.json()).map(f => f.foto).filter(u => /^https:\/\//.test(u || '')) : [];
+        post = testoVetrina(riga, foto);
+      }
     } else if (t === 'imp') {
       riga = await una(`imprese_pubbliche?id=eq.${id}&select=id,tipo,nome_attivita,nome,mestiere,citta,provincia`);
       if (riga) post = testoIscritto(riga);
