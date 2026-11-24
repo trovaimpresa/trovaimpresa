@@ -1063,7 +1063,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <input id="imp-search" class="search-input" placeholder="🔍 Cerca impresa..." oninput="applicaFiltriImprese()">
           <select id="imp-filtro-tipo" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Impresa</option><option value="artigiano">Artigiano</option><option value="professionista">Professionista</option><option value="negozio">Negozio</option></select>
           <select id="imp-filtro-origine" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutte le provenienze</option><option value="sito">Dal sito</option><option value="gestionale">Dal gestionale</option></select>
-          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Non verificate</option></select>
+          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Non verificate</option><option value="controllo">⚠ Da controllare</option></select>
         </div>
       </div>
       <div class="table-wrap">
@@ -4740,10 +4740,52 @@ async function caricaImprese() {
   _set('badge-daverif', attesa);
   _set('imprese-count', tot + ' imprese registrate' + (nTest ? ' (esclusi ' + nTest + ' profili di prova)' : ''));
 
+  _ctrlPrepara(tutteImprese);
   renderImprese(tutteImprese);
   if (document.getElementById('table-daverif')) renderDaVerificare(tutteImprese.filter(i => !i.verificata));
   _creLista = impreseVere;
   renderCrescita();
+}
+
+/* 24 nov 2026 — «Da controllare»: i siti che raccolgono contatti per altri
+   (es. i 3 «Montascale» cancellati oggi) si iscrivono a raffica.
+   NON si usa la P.IVA mancante: alla registrazione non si chiede, e senza
+   ce l'hanno →164← schede su →270← — un avviso su 6 su 10 non avvisa niente.
+   Si guardano i segni veri: la stessa email (anche con +qualcosa), lo stesso
+   telefono o lo stesso sito su piu' schede, e le frasi tipiche di chi
+   «inoltra le richieste». La parola «partner» da sola NON conta: la usano
+   imprese vere. */
+let _ctrlMappe = null;
+function _ctrlChiavi(i) {
+  const em = String(i.email || '').toLowerCase().trim();
+  const [u, d] = em.split('@');
+  const tel = String(i.telefono || '').replace(/\D/g, '');
+  const dom = String(i.sito_web || '').toLowerCase().trim()
+    .replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+  return {
+    email: d ? (u || '').replace(/\+.*$/, '') + '@' + d : '',
+    tel: tel.length >= 6 ? tel : '',
+    /* i social e i link corti li usano in tanti: non sono «lo stesso sito» */
+    dom: dom.includes('.') && !/(^|\.)(facebook\.com|fb\.com|fb\.me|instagram\.com|wa\.me|whatsapp\.com|share\.google|google\.com|goo\.gl|g\.page|linktr\.ee|tiktok\.com|youtube\.com|youtu\.be|linkedin\.com|paginegialle\.it|subito\.it)$/.test(dom) ? dom : ''
+  };
+}
+function _ctrlPrepara(lista) {
+  const m = { email: {}, tel: {}, dom: {} };
+  lista.forEach(i => { if (i.is_test) return; const k = _ctrlChiavi(i);
+    ['email', 'tel', 'dom'].forEach(c => { if (k[c]) m[c][k[c]] = (m[c][k[c]] || 0) + 1; }); });
+  _ctrlMappe = m;
+}
+function _motiviControllo(i) {
+  if (i.is_test) return [];
+  const mot = [];
+  const k = _ctrlChiavi(i), m = _ctrlMappe || { email: {}, tel: {}, dom: {} };
+  if (/\+[^@]*@/.test(String(i.email || ''))) mot.push('email con «+»');
+  if (k.email && m.email[k.email] > 1) mot.push('stessa email su ' + m.email[k.email] + ' schede');
+  if (k.tel && m.tel[k.tel] > 1) mot.push('stesso telefono su ' + m.tel[k.tel] + ' schede');
+  if (k.dom && m.dom[k.dom] > 1) mot.push('stesso sito su ' + m.dom[k.dom] + ' schede');
+  if (/inoltrat|servizio (indipendente|informativo)|di segnalazione|non (siamo|è) un'?\s?impresa|non (vende|installa)/i.test(String(i.descrizione || '')))
+    mot.push('dice di passare i clienti ad altri');
+  return mot;
 }
 
 function renderImprese(lista) {
@@ -4754,7 +4796,7 @@ function renderImprese(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${esc(_nomeImp(i))}</strong>${i.is_test?' <span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span>':''}${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}<br><small style="color:var(--light)">${esc(i.email)}</small></td>
+      <td><strong>${esc(_nomeImp(i))}</strong>${i.is_test?' <span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span>':''}${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}${(()=>{const mo=_motiviControllo(i);return mo.length?' <span class="badge" style="background:#fdecea;color:#c0392b;font-size:0.72rem">⚠ Da controllare</span>':'';})()}<br><small style="color:var(--light)">${esc(i.email)}</small>${(()=>{const mo=_motiviControllo(i);return mo.length?'<br><small style="color:#c0392b;font-weight:700">'+esc(mo.join(' · '))+'</small>':'';})()}</td>
       <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc(_mestieri(i).slice(0,2).join(', '))}${_mestieri(i).length>2?' +altri':''}</td>
@@ -5384,6 +5426,7 @@ function applicaFiltriImprese() {
     if (ft && (i.tipo || '').toLowerCase() !== ft.toLowerCase()) return false;
     if (fs === 'verificata' && !i.verificata) return false;
     if (fs === 'attesa' && i.verificata) return false;
+    if (fs === 'controllo' && !_motiviControllo(i).length) return false;
     return true;
   });
   const c = document.getElementById('imprese-count');
