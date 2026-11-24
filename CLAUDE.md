@@ -4173,6 +4173,8 @@ Funzioni nuove (foto prima, «Si e si pubblica» di Alex), `?v=24nov-cal2`, css 
 - **Il giorno del deposito** (solo studio): riga viola «Depositata: …» nel giorno di `pratica_data_dep` (`calDep`, `calDepRiga`, `.cal-lav-bar.dep`, `.dot.dep`, `.stato.dep` #7C3AED), legenda «Deposito» (`.cal-leg-dep`), nel riquadro «Depositata», apre la pratica. Conta nei 3 posti della casella.
 Foto fatte col banco (`/tmp/lavoro/foto.js` + `dati-cal.js`: finto `sb.from` con pratiche, persone, scadenze). Banco `tools/banco-gestionale.js app`: ZERO difetti.
 ⬜ Non provato: collaboratore vero dal suo telefono (letto il codice); fattura vera da incassare (vietato emetterla).
+Pubblicato ef907d9, Netlify ok, riprovato sul sito vero 1440 e 375: «Chi ci va» (Tutti 3 · Giulia 1 · Nessuno 2, filtra giusto), «Ci va:» nel giorno, deposito viola + legenda, SCIA al Comune arancio e non rossa («1 pratica in ritardo» = solo il rilievo), taratura col nome ✔. Pulito.
+⛔ Trovato dal vivo: sul telefono un nome lungo faceva uscire la tendina «Chi ci va» dallo schermo (anche nella Mappa): sistemato in css/gestionale.css (larga quanto lo schermo sotto i 600 px).
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
 Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario.

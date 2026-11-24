@@ -6498,6 +6498,8 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 /* 24 nov 2026 (si' di Alex) — CALENDARIO: «Chi ci va» e il giorno del deposito */
 .cal-filtri{margin:0 0 10px}
 .cal-filtri .filtro[hidden]{display:none}
+/* 24 nov 2026 (collaudo dal vivo) — un nome lungo in «Chi ci va» faceva uscire la tendina dallo schermo del telefono (Calendario e Mappa) */
+@media(max-width:600px){.cal-filtri .filtro,#mp-chi-box{width:100%}.wrap section .cal-filtri .filtro-sel,.wrap section #mp-chi{flex:1 1 0;min-width:0;max-width:none}}
 .cal-chi-n{color:var(--testo-2);font-weight:600}
 .day-chi{font-size:15px;color:var(--testo-2);margin-top:2px}
 .cal-lav-bar.dep,.cal-lista .cal-lav-bar.dep{background:#7C3AED}
