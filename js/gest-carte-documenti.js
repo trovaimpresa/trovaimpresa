@@ -725,9 +725,13 @@
      professionista a cui e' mandata. Per imprese e artigiani torna vuoto. */
   async function dsIncarichi(ids){
     try{
-      const r=await sb.from("incarichi_richieste")
-        .select("id,nome,email,telefono,prestazione,comune,urgenza,note,documenti,stato,risposta_at,visto_il,created_at")
+      /* 24 nov 2026: preventivo_creato_id = il preventivo nato dalla richiesta.
+         Se la colonna manca si rilegge senza (paracadute). */
+      const _q=c=>sb.from("incarichi_richieste").select(c)
         .in("professionista_id",ids).order("created_at",{ascending:false}).limit(300);
+      const _base="id,nome,email,telefono,prestazione,comune,urgenza,note,documenti,stato,risposta_at,visto_il,created_at";
+      let r=await _q(_base+",preventivo_creato_id");
+      if(r.error)r=await _q(_base);
       if(r.error)return [];
       return (r.data||[]).map(x=>{
         let st=["vista","preventivo","chiusa"].includes(x.stato)?x.stato:"nuova";
@@ -736,7 +740,7 @@
         return {id:String(x.id),_inc:true,nome:x.nome,citta:x.comune,categoria_lavoro:x.prestazione,
           descrizione:x.note,urgenza:x.urgenza,risposta_at:x.risposta_at,visto_il:x.visto_il,
           created_at:x.created_at,email:x.email,telefono:x.telefono,
-          documenti:Array.isArray(x.documenti)?x.documenti:[],_stato:st,_prevId:null};
+          documenti:Array.isArray(x.documenti)?x.documenti:[],_stato:st,_prevId:x.preventivo_creato_id||null};
       });
     }catch(e){return [];}
   }
@@ -751,7 +755,13 @@
       const agg={stato:stato};
       const r0=dsCache.find(x=>String(x.id)===String(pid));
       if(r0&&!r0.visto_il)agg.visto_il=new Date().toISOString();
-      const {data,error}=await sb.from("incarichi_richieste").update(agg).eq("id",String(pid)).select("id");
+      /* 24 nov 2026: il preventivo nato dalla richiesta (per «Apri il preventivo») */
+      if(extra&&extra.preventivo_creato_id)agg.preventivo_creato_id=extra.preventivo_creato_id;
+      let {data,error}=await sb.from("incarichi_richieste").update(agg).eq("id",String(pid)).select("id");
+      if(error&&agg.preventivo_creato_id&&/preventivo_creato_id/.test(error.message||"")){
+        delete agg.preventivo_creato_id;
+        ({data,error}=await sb.from("incarichi_richieste").update(agg).eq("id",String(pid)).select("id"));
+      }
       if(error||!data||!data.length){
         toast("Non sono riuscito a salvare: "+((error&&error.message)||"nessuna riga scritta"));
         return false;

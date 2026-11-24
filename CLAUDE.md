@@ -4273,7 +4273,7 @@ Sistemato (`?v=24nov-ds`, stile `?v=37`, pannelli `pannelli-preventivi.js?v=3`):
 6. «Riapri» su una richiesta già trasformata tornava «Vista» con «Crea il preventivo»: ora torna «Preventivo fatto» se si sa qual è il preventivo (imprese/artigiani; per gli incarichi vedi sotto).
 7. Allo studio «Lavoro» → «Prestazione» nella scheda dell'incarico; segnaposto della parcella da studio (titolo «Es. Pratica CILA per ristrutturazione», voce «Es. Redazione APE con sopralluogo», capitolo «Es. Progettazione», ricerca «Es. rilievo, APE») — prima «bagno», «tramezzo».
 Banchi: `tools/banco-gestionale.js app` e `noleggio` ZERO difetti; `controllo-push.js` verde.
-⬜ DA DECIDERE con Alex: «Apri il preventivo» per gli INCARICHI. Il legame richiesta → preventivo non si salva (gli incarichi hanno id uuid e lo stato nella riga stessa; `gest_dalsito.preventivo_id` è bigint). Serve la colonna `incarichi_richieste.preventivo_creato_id uuid` (migrazione additiva): la migrazione dalla chat è stata FERMATA dal controllo dei permessi, non eseguita. Senza, allo studio la richiesta trasformata non ha «Apri il preventivo» e «Riapri» la rimette «Vista».
+Deciso da Alex («si pubblica»): colonna `incarichi_richieste.preventivo_creato_id uuid` (`sql/2026-11-24-incarichi-preventivo.sql`, migrazione `incarichi_preventivo_creato_24nov2026` GIÀ ESEGUITA, riga in PROVE). `dsIncarichi` la legge (paracadute se manca), `dsSegna` la scrive al «Preventivo fatto»: allo studio c'è «Apri il preventivo» e «Riapri» torna «Preventivo fatto». Le richieste trasformate prima del 24 nov non ce l'hanno.
 ⬜ Non provati dopo le correzioni (il browser si è scollegato a metà sessione): i 7 punti qui sopra sul sito vero, la nuova «Risposta pronta» (1 credito), un documento allegato dal cliente, l'email nuova.
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
@@ -4434,7 +4434,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Richieste dal sito ↔ Scheda pubblica (Affida un incarico): ✔ la richiesta vera arriva in «Da fare» (provato col modulo vero), con prestazione, comune, urgenza, note; documenti del cliente con «Documento N».
 - Richieste dal sito ↔ Pannello professionisti: ✔ uno stato solo (Nuova/Vista/Preventivo fatto/Chiusa/Risposto) e numerino = «Da fare»; dal 24 nov WhatsApp col 39. — la risposta scritta dal gestionale (WhatsApp/email) non segna «Risposto» nel pannello (lo segna solo «Invia risposta» del pannello).
 - Richieste dal sito ↔ Email e telefono: ✔ avviso subito; dal 24 nov allo studio dice «Richiesta di incarico».
-- Richieste dal sito ↔ Preventivi e parcella: ✔ «Crea il preventivo» apre la parcella col cliente, titolo = prestazione, note; «Preventivo fatto» solo a preventivo salvato. ✗ dalla richiesta trasformata non si apre il preventivo (manca la colonna, da decidere con Alex).
+- Richieste dal sito ↔ Preventivi e parcella: ✔ «Crea il preventivo» apre la parcella col cliente, titolo = prestazione, note; «Preventivo fatto» solo a preventivo salvato. ✔ dal 24 nov «Apri il preventivo» anche per gli incarichi.
 - Richieste dal sito ↔ Clienti: ✔ cliente nuovo in rubrica, niente doppioni (stesso telefono o stessa email).
 - Richieste dal sito ↔ Assistente: ✔ «N richieste dal sito da aprire» = pallino del menu.
 - Richieste dal sito ↔ Pratiche: — la richiesta non diventa pratica direttamente (passa dal preventivo: «Accettato → crea pratica»). Giusto.
