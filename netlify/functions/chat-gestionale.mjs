@@ -1311,7 +1311,7 @@ const STRUMENTI = [
       type: 'object',
       properties: {
         nome:      { type:'string', description:'il nome del cliente, del condominio o della ditta' },
-        tipo:      { type:'string', enum:['privato','azienda','condominio'], description:'azienda se e\' una ditta o una societa\', condominio, se no privato' },
+        tipo:      { type:'string', enum:['privato','azienda','condominio','ente'], description:'azienda se e\' una ditta o una societa\', condominio, ente se e\' un Comune, una scuola, un ente pubblico, se no privato' },
         indirizzo: { type:'string', description:'SOLO via e numero (la citta\' va in citta)' },
         cap:       { type:'string', description:'5 cifre, solo se te lo ha detto' },
         citta:     { type:'string', description:'il comune' },

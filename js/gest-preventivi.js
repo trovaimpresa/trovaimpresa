@@ -1077,8 +1077,8 @@
         if(pro&&c&&c.tipo&&!fattForfettario()){
           if(p.ritenuta&&c.tipo==="privato")
             avvisi.push(["La ritenuta d'acconto c'è, ma il cliente è un privato","Con un privato non si applica: togli la spunta nella parcella"]);
-          else if(!p.ritenuta&&(c.tipo==="azienda"||c.tipo==="condominio"))
-            avvisi.push(["Manca la ritenuta d'acconto","Il cliente è "+(c.tipo==="condominio"?"un condominio":"un'azienda")+": di norma la ritenuta del 20% va applicata"]);
+          else if(!p.ritenuta&&(c.tipo==="azienda"||c.tipo==="condominio"||c.tipo==="ente"))
+            avvisi.push(["Manca la ritenuta d'acconto","Il cliente è "+(c.tipo==="condominio"?"un condominio":(c.tipo==="ente"?"un ente pubblico":"un'azienda"))+": di norma la ritenuta del 20% va applicata"]);
         }
       }
     }catch(e){ return prevPdf(id); }   /* un controllo che si rompe non deve fermare il preventivo */

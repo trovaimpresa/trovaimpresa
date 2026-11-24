@@ -1396,12 +1396,14 @@
     const priv=ruoloUtente==='professionista';
     /* che tipo di cliente è: privato (il caso più comune), azienda o condominio.
        Cambia solo le parole del modulo, non i campi: così nessuno resta bloccato. */
-    const tipoCli=(c.tipo==='azienda'||c.tipo==='condominio')?c.tipo:'privato';
+    const tipoCli=(c.tipo==='azienda'||c.tipo==='condominio'||c.tipo==='ente')?c.tipo:'privato';
     const LAB_T={privato:{nome:'Nome e cognome',ph:'Es. Mario Rossi',ref:'Referente (se diverso)'},
                  azienda:{nome:'Ragione sociale',ph:'Es. Rossi Costruzioni Srl',ref:'Referente'},
-                 condominio:{nome:'Nome condominio',ph:'Es. Condominio Via Roma 12',ref:'Amministratore'}};
+                 condominio:{nome:'Nome condominio',ph:'Es. Condominio Via Roma 12',ref:'Amministratore'},
+                 /* 24 nov 2026 — ente pubblico (sì di Alex): Comune, scuola, ASL */
+                 ente:{nome:"Nome dell'ente",ph:'Es. Comune di Rieti',ref:'Ufficio o responsabile'}};
     const Lt=LAB_T[tipoCli];
-    const T_TIT={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"};
+    const T_TIT={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio",ente:"Nuovo ente pubblico"};
     /* 6 nov 2026 — IL MODULO PIU' CORTO. Prima si apriva con 12 caselle
        insieme anche per un privato. Adesso si vedono nome, telefono, email e
        indirizzo; i dati per la fattura (P.IVA, codice fiscale, codice
@@ -1423,6 +1425,7 @@
             <button type="button" class="tipo-btn${tipoCli==='privato'?' on':''}" data-t="privato" onclick="setTipoCliente(this)">Privato<small>una persona</small></button>
             <button type="button" class="tipo-btn${tipoCli==='azienda'?' on':''}" data-t="azienda" onclick="setTipoCliente(this)">Azienda<small>ditta o società</small></button>
             <button type="button" class="tipo-btn${tipoCli==='condominio'?' on':''}" data-t="condominio" onclick="setTipoCliente(this)">Condominio<small>con amministratore</small></button>
+            <button type="button" class="tipo-btn${tipoCli==='ente'?' on':''}" data-t="ente" onclick="setTipoCliente(this)">Ente pubblico<small>Comune, scuola, ASL</small></button>
           </div>
         </div>
         <div class="field"><label id="lab-c-nome">${Lt.nome}</label>
@@ -1470,9 +1473,10 @@
 
       <div class="sh-b">
         <div class="sh-tit">Dove mandargli la fattura</div>
-        <div class="field"><label>Codice destinatario</label>
+        <div class="field"><label id="lab-c-sdi">${tipoCli==='ente'?'Codice univoco ufficio (6 caratteri)':'Codice destinatario'}</label>
           <input id="c-sdi" value="${esc(c.sdi_codice||"")}" placeholder="7 caratteri" maxlength="7" style="text-transform:uppercase"></div>
         <div class="field"><label>PEC</label><input id="c-pec" type="email" value="${esc(c.sdi_pec||"")}" placeholder="cliente@pec.it"></div>
+        <div class="sh-nota" id="nota-c-ente"${tipoCli==='ente'?'':' style="display:none"'}><b>Ente pubblico:</b> serve il codice univoco dell'ufficio (6 caratteri), te lo dà l'ente o lo trovi su indicepa.gov.it. La PEC da sola non basta. In fattura metto la scissione dei pagamenti: l'IVA la versa l'ente.</div>
         <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale.</div>
       </div>
       </div>
@@ -1521,7 +1525,11 @@
              azienda:{nome:"Ragione sociale",ph:"Es. Rossi Costruzioni Srl",ref:"Referente",
                       fisc:"Per un'azienda serve la partita IVA."},
              condominio:{nome:"Nome condominio",ph:"Es. Condominio Via Roma 12",ref:"Amministratore",
-                      fisc:"Un condominio ha il codice fiscale, non la partita IVA."}}[t];
+                      fisc:"Un condominio ha il codice fiscale, non la partita IVA."},
+             ente:{nome:"Nome dell'ente",ph:"Es. Comune di Rieti",ref:"Ufficio o responsabile",
+                      fisc:"Un ente pubblico ha il codice fiscale di 11 cifre (a volte anche la partita IVA)."}}[t];
+    const ls=document.getElementById("lab-c-sdi"); if(ls) ls.textContent=t==="ente"?"Codice univoco ufficio (6 caratteri)":"Codice destinatario";
+    const ne=document.getElementById("nota-c-ente"); if(ne) ne.style.display=t==="ente"?"":"none";
     const ln=document.getElementById("lab-c-nome"); if(ln) ln.textContent=L.nome;
     const inp=document.getElementById("c-nome");    if(inp) inp.placeholder=L.ph;
     const lr=document.getElementById("lab-c-ref");  if(lr) lr.textContent=L.ref;
@@ -1536,7 +1544,7 @@
        e leggevi "Nuova azienda" con Privato acceso */
     const ht=document.querySelector("#sheet .sh-head h3");
     if(ht&&/^Nuov/.test(ht.textContent||"")){
-      ht.textContent={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"}[t];
+      ht.textContent={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio",ente:"Nuovo ente pubblico"}[t];
     }
   };
 

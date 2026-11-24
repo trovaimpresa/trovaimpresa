@@ -24,7 +24,7 @@
      Prima per vedere l'email o la partita IVA bisognava entrare in "Modifica",
      col rischio di cambiare qualcosa per sbaglio. Modifica e Documenti stanno
      qui dentro, in fondo. */
-  const _TIPO_LAB={privato:"Privato",azienda:"Azienda",condominio:"Condominio"};
+  const _TIPO_LAB={privato:"Privato",azienda:"Azienda",condominio:"Condominio",ente:"Ente pubblico"};
 
   function _rigaDato(etichetta,valore,link){
     const v=(valore==null||String(valore).trim()==="")?"":String(valore).trim();
@@ -127,39 +127,41 @@
     const tipo=_TIPO_LAB[c.tipo]||"Privato";
     const tag='<span class="tipo-tag">'+tipo+'</span>';
     const ind=cliIndirizzo(c);
-    const etNome=c.tipo==="azienda"?"Ragione sociale":(c.tipo==="condominio"?"Nome condominio":"Nome e cognome");
-    const etRef=c.tipo==="condominio"?"Amministratore":"Referente";
+    const etNome=c.tipo==="azienda"?"Ragione sociale":(c.tipo==="condominio"?"Nome condominio":(c.tipo==="ente"?"Nome dell'ente":"Nome e cognome"));
+    const etRef=c.tipo==="condominio"?"Amministratore":(c.tipo==="ente"?"Ufficio o responsabile":"Referente");
 
     openSheetGrande(esc(c.nome||"Cliente")+tag,
       /* la striscia sta PRIMA di tutto: se c'e' qualcosa da guardare, lo
          vedi appena apri, non dopo aver scorso mezza scheda */
       ctrStrisciaHTML('cliente',c)
-      + '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
-      + '<div class="sh-b">'
-      +   '<div class="sh-tit">Chi &egrave;</div>'
-      +   _rigaDato(etNome,c.nome)
-      +   _rigaDato(etRef,c.referente)
-      +   _rigaDato("Telefono",c.telefono,"tel:")
-      +   _rigaDato("Email",c.email,"mailto:")
-      + '</div>'
-      + '<div class="sh-b">'
-      +   '<div class="sh-tit">Dove sta</div>'
-      +   _rigaDato("Indirizzo",ind)
-      + '</div>'
-      /* 17 nov 2026 (voce Clienti, ok di Alex) — le note: solo se ci sono */
-      + (String(c.note||"").trim()?'<div class="sh-b"><div class="sh-tit">Note</div><div class="dato-val" style="white-space:pre-wrap">'+esc(String(c.note).trim())+'</div></div>':'')
-      + '</div><div class="sh-col">'
-      + '<div class="sh-b">'
-      +   '<div class="sh-tit">Dati fiscali</div>'
-      +   _rigaDato("Partita IVA",c.piva)
-      +   _rigaDato("Codice fiscale",c.cod_fiscale)
-      + '</div>'
-      + '<div class="sh-b">'
-      +   '<div class="sh-tit">Dove mandargli la fattura</div>'
-      +   _rigaDato("Codice destinatario",c.sdi_codice)
-      +   _rigaDato("PEC",c.sdi_pec)
-      + '</div>'
-      + '</div></div>'
+      /* 24 nov 2026 (sì di Alex, foto approvata) — LA SCHEDA CORTA: si vede
+         solo quello che c'e'. I «non indicato» riempivano mezza pagina e sul
+         telefono le pratiche del cliente finivano a quattro schermate. Cosa
+         manca lo dice gia' la striscia «Da guardare» in cima. */
+      + (function(){
+          const pieno=v=>String(v==null?"":v).trim()!=="";
+          const riga=(lab,v,lnk)=>pieno(v)?_rigaDato(lab,v,lnk):"";
+          const fiscale=pieno(c.piva)||pieno(c.cod_fiscale)||pieno(c.sdi_codice)||pieno(c.sdi_pec);
+          const sdiLab=c.tipo==="ente"?"Codice univoco ufficio":"Codice destinatario";
+          return '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
+          + '<div class="sh-b">'
+          +   '<div class="sh-tit">Chi &egrave;</div>'
+          +   _rigaDato(etNome,c.nome)
+          +   riga(etRef,c.referente)
+          +   riga("Telefono",c.telefono,"tel:")
+          +   riga("Email",c.email,"mailto:")
+          + '</div>'
+          + (pieno(ind)?'<div class="sh-b"><div class="sh-tit">Dove sta</div>'+_rigaDato("Indirizzo",ind)+'</div>':'')
+          /* 17 nov 2026 (voce Clienti, ok di Alex) — le note: solo se ci sono */
+          + (pieno(c.note)?'<div class="sh-b"><div class="sh-tit">Note</div><div class="dato-val" style="white-space:pre-wrap">'+esc(String(c.note).trim())+'</div></div>':'')
+          + '</div><div class="sh-col">'
+          + (fiscale
+              ? ((pieno(c.piva)||pieno(c.cod_fiscale))?'<div class="sh-b"><div class="sh-tit">Dati fiscali</div>'+riga("Partita IVA",c.piva)+riga("Codice fiscale",c.cod_fiscale)+'</div>':'')
+                + ((pieno(c.sdi_codice)||pieno(c.sdi_pec))?'<div class="sh-b"><div class="sh-tit">Dove mandargli la fattura</div>'+riga(sdiLab,c.sdi_codice)+riga("PEC",c.sdi_pec)+'</div>':'')
+              : '<div class="sh-b"><div class="sh-tit">Dati per la fattura</div><div class="campo-aiuto" style="font-size:16px">Non ancora scritti. '
+                + '<button type="button" class="btn-link" data-action="edit-cli" data-fisc="1" data-id="'+esc(c.id)+'" style="font-size:16px;font-weight:700;color:var(--blu,#0066ff);background:none;border:0;padding:0;min-height:44px;cursor:pointer;text-decoration:underline">Aggiungili</button></div></div>')
+          + '</div></div>';
+        })()
       /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): i suoi lavori,
          preventivi e fatture, qui dentro. Prima per vederli bisognava cercare
          il nome nella casella in alto. Si riempie da sola (cliStoria). */

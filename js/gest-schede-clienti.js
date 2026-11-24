@@ -988,7 +988,7 @@
   function cliCard(c){
     const fisc=[c.piva?"P.IVA "+esc(c.piva):"", c.cod_fiscale?"C.F. "+esc(c.cod_fiscale):""].filter(Boolean).join(" · ");
     const ind=cliIndirizzo(c);
-    const TAG={azienda:"Azienda",condominio:"Condominio",privato:"Privato"};
+    const TAG={azienda:"Azienda",condominio:"Condominio",privato:"Privato",ente:"Ente pubblico"};
     const tag=TAG[c.tipo]?'<span class="tipo-tag">'+TAG[c.tipo]+'</span>':"";
     return schedaJob({
       tono:"t-neutro",                 /* un cliente non ha uno stato: barretta grigia */

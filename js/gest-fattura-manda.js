@@ -38,6 +38,9 @@
     }else r.push("Importo"+(f.stato==="pagata"?"":" da pagare")+": "+eur2(c.daPagare)+".");
     /* 19 nov 2026 (studio) — col netto nel messaggio e il totale sul PDF il
        cliente legge due numeri diversi: si dice perche' */
+    /* 24 nov 2026 — ente pubblico in scissione dei pagamenti */
+    if(c.scissione&&f.tipo!=="nota_credito")
+      r.push("L'IVA di "+eur2(c.iva)+" la versate voi all'Erario (scissione dei pagamenti, art. 17-ter): non è compresa nell'importo.");
     if((+c.ritenuta||0)>0&&f.tipo!=="nota_credito")
       r.push("La ritenuta d'acconto di "+eur2(c.ritenuta)+" è già tolta: la versa lei all'Erario col modello F24.");
     if(f.stato!=="pagata"&&f.tipo!=="nota_credito"){

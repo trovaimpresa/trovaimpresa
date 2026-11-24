@@ -852,8 +852,8 @@
       if(rit&&!rit.disabled&&tipo){
         if(rit.checked&&tipo==='privato') out.push({el:rit,grave:"arancio",
           dice:"Il cliente è un privato: la ritenuta d'acconto non si applica. Con lui la casella va lasciata vuota."});
-        if(!rit.checked&&(tipo==='azienda'||tipo==='condominio')) out.push({el:rit,grave:"arancio",
-          dice:(tipo==='condominio'?"Il cliente è un condominio":"Il cliente è un'azienda")
+        if(!rit.checked&&(tipo==='azienda'||tipo==='condominio'||tipo==='ente')) out.push({el:rit,grave:"arancio",
+          dice:(tipo==='condominio'?"Il cliente è un condominio":(tipo==='ente'?"Il cliente è un ente pubblico":"Il cliente è un'azienda"))
                +": di norma la ritenuta del 20% va applicata."});
       }
     }
@@ -948,8 +948,8 @@
       const _rv=_numIt("#fa-rit")||0;
       if(_t==='privato'&&_rv>0) out.push({el:frt,grave:"arancio",
         dice:"Il cliente è un privato: non è sostituto d'imposta, la ritenuta d'acconto non si applica. Lascia la casella vuota."});
-      if((_t==='azienda'||_t==='condominio')&&!(_rv>0)) out.push({el:frt,grave:"arancio",
-        dice:(_t==='condominio'?"Il cliente è un condominio":"Il cliente è un'azienda")
+      if((_t==='azienda'||_t==='condominio'||_t==='ente')&&!(_rv>0)) out.push({el:frt,grave:"arancio",
+        dice:(_t==='condominio'?"Il cliente è un condominio":(_t==='ente'?"Il cliente è un ente pubblico":"Il cliente è un'azienda"))
              +": è sostituto d'imposta, di norma la ritenuta del 20% va applicata."});
     }
 
@@ -1149,6 +1149,8 @@
       if(!nCf) out.push({campo:"c-cf",grave:"arancio",
         dice:(tipo==='condominio'
               ? "Un condominio ha il codice fiscale: senza, quando gli fatturi ti tocca cercarlo di corsa."
+              : tipo==='ente'
+              ? "Un ente pubblico ha il codice fiscale di 11 cifre: senza, la fattura elettronica non si può fare."
               : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")});
       else if(nCf.length!==16&&nCf.length!==11) out.push({campo:"c-cf",grave:"arancio",
         dice:"Il codice fiscale di una persona ha 16 caratteri (11 se è un condominio o un ente): questo ne ha "+nCf.length+"."});
@@ -1161,6 +1163,15 @@
     }
 
     /* --- dove mandare la fattura elettronica --- */
+    /* 24 nov 2026 — ente pubblico: codice univoco ufficio di 6 caratteri,
+       la PEC da sola non basta (lo SDI alla Pubblica Amministrazione vuole il codice) */
+    if(tipo==='ente'){
+      const hSdiE=L.get("c-sdi");
+      if(!hSdiE) out.push({campo:"c-sdi",grave:"rosso",
+        dice:"Manca il codice univoco ufficio: senza, la fattura a un ente pubblico non parte. Te lo dà l'ente, o lo trovi su indicepa.gov.it."});
+      else if(hSdiE.length!==6) out.push({campo:"c-sdi",grave:"rosso",
+        dice:"Il codice univoco ufficio di un ente pubblico ha 6 caratteri, questo ne ha "+hSdiE.length+"."});
+    }else
     if(tipo!=='privato'){
       const hSdi=L.get("c-sdi"), hPec=L.get("c-pec");
       if(!hSdi&&!hPec) out.push({campo:"c-sdi",grave:"arancio",

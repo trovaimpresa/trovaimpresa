@@ -4147,7 +4147,13 @@ Sistemato (tutte le facce):
 6. Controllo del cliente: il codice fiscale di 16 caratteri si verifica con l'ultima lettera (`ctrCfOk`, anche omocodia); quello di 11 cifre (condomini, enti) con la cifra di controllo. Provato: RSSMRA85T10A562S sì, …562T no.
 Banco `tools/banco-gestionale.js app`: ZERO difetti (1440, 375, 360). Versioni `?v=24nov-cli`.
 ⬜ Non provato: sul sito vero col browser (Chrome spento) — da rifare dopo il push.
-Proposte con foto (aspettano il sì di Alex): **«Ente pubblico»** come quarto tipo di cliente (codice ufficio di 6, fattura per la PA con scissione dei pagamenti, CIG/CUP: oggi un Comune si mette come «Azienda» e la fattura si ferma sul «codice di 7 caratteri»); **scheda sul telefono senza i «non indicato»** (le pratiche del cliente stavano a 4 schermate di distanza).
+Pubblicato f073943, Netlify ok, riprovato sul sito vero 1440 e 375: ricerca per codice fiscale e PEC, scheda con pratiche e computi, domanda del Cestino «1 pratica e 1 computo», Scadenzario «(nel cestino)», codice fiscale sbagliato in rosso ✔. Pulito.
+
+Funzioni nuove («facciamo anche le proposte e pubblica» di Alex), tutte le facce, `?v=24nov-cli2`:
+- **«Ente pubblico»** quarto tipo di cliente (`tipo='ente'`; Comune, scuola, ASL): «Nome dell'ente», «Ufficio o responsabile», «Codice univoco ufficio (6 caratteri)»; controllo: CF di 11 cifre e codice di 6 OBBLIGATORI (la PEC da sola non basta); ritenuta come azienda/condominio; l'AI del cliente e la Chat conoscono «ente».
+- **Fattura all'ente**: riquadro «Ente pubblico» nel modulo (solo se il cliente è un ente): «Scissione dei pagamenti» (spunta, accesa sulle nuove; non in forfettario), CIG, CUP, determina/ordine. Colonne `gest_fatture.scissione`, `cig`, `cup`, `rif_pa` (`sql/2026-11-24-fattura-ente-pubblico.sql`, migrazione `fattura_ente_pubblico_24nov2026` GIÀ ESEGUITA, riga in PROVE; somme della vista uguali prima e dopo). Conti: il documento vale lo stesso, `daPagare` = totale − ritenuta − IVA (`fattConti`); in `gest_fattura_conti` «totale» (= da pagare, quindi anche `resto`) toglie l'IVA. File SDI: codice di 6 → `FPA12`, `EsigibilitaIVA` «S», `DatiOrdineAcquisto` (IdDocumento = determina, se no CIG/CUP) prima di `DatiFattureCollegate`. PDF: riga «IVA versata dall'ente», «NETTO A PAGARE», dicitura art. 17-ter, «CIG · CUP · Rif.». «Manda al cliente» lo dice. Una fattura emessa non cambia scissione risalvandola. Provato col banco: 1.000 + IVA 220, ritenuta 20% → documento 1.220, da pagare 800, file FPA12 con UF1234, S, CIG/CUP.
+- **Scheda del cliente corta**: solo i dati scritti; senza P.IVA/CF/codice/PEC un riquadro «Dati per la fattura — Non ancora scritti. Aggiungili» (apre il modulo sui dati fiscali).
+⬜ Non provati: invio allo SDI di una fattura FPA12 vera (vietato), il PDF col jsPDF vero (provato dopo il push solo se c'è una fattura in bozza di prova).
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
 Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti.
@@ -4230,7 +4236,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Clienti ↔ Pratiche: ✔ «+ Nuova pratica» dalla scheda col cliente già scelto; dal 24 nov la scheda elenca le pratiche col tipo e lo stato della pratica.
 - Clienti ↔ Preventivi e parcella: ✔ «+ Nuovo preventivo» dalla scheda; i preventivi nella scheda col totale senza IVA.
 - Clienti ↔ Computo metrico / Stati di avanzamento: ✔ dal 24 nov i computi del cliente nella scheda (aprono il computo); il SAL prende il cliente dal computo. — dalla scheda non si fa «+ Nuovo computo».
-- Clienti ↔ Fatture: ✔ la fattura prende i dati dal cliente (fotografia); dallo SDI «Modifica» apre «Dati per la fattura». ✗ un ente pubblico (codice ufficio di 6) non si può fatturare: proposta «Ente pubblico».
+- Clienti ↔ Fatture: ✔ la fattura prende i dati dal cliente (fotografia); dallo SDI «Modifica» apre «Dati per la fattura». ✔ dal 24 nov un ente pubblico si fattura (FPA12, scissione, CIG/CUP).
 - Clienti ↔ Scadenze e promemoria: ✔ dal 24 nov il cliente nel Cestino ha il nome «(nel cestino)».
 - Clienti ↔ Mappa: ✔ senza «Dove» la pratica usa l'indirizzo del cliente. — cliente nel Cestino: la pratica va in «senza indirizzo».
 - Clienti ↔ Report / Assistente: ✔ «Migliori clienti»; la striscia «Da guardare» nella scheda. — dal Report non si apre il cliente.

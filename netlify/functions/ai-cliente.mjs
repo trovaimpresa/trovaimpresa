@@ -21,7 +21,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const MODELLO = 'claude-haiku-4-5-20251001';
 const EUR_IN = 0.92, EUR_OUT = 4.60;           // € per milione di gettoni (come ai-pratica)
-export const TIPI = ['privato', 'azienda', 'condominio'];
+export const TIPI = ['privato', 'azienda', 'condominio', 'ente'];
 export const CASELLE = ['nome', 'indirizzo', 'cap', 'citta', 'prov', 'referente', 'telefono', 'email', 'piva', 'cod_fiscale', 'sdi_codice', 'pec', 'note'];
 
 export function istruzioni() {
@@ -32,7 +32,7 @@ Rispondi SOLO con questo JSON, senza testo attorno:
 
 Regole:
 - "nome": il condominio, la ragione sociale o il nome della persona.
-- "tipo": "azienda" se e' una ditta o una societa' (Srl, Spa, Snc, Sas, ditta, impresa, studio, oppure ha la partita IVA); "condominio" se e' un condominio; "privato" se e' una persona. Se non si capisce, stringa vuota.
+- "tipo": "azienda" se e' una ditta o una societa' (Srl, Spa, Snc, Sas, ditta, impresa, studio, oppure ha la partita IVA); "condominio" se e' un condominio; "ente" se e' un ente pubblico (Comune, Provincia, Regione, scuola, ASL, universita'); "privato" se e' una persona. Se non si capisce, stringa vuota.
 - "referente": l'amministratore o la persona di contatto, se diversa dal nome.
 - "telefono": solo cifre, spazi e +.
 - "indirizzo": SOLO via e numero civico (scala e piano se detti). La citta' NON va qui.

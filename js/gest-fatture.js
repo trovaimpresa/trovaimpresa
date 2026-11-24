@@ -421,8 +421,13 @@
        La ritenuta non è uno sconto: è una parte del tuo compenso che il
        cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
     const totale=b.imponibile+b.iva+(+f.bollo||0);
-    const daPagare=totale-ritenuta;
-    return {compenso:b.compenso,cassa:b.cassa,spese:b.spese,speseIva:b.speseIva,art15:b.art15,
+    /* 24 nov 2026 — ente pubblico con scissione dei pagamenti (art. 17-ter):
+       il documento vale lo stesso, ma l'IVA la versa l'ente all'Erario.
+       A te arriva il totale meno l'IVA (e meno la ritenuta). In forfettario
+       l'IVA e' zero: non cambia niente. Stessa regola in gest_fattura_conti. */
+    const scissione=!!f.scissione&&(+b.iva||0)>0;
+    const daPagare=totale-ritenuta-(scissione?b.iva:0);
+    return {scissione:scissione,compenso:b.compenso,cassa:b.cassa,spese:b.spese,speseIva:b.speseIva,art15:b.art15,
             aliqPrev:b.aliqPrev,natLinea:b.natLinea,scResto:b.scResto,
             sconto:b.sconto,pieno:b.pieno,righeIva:b.righe,linee:b.linee,
             imponibile:b.imponibile,iva:b.iva,ritenuta:ritenuta,totale:totale,daPagare:daPagare,
@@ -508,6 +513,7 @@
       cassa_perc:+f.cassa_perc||0, cassa_tipo:f.cassa_tipo||null,
       spese:+f.spese||0, spese_iva:+f.spese_iva||0,
       ritenuta_perc:+f.ritenuta_perc||0, sconto:+f.sconto||0,
+      cig:f.cig||null, cup:f.cup||null, rif_pa:f.rif_pa||null,
       note:rif,
       _rif:{numero:f.numero,anno:fattAnno(f),data:f.data,cli:f.cli_nome||""},
       _righe:R.slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0))
@@ -1000,6 +1006,19 @@
      fattura NUOVA, quando il totale passa i 77,47 € la casella prende 2,00;
      se torna sotto si svuota. Appena la tocchi tu, il gestionale non la
      tocca piu'. Sulle fatture gia' salvate non si cambia niente. */
+  /* 24 nov 2026 — il cliente scelto e' un ente pubblico? */
+  function fattEnteScelto(){
+    const sel=$("#fa-cli"); if(!sel||!sel.value)return false;
+    const c=(fattCliCache||[]).find(x=>String(x.id)===String(sel.value));
+    return !!(c&&c.tipo==="ente");
+  }
+  /* la scissione c'entra solo se c'e' l'IVA (non in forfettario) */
+  function fattScissioneVisibile(){ return fattEnteScelto()&&!fattForfettario(); }
+  function fattEnteMostra(){
+    const b=$("#fa-ente"); if(!b)return;
+    b.style.display=fattEnteScelto()?"":"none";
+    const sb2=$("#fa-scis-box"); if(sb2)sb2.style.display=fattScissioneVisibile()?"flex":"none";
+  }
   let fattBolloAuto=false;
   const FATT_BOLLO_SOGLIA=77.47;
   /* i totali si rifanno a ogni tasto premuto: si vede il conto crescere
@@ -1021,7 +1040,8 @@
       spese_regime:fattRegimeCorrente,
       sconto:_numIt("#fa-sconto")||0,
       bollo:_numIt("#fa-bollo")||0,
-      ritenuta_perc:_numIt("#fa-rit")||0
+      ritenuta_perc:_numIt("#fa-rit")||0,
+      scissione:fattScissioneVisibile()&&!!($("#fa-scis")&&$("#fa-scis").checked)
     };
     /* 12 agosto 2026 — gli STESSI conti della scheda, del PDF e del file per
        lo SDI. Prima la formula era riscritta qui a mano, e in forfettario
@@ -1057,7 +1077,8 @@
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
       + (ritE   ?'<div class="fs-r"><span>Ritenuta '+_pct(f.ritenuta_perc)+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
       + '<div class="fs-r fs-tot"><span>'+(ritE?"Totale fattura":"Totale")+'</span><b>'+eur2(tot)+'</b></div>'
-      + (ritE?'<div class="fs-r fs-tot"><span>Netto a pagare</span><b>'+eur2(netto)+'</b></div>':"");
+      + (c.scissione?'<div class="fs-r"><span>IVA versata dall\'ente (scissione)</span><b>−'+eur2(b.iva)+'</b></div>':"")
+      + ((ritE||c.scissione)?'<div class="fs-r fs-tot"><span>Netto a pagare</span><b>'+eur2(netto)+'</b></div>':"");
     return tot;
   }
 
@@ -1271,6 +1292,17 @@
           +'<div class="sh-nota" id="fa-bollo-nota" style="display:none;color:var(--ok)"><b>Bollo da 2 € messo in automatico.</b> Se non vuoi farlo pagare al cliente, scrivi 0 nella casella.</div>':'')
       + '</div>'
 
+      /* 24 nov 2026 — fattura a un ente pubblico (sì di Alex): si vede solo
+         se il cliente scelto e' un ente (fattEnteMostra) */
+      + '<div class="sh-b" id="fa-ente" style="display:none"><div class="sh-tit">Ente pubblico</div>'
+      +   '<label class="fa-scis-riga" id="fa-scis-box" style="display:flex;gap:10px;align-items:flex-start;font-size:16px;margin-bottom:10px"><input type="checkbox" id="fa-scis"'+((f.id?f.scissione:true)?' checked':'')+' style="width:22px;height:22px;flex:0 0 auto;margin-top:2px"><span><b>Scissione dei pagamenti</b><br><span style="font-size:15px;color:var(--testo-2)">L\'IVA la versa l\'ente all\'Erario: a te arriva il totale senza IVA (art. 17-ter DPR 633/72).</span></span></label>'
+      +   '<div class="row2">'
+      +     '<div class="field"><label for="fa-cig">CIG</label><input type="text" id="fa-cig"'+_noAuto()+' value="'+esc(f.cig||"")+'" maxlength="15" placeholder="Se l\'incarico ce l\'ha" style="text-transform:uppercase"></div>'
+      +     '<div class="field"><label for="fa-cup">CUP</label><input type="text" id="fa-cup"'+_noAuto()+' value="'+esc(f.cup||"")+'" maxlength="15" placeholder="Se l\'incarico ce l\'ha" style="text-transform:uppercase"></div>'
+      +   '</div>'
+      +   '<div class="field"><label for="fa-rifpa">Numero della determina o dell\'ordine</label><input type="text" id="fa-rifpa"'+_noAuto()+' value="'+esc(f.rif_pa||"")+'" maxlength="20" placeholder="Es. Det. 123/2026"></div>'
+      +   '<div class="sh-nota">Te li dà l\'ente insieme all\'incarico. Se ci sono e non li scrivi, l\'ente può rifiutare la fattura.</div>'
+      + '</div>'
       + (function(){
           const _gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
           const _sc=f.scadenza||_giorniDopo(f.data||todayStr(),_gg);
@@ -1322,7 +1354,9 @@
     if($("#fa-bollo"))$("#fa-bollo").addEventListener("input",function(){
       fattBolloAuto=false;const n=$("#fa-bollo-nota");if(n)n.style.display="none";
     });
-    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese","#fa-spese-iva"].forEach(id=>{
+    fattEnteMostra();
+    if($("#fa-cli"))$("#fa-cli").addEventListener("change",function(){fattEnteMostra();fattTotaleLive();});
+    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese","#fa-spese-iva","#fa-scis"].forEach(id=>{
       const e=$(id);if(!e)return;
       e.addEventListener("input",fattTotaleLive);
       e.addEventListener("change",fattTotaleLive);
@@ -1458,6 +1492,17 @@
       ritenuta_perc:_numIt("#fa-rit")||0,
       note:$("#fa-note").value.trim()||null
     };
+    /* 24 nov 2026 — ente pubblico: scissione, CIG, CUP, determina.
+       Una fattura gia' emessa non cambia scissione risalvandola. */
+    {
+      const _ente=fattEnteScelto();
+      const _fP=id?fattCache.find(x=>String(x.id)===String(id)):null;
+      testata.scissione=(_fP&&_fP.numero)?!!_fP.scissione:(_ente&&fattScissioneVisibile()&&!!($("#fa-scis")&&$("#fa-scis").checked));
+      const _vv=q=>{const e=$(q);return e?(e.value||"").trim():"";};
+      testata.cig=_ente?(_vv("#fa-cig").toUpperCase()||null):null;
+      testata.cup=_ente?(_vv("#fa-cup").toUpperCase()||null):null;
+      testata.rif_pa=_ente?(_vv("#fa-rifpa")||null):null;
+    }
     /* 13 nov 2026 — il pagamento: entro quando, come, e su quale IBAN.
        L'IBAN si scrive solo se serve (bonifico, Ri.Ba.). */
     if($("#fa-scad")){
@@ -1505,8 +1550,8 @@
        colonne nuove non esistono: invece di perdere TUTTA la fattura le
        togliamo e riproviamo, dicendolo (stesso schema dei Dati azienda). */
     let avvisoCassa=false;
-    const _senzaCassa=o=>{const x=Object.assign({},o);delete x.cassa_perc;delete x.cassa_tipo;delete x.spese;delete x.spese_iva;delete x.spese_regime;return x;};
-    const _eCassaMancante=e=>/cassa_perc|cassa_tipo|\bspese\b|spese_iva|spese_regime/.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
+    const _senzaCassa=o=>{const x=Object.assign({},o);delete x.cassa_perc;delete x.cassa_tipo;delete x.spese;delete x.spese_iva;delete x.spese_regime;delete x.scissione;delete x.cig;delete x.cup;delete x.rif_pa;return x;};
+    const _eCassaMancante=e=>/cassa_perc|cassa_tipo|\bspese\b|spese_iva|spese_regime|scissione|\bcig\b|\bcup\b|rif_pa/.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     if(id){
       let {data:okFat,error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid).select("id");
       if(error&&_eCassaMancante(error)){
@@ -2198,9 +2243,9 @@
        riquadri. Se non ci stanno tutte, si parte da una pagina nuova invece di
        spezzare il conto in due fogli. */
     const _extra=(c.cassa||c.spese||c.speseIva||c.sconto);
-    const _nRighe=1+(!forf?1:0)+(+f.bollo?1:0)+(c.ritenuta?1:0)
+    const _nRighe=1+(!forf?1:0)+(+f.bollo?1:0)+(c.ritenuta?1:0)+(c.scissione?1:0)
                  +(_extra?(1+(c.cassa?1:0)+(c.spese?1:0)+(c.speseIva?1:0)+(c.sconto?1:0)):0);
-    spazio(_nRighe*5.4+13+(c.ritenuta?13:0));
+    spazio(_nRighe*5.4+13+((c.ritenuta||c.scissione)?13:0)+(c.scissione?10:0));
     /* 9 agosto 2026 — cassa e spese in chiaro: prima il PDF mostrava un solo
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
     if(_extra){
@@ -2226,9 +2271,21 @@
     doc.setDrawColor(11,75,196);doc.setLineWidth(.4);
     doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
     y+=6;riga("TOTALE",eurPdf(c.totale),true);
-    if(c.ritenuta){
+    /* 24 nov 2026 — ente pubblico in scissione dei pagamenti: l'IVA la versa
+       l'ente. La dicitura sul foglio e' obbligatoria. */
+    if(c.scissione)riga("IVA versata dall'ente (scissione)","-"+eurPdf(c.iva));
+    if(c.ritenuta||c.scissione){
       y+=2;doc.setDrawColor(11,75,196);doc.setLineWidth(.4);doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
       y+=6;riga("NETTO A PAGARE",eurPdf(c.daPagare),true);
+    }
+    if(c.scissione){
+      y+=5;doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(0);
+      doc.text("Scissione dei pagamenti - art. 17-ter DPR 633/72: l'IVA è versata dall'ente.",M,y);
+      doc.setFont("helvetica","normal");y+=1;
+    }
+    {
+      const _pa=[f.cig?"CIG "+String(f.cig).toUpperCase():"",f.cup?"CUP "+String(f.cup).toUpperCase():"",f.rif_pa?"Rif. "+f.rif_pa:""].filter(Boolean).join("  ·  ");
+      if(_pa){y+=5;doc.setFontSize(9);doc.setTextColor(0);doc.text(_pa,M,y);y+=1;}
     }
     y+=6;
 
@@ -2439,7 +2496,11 @@
       const pec=(cli.sdi_pec||f.cli_pec||"").trim();
       if(!sdi&&!pec)
         m.push("Il cliente non ha né codice destinatario né PEC. Se non li ha davvero, scrivi 0000000 nel codice destinatario: la fattura gli arriverà nel suo cassetto fiscale — Clienti.");
-      if(sdi&&sdi!=="0000000"&&sdi.length!==7)
+      /* 24 nov 2026 — ente pubblico: codice univoco ufficio di 6 caratteri */
+      if(cli.tipo==="ente"){
+        if(sdi.length!==6)
+          m.push("Il cliente è un ente pubblico: serve il codice univoco ufficio di 6 caratteri (te lo dà l'ente, o lo trovi su indicepa.gov.it) — Clienti.");
+      }else if(sdi&&sdi!=="0000000"&&sdi.length!==7&&sdi.length!==6)
         m.push("Il codice destinatario del cliente deve essere di 7 caratteri (o 0000000 se non ce l'ha) — Clienti.");
     }
 
@@ -2477,6 +2538,10 @@
     const cSdi  =(cli.sdi_codice||f.cli_sdi||"").trim();
     const cPec  =(cli.sdi_pec||f.cli_pec||"").trim();
     const codDest = cSdi || "0000000";
+    /* 24 nov 2026 — un codice di 6 caratteri e' un ufficio della Pubblica
+       Amministrazione: il file e' FPA12 (fattura alla PA), non FPR12 */
+    const fpa = codDest.length===6;
+    const formato = fpa?"FPA12":"FPR12";
 
     /* il progressivo dell'invio: identifica il file, non la fattura.
        Basta che sia diverso ogni volta e lungo al massimo 10 caratteri. */
@@ -2506,7 +2571,7 @@
     };
 
     let x='<?xml version="1.0" encoding="UTF-8"?>\n';
-    x+='<p:FatturaElettronica versione="FPR12"'
+    x+='<p:FatturaElettronica versione="'+formato+'"'
      + ' xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"'
      + ' xmlns:ds="http://www.w3.org/2000/09/xmldsig#"'
      + ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
@@ -2518,7 +2583,7 @@
     x+='    <DatiTrasmissione>\n';
     x+='      <IdTrasmittente>\n        <IdPaese>IT</IdPaese>\n        <IdCodice>'+xesc(xpul(az.piva))+'</IdCodice>\n      </IdTrasmittente>\n';
     x+='      <ProgressivoInvio>'+xesc(prog)+'</ProgressivoInvio>\n';
-    x+='      <FormatoTrasmissione>FPR12</FormatoTrasmissione>\n';
+    x+='      <FormatoTrasmissione>'+formato+'</FormatoTrasmissione>\n';
     x+='      <CodiceDestinatario>'+xesc(codDest)+'</CodiceDestinatario>\n';
     /* la PEC si scrive solo quando il cliente non ha un codice destinatario:
        messa insieme al codice, lo SDI scarta il file */
@@ -2608,6 +2673,16 @@
     x+='      </DatiGeneraliDocumento>\n';
     /* 19 nov 2026 — la nota di credito dice quale fattura storna */
     const _rifNc=(f.tipo==="nota_credito")?fattRifStornata(f):null;
+    /* 24 nov 2026 — ente pubblico: determina/ordine, CIG e CUP.
+       DatiOrdineAcquisto viene PRIMA di DatiFattureCollegate (schema). */
+    const _cig=String(f.cig||"").trim().toUpperCase(), _cup=String(f.cup||"").trim().toUpperCase(), _rif=String(f.rif_pa||"").trim();
+    if(_cig||_cup||_rif){
+      x+='      <DatiOrdineAcquisto>\n';
+      x+='        <IdDocumento>'+xesc(xtaglia(_rif||_cig||_cup,20))+'</IdDocumento>\n';
+      if(_cup) x+='        <CodiceCUP>'+xesc(xtaglia(_cup,15))+'</CodiceCUP>\n';
+      if(_cig) x+='        <CodiceCIG>'+xesc(xtaglia(_cig,15))+'</CodiceCIG>\n';
+      x+='      </DatiOrdineAcquisto>\n';
+    }
     if(_rifNc) x+='      <DatiFattureCollegate>\n        <IdDocumento>'+xesc(_rifNc.numero)+'</IdDocumento>\n        <Data>'+xesc(_rifNc.data)+'</Data>\n      </DatiFattureCollegate>\n';
     x+='    </DatiGenerali>\n';
 
@@ -2683,7 +2758,8 @@
       if(nat) x+='        <Natura>'+nat+'</Natura>\n';
       x+='        <ImponibileImporto>'+xnum(ri.imponibile)+'</ImponibileImporto>\n';
       x+='        <Imposta>'+xnum(ri.imposta)+'</Imposta>\n';
-      x+='        <EsigibilitaIVA>I</EsigibilitaIVA>\n';
+      /* 24 nov 2026 — scissione dei pagamenti: «S» dove c'e' l'imposta */
+      x+='        <EsigibilitaIVA>'+((c.scissione&&(+ri.imposta||0)>0)?'S':'I')+'</EsigibilitaIVA>\n';
       if(nat==="N2.2") x+='        <RiferimentoNormativo>Operazione non soggetta a IVA ai sensi dell\'art. 1, commi 54-89, L. 190/2014 - regime forfettario</RiferimentoNormativo>\n';
       if(nat==="N1")   x+='        <RiferimentoNormativo>Spese anticipate in nome e per conto del cliente - escluse ex art. 15, comma 1, n. 3, DPR 633/72</RiferimentoNormativo>\n';
       x+='      </DatiRiepilogo>\n';
