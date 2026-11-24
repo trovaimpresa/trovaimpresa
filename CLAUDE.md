@@ -4198,8 +4198,30 @@ Funzioni nuove («Si e pubblica» di Alex, foto prima), `?v=24nov-sp2`, tutte le
 ⬜ Non provati: l'email del mattino vera (parte una volta al giorno), «Parla» e Chat che scrivono un promemoria (crediti), un collaboratore vero dal telefono.
 ⬜ Visto, non toccato: la linguetta viola «F» copre la prima lettera della riga sotto le linguette sul telefono (vale per tutte le sezioni, già segnato il 18 nov).
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: ASSISTENTE
+
+⚠️ Il Cestino dello studio del 24 nov NON è pubblicato (ultimo commit online f6d47ff, Scadenze): non riprovato. Il suo lavoro sta solo nel contenitore di quella chat.
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati, provati e cancellati in UNA chiamata (`window._provaAss(opz)`; si lancia senza aspettarla e si legge `window._RA`): cliente srl, collaboratrice Giulia, stazione totale con taratura scaduta, integrazioni scadute, 4 pratiche (rilievo in ritardo, sopralluogo fra 2 giorni con Giulia, SCIA depositata con data passata, APE finita da fatturare), parcella inviata e ferma, fornitore con fattura scaduta, promemoria passato; fatture SOLO in memoria (finto `sb.from` che rispetta i filtri: una emessa scaduta, una bozza ferma; niente SDI). Le 3 chat aperte dai pulsanti buttate con `chat_svuota`. Conteggi prima = dopo ✔.
+Visti: «Parti da qui» (1 fattura scaduta, poi pratica in ritardo, scadenza, strumento, 2 pratiche da fatturare, bozza ferma, preventivo fermo) ✔; schede = voci: Pratiche 3/1 in ritardo ✔, Preventivi 1.024,80 ✔, Fatture da incassare e da fatturare 1.360,50 ✔, Clienti 2 ✔, Calendario 1 ✔, Agenda «Giulia 1 · 2 senza nessuno» ✔, Fornitori 300 ✔, Promemoria ✔; Scadenze 2 = pallino del menu (la linguetta «Scadenze (5)» conta anche fatture da incassare e da pagare: voluto). Telefono 375: niente fuori, niente sotto 13 px, barra «Assistente · Pratiche · microfono · Preventivi · Fatture» ✔.
+⚠️ Col conto di Alex (`imprese.tipo` = artigiano) la vista `gest_preventivi_totali` conta la parcella SENZA cassa: la chat ha detto 976 € invece di 1.024,80. Con uno studio vero torna. Non è un difetto.
+
+Sistemato (`?v=24nov-ass`):
+1. ⛔ «Fai un preventivo» allo studio: suggerimento delle PIASTRELLE e esempio del bagno; l'AI scriveva da capocantiere. Ora esempio e consiglio da parcella, e all'AI si dice prima che servono solo le prestazioni del tecnico (`PARCELLA_CONTESTO` in `js/gest-ai-moduli.js`). Provato dal vivo: rilievo, progetto, CILA, direzione lavori, catasto, APE, a corpo.
+2. ⛔ «Parla» allo studio (`js/gest-parla.js`, finestra fuori dal gestionale = il traduttore non la vede): «Cantiere», «chi sei tu nella squadra?», «Non lavoro in cantiere», «Nota sul cantiere», messaggi d'errore → parole dello studio (`PAROLE_STUDIO`, solo le scritte fisse).
+3. ⛔ «Parla»: «ricordami venerdì» detto martedì 24 → promemoria SABATO 28 (conto sbagliato dell'AI). `giornoGiusto()`: un solo giorno della settimana nella frase e data a meno di una settimana → il giorno giusto. Provato in node, 7 casi. Tutte le facce e il Noleggio.
+4. «📷 Fotografa un foglio» allo studio: via «Bolla della pratica», «Fattura di un fornitore».
+5. Scheda Clienti: «1 cliente in anagrafica» e sotto «Nessun cliente registrato» → «Nessuna pratica aperta» (impresa «Nessun lavoro aperto»). Tutte le facce.
+6. Scheda Strumenti / Mezzi: «1 con scadenza vicina» e sotto «scaduta» → «1 con scadenza passata» (o «2 da guardare · 1 passata»). Tutte le facce.
+7. Scheda Pratiche: SCIA al Comune con la data passata diceva «9 giorni fa» → «Al Comune», come Pratiche.
+8. Scheda Mappa: con una distanza sola «più vicina 21 km / più lontana 21 km» → una riga.
+9. Chat (pulsante «Cosa scade questo mese?»): la SCIA depositata stava fra le «pratiche in ritardo» (`netlify/functions/chat-gestionale.mjs`, `agenda`: allo studio fuori le depositate e in istruttoria). Pulsante «Aprilo» → «Aprila» allo studio (`js/gest-chat.js`).
+Banco `tools/banco-gestionale.js app` e `noleggio`: ZERO difetti.
+⬜ Non provati: la voce vera dal telefono (il microfono del browser di Claude è bloccato), il preventivo AI riempito nel modulo dopo il push (provata la risposta dell'AI).
+⬜ Visto, lasciato alla voce «Chat con AI»: allo studio la chat dice ancora «lavoro» («Apri sul lavoro → Crea fattura», «diventati lavori»).
+⬜ Proposta (non fatta, aspetta il sì): in «Parti da qui» allo studio la riga «N pratiche con integrazioni da mandare al Comune» (stato «integrazioni»): oggi la vede solo la chat.
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4315,6 +4337,17 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Scadenze e promemoria ↔ app del collaboratore: — non vede le scadenze dello studio (giusto; vede le sue pratiche).
 - Scadenze e promemoria ↔ Ricerca in alto: — le scadenze non si cercano (da guardare a fine giro).
 - Si può unire: già unite (18 nov) in una voce con due linguette. Resta così.
+
+- Assistente ↔ Pratiche: ✔ «N pratiche aperte · N in ritardo» uguali a Pratiche (la pratica al Comune non è in ritardo e dal 24 nov dice «Al Comune»).
+- Assistente ↔ Fatture: ✔ da incassare, da fatturare, bozze ferme uguali alla sezione (stessa fattConti).
+- Assistente ↔ Preventivi e parcella: ✔ totale della parcella uguale; «Fai un preventivo» apre il modulo con l'AI della parcella (dal 24 nov).
+- Assistente ↔ Clienti / Calendario / Agenda / Collaboratori / Fornitori / Promemoria / Strumenti / Mappa / Report: ✔ numeri uguali alle voci.
+- Assistente ↔ Scadenze e promemoria: ✗ voluto: la scheda conta come il pallino del menu (scadenze, persone, carte, crediti), la linguetta «Scadenze (N)» conta anche fatture da incassare e da pagare (quelle hanno già le schede Fatture e Fornitori).
+- Assistente ↔ Chat con AI: ✔ «Manda» e i pulsanti aprono una chat nuova con la domanda. ✗ la chat allo studio dice ancora «lavoro» in qualche frase (da fare nella voce Chat).
+- Assistente ↔ Parla / Giornate / Promemoria: ✔ dal 24 nov parole dello studio e giorno della settimana giusto.
+- Assistente ↔ Crediti formativi: — la scheda compare solo col primo corso segnato (regola «se non l'hai usata non si vede»); l'avviso «ne mancano» sta nello Scadenzario.
+- Assistente ↔ Pratiche con integrazioni: — in «Parti da qui» non c'è (proposta del 24 nov).
+- Si può unire: NO, l'Assistente è la pagina di partenza; non è una voce da unire, è il riassunto di tutte.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

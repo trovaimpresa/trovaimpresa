@@ -236,9 +236,16 @@
     }
   };
 
+  /* 24 nov 2026 — la parcella dello studio (vedi go.onclick) */
+  const PARCELLA_ESEMPIO = 'CILA rifacimento bagno per Rossi, via Roma 3 Rieti: rilievo, progetto, deposito, direzione lavori e aggiornamento catastale';
+  const PARCELLA_CONTESTO = '[STUDIO TECNICO — questo è il preventivo di un geometra/ingegnere/architetto, cioè la sua PARCELLA. '
+    + 'Metti SOLO le prestazioni professionali del tecnico (sopralluogo e rilievo, progetto, pratica edilizia e deposito al Comune, '
+    + 'direzione lavori, coordinamento sicurezza, aggiornamento catastale, APE, fine lavori), a corpo, con l\'onorario del tecnico. '
+    + 'NIENTE lavori edili, materiali o manodopera di cantiere: quelli li fa l\'impresa. Niente capitoli se le voci sono 8 o meno.]\n';
   function aiRigaHTML(tipo){
     const m = AI_MODULI[tipo]; if(!m) return "";
     const pro = ruoloUtente==='professionista' && tipo==='lavoro';
+    const proPrev = ruoloUtente==='professionista' && tipo==='preventivo';
     return '<div class="ai-riga" id="ai-riga">'
       + '<button type="button" class="ai-riga-apri" id="ai-riga-apri" aria-expanded="false" aria-controls="ai-riga-giu">'
       +   '<span class="ai-riga-mk">AI</span>'
@@ -247,7 +254,7 @@
       + '</button>'
       + '<div class="ai-riga-giu" id="ai-riga-giu" hidden>'
       +   '<label class="ai-riga-lab" for="ai-riga-in">'+(pro?'Scrivi o parla come al telefono, oppure fotografa la ricevuta o la visura':'Scrivi o parla come al telefono')+'</label>'
-      +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(pro?'CILA bagno per Rossi, via Roma 3 Rieti, depositata ieri prot. 4567, foglio 12 particella 345 sub 2':m.esempio) + '"></textarea>'
+      +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(pro?'CILA bagno per Rossi, via Roma 3 Rieti, depositata ieri prot. 4567, foglio 12 particella 345 sub 2':(proPrev?PARCELLA_ESEMPIO:m.esempio)) + '"></textarea>'
       /* ⛔ 22 agosto 2026 — LE MISURE, SCRITTE PRIMA DI SCRIVERE.
          Alessio aveva chiesto un preventivo per un bagno senza dire quanto
          era grande: l'AI si e' data da sola «bagno standard di circa 8 mq»
@@ -262,7 +269,11 @@
          della funzione obbliga l'AI a dire nella PRIMA riga delle note
          quali misure ha supposto. */
       +   (m.feature==='preventivo'
-            ? '<div class="campo-aiuto">Scrivi anche <b>quanti mq</b> e <b>fino a che altezza vanno le piastrelle</b> (di solito 1 m o 2 m): se no le quantità me le invento io.</div>'
+            /* 24 nov 2026 (studio, voce Assistente) — al geometra la parcella:
+               il consiglio delle piastrelle era per l'impresa */
+            ? (proPrev
+                ? '<div class="campo-aiuto">Scrivi <b>la pratica</b> e <b>cosa fai tu</b> (rilievo, progetto, deposito, direzione lavori, catasto): ogni cosa diventa una voce della parcella.</div>'
+                : '<div class="campo-aiuto">Scrivi anche <b>quanti mq</b> e <b>fino a che altezza vanno le piastrelle</b> (di solito 1 m o 2 m): se no le quantità me le invento io.</div>')
             : '')
       +   '<div class="ai-riga-az">'
       +     '<button type="button" class="ai-riga-go" id="ai-riga-go">Riempi le caselle</button>'
@@ -399,7 +410,13 @@
         const pratica = ruoloUtente==='professionista' && tipo==='lavoro' && window.AI && typeof window.AI.pratica==="function";
         /* 17 nov 2026 — il cliente passa da ai-cliente (tutte le caselle) */
         const _aiCli = tipo==='cliente' && window.AI && typeof window.AI.cliente==="function";
-        const d=pratica ? await window.AI.pratica(testo,null) : (_aiCli ? await window.AI.cliente(testo) : await window.AI.dati(m.feature,testo));
+        /* 24 nov 2026 (studio, voce Assistente) — il preventivo dello studio e'
+           la PARCELLA. L'AI dei preventivi scrive da capocantiere: a «rifacimento
+           bagno per Rossi» rispondeva con demolizioni e piastrelle. Allo studio
+           le si dice prima che servono solo le prestazioni del tecnico. Provato
+           dal vivo: rilievo, progetto, CILA, direzione lavori, catasto, a corpo. */
+        const testoAI = (ruoloUtente==='professionista' && m.feature==='preventivo') ? (PARCELLA_CONTESTO + testo) : testo;
+        const d=pratica ? await window.AI.pratica(testo,null) : (_aiCli ? await window.AI.cliente(testo) : await window.AI.dati(m.feature,testoAI));
         if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
         const messi=[], nonTrovati=[];
         m.campi.forEach(c=>{

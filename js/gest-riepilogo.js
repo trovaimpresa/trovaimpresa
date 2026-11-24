@@ -42,6 +42,7 @@
     "✉️":'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
     "💬":'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z"/>'
   };
+  function _rieStudio(){ try{ return typeof ruoloUtente!=="undefined"&&ruoloUtente==='professionista'; }catch(e){ return false; } }
   function rieFotoScegli(){
     const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;flex-wrap:nowrap!important;gap:14px;align-items:center;width:100%;text-align:left;'
       +'border:2px solid #d9dfe7;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;font-size:21px;font-weight:700;cursor:pointer">'
@@ -49,8 +50,10 @@
       +'<span style="flex:0 0 auto;width:34px;height:34px;color:#0a2a4d"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(RIE_IC[ic]||"")+'</svg></span><span style="flex:1 1 auto;min-width:0">'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
     openSheetGrande("Cosa stai fotografando?",
       '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
-      +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
-      +(typeof window.gestParlaFoto==="function"?c("pf-bolla","📦","Bolla del cantiere","Diventa una spesa del cantiere"):"")
+      /* 24 nov 2026 (studio, voce Assistente) — lo studio non riceve bolle di
+         materiale: la «Bolla del cantiere» diventava «Bolla della pratica». */
+      +c("pf-forn","🧾",_rieStudio()?"Fattura di un fornitore":"Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
+      +(typeof window.gestParlaFoto==="function"&&!_rieStudio()?c("pf-bolla","📦","Bolla del cantiere","Diventa una spesa del cantiere"):"")
       +c("pf-lett","✉️","Lettera del Fisco o dell'INPS","Te la spiega in parole semplici")
       +c("pf-altro","💬","Altro: scrivi alla chat","La chat guarda la foto e ti risponde")+'</div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>');
@@ -550,6 +553,12 @@
       return v.prossimo_titolo||"";
     };
     const mzAvvisa=_scadDi(MZveicoli);
+    /* 24 nov 2026 (studio, voce Assistente) — la scheda diceva «1 con
+       scadenza vicina» e sotto «scaduta». Adesso: «1 con scadenza passata»,
+       e se ce ne sono anche di vicine «2 da guardare · 1 passata». */
+    const _mzLab=el=>{const p=el.filter(v=>v.scadute>0).length;
+      return p===el.length ? p+(p===1?" con scadenza passata":" con scadenze passate")
+                           : el.length+" da guardare · "+p+(p===1?" passata":" passate");};
     const stAvvisa=_scadDi(MZstrum);
     /* squadra: quanti lavori aperti ha ciascuno */
     /* carte: saldo per carta */
@@ -810,8 +819,13 @@
       lab: ritardo.length? ritardo.length+" in ritardo":_plur(aperti.length,"lavoro aperto","lavori aperti"),
       tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
       vuoto:"Nessun lavoro aperto",
-      righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
-        t:l.descrizione||"Lavoro", v:q.testo, cls:inRitardo(l.stato,l.data_prevista,l.pratica_stato)?"q-passato":q.classe,
+      /* 24 nov 2026 (studio, voce Assistente) — una pratica depositata o in
+         istruttoria con la data passata diceva «9 giorni fa», come una in
+         ritardo: Pratiche e Calendario dicono «Al Comune». */
+      righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);
+        const _com=_pro&&(l.pratica_stato==="depositata"||l.pratica_stato==="istruttoria")&&l.data_prevista&&l.data_prevista<oggi;
+        return{
+        t:l.descrizione||"Lavoro", v:_com?"Al Comune":q.testo, cls:inRitardo(l.stato,l.data_prevista,l.pratica_stato)?"q-passato":(_com?"":q.classe),
         action:"edit-job", id:l.id};})
     }));
 
@@ -872,7 +886,9 @@
     const _proNascosto=tabNascosto;
     if(!_proNascosto("mezzi"))C.push(rieCard({
       tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length, dati:MZveicoli.length>0,
-      lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+      /* 24 nov 2026 — «con scadenza vicina» anche quando era gia' passata */
+      lab: mzAvvisa.some(v=>v.scadute>0)? _mzLab(mzAvvisa)
+          : mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
                           : (MZveicoli.length===1?"mezzo in azienda":"mezzi in azienda"),
       tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
       vuoto: MZveicoli.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
@@ -885,7 +901,8 @@
        l'impresa. Le tarature e le verifiche periodiche si vedono da qui. */
     C.push(rieCard({
       tab:"attrezzature", titolo: _pro?"Strumenti":"Attrezzature", n:MZstrum.length, dati:MZstrum.length>0,
-      lab: stAvvisa.length? stAvvisa.length+(stAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+      lab: stAvvisa.some(v=>v.scadute>0)? _mzLab(stAvvisa)
+          : stAvvisa.length? stAvvisa.length+(stAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
                           : (_pro?"strumenti dello studio":"attrezzature in azienda"),
       tono: stAvvisa.some(v=>v.scadute>0)?"err":(stAvvisa.length?"attesa":"ok"),
       vuoto: MZstrum.length?"Nessuna taratura o verifica in arrivo"
@@ -952,7 +969,10 @@
     C.push(rieCard({
       tab:"clienti", titolo:"Clienti", n:CLI.length, dati:CLI.length>0,
       lab:_plur(CLI.length,"cliente in anagrafica","clienti in anagrafica"), tono:"neutro",
-      vuoto:"Nessun cliente registrato",
+      /* 24 nov 2026 (studio, voce Assistente) — «1 cliente in anagrafica» e
+         sotto «Nessun cliente registrato»: le righe sono i clienti con
+         qualcosa APERTO, e se non ce n'era nessuno la scheda si smentiva. */
+      vuoto:CLI.length?(_pro?"Nessuna pratica aperta":"Nessun lavoro aperto"):"Nessun cliente registrato",
       righe: cliOrd.slice(0,2).map(k=>({
         t:cliMap[k]||"Cliente",
         v:perCli[k]+(perCli[k]===1?" lavoro aperto":" lavori aperti")}))
@@ -1118,6 +1138,9 @@
         const pro=ruoloUtente==='professionista';
         mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0]),fisso:1},
                 {t:pro?"La più lontana":"Il più lontano",v:mpFormattaKm(km[km.length-1]),fisso:1}];
+        /* 24 nov 2026 — con UNA distanza sola la scheda diceva due volte
+           «21 km» (più vicina e più lontana): basta una riga */
+        if(km.length===1) mpNote=[{t:pro?"La pratica a":"Il cantiere a",v:mpFormattaKm(km[0]),fisso:1}];
       }
     }catch(e){}
     C.push(rieCard({

@@ -150,6 +150,29 @@
     var o = ops().find(function (x) { return String(x.id) === String(i); });
     return o ? o.nome + ' (tu)' : 'Tu';
   }
+  /* 24 nov 2026 (studio, voce Assistente) — la finestra di «Parla» sta fuori
+     dal gestionale (#gp-ov), quindi il traduttore dello studio non la vede:
+     al geometra diceva «Cantiere», «chi sei tu nella squadra?», «Non lavoro
+     in cantiere». Qui si cambiano SOLO le scritte fisse, col loro pezzo di
+     HTML intorno: quello che ha detto lui (e il nome della pratica) resta. */
+  function studio() { try { return typeof ruoloUtente !== 'undefined' && ruoloUtente === 'professionista'; } catch (x) { return false; } }
+  var PAROLE_STUDIO = [
+    ['>Nota sul cantiere<', '>Nota sulla pratica<'],
+    ['<label>Cantiere<input', '<label>Pratica<input'],
+    ['<label>Per quale cantiere<input', '<label>Per quale pratica<input'],
+    ['<span>Cantiere</span>', '<span>Pratica</span>'],
+    [' · cantiere da scegliere<', ' · pratica da scegliere<'],
+    ['>cantiere da scegliere<', '>pratica da scegliere<'],
+    ['documenti del cantiere.<', 'documenti della pratica.<'],
+    [' ancora in Squadra: lo aggiungo io.<', ' ancora fra i Collaboratori: lo aggiungo io.<'],
+    ['chi sei tu nella squadra?<', 'chi sei tu fra i collaboratori?<'],
+    ['>Non lavoro in cantiere<', '>Non sono fra i collaboratori<'],
+    ['Dimmi chi sei tu nella squadra (', 'Dimmi chi sei tu fra i collaboratori ('],
+    ['In una giornata manca il cantiere:', 'In una giornata manca la pratica:'],
+    ['Una spesa va su un cantiere:', 'Una spesa va su una pratica:'],
+    ['In una nota manca il cantiere o il testo:', 'In una nota manca la pratica o il testo:']
+  ];
+  function perStudio(h) { PAROLE_STUDIO.forEach(function (x) { h = h.split(x[0]).join(x[1]); }); return h; }
   function serveIo() { return !io() && P.cose.some(function (c) { return c.tipo === 'giornata' && c.chi.indexOf('IO') >= 0; }); }
 
   function campo(lab, f, v, tipo) {
@@ -211,7 +234,7 @@
     }
     h += '<div class="gp-grid">' + P.cose.map(scheda).join('') + '</div>'
       + '<datalist id="gp-cantieri">' + lavori().map(function (l) { return '<option value="' + e(nomeLav(l)) + '">'; }).join('') + '</datalist></div>';
-    ov.innerHTML = h;
+    ov.innerHTML = studio() ? perStudio(h) : h;
     pie.hidden = !da || !!P.leggendo;
     pie.innerHTML = '<button type="button" class="gp-b gp-b--blu" data-gp="salva">Salva tutto (' + da + ')</button><button type="button" class="gp-b" data-gp="chiudi">Annulla</button>';
     posiziona();
@@ -456,11 +479,37 @@
 
   /* ---------------- la porta ----------------
      torna 'aperta' se ha aperto la finestra, 'vecchio' se tocca al Parla di prima */
+  /* 24 nov 2026 (studio, voce Assistente) — «ricordami di chiamare il Comune
+     venerdì», detto di martedì 24, era diventato SABATO 28: l'AI ha sbagliato
+     il conto dei giorni. Se nella frase c'e' UN SOLO giorno della settimana e
+     il promemoria cade a meno di una settimana dal prossimo di quel giorno ma
+     in un giorno diverso, si mette quello giusto. Non tocca le date scritte
+     per intero e non tocca giornate e spese (sono di giorni passati). */
+  /* niente \\b: dopo la «ì» il confine di parola di JavaScript non scatta */
+  var GG_RX = /(?:^|[^a-zà-ù])(luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)(?![a-zà-ù])/gi;
+  function giornoGiusto(t, cose) {
+    try {
+      var trovati = [], m; GG_RX.lastIndex = 0;
+      while ((m = GG_RX.exec(String(t)))) trovati.push(m[1].toLowerCase().replace(/i$/, 'ì'));
+      trovati = trovati.filter(function (x, i, a) { return a.indexOf(x) === i; });
+      if (trovati.length !== 1 || /\bscors|\bpassat/i.test(t)) return cose;
+      var g = GG.indexOf(trovati[0]); if (g < 0) return cose;
+      var o = new Date(oggi() + 'T12:00'), d = new Date(o); d.setDate(o.getDate() + ((g - o.getDay() + 7) % 7));
+      var giusto = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      return cose.map(function (c) {
+        if (c.tipo !== 'promemoria' || !DATA.test(c.data || '') || c.data === giusto) return c;
+        var x = new Date(c.data + 'T12:00');
+        if (x.getDay() === g || Math.abs(x - d) > 6.5 * 86400000) return c;
+        return Object.assign({}, c, { data: giusto });
+      });
+    } catch (x) { return cose; }
+  }
   window.gestParla = async function (t, vecchio) {
     if (typeof sb === 'undefined' || !sb) return 'vecchio';
     var cose = await capisci(t);
     if (!cose || !cose.length) return 'vecchio';
     cose = cose.slice(0, 20).map(pulisci);
+    cose = giornoGiusto(t, cose);
     /* 10 nov 2026 — da soli: «io» si capisce senza chiederlo (gest-giornate.js) */
     if (typeof window.giorIoAuto === 'function' && cose.some(function (c) { return c.tipo === 'giornata' && c.chi.indexOf('IO') >= 0; })) {
       try { await window.giorIoAuto(true); } catch (x) {}

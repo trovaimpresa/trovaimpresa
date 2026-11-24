@@ -435,6 +435,9 @@
   }
   function pulsanteApri(tutto, tipo, id) {
     var lab = TIPI_APRIBILI[tipo];
+    /* 24 nov 2026 (studio, voce Assistente) — allo studio il lavoro e' una
+       PRATICA: «Aprilo» accanto a «Rilievo …» stonava. */
+    if (tipo === 'lav') { try { if (typeof ruoloUtente !== 'undefined' && ruoloUtente === 'professionista') lab = 'Aprila'; } catch (e) {} }
     if (!lab) return tutto;
     return ' <button class="chip" type="button" data-apri="' + tipo + '" data-apri-id="' + id + '">' + lab + '</button>';
   }

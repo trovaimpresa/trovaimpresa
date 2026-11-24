@@ -1477,6 +1477,14 @@ async function agenda(clientDati, uid, reparto, oggi, base) {
   nomi.forEach(function (k, i) {
     const r = esiti[i];
     fuori[k] = r.errore ? { errore: r.errore } : r.righe;
+    /* 24 nov 2026 (studio, voce Assistente) — una pratica DEPOSITATA o in
+       ISTRUTTORIA aspetta il Comune: non e' in ritardo (stessa regola di
+       inRitardo/_alComune nel gestionale). La chat la metteva fra le
+       «pratiche in ritardo» mentre Pratiche e Assistente no. Resta in
+       pratiche_al_comune, che e' il suo posto. */
+    if (k === 'lavori_in_ritardo' && base && base.ruolo === 'professionista' && Array.isArray(fuori[k])) {
+      fuori[k] = fuori[k].filter(function (x) { return ['depositata', 'istruttoria'].indexOf(x && x.pratica_stato) < 0; });
+    }
     if (r.righe && r.righe.length >= RIGHE_MAX) fuori[k + '_avviso'] = 'ce ne sono almeno ' + RIGHE_MAX + ': il conto e\' parziale';
   });
   return fuori;
