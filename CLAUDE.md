@@ -4155,8 +4155,24 @@ Funzioni nuove («facciamo anche le proposte e pubblica» di Alex), tutte le fac
 - **Scheda del cliente corta**: solo i dati scritti; senza P.IVA/CF/codice/PEC un riquadro «Dati per la fattura — Non ancora scritti. Aggiungili» (apre il modulo sui dati fiscali).
 ⬜ Non provati: invio allo SDI di una fattura FPA12 vera (vietato), il PDF col jsPDF vero (provato dopo il push solo se c'è una fattura in bozza di prova).
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CALENDARIO
+
+⚠️ Il Cestino del 24 nov NON risulta pubblicato (ultimo commit online f073943, Clienti): non riprovato sul sito.
+Prova da geometra dal vivo su trovaimpresa.com (browser di Alex, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati, letti e cancellati in UNA chiamata (`window._provaCal(leggi)` scritta nella pagina): cliente srl, collaboratrice Giulia, stazione totale con taratura, 7-8 pratiche (sopralluogo domani con Giulia, SCIA depositata con integrazioni nello stesso giorno, rilievo in ritardo, APE fatta, DOCFA e frazionamento per riempire un giorno, PdC in istruttoria con data passata, agibilità a dicembre), promemoria, nota, fattura del fornitore da pagare; fattura da incassare SOLO in memoria (finto `sb.from` per `gest_fatture`: nessuna fattura emessa, niente SDI). Visti: giorno pieno (3 righe + «+1»), giorno vuoto «Niente in programma», nota scritta e tolta dal riquadro (passa dal correttore: secondo «Salva» ✔), «+ Pratica in questa data» con la data già messa ✔, frecce e «Oggi» ✔, «1 pratica in ritardo · Vedi» → Pratiche ✔, «Da pagare» apre la fattura del fornitore e si torna al Calendario ✔, taratura apre la scadenza ✔, pratica nel Cestino sparisce con la sua scadenza e torna con «Rimetti a posto» («e con lei 1 scadenza») ✔, telefono 375: elenco per giorno, niente fuori schermo, niente sotto 13 px, pulsanti 44-50 px ✔. Pulito ogni volta: conteggi uguali a prima (lavori 5, clienti 2, scadenze 2, persone 1, mezzi 2, fornitori 2, note 0, promemoria 0, fatture 3).
+
+Sistemato (`?v=24nov-cal`):
+1. ⛔ Pratica depositata / in istruttoria con la data passata: nella casella e nell'elenco del telefono era ROSSA («in ritardo»), mentre il riquadro del giorno diceva «In corso» e la riga «in ritardo» non la contava. Ora la casella usa `inRitardo()` come Pratiche e il riquadro. Tutte le facce.
+2. ⛔ Taratura nel calendario: «⏰ Taratura strumento» senza dire QUALE. Ora «Taratura strumento · Stazione totale» (nome del mezzo/strumento accanto a ogni scadenza col `mezzo_id`, se non c'è già nel titolo). Tutte le facce.
+3. Riquadro del giorno: il promemoria aveva l'etichetta «Scadenza» → «Promemoria» (`_prom` in `calAltreDate`).
+4. Parole dello studio: legenda «Fatta», riquadro «Fatta», «Apri la pratica», pratica senza nome «Pratica».
+5. App del collaboratore (`js/op-agenda-giorno.js`): «Fatto» → «Fatta» allo studio; nel giorno due pratiche dello stesso cliente erano uguali (titolo = nome del cliente) → sotto c'è anche cosa c'è da fare.
+Banco `tools/banco-gestionale.js app`: ZERO difetti prima e dopo. Correzioni provate sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione).
+
+Proposte con foto (aspettano il sì di Alex), script pronto in `/tmp/lavoro/funzioni-nuove.py` della sessione: **«Chi ci va»** nel Calendario (nome accanto alla pratica, «Ci va: …» nel riquadro, tendina come la Mappa: Tutti / persona / Nessuno, filtra solo pratiche e depositi) e **il giorno del deposito** (solo studio: riga viola «Depositata: …» nel giorno di `pratica_data_dep`, legenda «Deposito», apre la pratica).
+⬜ Non provato: collaboratore vero dal suo telefono (letto il codice); fattura vera da incassare (vietato emetterla).
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4245,6 +4261,18 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Clienti ↔ Cestino: ✔ va e torna; pratiche, preventivi, computi e fatture restano (dal 24 nov la domanda conta anche i computi).
 - Clienti ↔ Ricerca in alto: ✔ dal 24 nov anche codice fiscale, PEC, codice destinatario e i clienti senza reparto.
 - Si può unire: NO, Clienti resta voce sola (la scheda è il punto da cui partono preventivi, pratiche e fatture).
+
+- Calendario ↔ Pratiche: ✔ la data prevista; «Apri» apre la pratica; «+ Pratica in questa data» con la data già messa; dal 24 nov il colore del ritardo uguale a Pratiche (al Comune non è in ritardo). — il giorno del deposito non c'è (proposta).
+- Calendario ↔ Scadenze e promemoria: ✔ scadenze delle pratiche, integrazioni, promemoria; aprono la loro scheda.
+- Calendario ↔ Strumenti: ✔ dal 24 nov la taratura col nome dello strumento.
+- Calendario ↔ Fornitori: ✔ «Da pagare» apre la fattura e si torna al Calendario.
+- Calendario ↔ Fatture: ✔ «Da incassare» (provato solo in memoria).
+- Calendario ↔ Collaboratori / Agenda: — il Calendario non dice chi va al sopralluogo (proposta «Chi ci va», come la Mappa).
+- Calendario ↔ app del collaboratore: ✔ vede i giorni delle sue pratiche; dal 24 nov «Fatta» e cosa c'è da fare sotto il cliente. — non vede scadenze e promemoria dello studio (giusto).
+- Calendario ↔ Assistente: ✔ la riga «in ritardo» usa la stessa regola di Pratiche.
+- Calendario ↔ Cestino: ✔ pratica nel Cestino sparisce con la sua scadenza, torna con «Rimetti a posto».
+- Calendario ↔ Mappa: — i sopralluoghi del giorno non hanno «il giro» sulla carta.
+- Si può unire: NO (Calendario = tutte le date dello studio; Agenda = chi fa cosa). Con «Chi ci va» si parlano senza unirle.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

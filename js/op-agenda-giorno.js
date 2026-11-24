@@ -262,7 +262,8 @@ $("#cal-next").onclick=()=>{calM++;if(calM>11){calM=0;calY++;}renderCal();};
 /* ===== lista del giorno ===== */
 function statoBadge(s){
   const v=(s||"").toLowerCase();
-  if(v.includes("fatt")||v.includes("complet"))return'<span class="badge b-fatto">Fatto</span>';
+  /* 24 nov 2026 (collaudo Calendario dello studio) — allo studio la pratica e' «Fatta» */
+  if(v.includes("fatt")||v.includes("complet"))return'<span class="badge b-fatto">'+((typeof MIO!=="undefined"&&MIO.tipoStudio==='professionista')?"Fatta":"Fatto")+'</span>';
   if(v.includes("corso"))return'<span class="badge b-corso">In corso</span>';
   return'<span class="badge b-dafare">Da fare</span>';
 }
@@ -345,8 +346,12 @@ function renderDay(){
     const cl=CLIENTI[l.cliente_id];
     const titolo=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,40):"Lavoro");
     const dove=(typeof opDove==="function")?opDove(l):(l.dove||(cl&&cl.indirizzo)||"");
+    /* 24 nov 2026 — col nome del cliente come titolo, due pratiche dello
+       stesso cliente nello stesso giorno erano uguali: sotto, cosa c'e' da fare */
+    const cosa=(cl&&l.descrizione)?String(l.descrizione).slice(0,80):"";
     return `<div class="job" data-id="${l.id}">
       <h3>${esc(titolo)}</h3>
+      ${cosa?`<div class="where">${esc(cosa)}</div>`:""}
       ${dove?`<div class="where">📍 ${esc(dove)}</div>`:""}
       ${statoBadge(l.stato)}
     </div>`;

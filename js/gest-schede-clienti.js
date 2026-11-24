@@ -640,6 +640,7 @@
   }
 
   let calJobs=[], calScad=[];
+  const _calPro=()=>typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
@@ -660,13 +661,20 @@
     if(sb&&sbUid){
       try{
         const mid=curMestiere();
-        const [{data:sc,error:_eSc},per]=await Promise.all([
+        const [{data:sc,error:_eSc},per,{data:_mzN}]=await Promise.all([
           sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id")
             .eq("user_id",sbUid).eq("mestiere_id",mid),
-          scadenzePersone(mid)
+          scadenzePersone(mid),
+          /* 24 nov 2026 (collaudo Calendario dello studio) — la taratura nasce
+             col titolo «Taratura strumento»: nel calendario non si capiva QUALE.
+             Accanto ci va il nome dello strumento (o del mezzo). */
+          sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid)
         ]);
+        const _mzNome={};(_mzN||[]).forEach(m=>{_mzNome[m.id]=m.nome;});
+        const _conMezzo=x=>{const t=x.titolo||"Scadenza", n=x.mezzo_id&&_mzNome[x.mezzo_id];
+          return (n&&t.toLowerCase().indexOf(String(n).toLowerCase())<0)?t+" · "+n:t;};
         calScad=(sc||[]).filter(x=>x.data_scadenza)
-          .map(x=>({id:x.id,titolo:x.titolo||"Scadenza",data:x.data_scadenza,fatta:x.stato==="fatta"}))
+          .map(x=>({id:x.id,titolo:_conMezzo(x),data:x.data_scadenza,fatta:x.stato==="fatta"}))
           /* si portano dietro _persona e _opId: nel riquadro del giorno servono
              per aprire la SCHEDA DELLA PERSONA invece del modulo scadenza (una
              visita medica non e' una riga di gest_scadenze, e' una data sulla
@@ -708,8 +716,11 @@
       const nJobs=Math.min(jobs.length,MAX_CELLA);
       const nSc=Math.min(sc.length,MAX_CELLA-nJobs);
       const righe=jobs.slice(0,nJobs).map(j=>{
-        const cls=j.stato==="fatto"?"fatto":(scaduto?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
-        const tit=j.descrizione||"Lavoro";
+        /* 24 nov 2026 — una pratica depositata o in istruttoria con la data
+           passata aspetta il Comune: non e' in ritardo (inRitardo, come Lavori
+           e il riquadro del giorno). Prima la casella la faceva rossa. */
+        const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        const tit=j.descrizione||(_calPro()?"Pratica":"Lavoro");
         return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}</span></span>`;
       }).join("");
       const righeSc=sc.slice(0,nSc).map(x=>{
@@ -746,6 +757,8 @@
       rit.textContent=n?"⚠ "+n+" "+(n===1?(pro?"pratica":"lavoro"):(pro?"pratiche":"lavori"))+" in ritardo · Vedi":"";
       rit.hidden=!n;
     }
+    /* 24 nov 2026 — allo studio la legenda dice «Fatta» (la pratica), come la Mappa */
+    try{const lf=document.querySelector("#calendario .cal-legend .dot.done");if(lf&&lf.nextSibling)lf.nextSibling.nodeValue=_calPro()?"Fatta":"Fatto";}catch(e){}
     calListaTelefono(y,m,days);
     /* 17 nov 2026 — senza rete l'elenco del telefono diceva «Niente in
        programma» sotto il riquadro rosso: una bugia (regola 20). */
@@ -784,7 +797,7 @@
     if(letturaKo(rp,rm,rf,rff))calAltreDate._ko=true;
     /* i promemoria sono della persona, non del reparto: si vedono da tutti */
     ok(rp).forEach(p=>{ if(p.data)out.push({id:p.id,titolo:p.testo||"Promemoria",data:p.data,fatta:p.stato==="fatto",
-      _pre:"",_lab:"Promemoria: ",_az:vai("promemoria","edit-prom",p.id)}); });
+      _pre:"",_lab:"Promemoria: ",_prom:true,_az:vai("promemoria","edit-prom",p.id)}); });
     /* le stesse quattro date della vista gest_mezzi_scadenze */
     const piuMesi=(d,n)=>{const x=new Date(d+"T12:00:00");const g=x.getDate();x.setMonth(x.getMonth()+n);if(x.getDate()<g)x.setDate(0);return ymd(x.getFullYear(),x.getMonth(),x.getDate());};
     ok(rm).forEach(m=>{
@@ -873,9 +886,9 @@
       h+='<div class="cl-g'+(ds===oggi?" oggi":"")+'" data-action="open-day" data-d="'+ds+'">'
         +(ds===oggi?"Oggi \u00b7 ":"")+esc(tit)+'</div>';
       jobs.forEach(j=>{
-        const cls=j.stato==="fatto"?"fatto":(scaduto?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
         h+='<div class="cl-r" data-action="edit-job" data-id="'+esc(String(j.id))+'"><i class="cal-lav-bar '+cls+'"></i>'
-          +'<span class="cl-t">'+esc(j.descrizione||"Lavoro")+'</span><span class="cl-f">\u203a</span></div>';
+          +'<span class="cl-t">'+esc(j.descrizione||(_calPro()?"Pratica":"Lavoro"))+'</span><span class="cl-f">\u203a</span></div>';
       });
       sc.forEach(x=>{
         const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
@@ -915,9 +928,9 @@
       const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds,j.pratica_stato);
       const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
       /* 17 nov 2026 — pallino rosso e scritta «Da fare»: adesso dice «In ritardo», come in Lavori e nella legenda */
-      const lab=sf?'Fatto':(late?'In ritardo':(inCorso?'In corso':'Da fare'));
+      const lab=sf?(_calPro()?'Fatta':'Fatto'):(late?'In ritardo':(inCorso?'In corso':'Da fare'));
       const dot=sf?'done':(late?'ritardo':(inCorso?'corso':'todo'));  /* .dot.corso esiste gia' nel CSS, la usa la legenda del calendario */
-      return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="Apri il lavoro"><i class="dot ${dot}"></i>
+      return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="${_calPro()?"Apri la pratica":"Apri il lavoro"}"><i class="dot ${dot}"></i>
         <div style="flex:1"><b>${esc(j.descrizione||"(senza descrizione)")}</b></div>
         <span class="stato ${cls}">${lab}</span></div>`;}).join("")
       :"";
@@ -937,7 +950,7 @@
       /* 17 nov 2026 — il pallino di una scadenza e' quello della legenda (.dot.scad), non l'ambra del «Da fare» */
       return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'scad')}"></i>
         <div style="flex:1"><b>${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</b></div>
-        <span class="stato ${x.fatta?'fatto':(late?'ritardo':'scad')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
+        <span class="stato ${x.fatta?'fatto':(late?'ritardo':'scad')}">${x._prom?(x.fatta?'Fatto':(late?'Passato':'Promemoria')):(x.fatta?'Fatta':(late?'Scaduta':'Scadenza'))}</span></div>`;}).join(""):"";
     /* ⛔ 29 agosto 2026 — Alessio: «la voglio come e' su tutti i gestionali».
        Era l'ultima finestra rimasta con la sola freccia in cima invece della
        testata col titolo e del piede fermo. Il contenuto e' lo stesso: cambia
