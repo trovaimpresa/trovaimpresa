@@ -38,7 +38,7 @@ async function vetrina(giorno, turno) {
   if (!id) return null;
   const [i] = await get(`imprese_pubbliche?id=eq.${id}&select=id,user_id,tipo,nome_attivita,nome,mestiere,citta,provincia`);
   if (!i) return null;
-  const foto = (await get(`lavori_foto?owner_id=eq.${i.user_id}&pubblico=eq.true&select=foto&order=ordine.desc,created_at.desc&limit=4`))
+  const foto = (await get(`lavori_foto?owner_id=eq.${i.user_id}&pubblico=eq.true&foto=like.https*&select=foto&order=ordine.desc,created_at.desc&limit=4`))
     .map(f => f.foto).filter(u => /^https:\/\//.test(u || ''));
   return { chiave: `vet:${giorno}:${turno}`, ...testoVetrina(i, foto) };
 }

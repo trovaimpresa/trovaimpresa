@@ -48,7 +48,7 @@ exports.handler = async (event) => {
     const scelte = imp.sort((a, b) => visti.get(b.id).localeCompare(visti.get(a.id))).slice(0, 3);
     const lista = [];
     for (const i of scelte) {
-      const f = await get(`lavori_foto?owner_id=eq.${i.user_id}&pubblico=eq.true&select=foto&order=ordine.desc,created_at.desc&limit=1`);
+      const f = await get(`lavori_foto?owner_id=eq.${i.user_id}&pubblico=eq.true&foto=like.https*&select=foto&order=ordine.desc,created_at.desc&limit=1`);
       lista.push({ id: i.id, nome: i.nome_attivita || i.nome || '', mestiere: i.mestiere || '', foto: f[0] ? f[0].foto : null, giorno: visti.get(i.id) });
     }
     return out(200, { imprese: lista }, true);
