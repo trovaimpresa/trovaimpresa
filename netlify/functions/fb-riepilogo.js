@@ -1,5 +1,10 @@
-// FACEBOOK — l'email del mattino ad Alessio «Da pubblicare su Facebook»
-// (20 novembre 2026). Una sola email al giorno (quota di Resend).
+// FACEBOOK — l'email del mattino ad Alessio (20 novembre 2026).
+// 24 nov 2026 (Alex, «solo per il gruppo»): dalla pagina pubblica Make da solo
+// (fb-coda.js), quindi l'email NON dice piu' «da pubblicare» (farebbe doppioni):
+// elenca le Vetrine uscite IERI sulla pagina, da condividere a mano nel gruppo,
+// perche' Facebook nei gruppi non lascia pubblicare in automatico.
+// Se ieri non e' uscita nessuna Vetrina, l'email non parte.
+// (Sotto restano le note vecchie del 20 nov, per la storia.)
 //
 // Dentro: i subappalti, le offerte di lavoro e i nuovi iscritti con la
 // scheda pubblica arrivati nelle ultime 24 ore. Ogni riga ha il pulsante che
@@ -8,7 +13,7 @@
 // ⛔ Le due righe vanno insieme: l'import di `schedule` e
 //    `exports.handler = schedule(...)` in fondo.
 const { schedule } = require('@netlify/functions');
-const { SITO, MARCHI, marchioDelGiorno, GESTIONALE, gestionaleDelGiorno } = require('./lib/fb-testi');
+const { SITO } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -30,7 +35,7 @@ function riga(icona, nome, dove, t, id) {
   return `<tr><td style="padding:12px 0;border-bottom:1px solid #e5e7eb">
     <div style="font-size:17px;font-weight:800;color:#0a2a4d">${icona} ${esc(nome)}</div>
     ${dove ? `<div style="font-size:15px;color:#475569;margin:2px 0 8px">📍 ${esc(dove)}</div>` : ''}
-    <a href="${url}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:800;font-size:16px;text-decoration:none;padding:11px 20px;border-radius:9px">Prepara il post</a>
+    <a href="${url}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:800;font-size:16px;text-decoration:none;padding:11px 20px;border-radius:9px">Apri e condividi nel gruppo</a>
   </td></tr>`;
 }
 
@@ -39,59 +44,32 @@ const handler = async () => {
   const oraRoma = Number(new Intl.DateTimeFormat('it-IT', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()));
   if (oraRoma !== 6) return { statusCode: 200 };
   if (!SERVICE_KEY || !RESEND_KEY) { console.error('[fb-riepilogo] chiavi mancanti'); return { statusCode: 500 }; }
-  const da = encodeURIComponent(new Date(Date.now() - 864e5).toISOString());
+  const ieri = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date(Date.now() - 864e5));
   const righe = [];
   try {
-    const sub = await sb(`subappalti?attivo=eq.true&created_at=gte.${da}&select=id,nome_impresa,citta&order=created_at.desc&limit=30`);
-    sub.forEach(a => righe.push(riga('🏗️ Subappalto —', a.nome_impresa || 'senza nome', a.citta, 'sub', a.id)));
-  } catch (e) { console.error('[fb-riepilogo] subappalti', e.message); }
-  try {
-    const off = await sb(`offerte_lavoro?attiva=eq.true&data_pubblicazione=gte.${da}&select=id,titolo,citta&order=data_pubblicazione.desc&limit=30`);
-    off.forEach(o => righe.push(riga('💼 Offerta —', o.titolo || 'senza titolo', o.citta, 'off', o.id)));
-  } catch (e) { console.error('[fb-riepilogo] offerte', e.message); }
-  try {
-    const imp = await sb(`imprese_pubbliche?created_at=gte.${da}&select=id,nome_attivita,nome,citta&order=created_at.desc&limit=30`);
-    imp.forEach(i => righe.push(riga('👷 Nuovo iscritto —', i.nome_attivita || i.nome || 'senza nome', i.citta, 'imp', i.id)));
-  } catch (e) { console.error('[fb-riepilogo] iscritti', e.message); }
-
-  // 23 nov 2026 (Alex): le Vetrine del giorno, imprese con le foto, a turno.
-  // «si 3»: tre al giorno (mattina, pranzo, sera), cosi' entro il 31/12
-  // escono tutte. Vanno in cima: sono i post piu' belli della mattina.
-  try {
-    const giorno = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date());
-    const vetrine = [];
-    for (const turno of [1, 2, 3]) {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/fb_vetrina_del_giorno`, {
-        method: 'POST',
-        headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_giorno: giorno, p_turno: turno }), signal: AbortSignal.timeout(8000)
-      });
-      const vid = r.ok ? await r.json() : null;
-      if (!vid) continue;
-      const v = await sb(`imprese_pubbliche?id=eq.${vid}&select=id,nome_attivita,nome,citta`);
-      if (v[0]) vetrine.push(riga(`📣 Vetrina ${turno}/3 —`, v[0].nome_attivita || v[0].nome || 'senza nome', v[0].citta, 'vet', v[0].id));
+    const v = await sb(`fb_vetrine?giorno=eq.${ieri}&select=turno,impresa_id&order=turno.asc`);
+    if (v.length) {
+      const chiavi = v.map(x => `"vet:${ieri}:${x.turno}"`).join(',');
+      const fatti = new Set((await sb(`fb_pubblicati?chiave=in.(${chiavi})&select=chiave`)).map(x => x.chiave));
+      for (const x of v) {
+        if (!fatti.has(`vet:${ieri}:${x.turno}`)) continue;
+        const i = await sb(`imprese_pubbliche?id=eq.${x.impresa_id}&select=id,nome_attivita,nome,citta`);
+        if (i[0]) righe.push(riga('📣 Vetrina —', i[0].nome_attivita || i[0].nome || 'senza nome', i[0].citta, 'vet', i[0].id));
+      }
     }
-    righe.unshift(...vetrine);
-  } catch (e) { console.error('[fb-riepilogo] vetrina', e.message); }
-
-  const nuovi = righe.length;
-  // 20 nov 2026 (Alex): ogni giorno anche un marchio della pubblicita' della
-  // home, a giro. Cosi' la pagina ha un post anche nei giorni senza novita'.
-  const mk = marchioDelGiorno();
-  righe.push(riga('🛠️ Pubblicità —', MARCHI[mk].nome, '', 'mar', mk));
-  // 20 nov 2026 (Alex): e una cosa del gestionale, a giro.
-  const gk = gestionaleDelGiorno();
-  righe.push(riga('💼 Gestionale —', GESTIONALE[gk].titolo, '', 'ges', gk));
+  } catch (e) { console.error('[fb-riepilogo] vetrine', e.message); }
+  if (!righe.length) return { statusCode: 200, body: JSON.stringify({ righe: 0 }) };
 
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
-    <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Da pubblicare su Facebook</h2>
-    <p style="font-size:16px;color:#475569;margin:0 0 8px">${nuovi ? 'Arrivati nelle ultime 24 ore, più il marchio e il gestionale di oggi.' : 'Niente di nuovo ieri: ci sono il marchio e il gestionale di oggi.'} Tocca «Prepara il post»: il testo è già scritto.</p>
+    <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Uscite ieri sulla pagina Facebook</h2>
+    <p style="font-size:16px;color:#475569;margin:0 0 8px">Sulla pagina le ha già pubblicate Make. Se vuoi, condividile nel <b>gruppo</b>: tocca il pulsante, copia il testo e apri il gruppo.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${righe.join('')}</table>
+    <p style="font-size:14px;color:#64748b;margin:14px 0 0">Non pubblicarle di nuovo sulla pagina: ci sono già.</p>
   </div>`;
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [A_CHI], subject: `Da pubblicare su Facebook: ${righe.length}`, html }),
+    body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [A_CHI], subject: `Per il gruppo Facebook: ${righe.length} Vetrin${righe.length === 1 ? 'a' : 'e'} di ieri`, html }),
     signal: AbortSignal.timeout(8000)
   });
   if (!r.ok) console.error('[fb-riepilogo] Resend', r.status, await r.text());
