@@ -212,7 +212,7 @@
     const _fuori=m=>!!(mezziUscMap[m.id]&&mezziUscMap[m.id].aperta);
     const filtra=(A,v)=>v==="manutenzione"?A.filter(m=>m.stato==="manutenzione")
       :(v==="fuori"?A.filter(_fuori)
-      :(v==="liberi"?A.filter(m=>!_fuori(m)&&(!m.stato||m.stato==="disponibile")):A.slice()));
+      :(v==="liberi"?A.filter(m=>!_fuori(m)&&(!m.stato||m.stato==="disponibile")&&!(mezziNolMap[m.id]&&mezziNolMap[m.id].peso>=2)):A.slice()));
     const conta={};_viste.forEach(v=>conta[v.k]=filtra(tutti,v.k).length);
     const L=filtra(tutti,filtro);
     renderTabella({
@@ -369,6 +369,9 @@
         {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
       ].filter(Boolean)});
     if(m.categoria==="attrezzatura")return _html;
+    /* fuori a noleggio, in manutenzione o fuori uso: non si fa uscire (il rientro si', se era gia' fuori) */
+    const _nl=mezziNolMap[m.id];
+    if(!_u.aperta&&((_nl&&_nl.peso>=2)||m.stato==="manutenzione"||m.stato==="fuori_uso"))return _html;
     const _btn=_u.aperta
       ?`<button class="btn-primary btn-sm mz-btn" data-action="mz-rientra" data-id="${esc(String(m.id))}">↩ Rientrato</button>`
       :`<button class="btn-primary btn-sm mz-btn" data-action="mz-esce" data-id="${esc(String(m.id))}">→ Esce</button>`;
@@ -718,7 +721,7 @@
       return `<div class="mz-reg"><span class="mz-reg-d">${esc(quando)}</span><span class="mz-reg-c">${esc(x.chi_nome||"—")}${x.motivo?" · "+esc(x.motivo):""}</span><span class="mz-reg-k">${km}</span></div>`;
     }).join("");
     box.innerHTML='<div class="sh-tit">Uscite e rientri</div>'+righe
-      +(tot?`<p class="sh-nota">In tutto, in queste ${L.length} uscite: ${mzKmTesto(tot)}.</p>`:"");
+      +(tot?`<p class="sh-nota">${L.length===1?"In questa uscita":"In tutto, in queste "+L.length+" uscite"}: ${mzKmTesto(tot)}.</p>`:"");
   }
 
   if(!window.__mzUsciteAscolto){

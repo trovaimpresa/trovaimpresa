@@ -73,7 +73,7 @@ begin
   if io is null then return jsonb_build_object('ok',false,'errore','permesso'); end if;
   return jsonb_build_object('ok',true,'io',io,'mezzi',coalesce((
     select jsonb_agg(jsonb_build_object(
-      'id',z.id,'nome',z.nome,'targa',z.targa,'tipo',z.tipo,'stato',z.stato,
+      'id',z.id,'nome',z.nome,'targa',z.targa,'tipo',z.tipo,'stato',z.stato,'noleggio',gest_mezzo_a_noleggio(z.id),
       'km',coalesce(z.km_attuali,(select max(greatest(coalesce(u.km_rientro,0),coalesce(u.km_uscita,0)))
                                   from gest_mezzi_uscite u where u.mezzo_id=z.id and u.eliminato_il is null)),
       'aperta',(select jsonb_build_object('id',u.id,'chi',u.chi_nome,'mia',u.operatore_id=io,
@@ -102,6 +102,7 @@ begin
   if _lavoro is not null and not exists (select 1 from gest_lavori where id=_lavoro and user_id=_impresa) then
     _lavoro := null;
   end if;
+  if gest_mezzo_a_noleggio(_mezzo) then return jsonb_build_object('ok',false,'errore','a_noleggio'); end if;
   select chi_nome into chi from gest_mezzi_uscite
    where mezzo_id=_mezzo and rientro_il is null and eliminato_il is null limit 1;
   if found then return jsonb_build_object('ok',false,'errore','gia_fuori','chi',chi); end if;
@@ -148,3 +149,17 @@ revoke all on function public.gest_mezzo_riporto(uuid,uuid,numeric) from public,
 grant execute on function public.gest_mezzi_operaio(uuid) to authenticated;
 grant execute on function public.gest_mezzo_prendo(uuid,uuid,numeric,uuid,text) to authenticated;
 grant execute on function public.gest_mezzo_riporto(uuid,uuid,numeric) to authenticated;
+
+-- ── 24 nov 2026 (sera), trovato provando: un mezzo fuori a NOLEGGIO
+--    risultava «libero» all'operaio. Adesso l'elenco lo dice e
+--    gest_mezzo_prendo lo rifiuta ('a_noleggio').
+create or replace function public.gest_mezzo_a_noleggio(_mezzo uuid)
+returns boolean language sql stable security definer
+set search_path to 'public','pg_catalog' as $$
+  select exists (select 1 from nol_noleggi n
+                  where n.mezzo_id=_mezzo and n.eliminato_il is null
+                    and n.data_rientro_effettivo is null
+                    and coalesce(n.fase,'') <> 'rientrato'
+                    and (n.data_uscita is null or n.data_uscita <= current_date));
+$$;
+revoke all on function public.gest_mezzo_a_noleggio(uuid) from public, anon;

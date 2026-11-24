@@ -60,6 +60,11 @@
         +'<div class="op-dove">Fuori con '+e(m.aperta.chi||"un collega")+' '+e(quando(m.aperta.uscita_il))+'</div>'
         +'<span class="op-st" style="background:#eef2f7;color:#374151">FUORI</span></div>';
     }
+    if(m.noleggio){
+      return '<div class="op-card v" style="border-left-color:#9ca3af"><div class="op-t">'+t+'</div>'
+        +'<div class="op-dove">È fuori a noleggio a un cliente.</div>'
+        +'<span class="op-st" style="background:#eef2f7;color:#374151">A NOLEGGIO</span></div>';
+    }
     var manut=m.stato==="manutenzione";
     return '<div class="op-card v"'+(manut?' style="border-left-color:#b45309"':'')+'><div class="op-t">'+t+'</div>'
       +(m.km!=null?'<div class="op-dove">'+punti(m.km)+' km</div>':'')
@@ -134,7 +139,8 @@
                   km_bassi:"Sono meno dei km alla partenza ("+punti(d.km_uscita||0)+").",
                   permesso:"Il tuo capo non ti ha dato il permesso «Mezzi».",
                   non_tua:"Questo mezzo non risulta preso da te.",
-                  non_aperta:"Il rientro era già registrato."}[d.errore]||"Non è andato: riprova.";
+                  non_aperta:"Il rientro era già registrato.",
+                  a_noleggio:"Questo mezzo è fuori a noleggio."}[d.errore]||"Non è andato: riprova.";
         mzForm=null; await carica(); mzOcc=false; disegna(dice); return;
       }
       var fatto=riporto?("Riportato ✔"+(d.km_fatti!=null?" — "+punti(d.km_fatti)+" km fatti":"")):("Preso ✔ — "+(m.nome||"il mezzo")+" è tuo");
