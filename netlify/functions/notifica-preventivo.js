@@ -59,6 +59,7 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'impresa_id non valido' };
   }
   impresa_id = Number(impresa_id);
+  let trovata = false;   /* fuori dal blocco: serve anche sotto (studio) */
   {
     const soglia = encodeURIComponent(new Date(Date.now() - 60 * 60 * 1000).toISOString());
     const pulito = v => String(v || '').trim().toLowerCase();
@@ -66,11 +67,10 @@ exports.handler = async function(event) {
     const combacia = r => (email_cliente && pulito(r.email) === pulito(email_cliente))
                        || (telefono && soloCifre(r.telefono).length >= 6 && soloCifre(telefono).length >= 6
                            && soloCifre(r.telefono).slice(-6) === soloCifre(telefono).slice(-6));
-    let trovata = false;
     for (const [tab, col] of [['preventivi', 'impresa_id'], ['incarichi_richieste', 'professionista_id']]) {
       const rr = await fetch(`${SUPABASE_URL}/rest/v1/${tab}?${col}=eq.${impresa_id}&created_at=gte.${soglia}&select=email,telefono&limit=30`, { headers: sbHeaders });
       const righe = rr.ok ? await rr.json() : [];
-      if (Array.isArray(righe) && righe.some(combacia)) { trovata = true; break; }
+      if (Array.isArray(righe) && righe.some(combacia)) { trovata = tab; break; }
     }
     if (!trovata) {
       return { statusCode: 403, body: 'Nessuna richiesta appena arrivata per questa impresa' };
@@ -103,7 +103,8 @@ exports.handler = async function(event) {
     const impresa = imprese[0];
     /* 24 nov 2026 (collaudo studio): a un professionista arrivava «Richiesta
        sopralluogo» e «Nuova richiesta di preventivo». Per lui e' un INCARICO. */
-    const studio = !!(impresa && impresa.tipo === 'professionista');
+    /* e' un incarico anche quando la riga trovata sta in incarichi_richieste (conto misto) */
+    const studio = !!(impresa && impresa.tipo === 'professionista') || trovata === 'incarichi_richieste';
     const titoloAvviso = studio ? 'Nuova richiesta di incarico' : 'Nuova richiesta di preventivo';
 
     /* 8 nov 2026 — SUBITO SUL TELEFONO, se l'impresa l'ha acceso (Dati azienda →
