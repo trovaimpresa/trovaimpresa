@@ -4220,8 +4220,25 @@ Banco `tools/banco-gestionale.js app` e `noleggio`: ZERO difetti.
 ⬜ Visto, lasciato alla voce «Chat con AI»: allo studio la chat dice ancora «lavoro» («Apri sul lavoro → Crea fattura», «diventati lavori»).
 Funzione nuova («Il tuo consiglio faccia e pubblica» di Alex), `?v=24nov-ass2`: in «Parti da qui» allo studio la riga «N pratiche con integrazioni da mandare al Comune» (stato «integrazioni», col nome della prima), grave come il ritardo; «Vai a sistemare» apre le Pratiche su «Tutte» + «Integrazioni richieste» (azione `rie-integr` in `js/gest-finestre-eventi.js`).
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CHAT CON AI
+
+⚠️ Il Cestino dello studio del 24 nov NON è pubblicato (ultimo commit online 9982fbf, Assistente): non riprovato.
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375). Dati creati con `window._provaChat(domande)` (si lancia senza aspettarla, si legge `window._PC`), cancellati con `window._pulisciChat()` (anche `chat_svuota` delle chat nuove): srl + privato, Giulia, 4 pratiche (CILA in integrazioni prot. 4567, SCIA depositata, APE fatta da fatturare, rilievo con Giulia), parcella inviata (1.000, cassa 5%, ritenuta), fattura in BOZZA (niente SDI), scadenza integrazioni; date 2027. 14 domande. Conteggi dopo = prima; tolto anche «PROVA ACCONTO — da cancellare» rimasto nel Cestino dal 19 nov.
+Visti: soldi (incassare, bozze, da fatturare) ✔; pratiche al Comune e integrazioni ✔; «cosa scade a gennaio» ✔ «Apri la scadenza»; telefono/email/referente letti ✔; «Segna una nuova CILA/APE» → modulo pieno (cliente, Giulia, data, tipo, stato) con «Crea pratica» ✔; foto «+» della ricevuta del Comune → protocollo 5521, data, foglio/particella/sub nella pratica, «Salva» ✔; «Vai a Fatture · Bozze» apre Fatture su Bozze ✔; «Aprila» apre la pratica ✔; telefono 375: niente fuori, niente sotto 13 px, Foto/Parla/Manda 44 px ✔.
+⚠️ Col conto di Alex (`imprese.tipo` artigiano, regime RF19) le viste contano la parcella senza cassa e la fattura senza IVA: non è un difetto della chat.
+
+Sistemato (solo `netlify/functions/chat-gestionale.mjs`, tutte le facce):
+1. ⛔ Manuale dell'impresa allo studio: la chat diceva «Crea la fattura da qui» per una pratica, «Accettato, crea lavoro», «Conferma d'ordine», «Salva bozza», barra in basso «Oggi, Lavori», esempio di Wahid. Adesso `MANUALE_STUDIO` = stesso manuale con i pezzi dello studio (`STUDIO_MANUALE`, presi dalla pagina vera): Pratiche, «🧾 Crea fattura» sulla pratica fatta, «Accettato → crea pratica», Lettera d'incarico, Collaboratori, Agenda, Strumenti, Ente pubblico, Galleria con PDF delle foto, barra «Assistente, Pratiche, microfono, Preventivi, Fatture». `istruzioniFisse(ruolo)`: lo studio ha la sua memoria (cache). ⚠️ Se si cambia `MANUALE_GESTIONALE`, un pezzo che non si trova più finisce in `STUDIO_PEZZI_PERSI` e il banco diventa rosso.
+2. ⛔ «Cosa deve fare Giulia?» → rispondeva con le pratiche di TUTTI e saltava quella di Giulia (i lavori non avevano `operatore_id`). Adesso `operatore_id` nei lavori e filtro `persona` (solo id vero, solo lavori e ore) in conta/elenco, con la regola «COSA DEVE FARE UNA PERSONA». Vale anche per imprese («i lavori di Wahid»).
+3. ⛔ Bozza con ritenuta: «525,00 € (425,00 € imponibile)» — numeri scambiati (425 è il netto, ritenuta tolta; Fatture dice «425,00 € netto da incassare»). Regola dello studio: il totale è già senza ritenuta, «da incassare X € (documento Y €, ritenuta già tolta)», mai «imponibile» il numero più basso.
+4. Parcella: «cassa e ritenuta non li vedo da qui» → `preventivi_totali` ora legge compenso, cassa, spese, ritenuta.
+5. Stato della pratica inventato («SCIA … in istruttoria» era «depositata») e CILA nominata due volte: regola «lo stato come sta scritto, una volta sola, non cambiarlo se non chiesto».
+Banco NUOVO `tools/banco-chat-studio.mjs` (31 prove, 4 sabotaggi tutti accusati). `tools/banco-gestionale.js app`: ZERO difetti.
+⬜ Non provati: «Parla» dentro la chat (dettatura: il microfono del browser di Claude è bloccato), un PDF vero col «+», un collaboratore vero.
+⬜ Visto, non toccato: «Apri il preventivo» allo studio (la voce del menu si chiama «Preventivi»: coerente).
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4343,11 +4360,23 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Assistente ↔ Preventivi e parcella: ✔ totale della parcella uguale; «Fai un preventivo» apre il modulo con l'AI della parcella (dal 24 nov).
 - Assistente ↔ Clienti / Calendario / Agenda / Collaboratori / Fornitori / Promemoria / Strumenti / Mappa / Report: ✔ numeri uguali alle voci.
 - Assistente ↔ Scadenze e promemoria: ✗ voluto: la scheda conta come il pallino del menu (scadenze, persone, carte, crediti), la linguetta «Scadenze (N)» conta anche fatture da incassare e da pagare (quelle hanno già le schede Fatture e Fornitori).
-- Assistente ↔ Chat con AI: ✔ «Manda» e i pulsanti aprono una chat nuova con la domanda. ✗ la chat allo studio dice ancora «lavoro» in qualche frase (da fare nella voce Chat).
+- Assistente ↔ Chat con AI: ✔ «Manda» e i pulsanti aprono una chat nuova con la domanda; dal 24 nov la chat ha il manuale con le parole dello studio.
 - Assistente ↔ Parla / Giornate / Promemoria: ✔ dal 24 nov parole dello studio e giorno della settimana giusto.
 - Assistente ↔ Crediti formativi: — la scheda compare solo col primo corso segnato (regola «se non l'hai usata non si vede»); l'avviso «ne mancano» sta nello Scadenzario.
 - Assistente ↔ Pratiche con integrazioni: ✔ dal 24 nov riga in «Parti da qui» che apre le Pratiche filtrate su «Integrazioni richieste».
 - Si può unire: NO, l'Assistente è la pagina di partenza; non è una voce da unire, è il riassunto di tutte.
+
+- Chat ↔ Pratiche: ✔ legge tipo, stato, Comune, protocollo, deposito; «Aprila» apre la pratica; «Segna una nuova CILA» apre il modulo pieno («Crea pratica»); la foto della ricevuta riempie protocollo e catasto. ✔ dal 24 nov «cosa deve fare Giulia» filtra per persona.
+- Chat ↔ Fatture: ✔ da incassare, bozze, «Vai a Fatture · Bozze», «Segna come pagata»; dal 24 nov la ritenuta detta giusta. — non emette (giusto).
+- Chat ↔ Preventivi e parcella: ✔ totale, dal 24 nov anche cassa e ritenuta; «Accettato → crea pratica» spiegato giusto.
+- Chat ↔ Scadenze e promemoria: ✔ legge e «Apri la scadenza»; apre il modulo della scadenza. — un promemoria non lo apre (lo fa «Parla»).
+- Chat ↔ Clienti: ✔ recapiti e referente letti; «Apri il cliente»; modulo cliente pieno.
+- Chat ↔ Collaboratori / Agenda: ✔ dal 24 nov le pratiche e le ore di una persona. — non vede gli strumenti che ha.
+- Chat ↔ Computo metrico: ✔ «Aggiungi con l'AI» e i prezzi del computo (provati il 16 nov).
+- Chat ↔ Calendario / Mappa / Report / Crediti formativi: — non c'entrano direttamente (la chat legge le date con `agenda`).
+- Chat ↔ Cestino: ✔ quello nel Cestino non lo vede (`senzaCestino`). Le chat si buttano con la ×.
+- Chat ↔ Ricerca in alto: — le chat non si cercano (archivio per reparto con la data).
+- Si può unire: NO. La chat è la porta «chiedi» di tutte le voci; l'Assistente la apre con la domanda già scritta.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

@@ -95,7 +95,7 @@ const ATTREZZI = {
      ai filtri «dal/al» e a scrivere accanto a ogni riga `giorni_da_oggi`,
      cosi' il modello non confronta piu' le date a mente (dal vivo aveva
      detto «nei tempi» un lavoro previsto due mesi prima). */
-  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,cliente_id', ordine:'data_prevista', data:'data_prevista', nome:'i lavori' },
+  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,cliente_id,operatore_id', ordine:'data_prevista', data:'data_prevista', nome:'i lavori' },
   preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data,cliente_id',             ordine:'data',          data:'data',          nome:'i preventivi' },
   fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome,cliente_id,data_pagata', ordine:'data',   data:'data',          nome:'le fatture' },
   /* 17 nov 2026 (collaudo Chat) — coi RECAPITI: senza, a «che telefono ha
@@ -128,7 +128,7 @@ const ATTREZZI = {
      contarle sembrava la cosa giusta: adesso dice cosa e' una riga. */
   ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          data:'data', nome:'le segnature delle ore (ATTENZIONE: ogni riga e\' una segnatura, e la colonna `ore` dice quante ore sono. Contare le righe NON da\' le ore)' },
   rapportini:        { tabella:'gest_rapportini',        campi:'id,data,lavoro_id,materiali,note',                                    ordine:'data',          data:'data', nome:'i rapportini di cantiere' },
-  preventivi_totali: { tabella:'gest_preventivi_totali', campi:'preventivo_id,imponibile,iva,totale,n_righe',                          ordine:'totale',        nome:'quanto vale ogni preventivo', cestino:false },
+  preventivi_totali: { tabella:'gest_preventivi_totali', campi:'preventivo_id,compenso,cassa,spese,imponibile,iva,ritenuta,totale,n_righe',                          ordine:'totale',        nome:'quanto vale ogni preventivo', cestino:false },
   fatture_totali:    { tabella:'gest_fatture_totali',    campi:'fattura_id,imponibile,iva,totale,totale_documento,ritenuta,segno',     ordine:'totale',        nome:'quanto vale ogni fattura',    cestino:false },
   mezzi_scadenze:    { tabella:'gest_mezzi_scadenze',    campi:'mezzo_id,nome,targa,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo', ordine:'prossima_data', nome:'le scadenze dei mezzi', cestino:false },
   rifornimenti:      { tabella:'gest_rifornimenti',      campi:'id,data,mezzo_id,importo,litri,km,distributore',                       ordine:'data',          data:'data', nome:'i rifornimenti di carburante', cestino:false },
@@ -301,6 +301,10 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
   if (o.vuoto === 'visto_il' && cosa === 'richieste_sito') q.vuoto = 'visto_il';
   if (cosa === 'lavori' && o.statoPratica && PRATICA_STATI_OK.indexOf(String(o.statoPratica)) >= 0) q.statoPratica = String(o.statoPratica);
   if (cosa === 'lavori' && o.praticheAlComune) q.inPratica = ['depositata', 'istruttoria', 'integrazioni'];
+  /* 24 nov 2026 (studio, voce Chat) — «cosa deve fare Giulia?»: senza questo
+     filtro la chat rispondeva con le pratiche di TUTTI e saltava quella di
+     Giulia. Solo un id vero (FORMA_ID), solo su lavori e ore. */
+  if ((cosa === 'lavori' || cosa === 'ore') && o.persona && FORMA_ID.test(String(o.persona))) q.persona = String(o.persona);
   if (q.statoPratica || q.inPratica) {
     q.ordine = 'pratica_data_dep';
     if (campi.indexOf('pratica_stato') < 0) q.campi = campi + ',pratica_tipo,pratica_stato,pratica_comune,pratica_protocollo,pratica_data_dep';
@@ -1103,6 +1107,7 @@ async function esegui(clientDati, q) {
   if (q.vuoto) sel = sel.is(q.vuoto, null);
   if (q.statoPratica) sel = sel.eq('pratica_stato', q.statoPratica);
   if (q.inPratica) sel = sel.in('pratica_stato', q.inPratica);
+  if (q.persona) sel = sel.eq('operatore_id', q.persona);
   if (!q.soloConta) {
     /* ⛔ 30 agosto 2026 — le righe di un documento vanno lette 1, 2, 3 e non
        al contrario: un preventivo letto dal fondo non si capisce. Per tutto
@@ -1182,7 +1187,8 @@ const FILTRI_SCHEMA = {
   dal:           { type:'string', description:'dalla data AAAA-MM-GG (compresa), sulla data principale di quella cosa' },
   al:            { type:'string', description:'fino alla data AAAA-MM-GG (compresa)' },
   prima_le_prossime: { type:'boolean', description:'true = dalla data più vecchia/vicina alla più lontana (per le cose da fare); di base sono dalle più recenti' },
-  stato_pratica: { type:'string', description:'SOLO studio tecnico, su lavori: da_preparare, depositata, istruttoria, integrazioni, approvata, archiviata' }
+  stato_pratica: { type:'string', description:'SOLO studio tecnico, su lavori: da_preparare, depositata, istruttoria, integrazioni, approvata, archiviata' },
+  persona:       { type:'string', description:'SOLO su lavori e ore: l\'id della persona della squadra (o del collaboratore dello studio), letto prima con cerca_per_nome su operatori. Per «cosa deve fare Giulia», «le ore di Marco».' }
 };
 const STRUMENTI = [
   {
@@ -1562,13 +1568,58 @@ CREDITI AI. Ogni mese ci sono crediti AI e messaggi di chat gratis; quelli compr
 
 AIUTO VERO. «Assistenza diretta» (in fondo al menu): scrivi e risponde una persona, anche con una foto dello schermo. «Chiedi una funzione»: per chiedere una cosa che il gestionale ancora non fa.`;
 
+/* ⛔ 24 nov 2026 (studio, voce Chat con AI) — IL MANUALE CON LE PAROLE DELLO STUDIO.
+   Il manuale qui sopra e' scritto per l'impresa. Allo studio la chat lo
+   ricopiava: «Apri sul lavoro → Crea fattura», «diventati lavori», «Accettato,
+   crea lavoro», «Conferma d'ordine», la barra in basso con «Lavori», l'esempio
+   di Wahid e della sabbia. La riga «usa le parole dello studio» in fondo non
+   bastava: il manuale vinceva.
+   Qui si cambiano SOLO i pezzi diversi, presi dalla pagina vera dello studio
+   (24 nov, ?vedi=professionista). ⚠️ Ogni pezzo «da» deve stare nel manuale:
+   se qualcuno cambia il manuale e un pezzo non c'e' piu', `manualeStudio()`
+   lo segna in `STUDIO_PEZZI_PERSI` (il banco lo controlla) invece di tacere.
+   Il manuale dello studio ha la SUA memoria da Anthropic (cache): e' fisso
+   anche lui, cambia solo fra impresa e studio. */
+const STUDIO_MANUALE = [
+  ['«Preventivi», «Computo da prezzare» (o «Computo metrico»), «Lavori e interventi», «Fatture», «Clienti», «Calendario». Tutte le altre voci stanno sotto «Tutto il resto», divise in gruppi: Chat con AI, Giornate, Richieste dal sito, Scadenze e promemoria (una voce sola con due linguette in alto: «Scadenze» e «Promemoria»); Squadra e agenda (una voce sola con due linguette in alto: «Squadra» e «Agenda», che ha dentro «Lavori» e «Ore fatte»), Mezzi e attrezzature (una voce sola con due linguette in alto: «Mezzi» e «Attrezzature»); Tasse e fisco, Prezzario, Stati di avanzamento, Fornitori, Carte, Report, Crediti formativi; Galleria, Mappa, Cestino.',
+   '«Preventivi», «Pratiche», «Fatture», «Clienti», «Computo metrico», «Calendario». Tutte le altre voci stanno sotto «Tutto il resto»: Chat con AI, Giornate, Richieste dal sito, Scadenze e promemoria (una voce sola con due linguette in alto: «Scadenze» e «Promemoria»); Agenda (dentro: «Pratiche» e «Ore fatte»), Collaboratori, Strumenti (voce sola, senza linguette); Tasse e fisco, Prezzario, Stati di avanzamento, Fornitori, Report, Crediti formativi; Galleria, Mappa, Cestino. Lo studio NON ha «Mezzi» né «Carte».'],
+  ['Sul telefono c\'e\' anche la barra in basso: Oggi, Lavori, il microfono grande al centro, Preventivi, Menu.',
+   'Sul telefono c\'e\' anche la barra in basso: Assistente, Pratiche, il microfono grande al centro, Preventivi, Fatture; il menu si apre col pulsante ☰ in alto a destra.'],
+  ['«Cerca un nome: cliente, lavoro, preventivo, fattura»', '«Cerca un nome: cliente, pratica, preventivo, fattura, collaboratore»'],
+  ['racconti la giornata come viene («oggi Wahid e Luis da Rossi, 8 ore, spesi 45 euro di sabbia, domani chiamare il commercialista») e lui la divide in schede (giornata, spesa, promemoria) da controllare',
+   'racconti la giornata come viene («stamattina sopralluogo da Rossi con Giulia, 3 ore, pagati 30 euro di diritti di segreteria, venerdì chiamare l\'ufficio tecnico») e lui la divide in schede (giornata, spesa, promemoria) da controllare'],
+  ['«Genera con AI» (descrivi il lavoro e l\'AI prepara le voci, 1 credito)', '«Genera con AI» (descrivi l\'incarico e l\'AI prepara le prestazioni della parcella, 1 credito)'],
+  ['«Lettera d\'incarico», «Conferma d\'ordine», «Capitolato», «Segna inviato», «Accettato, crea lavoro», «Rifiutato»',
+   '«Lettera d\'incarico», «Capitolato», «Segna inviato», «Accettato → crea pratica», «Rifiutato»'],
+  ['LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l\'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».',
+   'PRATICHE. «+ Nuova pratica» o «Compila con AI» (la descrivi e l\'AI riempie il modulo). Schede: Tutte, In ritardo, Oggi, Prossime, Da incassare, Archivio. Ogni pratica ha «Apri»: dentro ci sono i «Dati della pratica», i documenti, le scadenze, il computo, le foto, le spese e le ore; il menu «⋯» ha mappa, WhatsApp, PDF, elimina. FATTURA DI UNA PRATICA FINITA: sulla pratica fatta c\'e\' «🧾 Crea fattura» (sulla scheda o nel menu «⋯»): si apre la fattura col cliente e l\'importo della pratica, controlli e premi «Crea fattura» (resta in bozza finché non premi «Emetti»). Una parcella accettata diventa pratica con «Accettato → crea pratica» (nel menu del preventivo).'],
+  ['CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI». Ogni cliente ha la sua scheda con lavori, preventivi, fatture e cosa deve ancora pagare.',
+   'CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI» (c\'è anche il tipo «Ente pubblico»: Comune, scuola, ASL). Ogni cliente ha la sua scheda con pratiche, preventivi, computi, fatture e cosa deve ancora pagare.'],
+  ['GIORNATE. Le giornate di lavoro della squadra (chi, dove, quante ore). Si segnano con «Parla» raccontando la giornata, o dall\'app dell\'operaio; «PDF del mese» fa il riepilogo del mese in PDF.',
+   'GIORNATE. Le giornate dei collaboratori (chi, quale pratica, quante ore). Si segnano con «Parla» raccontando la giornata, o dall\'app del collaboratore; «PDF del mese» fa il riepilogo del mese in PDF.'],
+  ['CALENDARIO: lavori, scadenze e note giorno per giorno.', 'CALENDARIO: pratiche, depositi, scadenze e note giorno per giorno, con «Chi ci va».'],
+  ['«+ Nuova scadenza» per revisioni, assicurazioni, DURC, visite mediche, pratiche (sono del reparto)', '«+ Nuova scadenza» per integrazioni del Comune, proroghe, tarature, polizza, iscrizione all\'albo (sono del reparto)'],
+  ['SQUADRA: «+ Persona», con le sue scadenze (visite, corsi). MEZZI E ATTREZZATURE (una voce del menu, due linguette): linguetta «Mezzi» → «+ Nuovo mezzo», con scadenze e rifornimenti; linguetta «Attrezzature» → «+ Nuova attrezzatura» (ponteggi, betoniere, utensili), con le scadenze delle verifiche.',
+   'COLLABORATORI: «+ Nuova persona», con le sue scadenze e le sue pratiche. AGENDA: chi fa quale pratica e le «Ore fatte». STRUMENTI: «+ Nuovo strumento» (stazione totale, laser scanner, drone, termocamera), con tarature e manutenzioni.'],
+  ['GALLERIA: «Carica foto o video» dei lavori;', 'GALLERIA: «Carica foto o video» delle pratiche (prima dei lavori e fine lavori), «📄 PDF delle foto» per ogni pratica;']
+];
+const STUDIO_PEZZI_PERSI = [];
+const MANUALE_STUDIO = (function manualeStudio() {
+  let m = MANUALE_GESTIONALE;
+  STUDIO_MANUALE.forEach(function (c) {
+    if (m.indexOf(c[0]) < 0) { STUDIO_PEZZI_PERSI.push(c[0].slice(0, 60)); return; }
+    m = m.split(c[0]).join(c[1]);
+  });
+  return m.replace('MANUALE DEL GESTIONALE (', 'MANUALE DEL GESTIONALE DELLO STUDIO TECNICO (');
+})();
+
 // ---------------------------------------------------------------------
 // le istruzioni della chat
 // ⚠️ Le tre materie su cui si ferma le ha decise Alessio il 26 agosto:
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
 //    la fa lui, non Claude.
 // ---------------------------------------------------------------------
-function istruzioniFisse() {
+function istruzioniFisse(ruolo) {
   return [
     'Sei la chat di aiuto dentro il gestionale di TrovaImpresa, usato da imprese edili, artigiani, studi tecnici, negozi di materiali e noleggi.',
     'Rispondi in italiano, corto e pratico, a passaggi numerati quando servono. Chi ti legge non è un tecnico di informatica.',
@@ -1596,7 +1647,7 @@ function istruzioniFisse() {
     //    sapeva com'e' fatto il gestionale: a «come faccio la fattura dal
     //    preventivo?» rispondeva a caso («di solito in alto a destra»).
     //    Chi aggiunge un pulsante o una sezione aggiorna MANUALE_GESTIONALE.
-    MANUALE_GESTIONALE,
+    ruolo === 'professionista' ? MANUALE_STUDIO : MANUALE_GESTIONALE,
     '',
     'QUANDO TI CHIEDE COME SI FA UNA COSA, rispondi SOLO con quello che sta nel manuale qui sopra, coi nomi veri dei pulsanti fra «». Se nel manuale non c\'e\', non tirare a indovinare («di solito sta in alto» e\' vietato): di\' che non sei sicuro e metti il segnalino [assistenza].',
     'SE QUALCOSA NON FUNZIONA (un errore, una pagina bianca, un pulsante che non fa niente) la causa non la conosci: non scrivere «di solito e\' perche\'…». Puoi dire UNA cosa da controllare solo se sta nel manuale, e poi metti SEMPRE il segnalino [assistenza].',
@@ -1617,6 +1668,8 @@ function istruzioniFisse() {
     'Metti il segnalino SOLO su cose che hai davvero letto, con l\'id esatto. Non inventarlo mai: un pulsante che apre la cosa sbagliata è peggio di nessun pulsante.',
     '',
     '⛔ LE ORE NON SI CONTANO A RIGHE. `conta_cose` su `ore` dice quante SEGNATURE ci sono, non quante ore: una segnatura da 8 ore e una da 2 sono due righe e dieci ore. Per rispondere sulle ore prendi l\'elenco con `elenco_cose` e SOMMA la colonna `ore`, poi di\' anche su quante segnature hai fatto il conto. Se le segnature sono piu\' di 25 avvisalo che il conto e\' solo delle ultime 25.',
+    // 24 nov 2026 (studio, voce Chat) — «cosa deve fare Giulia?» prendeva le pratiche di tutti.
+    'COSA DEVE FARE UNA PERSONA («cosa deve fare Giulia», «i lavori di Marco», «quante ore ha fatto»): 1) trova il suo id con `cerca_per_nome` su operatori; 2) `elenco_cose` su lavori con `persona` = quell\'id, `escludi_stato` «fatto» e `prima_le_prossime`; per le ore `elenco_cose` su ore con `persona`. ⛔ Non rispondere con le cose degli altri: se non ha niente, di\' che non ha niente assegnato.',
     'I SOLDI DEL REPARTO nel loro insieme si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
     '⛔ LIQUIDITÀ A 30 GIORNI («quanti soldi entrano e escono», «come sto messo», «riesco a pagare i fornitori?»): chiama `liquidita_30_giorni` e rispondi con questo schema, righe corte, importi in euro con i punti (1.250,00 €):\n**ENTRANO** (fatture da incassare)\n- già scadute: N fatture, X € ← sono i soldi da rincorrere\n- entro 7 giorni: …\n- da 8 a 14 giorni: …\n- da 15 a 30 giorni: …\n**ESCONO** (fornitori da pagare)\n- già scadute / entro 7 giorni / 8-14 / 15-30, uguale\n**SALDO PREVISTO a 30 giorni**: quello che dice il campo `saldo_previsto_30_giorni` (le scadute NON ci sono dentro, dillo).\nSaltare le righe a zero. Una riga finale di consiglio vera e semplice (per esempio «ti conviene sollecitare le fatture già scadute prima di pagare X»). ⛔ Dì sempre in una riga che sono le SCADENZE scritte nel gestionale, non il conto in banca: i soldi veri in banca non li vedi. Non inventare importi e non sommare a mano. GLI IMPORTI DELLE ENTRATE SONO QUELLI CHE ARRIVANO DAVVERO, al netto di un\'eventuale ritenuta: possono essere più bassi del totale scritto sulla fattura (es. 2.345 € incassati su una fattura da 2.745 € con ritenuta di 400 €). Se parli di una fattura precisa e i due numeri sono diversi, dì in mezza riga «incasso netto, dopo la ritenuta». Se ci sono fatture già scadute, offri di scrivere i solleciti.',
     'QUANTO VALE UN DOCUMENTO PRECISO invece sta in `fatture_totali` e `preventivi_totali`. Si legge la fattura (o il preventivo) e poi il suo totale, e si incrociano per id: `fatture_totali.fattura_id` e\' l\'`id` della fattura, `preventivi_totali.preventivo_id` e\' l\'`id` del preventivo. Lo stesso vale per le ore: `ore.operatore_id` e\' l\'`id` della persona della squadra, `ore.lavoro_id` e\' l\'`id` del lavoro. Gli importi di quelle tabelle NON si sommano a mano se la domanda riguarda tutto il reparto: per quello c\'e\' `soldi_del_reparto`.',
@@ -1662,7 +1715,9 @@ function istruzioniFisse() {
    domanda, 0,042 $. La parte DEL GIORNO (reparto, sezione, calendario,
    parole del ruolo) cambia e va dopo, fuori dalla memoria. */
 const PAROLE_RUOLO = {
-  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Nel suo menu «Strumenti» è una voce da sola, senza linguette. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nelle Scadenze. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri. COMPILARE LE PRATICHE PER LUI: quando ti dice una pratica nuova («CILA bagno Rossi via Roma 3 Rieti») usa `compila_lavoro` riempiendo ANCHE pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep e i dati catastali che ti ha detto; quando ti dice una novità su una pratica che c\'è («la CILA di Rossi è stata protocollata ieri, prot. 4567», «il Comune ha chiesto le integrazioni») usa `modifica_lavoro`. Se ti manda con il «+» la foto o il PDF della ricevuta di deposito, della visura catastale o della lettera del Comune, leggila e riempi le caselle da lì: protocollo, foglio, particella e subalterno SOLO se si leggono bene, mai indovinati. Per «cosa ho fermo al Comune», «quali pratiche aspettano» usa `agenda` (pratiche_integrazioni_richieste e pratiche_al_comune, con giorni_dal_deposito) o `elenco_cose` su lavori con `stato_pratica`. Le integrazioni richieste sono la cosa più urgente: dillo per prime. Quando metti una pratica a «integrazioni», digli in una riga che al Salva il gestionale gli propone la scadenza a 30 giorni (se il Comune gli ha dato un\'altra data, la cambia dallo Scadenzario).',
+  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Nel suo menu «Strumenti» è una voce da sola, senza linguette. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nelle Scadenze. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri. COMPILARE LE PRATICHE PER LUI: quando ti dice una pratica nuova («CILA bagno Rossi via Roma 3 Rieti») usa `compila_lavoro` riempiendo ANCHE pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep e i dati catastali che ti ha detto; quando ti dice una novità su una pratica che c\'è («la CILA di Rossi è stata protocollata ieri, prot. 4567», «il Comune ha chiesto le integrazioni») usa `modifica_lavoro`. Se ti manda con il «+» la foto o il PDF della ricevuta di deposito, della visura catastale o della lettera del Comune, leggila e riempi le caselle da lì: protocollo, foglio, particella e subalterno SOLO se si leggono bene, mai indovinati. Per «cosa ho fermo al Comune», «quali pratiche aspettano» usa `agenda` (pratiche_integrazioni_richieste e pratiche_al_comune, con giorni_dal_deposito) o `elenco_cose` su lavori con `stato_pratica`. Le integrazioni richieste sono la cosa più urgente: dillo per prime. Quando metti una pratica a «integrazioni», digli in una riga che al Salva il gestionale gli propone la scadenza a 30 giorni (se il Comune gli ha dato un\'altra data, la cambia dallo Scadenzario). '
+    + 'LO STATO DELLA PRATICA lo dici come sta scritto in pratica_stato, senza dedurlo: depositata = «depositata», istruttoria = «in istruttoria», integrazioni = «integrazioni richieste». Una pratica si nomina una volta sola anche se sta in due elenchi. Non cambiare lo stato di una pratica (modifica_lavoro) se non te l\'ha chiesto o se non sta scritto chiaro nel foglio che ti ha mandato. '
+    + 'LA RITENUTA D\'ACCONTO: nelle fatture e nelle parcelle dello studio il «totale» di `soldi_del_reparto` e di `fatture_totali` è GIÀ TOLTA la ritenuta (è quello che il cliente bonifica) e può essere PIÙ BASSO dell\'imponibile. Lì non usare la regola «totale (imponibile)»: scrivi «da incassare X € (documento Y €, ritenuta già tolta)», dove Y è `totale_documento` (o l\'imponibile se non l\'hai). ⛔ Mai chiamare «imponibile» il numero più basso. Nei preventivi_totali cassa e ritenuta ci sono: se valgono 0, di\' che in quella parcella non sono segnate.',
   artigiano: 'QUESTO ISCRITTO È UN ARTIGIANO: nel suo menu la voce si chiama «Lavori e interventi» e il computo «Computo da prezzare».',
   impresa: 'QUESTO ISCRITTO È UN\'IMPRESA: nel suo menu la voce si chiama «Lavori» e il computo «Computo da prezzare».'
 };
@@ -1677,12 +1732,12 @@ function istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo) {
   ].join('\n');
 }
 function istruzioni(sezione, nomeReparto, oggi, ruolo) {
-  return istruzioniFisse() + '\n\n' + istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo);
+  return istruzioniFisse(ruolo) + '\n\n' + istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo);
 }
 /* i due pezzi come li vuole Anthropic: il primo con la memoria accesa */
 function sistemaPerClaude(sezione, nomeReparto, oggi, ruolo) {
   return [
-    { type: 'text', text: istruzioniFisse(), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: istruzioniFisse(ruolo), cache_control: { type: 'ephemeral' } },
     { type: 'text', text: istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo) }
   ];
 }
@@ -2114,7 +2169,7 @@ export default async function (req) {
         const inp = t.input || {};
         let esito;
         const base = { ruolo: ruolo, impresaId: impresaId };
-        const filtri = { stato: inp.stato, escludiStato: inp.escludi_stato, dal: inp.dal, al: inp.al, prossime: inp.prima_le_prossime === true, statoPratica: inp.stato_pratica };
+        const filtri = { stato: inp.stato, escludiStato: inp.escludi_stato, dal: inp.dal, al: inp.al, prossime: inp.prima_le_prossime === true, statoPratica: inp.stato_pratica, persona: inp.persona };
         if (t.name === 'conta_cose') {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ soloConta: true }, base, filtri)));
         } else if (t.name === 'elenco_cose') {
@@ -2618,4 +2673,4 @@ export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisc
 export { inPiu, mettiInFila, formaParola, puntiVoce, formeDellaRiga, stessoMateriale, normaTesto, cercaNelPrezzario, stessaVariante, vicinaDi };
 export { radice, paroleDi, tentativiRicerca, vicinanza, ordinaPerVicinanza, contoComputo, stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { giornoGiusto, bottoneDi, FORN_CATS_OK };
-export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
+export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, MANUALE_STUDIO, STUDIO_PEZZI_PERSI, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
