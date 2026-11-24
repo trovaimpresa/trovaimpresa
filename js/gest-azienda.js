@@ -115,7 +115,7 @@ const AV_VOCI=[
   ["lavori",ruoloUtente==='professionista'?"Pratiche in ritardo":"Lavori in ritardo"],
   ["preventivi","Preventivi senza risposta"],
   ["fornitori","Fatture dei fornitori da pagare"],
-  ["squadra","Documenti della squadra"]
+  ["squadra",ruoloUtente==='professionista'?"Documenti dei collaboratori":"Documenti della squadra"]
 ].concat(ruoloUtente==='professionista'?[]:[["mezzi","Assicurazione e revisione dei mezzi"]]);
 const avOff=String(a.avvisi_esclusi||"").split(",").filter(Boolean);
 const avSoloLun=a.avvisi_solo_lunedi===true;
@@ -158,7 +158,7 @@ const avHtml=`
 
       <div class="sh-b">
         <div class="sh-tit">Chi sei</div>
-        <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||_azNomeSito||"")}" placeholder="Es. Multiservizi Rossi srl">
+        <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||_azNomeSito||"")}" placeholder="${ruoloUtente==='professionista'?"Es. Studio Tecnico Rossi":"Es. Multiservizi Rossi srl"}">
           <div class="sh-nota">È il nome che esce <b>in cima a preventivi e fatture</b>. Se lavori da solo: nome e cognome.${(!String(a.nome||"").trim()&&_azNomeSito)?" L'ho preso dal tuo profilo sul sito: controllalo.":""}</div></div>
         <div class="row2">
           <div class="field"><label>Partita IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="Es. 01234567890"></div>
@@ -210,9 +210,9 @@ const avHtml=`
         <div class="sh-nota">Serve al pulsante <b>«Porta le ore nella parcella»</b> nel registro delle ore: le ore diventano righe già col prezzo. Se lo lasci vuoto, le righe arrivano <b>senza prezzo</b> e lo scrivi tu. ⛔ Non è il costo di un collaboratore: è quanto <b>chiedi tu</b>.</div>
         ${ruoloUtente==='professionista'?`
         <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
-          <label>Traguardo dei crediti formativi (CFP)</label>
+          <label>Traguardo dei crediti formativi (CFP)${+a.cfp_periodo===3?" nel triennio":" all'anno"}</label>
           <input type="number" id="a-cfp" inputmode="numeric" value="${a.cfp_obiettivo!=null?a.cfp_obiettivo:30}" placeholder="30"></div>
-        <div class="sh-nota">Di norma <b>30</b> per ingegneri e architetti, <b>20</b> per i geometri. È l'obiettivo che vedi nella sezione Crediti formativi.</div>`:""}
+        <div class="sh-nota">Ingegneri <b>30 all'anno</b>; architetti e geometri <b>60 in tre anni</b>. Anno o triennio e crediti di deontologia li scegli in <b>Crediti formativi → «Come conta il tuo Ordine»</b>.</div>`:""}
       </div>
 
       </div><div class="sh-col">

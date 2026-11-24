@@ -723,7 +723,7 @@
     sal:{ caselle:"#sal-num,#sal-data,#sal-dal,#sal-al,#sal-rit,#sal-note", dentro:[], regole:ctrRegoleSal },
     prezzo:{ caselle:"#pz-cod,#pz-desc,#pz-prezzo,#pz-cat,#pz-fonte,#pz-mano", dentro:[], regole:ctrRegolePrezzo },
     azienda:{
-      caselle:"#a-nome,#a-piva,#a-cf,#a-ind,#a-cap,#a-citta,#a-prov,#a-tel,#a-email,#a-pec,#a-sdi,#a-iban",
+      caselle:"#a-nome,#a-piva,#a-cf,#a-ind,#a-cap,#a-citta,#a-prov,#a-tel,#a-email,#a-pec,#a-sdi,#a-iban,#a-pol-comp,#a-pol-num,#a-pol-mass,#a-pol-scad",
       dentro:[],
       regole:ctrRegoleAzienda
     },
@@ -1235,7 +1235,7 @@
     L=L||ctrDalModulo();
     const out=[];
     if(!L.get("a-nome")) out.push({campo:"a-nome",grave:"rosso",
-      dice:"Manca il nome dell'azienda: sui preventivi e sulle fatture uscirebbe vuoto."});
+      dice:(ruoloUtente==='professionista'?"Manca il nome dello studio":"Manca il nome dell'azienda")+": sui preventivi e sulle fatture uscirebbe vuoto."});
     const n=ctrCifre(L.get("a-piva"));
     if(!n) out.push({campo:"a-piva",grave:"arancio",
       dice:"Manca la partita IVA: senza, le fatture elettroniche non si possono fare."});
@@ -1246,6 +1246,13 @@
     const cf=L.get("a-cf");
     if(cf&&cf.length!==16&&cf.length!==11) out.push({campo:"a-cf",grave:"rosso",
       dice:"Il codice fiscale ha 16 caratteri (11 per una società): questo ne ha "+cf.length+"."});
+    /* 24 nov 2026 (collaudo Dati azienda dello studio) — come nei Clienti:
+       il codice fiscale si controlla con l'ultima lettera (o l'ultima cifra).
+       Il professionista ha quasi sempre il suo personale, diverso dalla P.IVA. */
+    else if(cf&&cf.length===16&&!ctrCfOk(cf)) out.push({campo:"a-cf",grave:"rosso",
+      dice:"Questo codice fiscale ha 16 caratteri ma uno è sbagliato: l'ultima lettera non torna con le altre."});
+    else if(cf&&cf.length===11&&(!/^\d{11}$/.test(cf)||!ctrPivaOk(cf))) out.push({campo:"a-cf",grave:"rosso",
+      dice:"Questo codice fiscale di 11 cifre non torna: l'ultima cifra non va con le altre."});
     const iban=L.get("a-iban");
     if(iban&&!ctrIbanOk(iban)) out.push({campo:"a-iban",grave:"rosso",
       dice:"Questo IBAN non torna: c'è una cifra sbagliata o ne manca una (in Italia sono 27 caratteri, IT + 25). Il cliente pagherebbe sul conto sbagliato."});
@@ -1263,6 +1270,19 @@
     const sdi=L.get("a-sdi");
     if(sdi&&sdi.length!==7) out.push({campo:"a-sdi",grave:"arancio",
       dice:"Il codice SDI è di 7 caratteri, questo ne ha "+sdi.length+"."});
+    /* 24 nov 2026 — la polizza dello studio: scaduta, la lettera d'incarico
+       non si scarica; il modulo lo diceva solo quando provavi a scaricarla. */
+    if(document.getElementById("a-pol-scad")){
+      const ps=L.get("a-pol-scad");
+      if(ps&&ps<todayStr()) out.push({campo:"a-pol-scad",grave:"rosso",
+        dice:"La polizza è scaduta il "+fdate(ps)+": finché non scrivi quella nuova, la lettera d'incarico non si scarica."});
+      else if(ps){ const g=Math.round((new Date(ps)-new Date(todayStr()))/864e5);
+        if(g<=30) out.push({campo:"a-pol-scad",grave:"arancio",
+          dice:"La polizza scade fra "+g+(g===1?" giorno":" giorni")+": ricordati di rinnovarla e di scrivere la scadenza nuova."}); }
+      const fatti=["a-pol-comp","a-pol-num","a-pol-mass","a-pol-scad"].filter(k=>L.get(k)).length;
+      if(fatti>0&&fatti<4) out.push({campo:["a-pol-comp","a-pol-num","a-pol-mass","a-pol-scad"].find(k=>!L.get(k)),grave:"arancio",
+        dice:"Della polizza manca ancora qualcosa: servono tutti e quattro (compagnia, numero, massimale, scadenza), se no la lettera d'incarico non si scarica."});
+    }
     return out;
   }
 
