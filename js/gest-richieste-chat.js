@@ -120,7 +120,7 @@
         </div><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Cosa chiede</div>
-        ${riga("Lavoro",_dsCosa(r))}
+        ${riga(r._inc?"Prestazione":"Lavoro",_dsCosa(r))}
         ${riga("Descrizione",r.descrizione)}
         ${riga("Quando gli servirebbe",r.data_preferita?fdate(String(r.data_preferita).slice(0,10)):"")}
         ${riga("Urgenza",r.urgenza)}
@@ -187,7 +187,11 @@
       /* 18 nov 2026: anche le voci scritte a mano nel Prezzario prima di oggi, rimaste senza fonte */
       const mie=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).or("fonte.eq.mio,fonte.is.null").is("eliminato_il",null).order("usata_volte",{ascending:false}).limit(25);
       let altre={data:[]};
-      if(parole.length){
+      /* 24 nov 2026 (studio): a uno studio il prezzario dei LAVORI (Tariffa regionale,
+         demolizioni, tinte) non serve a rispondere a un incarico: l'AI scriveva al
+         cliente «i miei prezzi riguardano demolizioni e tinteggiature». */
+      const _studio=typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
+      if(parole.length&&!_studio){
         const rad=parole.map(w=>w.length>6?w.slice(0,w.length-1):w);   /* pittura/pitture, piastrella/piastrelle */
         altre=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).neq("fonte","mio").is("eliminato_il",null)
           .or(rad.map(w=>"descrizione.ilike.%"+w+"%").join(",")).limit(40);
@@ -236,10 +240,16 @@
         ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",r.urgenza],["Quando serve",r.data_preferita],
         ["Budget del cliente",r.budget],["Altro",r.note_aggiuntive],["Foto allegata",r.foto?"si":""]]
         .filter(x=>x[1]).map(x=>x[0]+": "+x[1]).join("\n");
-      const input="Nome dell'impresa: "+(nomeImp||"(non indicato: firma solo con \u00abUn saluto,\u00bb)")
+      const _studio=typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
+      /* 24 nov 2026 — collaudo studio: l'AI diceva al cliente «i miei prezzi in archivio
+         riguardano demolizioni e tinteggiature». L'elenco serve a lei, il cliente non
+         deve saperne niente. E allo studio si risponde da tecnico, non da impresa. */
+      const regole="\n\nREGOLE IN PIU'\n- Non parlare MAI dell'elenco dei prezzi, di cosa contiene o di cosa manca: se nessun prezzo va bene, di' solo che per un prezzo giusto serve vedere il lavoro."
+        +(_studio?"\n- Chi risponde NON e' un'impresa: e' uno studio tecnico (geometra, ingegnere, architetto). Il cliente chiede una prestazione professionale (APE, pratica, rilievo, accatastamento...). Parla di prestazione e di onorario, mai di lavori, cantiere o materiali. Il sopralluogo si propone solo se serve davvero per quella prestazione. Firma col nome dello studio.":"");
+      const input=(_studio?"Nome dello studio: ":"Nome dell'impresa: ")+(nomeImp||"(non indicato: firma solo con \u00abUn saluto,\u00bb)")
         +"\nNome del cliente: "+(r.nome||"(non indicato)")
         +"\n\nRICHIESTA DEL CLIENTE\n"+campi
-        +"\n\nPREZZI DELL'IMPRESA\n"+(prezzi||"(nessun prezzo salvato: non fare cifre)");
+        +(_studio?"\n\nONORARI DELLO STUDIO\n":"\n\nPREZZI DELL'IMPRESA\n")+(prezzi||"(nessun prezzo salvato: non fare cifre)")+regole;
       /* i contatti, per i pulsanti WhatsApp ed Email */
       const c=await dsContattiDi(r);
       const res=await fetch("https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-risposta",{method:"POST",
@@ -368,9 +378,14 @@
   window.dsPrevSalvato=dsPrevSalvato;
 
   async function dsChiudi(pid,riapri){
-    if(await dsSegna(pid,riapri?"vista":"chiusa")){
+    /* 24 nov 2026 (collaudo studio): «Riapri» su una richiesta gia' trasformata la
+       rimetteva «Vista» e tornava «Crea il preventivo», come se il preventivo non ci
+       fosse. Se il preventivo c'e' (si sa quale), torna «Preventivo fatto». */
+    const r0=dsCache.find(x=>String(x.id)===String(pid));
+    const dove=riapri?((r0&&r0._prevId)?"preventivo":"vista"):"chiusa";
+    if(await dsSegna(pid,dove)){
       const r=dsCache.find(x=>String(x.id)===String(pid));
-      if(r)r._stato=riapri?"vista":"chiusa";
+      if(r)r._stato=dove;
       toast(riapri?"Riaperta":"Chiusa ✔");
       rinfresca("dalsito");
     }

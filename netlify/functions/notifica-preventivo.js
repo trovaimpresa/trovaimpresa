@@ -101,6 +101,10 @@ exports.handler = async function(event) {
     const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${impresa_id}&select=nome,nome_attivita,email,tipo,user_id`, { headers: sbHeaders });
     const imprese = await impresaRes.json();
     const impresa = imprese[0];
+    /* 24 nov 2026 (collaudo studio): a un professionista arrivava «Richiesta
+       sopralluogo» e «Nuova richiesta di preventivo». Per lui e' un INCARICO. */
+    const studio = !!(impresa && impresa.tipo === 'professionista');
+    const titoloAvviso = studio ? 'Nuova richiesta di incarico' : 'Nuova richiesta di preventivo';
 
     /* 8 nov 2026 — SUBITO SUL TELEFONO, se l'impresa l'ha acceso (Dati azienda →
        «Gli avvisi sul telefono»). Prima dell'email e indipendente da lei:
@@ -111,7 +115,7 @@ exports.handler = async function(event) {
         const chi = nomeTesto ? nomeTesto : 'Un cliente';
         const dove = cittaTesto;
         await avvisaTelefoni(sbc, impresa.user_id, 'richieste', {
-          titolo: 'Nuova richiesta di preventivo',
+          titolo: titoloAvviso,
           testo: chi + (dove ? ' · ' + dove : '') + ' — tocca per rispondere',
           url: '/' + (PANNELLI[impresa.tipo] || 'pannello-artigiano.html')
         });
@@ -131,12 +135,12 @@ exports.handler = async function(event) {
           </a>
         </div>
         <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-          <h1 style="color:white;margin:0;font-size:22px">📋 Nuova richiesta di preventivo</h1>
+          <h1 style="color:white;margin:0;font-size:22px">📋 ${titoloAvviso}</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
           <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${escH(impresa.nome_attivita || impresa.nome)}</strong>!</p>
           <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
-            Hai ricevuto una nuova richiesta di preventivo su TrovaImpresa.
+            Hai ricevuto una nuova ${studio ? 'richiesta di incarico' : 'richiesta di preventivo'} su TrovaImpresa.
           </p>
           <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
             <h3 style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Richiesta del cliente</h3>
@@ -146,7 +150,7 @@ exports.handler = async function(event) {
                 <td style="padding:10px 0;font-weight:700">${nome}</td>
               </tr>
               <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Categoria</td>
+                <td style="padding:10px 0;color:#666">${studio ? 'Prestazione' : 'Categoria'}</td>
                 <td style="padding:10px 0">${categoria_lavoro || '—'}</td>
               </tr>
               <tr style="border-bottom:1px solid #e5e5e5">
@@ -199,7 +203,7 @@ exports.handler = async function(event) {
           </div>
           ${require('./lib/avviso-sicurezza')('impresa')}
           <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
-            Ricevi questa email perché sei registrato come impresa su TrovaImpresa.
+            Ricevi questa email perché sei registrato ${studio ? 'come professionista' : 'come impresa'} su TrovaImpresa.
           </p>
         </div>
         <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
@@ -238,7 +242,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: fromAddr,
         to: [toAddr],
-        subject: `🔔 Richiesta sopralluogo da ${nomeTesto} – ${String(categoria_lavoro || '').replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`,
+        subject: `🔔 ${studio ? 'Richiesta di incarico' : 'Richiesta sopralluogo'} da ${nomeTesto} – ${String(categoria_lavoro || '').replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`,
         html
       })
     });

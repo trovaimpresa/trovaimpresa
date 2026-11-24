@@ -326,4 +326,12 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
   .sheet .sh-head-az{display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important;width:100%;box-sizing:border-box;overflow:visible !important}
   .sheet .sh-head-az>*{min-width:0;width:auto;margin:0 !important;box-sizing:border-box}
   .sheet .sh-head-az .btn,.sheet .sh-head-az details.sh-altro>summary{width:100%;box-sizing:border-box;justify-content:center;display:flex;padding:0 8px !important}
+  /* 24 nov 2026 (studio, Richieste dal sito): in mezza riga «Crea il preventivo»
+     usciva tagliato («Crea il preventiv»). Una scritta lunga va a capo, non si taglia. */
+  .sheet .sh-head-az .btn,.sheet .sh-head-az details.sh-altro>summary{white-space:normal !important;line-height:1.2;text-align:center;padding:6px 8px !important}
 }
+
+/* 24 nov 2026 (studio, Richieste dal sito) — la nota gialla di una scheda si ferma a
+   3 righe, ma lo spazio sotto (7 px) lasciava vedere la cima della QUARTA riga,
+   tagliata a meta'. Sotto si lascia solo lo spazio che non arriva alla riga dopo. */
+.wrap section .job .job-note.job-note{padding-top:5px !important;padding-bottom:3px !important}

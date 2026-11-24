@@ -3416,7 +3416,7 @@ body .profilo-card,body .dash-quick-card,body .prev-card,body .candidatura-card{
 <script src="/js/pannelli-supporto.js?v=1"></script>
 <script src="/js/pannelli-contatti.js?v=1"></script>
 <script src="/js/pannelli-lavori.js?v=1"></script>
-<script src="/js/pannelli-preventivi.js?v=2"></script>
+<script src="/js/pannelli-preventivi.js?v=3"></script>
 <script src="/js/pannelli-ai.js?v=1"></script>
 <script src="/js/pannelli-qr.js?v=1"></script>
 <script src="/js/pannelli-vari.js?v=2"></script>
@@ -3759,7 +3759,16 @@ async function caricaPreventivi() {
     const docBtns = docs.map((p, i) => `<button class="btn-genera" style="margin:2px" onclick="scaricaDocIncarico('${String(p).replace(/'/g, "\\'")}')">📎 Documento ${i + 1}</button>`).join('');
     const risposto = !!x.risposta;
     const telClean = (x.telefono || '').replace(/[^\d+]/g, '');
-    const waNum = (x.telefono || '').replace(/\D/g, '');
+    /* 24 nov 2026 (collaudo studio): il numero andava a WhatsApp senza il 39 davanti
+       (wa.me/3337650000 = numero sbagliato) e un fisso mostrava WhatsApp lo stesso.
+       Stessa regola del gestionale (dsTelWa): +39/0039 tolti, 3… prende il 39,
+       un fisso (0…) niente WhatsApp. */
+    const waNum = (function (t) {
+      const raw = String(t || '').trim(); let d = raw.replace(/\D/g, '');
+      if (/^(\+|00)/.test(raw)) d = d.replace(/^00/, '');
+      else if (!/^393\d{8,9}$/.test(d) && /^3/.test(d)) d = '39' + d;
+      return (!d || /^(39)?0/.test(d)) ? '' : d;
+    })(x.telefono);
     const azioni =
       (waNum ? `<a class="btn-genera" style="text-decoration:none;background:#25D366" target="_blank" rel="noopener" href="https://wa.me/${waNum}">💬 WhatsApp</a>` : '') +
       (telClean ? `<a class="btn-genera" style="text-decoration:none;background:#0a2a4d" href="tel:${telClean}">📞 Chiama</a>` : '');

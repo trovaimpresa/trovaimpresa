@@ -59,7 +59,7 @@ async function caricaContattoSbloccato(prevId) {
     let telPulito = String(c.telefono || '').trim();
     const _intl = /^(\+|00)/.test(telPulito);
     telPulito = telPulito.replace(/\D/g, '');
-    if (_intl) telPulito = telPulito.replace(/^00/, ''); else if (/^3/.test(telPulito)) telPulito = '39' + telPulito;
+    if (_intl) telPulito = telPulito.replace(/^00/, ''); else if (!/^393\d{8,9}$/.test(telPulito) && /^3/.test(telPulito)) telPulito = '39' + telPulito; /* 24 nov: «39 333…» scritto senza + non diventa 3939… */
     if (/^(39)?0/.test(telPulito)) telPulito = '';
     const waUrl = telPulito ? `https://wa.me/${telPulito}` : '';
     const el = document.getElementById('ric-contatto');

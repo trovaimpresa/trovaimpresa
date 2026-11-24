@@ -4259,8 +4259,25 @@ Deciso da Alex («due sì» + «pubblica»), `?v=24nov-gio2`, tutte le facce:
 - Riprovato sul sito vero: placeholder dello studio, «Accatastamento Bianchi» trovata dall'AI, persone e pratiche solo del reparto, «2 giornate salvate · 1 spesa aggiunta», «misure in cantiere» non tradotto, «Le pratiche del mese», «Tempo speso nel mese», niente «Benzina e km», PDF «Alessio Pinto · Resoconto dell'attività» ✔. Pulito.
 - **Spese dette nel racconto** (`giorSpeseDa`, `giorSpeseHTML`, `giorScriviSpese`): dal «cosa» dell'AI, importi con €/euro dopo pagato/speso/comprato/versato → righe con la spunta sotto la scheda; al «Salva» vanno in `gest_spese` sul lavoro della scheda (`c._lavId` scritto da `giorScrivi`). Niente AI in più. Non in «modifica».
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: RICHIESTE DAL SITO
+
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375). La richiesta è partita dal modulo VERO «Affida un incarico» di `profilo-impresa.html?id=36` (la scheda 36 non è pubblica: `_profiloKo` nasconde il modulo, rimesso a vista con `style.display=''` e premuto il pulsante vero → `submitIncarico`, riga in `incarichi_richieste`, `notifica-preventivo` 200, email consegnata a info@). ⚠️ Usare un telefono che NON è già in rubrica: con 333 1234567 il gestionale ha giustamente ripreso «Edilizia Bianchi srl» (stesso numero) invece di creare il cliente.
+Visti ✔: elenco «Da fare 1», scheda «Nuova» → aperta = «Vista» (anche nel pannello e nel pallino), contatti, WhatsApp 39…, «Risposta pronta» (1 credito, l'unica chiamata AI), «Crea il preventivo» con cliente nuovo in rubrica e note «Richiesta di incarico…», «Annulla» → resta «Vista», salvato → «Preventivo fatto» (Fatte 1), «Segna chiusa» / «Riapri»; pannello professionisti: stato «Vista» e numerino 1 = «Da fare 1» = riga dell'Assistente «1 richiesta dal sito da aprire». 375 px: niente fuori, niente sotto 13 px. Pulito: conteggi uguali a prima (incarichi 0, clienti 2, preventivi 4, righe 99, dalsito 3), 0 righe «PROVA CONTROLLORE», niente nel Cestino.
+
+Sistemato (`?v=24nov-ds`, stile `?v=37`, pannelli `pannelli-preventivi.js?v=3`):
+1. ⛔ «Risposta pronta» allo studio: l'AI scriveva al cliente «i miei prezzi in archivio riguardano demolizioni e tinteggiature». Adesso (`dsRisposta`, `dsPrezziPerRichiesta` in js/gest-richieste-chat.js): allo studio niente prezzario dei LAVORI, «Nome dello studio», «ONORARI DELLO STUDIO», e regole in coda all'input — per tutti: mai parlare dell'elenco dei prezzi; allo studio: chi risponde è uno studio tecnico, prestazione e onorario, niente cantiere. La Edge Function `ai-risposta` NON è stata toccata.
+2. ⛔ Email e avviso sul telefono a un professionista: «Richiesta sopralluogo», «Nuova richiesta di preventivo», «Categoria», «registrato come impresa» → «Richiesta di incarico», «Prestazione», «come professionista» (`netlify/functions/notifica-preventivo.js`, `studio = impresa.tipo==='professionista'`).
+3. ⛔ Pannello professionisti, card dell'incarico: WhatsApp a `wa.me/3337650000` (senza 39 = numero sbagliato), e WhatsApp anche ai fissi. Ora stessa regola del gestionale. E in `js/pannelli-preventivi.js` «39 333…» scritto senza + non diventa più 3939….
+4. ⛔ Telefono: «Crea il preventivo» in testa alla finestra usciva tagliato («Crea il preventiv») — la griglia a 2 colonne del 19 nov (gestionale-stile.css) teneva le scritte su una riga. Ora vanno a capo. Tutte le facce. ⚠️ Il banco non lo vedeva (guarda gli elementi fuori schermo, non il testo che esce dal pulsante).
+5. La nota gialla delle schede (3 righe) lasciava vedere la cima della 4ª riga tagliata a metà (7 px sotto): ora 5 px sopra e 3 sotto. Tutte le schede, tutti i gestionali.
+6. «Riapri» su una richiesta già trasformata tornava «Vista» con «Crea il preventivo»: ora torna «Preventivo fatto» se si sa qual è il preventivo (imprese/artigiani; per gli incarichi vedi sotto).
+7. Allo studio «Lavoro» → «Prestazione» nella scheda dell'incarico; segnaposto della parcella da studio (titolo «Es. Pratica CILA per ristrutturazione», voce «Es. Redazione APE con sopralluogo», capitolo «Es. Progettazione», ricerca «Es. rilievo, APE») — prima «bagno», «tramezzo».
+Banchi: `tools/banco-gestionale.js app` e `noleggio` ZERO difetti; `controllo-push.js` verde.
+⬜ DA DECIDERE con Alex: «Apri il preventivo» per gli INCARICHI. Il legame richiesta → preventivo non si salva (gli incarichi hanno id uuid e lo stato nella riga stessa; `gest_dalsito.preventivo_id` è bigint). Serve la colonna `incarichi_richieste.preventivo_creato_id uuid` (migrazione additiva): la migrazione dalla chat è stata FERMATA dal controllo dei permessi, non eseguita. Senza, allo studio la richiesta trasformata non ha «Apri il preventivo» e «Riapri» la rimette «Vista».
+⬜ Non provati dopo le correzioni (il browser si è scollegato a metà sessione): i 7 punti qui sopra sul sito vero, la nuova «Risposta pronta» (1 credito), un documento allegato dal cliente, l'email nuova.
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate, Richieste dal sito.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4413,6 +4430,16 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Giornate ↔ Chat con AI / Parla: ✔ «Parla» scrive le giornate con la stessa giorScrivi.
 - Giornate ↔ Clienti: — il cliente non si vede nella giornata (si vede nella pratica); il PDF «Per il cliente» non porta il nome del cliente (voluto: niente indirizzo).
 - Si può unire: Giornate dentro Agenda («Ore fatte»)? NO per ora: Giornate scrive (racconto, spese, PDF per il consulente e per il cliente), Agenda legge le ore; si parlano già coi numeri uguali.
+
+- Richieste dal sito ↔ Scheda pubblica (Affida un incarico): ✔ la richiesta vera arriva in «Da fare» (provato col modulo vero), con prestazione, comune, urgenza, note; documenti del cliente con «Documento N».
+- Richieste dal sito ↔ Pannello professionisti: ✔ uno stato solo (Nuova/Vista/Preventivo fatto/Chiusa/Risposto) e numerino = «Da fare»; dal 24 nov WhatsApp col 39. — la risposta scritta dal gestionale (WhatsApp/email) non segna «Risposto» nel pannello (lo segna solo «Invia risposta» del pannello).
+- Richieste dal sito ↔ Email e telefono: ✔ avviso subito; dal 24 nov allo studio dice «Richiesta di incarico».
+- Richieste dal sito ↔ Preventivi e parcella: ✔ «Crea il preventivo» apre la parcella col cliente, titolo = prestazione, note; «Preventivo fatto» solo a preventivo salvato. ✗ dalla richiesta trasformata non si apre il preventivo (manca la colonna, da decidere con Alex).
+- Richieste dal sito ↔ Clienti: ✔ cliente nuovo in rubrica, niente doppioni (stesso telefono o stessa email).
+- Richieste dal sito ↔ Assistente: ✔ «N richieste dal sito da aprire» = pallino del menu.
+- Richieste dal sito ↔ Pratiche: — la richiesta non diventa pratica direttamente (passa dal preventivo: «Accettato → crea pratica»). Giusto.
+- Richieste dal sito ↔ Chat con AI / Ricerca in alto: — la chat non legge le richieste dal sito; la ricerca non le trova (da guardare a fine giro).
+- Si può unire: NO, è la porta d'ingresso dei clienti dal sito; si potrebbe pensare di metterla dentro Preventivi come linguetta, ma il pallino e la riga nell'Assistente bastano.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

@@ -1,4 +1,7 @@
 // [SPOSTATO] gest-preventivi.js: era dentro gest-core.js, righe 9229-10132, spostato identico.
+  /* 24 nov 2026 (studio, voce Richieste dal sito): allo studio i segnaposto della parcella
+     parlano di prestazioni, non di tramezzi e bagni. */
+  const _pvStudio=()=>typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
   /* ============================================================
      16 agosto 2026 — LE NOTE DEL PREVENTIVO, UNA PER RIGA
      Prima era una casella sola con dentro tutto: per togliere una
@@ -234,11 +237,11 @@
        prezzo, e quello che non c'è non si può sbagliare. */
     if(_rigaSezione(r)){
       return `<div class="prev-riga prev-riga-cap" data-riga data-sezione>
-      <input class="pr-desc" placeholder="Es. Opere murarie" value="${esc(r.descrizione||"")}">
+      <input class="pr-desc" placeholder="${_pvStudio()?"Es. Progettazione":"Es. Opere murarie"}" value="${esc(r.descrizione||"")}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
     }
     return `<div class="prev-riga" data-riga>
-      <textarea class="pr-desc" rows="1" data-no-dettato placeholder="Es. Demolizione tramezzo">${esc(r.descrizione||"")}</textarea>
+      <textarea class="pr-desc" rows="1" data-no-dettato placeholder="${_pvStudio()?"Es. Redazione APE con sopralluogo":"Es. Demolizione tramezzo"}">${esc(r.descrizione||"")}</textarea>
       <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" aria-label="Quantità" value="${_numTesto(r.qta!=null?r.qta:1)}">
       <select class="pr-um" aria-label="Unità di misura">${prevUnitaOpts(r.unita)}</select>
       <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo" aria-label="Prezzo di una unità" value="${_prezzoCasella(r.prezzo)}" data-euro>
@@ -722,7 +725,7 @@
       <div class="sh-b">
       <div class="sh-tit">Che preventivo è</div>
       ${isNew?aiRigaHTML('preventivo'):''}
-      <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
+      <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="${_pvStudio()?"Es. Pratica CILA per ristrutturazione":"Es. Rifacimento bagno completo"}"></div>
       <div class="row2">
         <!-- ⛔ 22 agosto 2026 — IL CLIENTE NUOVO SENZA USCIRE DAL PREVENTIVO.
              Segnalato da Alessio con la pagina davanti: nella scheda del
@@ -765,7 +768,7 @@
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <button type="button" class="btn-ghost quick-add" data-action="prev-pz-apri">€ Prendi dal prezzario</button>
         <div id="prev-pz" class="sh-b" style="display:none;margin-top:10px">
-          <div class="field"><label>Cerca nel tuo prezzario</label><input id="prev-pz-cerca" autocomplete="off" placeholder="Es. intonaco, tramezzo"></div>
+          <div class="field"><label>Cerca nel tuo prezzario</label><input id="prev-pz-cerca" autocomplete="off" placeholder="${_pvStudio()?"Es. rilievo, APE":"Es. intonaco, tramezzo"}"></div>
           <div id="prev-pz-lista"></div>
           <div class="sh-nota">Tocca una voce: entra nel preventivo con descrizione e prezzo. La quantità la scrivi tu.</div>
         </div>
