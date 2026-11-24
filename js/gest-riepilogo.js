@@ -631,6 +631,25 @@
        nascosti dal menu (TAB_NASCOSTI_PRO), quindi la riga lo invitava a
        cliccare per andare in una sezione che per lui non esiste.
        Le tarature dei suoi strumenti restano: sono la riga qui sotto. */
+    /* 24 nov 2026 — il tagliando a km (sql/2026-11-24-mezzi-tagliando-km.sql):
+       passato = rosso, entro 1.000 km = da guardare. I km sono quelli del mezzo,
+       aggiornati dalle uscite e dai rientri. Se la lettura fallisce, niente riga. */
+    if(!_pro){
+      let _tg=[];
+      try{
+        const rt=await sb.from("gest_mezzi").select("id,nome,km_attuali,tagliando_ogni_km,tagliando_ultimo_km")
+          .eq("user_id",sbUid).or(_cliOr(mid)).not("tagliando_ogni_km","is",null).not("tagliando_ultimo_km","is",null).not("km_attuali","is",null);
+        _tg=((rt&&!rt.error&&rt.data)||[]).map(m=>Object.assign({},m,{manca:(+m.tagliando_ultimo_km)+(+m.tagliando_ogni_km)-(+m.km_attuali)}))
+          .filter(m=>m.manca<=1000).sort((a,b)=>a.manca-b.manca);
+      }catch(e){}
+      if(_tg.length){
+        const _km=n=>String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g,".")+" km";
+        const _pass=_tg.filter(m=>m.manca<0).length;
+        DA.push({g:_pass?1:2,male:1,
+          t:_pass?nn(_pass,"mezzo col tagliando passato","mezzi col tagliando passato"):nn(_tg.length,"mezzo col tagliando vicino","mezzi col tagliando vicino"),
+          d:(_tg[0].nome||"Mezzo")+" · "+(_tg[0].manca<0?"passato di "+_km(_tg[0].manca):"fra "+_km(_tg[0].manca))+(_tg.length>1?" e altri":""),go:"mezzi"});
+      }
+    }
     if(!_pro && mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(_titMz(mzScaduti[0])?" · "+_titMz(mzScaduti[0]):""),go:"mezzi"});
     /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.

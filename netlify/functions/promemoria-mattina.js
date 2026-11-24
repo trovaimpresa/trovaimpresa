@@ -580,7 +580,7 @@ const handler = async function () {
       } catch (e) { erroriNuovi.push(nome + ': ' + e.message); return []; }
     };
     const dataTetto7 = giorniDopo(oggi, -7);
-    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt, dPrevCtl, dCarte] = await Promise.all([
+    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt, dPrevCtl, dCarte, dTagliando] = await Promise.all([
       leggiLarga('fatture fornitori', f => vivi(sb.from('gest_fatture_fornitori')
         .select('id, user_id, fornitore_id, numero, importo, scadenza')
         .in('user_id', utenti).is('data_pagata', null).neq('stato', 'pagata')
@@ -611,7 +611,13 @@ const handler = async function () {
          Se la colonna non c'e' ancora, leggiLarga mette l'errore da parte e l'email parte lo stesso. */
       leggiLarga('carte', f => vivi(sb.from('gest_carte')
         .select('id, user_id, nome, scadenza')
-        .in('user_id', utenti).not('scadenza', 'is', null), f))
+        .in('user_id', utenti).not('scadenza', 'is', null), f)),
+      /* 24 nov 2026 — il tagliando a km (sql/2026-11-24-mezzi-tagliando-km.sql).
+         Lettura a parte: se le colonne mancano salta solo questa. */
+      leggiLarga('tagliando', f => vivi(sb.from('gest_mezzi')
+        .select('id, user_id, nome, targa, km_attuali, tagliando_ogni_km, tagliando_ultimo_km')
+        .in('user_id', utenti).not('tagliando_ogni_km', 'is', null)
+        .not('tagliando_ultimo_km', 'is', null).not('km_attuali', 'is', null), f))
     ]);
     const nomeOperatore = Object.fromEntries(dOp.map(x => [String(x.id), x.nome || '']));
     const nomeFornitore = Object.fromEntries(dFor.map(x => [String(x.id), x.nome || '']));
@@ -823,6 +829,18 @@ const handler = async function () {
         const r = { tit: 'Carta «' + (x.nome || 'aziendale') + '» — Scadenza della carta', sotto: '' };
         if (t) mezziOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduta ieri' : t.testo, col: t.col }));
         else if (completo && giaPassata(data)) mezziVecchie.push(Object.assign(r, { ev: passataTesto(data).replace('scaduto', 'scaduta'), col: '#c62828' }));
+      });
+
+      // 3-ter. 24 nov 2026 — il tagliando a km: SOLO nel quadro del lunedi'.
+      //    Non e' una data: non c'e' una «tappa di oggi», e ogni mattina
+      //    sarebbe la stessa riga (paletto 2: la stessa cosa non si ripete).
+      if (completo) (voglio('mezzi') ? dTagliando : []).filter(x => String(x.user_id) === uid).forEach(x => {
+        const manca = (+x.tagliando_ultimo_km) + (+x.tagliando_ogni_km) - (+x.km_attuali);
+        if (!(manca <= 1000)) return;
+        const km = n => String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' km';
+        const r = { tit: (x.nome || 'Mezzo') + (x.targa ? ' (' + x.targa + ')' : '') + ' — Tagliando', sotto: '' };
+        if (manca < 0) mezziVecchie.push(Object.assign(r, { ev: 'Passato di ' + km(manca), col: '#c62828' }));
+        else mezziOra.push(Object.assign(r, { ev: 'Fra ' + km(manca), col: '#b45309' }));
       });
 
       // 4. preventivi senza risposta: a 7 e a 14 giorni; il lunedi' tutti

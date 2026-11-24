@@ -94,7 +94,7 @@
        se la colonna manca si rilegge senza, poi la versione corta come prima */
     const _colErr=r=>r.error&&/column|schema cache/i.test(r.error.message||"");
     const [rmz,{data:vw},{data:cb},rsx,rnl,rlm,rop,rtar,rusc]=await Promise.all([
-      _leggiMezzi(_MZCOL+",operatore_id,km_attuali").then(r=>_colErr(r)?_leggiMezzi(_MZCOL+",operatore_id"):r).then(r=>_colErr(r)?_leggiMezzi(_MZCOL):r).then(r=>_colErr(r)?_leggiMezzi(_MZCORTO):r),
+      _leggiMezzi(_MZCOL+",operatore_id,km_attuali,tagliando_ogni_km,tagliando_ultimo_km").then(r=>_colErr(r)?_leggiMezzi(_MZCOL+",operatore_id,km_attuali"):r).then(r=>_colErr(r)?_leggiMezzi(_MZCOL+",operatore_id"):r).then(r=>_colErr(r)?_leggiMezzi(_MZCOL):r).then(r=>_colErr(r)?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid),
@@ -349,6 +349,14 @@
     const _u=(m.categoria!=="attrezzatura")?(mezziUscMap[m.id]||{}):{};
     const _km=(m.categoria!=="attrezzatura")?mzKm(m):null;
     let _chi=mezzoChiUso(m)?"👤 "+esc(mezzoChiUso(m)):"", _rit="";
+    /* 24 nov 2026 — il tagliando a km */
+    const _tg=(m.categoria!=="attrezzatura")?mzTagliando(m):null;
+    let _tgTesto="";
+    if(_tg){
+      if(_tg.manca<0){ _tgTesto=`<span style="color:var(--err);font-weight:700">⚠ Tagliando passato di ${mzKmTesto(-_tg.manca)}</span>`; tono="t-err"; }
+      else if(_tg.manca<=MZ_TAG_AVVISO){ _tgTesto=`<span style="color:var(--attesa);font-weight:700">🔧 Tagliando fra ${mzKmTesto(_tg.manca)}</span>`; if(tono!=="t-err")tono="t-attesa"; }
+      else _tgTesto="🔧 Tagliando fra "+mzKmTesto(_tg.manca);
+    }
     if(_u.aperta){
       _chi=`<b>👤 Fuori con ${esc(_u.aperta.chi_nome||"—")} ${esc(mzQuando(_u.aperta.uscita_il))}</b>`;
       if(etic.lab==="Disponibile"||etic.lab==="In uso")etic={lab:"Fuori",bg:"var(--info-bg)",fg:"var(--info)"};
@@ -359,7 +367,7 @@
     const _html=schedaJob({
       tono, titolo:esc(m.nome),
       destra:`<span class="stato" style="background:${etic.bg};color:${etic.fg}">${etic.lab}</span>`,
-      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", _km!=null?"🛣 "+mzKmTesto(_km):"", _chi, carbTesto, _rit, scTesto],
+      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", _km!=null?"🛣 "+mzKmTesto(_km):"", _chi, carbTesto, _rit, _tgTesto, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[
         /* 18 nov 2026 — i rifornimenti sono dei mezzi: sulla betoniera non si offrono (come gia' nella tabella) */
@@ -439,9 +447,10 @@
           <input type="checkbox" id="m-nolo" ${m.noleggiabile?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
           <span>Lo noleggio anche a terzi — compare nel listino del <b>Noleggio</b>, dove gli metti le tariffe</span></label>`}
         </div>
+        ${(STRU||attrezzo)?"":mzTagliandoHTML(m)}
         ${STRU?"":`<div class="sh-b">
         <div class="sh-tit">Le scadenze</div>
-        <p class="sh-nota" style="margin-top:0">Bollo, tagliando e le altre: pulsante <b>＋ Scadenza</b> qui in alto.</p>
+        <p class="sh-nota" style="margin-top:0">Bollo e le altre: pulsante <b>＋ Scadenza</b> qui in alto.</p>
         <div class="row2">
           <div class="field"><label>Assicurazione, scade il</label><input type="date" id="m-assic" value="${esc(m.assicurazione_scad||"")}"></div>
           <div class="field"><label>Revisione, scade il</label><input type="date" id="m-revis" value="${esc(m.revisione_scad||"")}"></div></div>
@@ -465,6 +474,15 @@
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){campoManca($("#m-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
+    /* 24 nov 2026 — il tagliando a km: si controlla prima di salvare niente */
+    let _tagCampi=null;
+    if($("#m-tag-ogni")){
+      const o=mzLeggiKm("#m-tag-ogni"), u=mzLeggiKm("#m-tag-ult");
+      if(o.errore){campoManca($("#m-tag-ogni"),"Scrivi solo il numero dei km, es. 30.000");return;}
+      if(u.errore){campoManca($("#m-tag-ult"),"Scrivi solo il numero dei km, es. 21.000");return;}
+      if(!o.vuoto&&o.n<500){campoManca($("#m-tag-ogni"),"Ogni quanti km? Di solito fra 15.000 e 40.000");return;}
+      _tagCampi={tagliando_ogni_km:o.vuoto?null:o.n, tagliando_ultimo_km:u.vuoto?null:u.n};
+    }
     /* per lo studio la spunta non c'e': la categoria viaggia nel campo nascosto
        messo dal modulo, così il salvataggio non deve indovinarla */
     const ckAttr=$("#m-attrezzo"), catFissa=$("#m-cat");
@@ -524,9 +542,13 @@
       }catch(e){ _tarMsg=" — la taratura però non è salvata"; }
       try{ renderScadenze(); rinfresca("calendario","riepilogo"); }catch(e){}
     }
+    if(_tagCampi){
+      const rt=await sb.from("gest_mezzi").update(_tagCampi).eq("id",data[0].id).eq("user_id",sbUid).select("id");
+      if(rt.error||!rt.data||!rt.data.length)_tarMsg=" — il tagliando però non è salvato"+(rt.error&&/column|schema cache/i.test(rt.error.message||"")?": manca sql/2026-11-24-mezzi-tagliando-km.sql":", riprova");
+    }
     closeSheet();renderMezzi();renderAttrezzature();
     if(_senzaChi){toast("Salvato, ma «Chi ce l'ha» no: manca sql/2026-11-20-strumenti-chi-ce-l-ha.sql");return;}
-    if(_tarMsg){toast((id?"Aggiornato":"Strumento aggiunto")+_tarMsg);return;}
+    if(_tarMsg){toast((id?"Aggiornato":(categoria==="attrezzatura"?"Strumento aggiunto":"Mezzo aggiunto"))+_tarMsg);return;}
     const _pro=(ruoloUtente==='professionista');
     /* 18 nov 2026 — spostato da una parte all'altra: spariva dall'elenco senza dire dove andava */
     const _era=id?((mezziCache.find(x=>String(x.id)===String(id))||{}).categoria==="attrezzatura"?"attrezzatura":"mezzo"):null;
@@ -733,5 +755,60 @@
       else if(a==="mz-rientra"){e.preventDefault();e.stopPropagation();mzRientraForm(id);}
       else if(a==="mz-esce-salva"){e.preventDefault();mzEsceSalva(id);}
       else if(a==="mz-rientra-salva"){e.preventDefault();mzRientraSalva(id);}
+    });
+  }
+
+
+  /* ═══ 24 NOVEMBRE 2026 — IL TAGLIANDO A KM ═══════════════════════════
+     «Si fa ogni N km» e «ultimo fatto a N km» (sql/2026-11-24-mezzi-tagliando-km.sql).
+     I km di adesso sono quelli di mzKm(): arrivano da soli con le uscite.
+     Sotto MZ_TAG_AVVISO km mancanti la scheda si fa arancione, sotto zero rossa;
+     lo dicono anche l'Assistente (js/gest-riepilogo.js) e l'email del lunedi'.
+     ═════════════════════════════════════════════════════════════════════ */
+  const MZ_TAG_AVVISO=1000;
+  function mzTagliando(m){
+    const ogni=+m.tagliando_ogni_km||0, ult=(m.tagliando_ultimo_km==null||m.tagliando_ultimo_km==="")?null:+m.tagliando_ultimo_km;
+    const km=mzKm(m);
+    if(!ogni||ult==null||km==null)return null;
+    const prossimo=ult+ogni;
+    return {prossimo, manca:prossimo-km, km};
+  }
+  function mzTagliandoNota(m,ogni,ult){
+    const km=mzKm(m);
+    if(!ogni)return "Scrivi ogni quanti km va fatto: te lo ricorda il gestionale.";
+    if(ult==null)return "Scrivi a quanti km hai fatto l'ultimo tagliando.";
+    if(km==null)return "Il prossimo tagliando è a <b>"+mzKmTesto(ult+ogni)+"</b>. I km del mezzo arrivano con la prima uscita.";
+    const manca=ult+ogni-km;
+    return "Adesso è a <b>"+mzKmTesto(km)+"</b>: il prossimo tagliando è a <b>"+mzKmTesto(ult+ogni)+"</b>, "
+      +(manca<0?"<b style=\"color:var(--err)\">passato di "+mzKmTesto(-manca)+"</b>.":"fra "+mzKmTesto(manca)+".");
+  }
+  function mzTagliandoHTML(m){
+    const km=m.id?mzKm(m):null;
+    const ogni=+m.tagliando_ogni_km||0, ult=(m.tagliando_ultimo_km==null||m.tagliando_ultimo_km==="")?null:+m.tagliando_ultimo_km;
+    return `<div class="sh-b" id="m-tag-box" data-mid="${esc(String(m.id||""))}">
+        <div class="sh-tit">Il tagliando</div>
+        <div class="row2">
+          <div class="field"><label>Si fa ogni (km)</label><input id="m-tag-ogni" type="text" inputmode="numeric" value="${ogni?mzPunti(ogni):""}" placeholder="Es. 30.000"></div>
+          <div class="field"><label>Ultimo fatto a (km)</label><input id="m-tag-ult" type="text" inputmode="numeric" value="${ult!=null?mzPunti(ult):""}" placeholder="Es. 21.000"></div></div>
+        <p class="sh-nota" id="m-tag-nota" style="margin-top:0">${m.id?mzTagliandoNota(m,ogni,ult):"Scrivi ogni quanti km va fatto: te lo ricorda il gestionale."}</p>
+        ${km!=null?`<button type="button" class="btn" data-action="mz-tag-fatto" data-km="${km}" style="width:100%">🔧 Tagliando fatto adesso (${mzKmTesto(km)})</button>`:""}
+        <p class="sh-nota">I km arrivano da soli dalle uscite e dai rientri. Quando mancano ${mzKmTesto(MZ_TAG_AVVISO)} ti avvisa: sulla scheda, nell'Assistente e nell'email del lunedì.</p>
+        </div>`;
+  }
+  function mzTagliandoRinfresca(){
+    const box=$("#m-tag-box"), n=$("#m-tag-nota"); if(!box||!n)return;
+    const m=mezziCache.find(x=>String(x.id)===box.dataset.mid)||{};
+    const o=mzLeggiKm("#m-tag-ogni"), u=mzLeggiKm("#m-tag-ult");
+    if(o.errore||u.errore){n.textContent="Scrivi solo il numero dei km.";return;}
+    n.innerHTML=m.id?mzTagliandoNota(m,o.vuoto?0:o.n,u.vuoto?null:u.n):(o.vuoto?"Scrivi ogni quanti km va fatto: te lo ricorda il gestionale.":"Il prossimo tagliando sarà a "+(u.vuoto?"—":mzKmTesto(u.n+o.n))+".");
+  }
+  if(!window.__mzTagAscolto){
+    window.__mzTagAscolto=1;
+    document.addEventListener("input",function(e){ if(e.target&&(e.target.id==="m-tag-ogni"||e.target.id==="m-tag-ult"))mzTagliandoRinfresca(); });
+    document.addEventListener("click",function(e){
+      const b=e.target.closest&&e.target.closest('[data-action="mz-tag-fatto"]'); if(!b)return;
+      e.preventDefault(); const i=$("#m-tag-ult"); if(!i)return;
+      i.value=mzPunti(+b.dataset.km); i.dispatchEvent(new Event("input",{bubbles:true}));
+      if(typeof toast==="function")toast("Segnato a "+mzKmTesto(+b.dataset.km)+": premi «Salva»");
     });
   }
