@@ -594,6 +594,7 @@
     const totScadute = scadute.reduce((s,f)=>s+totaleFatt(f),0);
 
     const DA=[];
+    const _proRie=(ruoloUtente==='professionista');
     const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
     if(scadute.length)   DA.push({g:1,male:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
                                   d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
@@ -615,6 +616,13 @@
       DA.push({g:2,male:1,t:nn(bozzeFerme.length,"fattura in bozza mai mandata","fatture in bozza mai mandate"),
                d:eur2(totBozze)+(bozzeFerme.length>1?", la più vecchia ferma da ":" fermi da ")+da,go:"fatture"});   /* 12 nov 2026 (terzo giro): «fermi da più di 3 mesi» valeva solo per la più vecchia */
     }
+    /* 24 nov 2026 (studio, voce Assistente, consiglio fatto col si' di Alex) —
+       le INTEGRAZIONI chieste dal Comune sono la cosa piu' urgente dello studio:
+       se non si mandano in tempo la pratica si archivia. Prima le vedeva solo la
+       chat. La riga porta alle Pratiche gia' filtrate su «Integrazioni richieste». */
+    const integr=_proRie?aperti.filter(l=>l.pratica_stato==="integrazioni"):[];
+    if(integr.length)    DA.push({g:1,male:1,t:nn(integr.length,"pratica con integrazioni da mandare al Comune","pratiche con integrazioni da mandare al Comune"),
+                                  d:(integr[0].descrizione||"Pratica")+(integr.length>1?" e altre":""),act:"rie-integr"});
     if(ritardo.length)   DA.push({g:1,male:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});
     if(scScadute.length) DA.push({g:1,male:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),

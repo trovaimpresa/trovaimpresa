@@ -4218,7 +4218,7 @@ Sistemato (`?v=24nov-ass`):
 Banco `tools/banco-gestionale.js app` e `noleggio`: ZERO difetti.
 ⬜ Non provati: la voce vera dal telefono (il microfono del browser di Claude è bloccato), il preventivo AI riempito nel modulo dopo il push (provata la risposta dell'AI).
 ⬜ Visto, lasciato alla voce «Chat con AI»: allo studio la chat dice ancora «lavoro» («Apri sul lavoro → Crea fattura», «diventati lavori»).
-⬜ Proposta (non fatta, aspetta il sì): in «Parti da qui» allo studio la riga «N pratiche con integrazioni da mandare al Comune» (stato «integrazioni»): oggi la vede solo la chat.
+Funzione nuova («Il tuo consiglio faccia e pubblica» di Alex), `?v=24nov-ass2`: in «Parti da qui» allo studio la riga «N pratiche con integrazioni da mandare al Comune» (stato «integrazioni», col nome della prima), grave come il ritardo; «Vai a sistemare» apre le Pratiche su «Tutte» + «Integrazioni richieste» (azione `rie-integr` in `js/gest-finestre-eventi.js`).
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
 Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente.
@@ -4346,7 +4346,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Assistente ↔ Chat con AI: ✔ «Manda» e i pulsanti aprono una chat nuova con la domanda. ✗ la chat allo studio dice ancora «lavoro» in qualche frase (da fare nella voce Chat).
 - Assistente ↔ Parla / Giornate / Promemoria: ✔ dal 24 nov parole dello studio e giorno della settimana giusto.
 - Assistente ↔ Crediti formativi: — la scheda compare solo col primo corso segnato (regola «se non l'hai usata non si vede»); l'avviso «ne mancano» sta nello Scadenzario.
-- Assistente ↔ Pratiche con integrazioni: — in «Parti da qui» non c'è (proposta del 24 nov).
+- Assistente ↔ Pratiche con integrazioni: ✔ dal 24 nov riga in «Parti da qui» che apre le Pratiche filtrate su «Integrazioni richieste».
 - Si può unire: NO, l'Assistente è la pagina di partenza; non è una voce da unire, è il riassunto di tutte.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)

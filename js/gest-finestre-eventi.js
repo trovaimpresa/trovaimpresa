@@ -331,6 +331,8 @@
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non è una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
+    /* 24 nov 2026 — dall'Assistente: le pratiche con le integrazioni del Comune */
+    if(a==="rie-integr"){filter.vista="tutti";filter.pstato="integrazioni";const b=document.querySelector('nav.tabs button[data-tab="lavori"]');if(b){b.click();window.scrollTo(0,0);}else renderJobs();return;}
     if(a==="rie-bolle")return (typeof acqApri==="function")?acqApri(t.dataset.mese||""):null;
     if(a==="rie-piu"){
       $$('#rie-alert [data-ro-piu]').forEach(function(x){x.style.display="";});
