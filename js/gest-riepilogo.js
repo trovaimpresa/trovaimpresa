@@ -600,6 +600,13 @@
     const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
     if(scadute.length)   DA.push({g:1,male:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
                                   d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
+    /* 24 nov 2026 (giro dello studio) — anche la fattura di un FORNITORE scaduta
+       sale qui: prima stava solo nella scheda Fornitori, rossa ma in fondo. */
+    try{
+      const _ffScad=(fornTabOk?FFOR:[]).filter(f=>f.stato!=="pagata"&&f.scadenza&&f.scadenza<oggi);
+      if(_ffScad.length)DA.push({g:1,male:1,t:nn(_ffScad.length,"fattura di un fornitore scaduta","fatture di fornitori scadute"),
+        d:"Da pagare: "+eur(_ffScad.reduce((t,f)=>t+(+f.importo||0),0)),go:"fornitori"});
+    }catch(e){}
     if(daFatt.length)    DA.push({g:2,male:1,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
                                   d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
     /* 7 nov 2026 — LE FATTURE IN BOZZA DIMENTICATE. Una bozza non e' «da

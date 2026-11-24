@@ -170,6 +170,8 @@
       +   '<div style="display:flex;gap:10px;flex-wrap:wrap">'
       +     '<button type="button" class="btn-primary" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-prev" data-id="'+esc(c.id)+'">+ Nuovo preventivo</button>'
       +     '<button type="button" class="btn" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-lav" data-id="'+esc(c.id)+'">'+(ruoloUtente==='professionista'?'+ Nuova pratica':'+ Nuovo lavoro')+'</button>'
+      /* 24 nov 2026 (giro dello studio) — anche il computo parte col cliente scelto */
+      +     (ruoloUtente==='professionista'?'<button type="button" class="btn" style="font-size:17px;min-height:50px;padding:0 22px" data-action="new-computo-pre" data-cli="'+esc(c.id)+'">+ Nuovo computo</button>':'')
       +   '</div></div>'
       + '<div class="sh-b" id="cli-storia"><div class="sh-tit">'+(ruoloUtente==='professionista'?'Le sue pratiche, preventivi, computi e fatture':'I suoi lavori, preventivi, computi e fatture')+'</div><div class="campo-aiuto">Sto guardando…</div></div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>'

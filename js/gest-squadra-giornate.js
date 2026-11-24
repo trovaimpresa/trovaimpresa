@@ -73,8 +73,17 @@ async function sqgLeggi(m) {
 /* 20 nov 2026 (collaudo Agenda dello studio, si' di Alex) — quante pratiche
    (o lavori) DA FARE ha ogni persona nel reparto: e' lo stesso conto della
    tendina dell'Agenda con «Da fare». Se la lettura cade, il tasto non c'e'. */
+/* 24 nov 2026 (giro dello studio) — gli strumenti/mezzi che ha ogni persona («Chi ce l'ha») */
+var sqgStru = {};
 async function sqgLeggiPrat() {
   sqgPrat = {};
+  sqgStru = {};
+  try {
+    if (sb && sbUid && !(typeof tabNascosto === "function" && tabNascosto("attrezzature") && tabNascosto("mezzi"))) {
+      const rm = await sb.from("gest_mezzi").select("nome,operatore_id").eq("user_id", sbUid).not("operatore_id", "is", null);
+      if (!rm.error) (rm.data || []).forEach(function (m) { const k = String(m.operatore_id); (sqgStru[k] = sqgStru[k] || []).push(m.nome || "—"); });
+    }
+  } catch (e) {}
   try {
     if (!sb || !sbUid || typeof curMestiere !== "function") return;
     if (typeof tabNascosto === "function" && tabNascosto("agenda")) return;
@@ -124,7 +133,8 @@ function sqgCard(o) {
         o.telefono ? (/\d/.test(String(o.telefono)) ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : esc(o.telefono)) : ""
       ].filter(Boolean).join(" · ") + '</div></div>'
     + '<div class="sqg-dx"><span class="stato ' + (o.attivo || io ? "fatto" : (o.acc === "scaduto" ? "da_fare" : "bozza")) + '">' + (typeof dipStato === "function" ? dipStato(o) : (o.attivo ? "Attivo" : "Invitato")) + '</span>' + altro + '</div></div>'
-    + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
+    + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + ((typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? (d.lavori.size === 1 ? " pratica" : " pratiche") : (d.lavori.size === 1 ? " cantiere" : " cantieri")) : "") + '</span></div>'
+    + ((sqgStru[String(o.id)] || []).length ? '<div class="sqg-sotto" style="margin:6px 0 0">🔧 Ha: ' + esc(sqgStru[String(o.id)].join(", ")) + '</div>' : "")
     + sqgStriscia(sqgMese, d.giorni)
     + avviso
     + (o.nuovi ? '<div class="sqg-avv rosso">' + o.nuovi + (o.nuovi === 1 ? " messaggio nuovo" : " messaggi nuovi") + '</div>' : "")

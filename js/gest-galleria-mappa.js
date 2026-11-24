@@ -300,6 +300,8 @@
       html+='<div class="gal-group"><div class="gal-cantiere">'+esc(lavName[k]||"—")
           + '<span class="gal-conta">'+conta+'</span>'
           + (nF&&k?'<button type="button" class="btn gal-pdf" data-action="gal-pdf" data-id="'+esc(k)+'">📄 PDF delle foto</button>':"")
+          /* 24 nov 2026 (giro dello studio) — dalla Galleria si apre la pratica/il lavoro */
+          + (k?'<button type="button" class="btn gal-pdf gal-apri" data-action="edit-job" data-id="'+esc(k)+'">'+(ruoloUtente==='professionista'?'Apri la pratica ›':'Apri il lavoro ›')+'</button>':"")
           + '</div><div class="thumbs">';
       arr.forEach(({x,kind})=>{
         const q=quando(x), tag=_galTag(q), tcls=q==="prima"?"prima":"dopo";

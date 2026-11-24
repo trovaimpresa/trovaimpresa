@@ -611,7 +611,8 @@ function giorDisegna(msg){
     const conCosto=can.some(c=>c.euro>0);
     h+=`<div class="gb"><h4>${_gP("I cantieri del mese","Le pratiche del mese")}</h4>`;
     can.forEach(c=>{
-      h+=`<div class="gcan"><span class="n gior-u">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`;
+      /* 24 nov 2026 (giro dello studio) — dalla giornata si apre la pratica/il lavoro */
+      h+=`<div class="gcan"><span class="n gior-u">${c.id?`<button type="button" class="aic-link" style="padding:2px 0;text-align:left;font-size:inherit" data-action="edit-job" data-id="${esc(String(c.id))}">${esc(c.nome)} ›</button>`:esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`;
       const a=giorAvanz[c.id];
       if(a&&!a.fatto){
         const pc=Math.round(a.speso/a.importo*100), w=Math.max(0,Math.min(100,pc));

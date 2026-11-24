@@ -274,8 +274,24 @@
         +'<button class="btn" type="button" id="ds-risp-ri">\u21bb Riscrivi (1 credito)</button></div>'
         +(!tel&&!c.email?'<p style="margin:8px 0 0;font-size:15px">'+(c.telefono?"Il numero del cliente \u00e8 un fisso, senza WhatsApp: usa Copia.":"Il cliente non ha lasciato email n\u00e9 telefono: usa Copia.")+'</p>':"");
       const T=()=>$("#ds-risp-txt").value;
-      const wa=$("#ds-risp-wa"); if(wa)wa.onclick=()=>window.open("https://wa.me/"+tel+"?text="+encodeURIComponent(T()),"_blank","noopener");
-      const em=$("#ds-risp-em"); if(em)em.onclick=()=>{location.href="mailto:"+encodeURIComponent(c.email)+"?subject="+encodeURIComponent("Re: "+(_dsCosa(r)||"la sua richiesta"))+"&body="+encodeURIComponent(T());};
+      /* 24 nov 2026 (giro dello studio) — risposto dal gestionale = «Risposto»
+         anche nel pannello (prima lo segnava solo «Invia risposta» del pannello).
+         Solo per gli incarichi (lo stato sta nella loro riga) e solo se era
+         ancora da fare: un preventivo già fatto resta «Preventivo fatto». */
+      const _risposto=async()=>{
+        try{
+          if(typeof dsEInc==="function"&&dsEInc(r.id)&&(r._stato==="nuova"||r._stato==="vista")){
+            /* come il pannello: stato «risposta_inviata» + risposta_at (senza testo:
+               niente email al cliente, l'ha già ricevuta su WhatsApp/email) */
+            const _ora=new Date().toISOString(), agg={stato:"risposta_inviata",risposta_at:_ora};
+            if(!r.visto_il)agg.visto_il=_ora;
+            const {data,error}=await sb.from("incarichi_richieste").update(agg).eq("id",String(r.id)).select("id");
+            if(!error&&data&&data.length){r._stato="risposto";r.risposta_at=_ora;try{renderDalSito();}catch(_){}try{contaDalSito();}catch(_){}}
+          }
+        }catch(_){}
+      };
+      const wa=$("#ds-risp-wa"); if(wa)wa.onclick=()=>{window.open("https://wa.me/"+tel+"?text="+encodeURIComponent(T()),"_blank","noopener");_risposto();};
+      const em=$("#ds-risp-em"); if(em)em.onclick=()=>{_risposto();location.href="mailto:"+encodeURIComponent(c.email)+"?subject="+encodeURIComponent("Re: "+(_dsCosa(r)||"la sua richiesta"))+"&body="+encodeURIComponent(T());};
       $("#ds-risp-cp").onclick=async()=>{try{await navigator.clipboard.writeText(T());toast("Copiato \u2714");}catch(e){const t=$("#ds-risp-txt");t.select();document.execCommand("copy");toast("Copiato \u2714");}};
       $("#ds-risp-ri").onclick=()=>dsRisposta(r);
     }catch(e){
@@ -799,7 +815,18 @@
     const U=usati||[], T=(tutti||[]).filter(m=>!_soloStru||m.categoria==="attrezzatura"||U.some(x=>x.mezzo_id===m.id));
     const etichetta=m=>esc(m.nome)+(m.targa?" ("+esc(m.targa)+")":"");
     const nomi=Object.fromEntries(T.map(m=>[m.id,etichetta(m)]));
-    $("#lm-list").innerHTML=U.length?U.map(x=>`<div class="spesa-row"><span style="flex:1">${nomi[x.mezzo_id]||(_pro?"(strumento eliminato)":"(mezzo eliminato)")}</span><button type="button" class="sdel" data-action="lm-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">${_pro?"Nessuno strumento collegato a questa pratica.":"Nessun mezzo collegato a questo lavoro."}</p>`;
+    /* 24 nov 2026 (giro dello studio) — scadenze passate dello strumento/mezzo
+       (taratura, revisione…): si vede subito nella pratica che non è in regola */
+    let _scadMz={};
+    try{
+      if(U.length){
+        const _oggi=(typeof todayStr==="function")?todayStr():new Date().toISOString().slice(0,10);
+        const {data:sc}=await sb.from("gest_scadenze").select("mezzo_id,titolo,tipo,data_scadenza,stato").eq("user_id",sbUid).in("mezzo_id",U.map(x=>x.mezzo_id)).lt("data_scadenza",_oggi);
+        (sc||[]).filter(z=>z.stato!=="fatta").forEach(z=>{if(!_scadMz[z.mezzo_id])_scadMz[z.mezzo_id]=z;});
+      }
+    }catch(e){}
+    const _avvMz=id=>{const z=_scadMz[id];return z?` <small style="color:var(--err,#c0392b);font-weight:700">⚠️ ${esc(z.titolo||z.tipo||(_pro?"Taratura":"Scadenza"))} scaduta il ${fdate(z.data_scadenza)}</small>`:"";};
+    $("#lm-list").innerHTML=U.length?U.map(x=>`<div class="spesa-row"><span style="flex:1">${nomi[x.mezzo_id]||(_pro?"(strumento eliminato)":"(mezzo eliminato)")}${_avvMz(x.mezzo_id)}</span><button type="button" class="sdel" data-action="lm-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">${_pro?"Nessuno strumento collegato a questa pratica.":"Nessun mezzo collegato a questo lavoro."}</p>`;
     const usati_ids=new Set(U.map(x=>x.mezzo_id));
     const liberi=T.filter(m=>!usati_ids.has(m.id));
     $("#lm-sel").innerHTML=liberi.length

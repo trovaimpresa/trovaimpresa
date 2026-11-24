@@ -137,6 +137,17 @@
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
+    /* 24 nov 2026 (giro dello studio) — computo nuovo già legato a cliente e/o pratica
+       (dalla scheda del cliente e dalla pratica) */
+    if(a==="new-computo-pre"){
+      const d=t.dataset, c={};
+      if(d.cli)c.cliente_id=d.cli; if(d.lav)c.lavoro_id=d.lav;
+      if(d.lav&&!d.cli){const s=document.querySelector("#j-cli,#j-cliente");if(s&&s.value)c.cliente_id=s.value;}
+      if(d.lav){const dv=document.querySelector("#j-dove");if(dv&&dv.value.trim())c.luogo=dv.value.trim();
+        const ds=document.querySelector("#j-desc");if(ds&&ds.value.trim())c.titolo=ds.value.trim();}
+      if(d.lav&&typeof gconfirm==="function"&&!(await gconfirm("Apro il computo nuovo al posto di questa pratica.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      return computoForm(c);
+    }
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
     if(a==="comp-dup")return compDuplica(id);

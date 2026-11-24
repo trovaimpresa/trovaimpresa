@@ -1167,7 +1167,9 @@
       const C=rc.data||[];
       if(!C.length){
         box.innerHTML='<div class="lm-conta">Nessun computo collegato a questa pratica</div>'
-          +'<div class="lm-vuoto">Nel computo, alla pagina «La scheda», scegli questa pratica: il computo e i suoi SAL compaiono qui.</div>';
+          +'<div class="lm-vuoto">Nel computo, alla pagina «La scheda», scegli questa pratica: il computo e i suoi SAL compaiono qui.</div>'
+          /* 24 nov 2026 (giro dello studio) — il computo si fa anche da qui */
+          +'<button type="button" class="btn btn-sm" data-action="new-computo-pre" data-lav="'+esc(String(lav))+'">+ Nuovo computo per questa pratica</button>';
         return;
       }
       const ids=C.map(c=>c.id);

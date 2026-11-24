@@ -4547,3 +4547,15 @@ Difetti trovati e sistemati (`?v=24nov-giro`):
 6. Computo: scelta la pratica, cliente e luogo vuoti si prendono dalla pratica.
 7. Parole: linguetta del computo «Acconti (SAL)» → «Stati di avanzamento (SAL)» allo studio; «Spese di questa pratica»; rapportini «Li scrivono i collaboratori dalla loro app»; aiuto del primo preventivo «ne fai una pratica».
 ⬜ Da decidere con Alex: il contributo cassa (4%) entra nell'«Incassato» del Report e di Tasse (imponibile della fattura) ma non nel guadagno della pratica (importo = compenso): sommando le pratiche non torna il totale per la cassa. Il codice cassa (TC03…) non si mette da solo alla prima fattura: lo chiede all'emissione (voluto, 12 ago).
+
+# 24 NOVEMBRE 2026 — STUDIO: LE COPPIE «—» DELLA MAPPA CHE ERANO DIFETTI (`?v=24nov-lega`)
+- Report → «Migliori clienti»: il nome apre la scheda del cliente (`edit-cli`; non se è nel Cestino).
+- Galleria → «Apri la pratica ›» / «Apri il lavoro ›» in testa a ogni gruppo (`edit-job`).
+- Giornate → «Le pratiche del mese»: il nome apre la pratica.
+- «+ Nuovo computo» dalla scheda del cliente (studio) e «+ Nuovo computo per questa pratica» dentro la pratica: azione `new-computo-pre` (data-cli / data-lav; dalla pratica prende cliente, «Dove» e titolo, e chiede prima di lasciare la pratica).
+- Ricerca in alto: anche «Scadenze» (apre `edit-scad`) e «Richieste dal sito» (apre `ds-apri`; riempie `dsCache` se vuota).
+- Assistente «Parti da qui»: «N fatture di fornitori scadute» (g:1, va a Fornitori).
+- Pratica → «Strumenti usati»: accanto allo strumento «⚠️ Taratura scaduta il …» (gest_scadenze con `mezzo_id`, data passata, non fatta). Vale anche per i mezzi delle imprese.
+- Collaboratori: sulla scheda «🔧 Ha: …» (gest_mezzi.operatore_id). Allo studio «· N pratiche» invece di «cantieri».
+- Richieste dal sito: WhatsApp/Email della «Risposta pronta» segnano l'incarico come risposto: `stato='risposta_inviata'` + `risposta_at` (SENZA testo: nessuna email al cliente). Pannello professionisti: «✅ Risposto dal gestionale» e numerino senza quelle.
+⬜ Provare dal vivo dopo il push (non iniettati nella pagina).

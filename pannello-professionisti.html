@@ -3732,7 +3732,8 @@ async function caricaPreventivi() {
   const lista = data || [];
 
   // Badge "da rispondere" sulla card
-  const _nuovi = lista.filter(x => !x.risposta).length;
+  /* 24 nov 2026 — risposto anche dal gestionale (WhatsApp/email): stato 'risposto' */
+  const _nuovi = lista.filter(x => !x.risposta && !x.risposta_at).length;
   const _badgePrev = document.getElementById('badge-prev-card');
   if (_badgePrev) {
     _badgePrev.textContent = _nuovi;
@@ -3758,6 +3759,7 @@ async function caricaPreventivi() {
     const docs = Array.isArray(x.documenti) ? x.documenti : [];
     const docBtns = docs.map((p, i) => `<button class="btn-genera" style="margin:2px" onclick="scaricaDocIncarico('${String(p).replace(/'/g, "\\'")}')">📎 Documento ${i + 1}</button>`).join('');
     const risposto = !!x.risposta;
+    const rispostoAltrove = !risposto && !!x.risposta_at;   /* 24 nov 2026: dal gestionale */
     const telClean = (x.telefono || '').replace(/[^\d+]/g, '');
     /* 24 nov 2026 (collaudo studio): il numero andava a WhatsApp senza il 39 davanti
        (wa.me/3337650000 = numero sbagliato) e un fisso mostrava WhatsApp lo stesso.
@@ -3776,7 +3778,7 @@ async function caricaPreventivi() {
     <div class="prev-card">
       <div class="prev-header">
         <div class="prev-nome">👤 ${escHtml(x.nome || '—')}</div>
-        <span class="prev-badge ${risposto ? 'badge-inviato' : 'badge-nuovo'}">${risposto ? '✅ Risposto' : '🆕 Nuova'}</span>
+        <span class="prev-badge ${(risposto || rispostoAltrove) ? 'badge-inviato' : 'badge-nuovo'}">${risposto ? '✅ Risposto' : (rispostoAltrove ? '✅ Risposto dal gestionale' : '🆕 Nuova')}</span>
       </div>
       <div class="prev-info">
         <span>🛠️ ${escHtml(x.prestazione || '—')}</span>
