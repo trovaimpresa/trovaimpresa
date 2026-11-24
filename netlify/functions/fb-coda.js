@@ -58,8 +58,8 @@ exports.handler = async (event) => {
     const v = await vetrina(giorno, turno);
     if (v) post.push(v);
     if (turno === 1) {
-      // 48 ore: se un giro salta, il mattino dopo i post ci sono ancora; i doppioni li ferma fb_pubblicati.
-      const da = encodeURIComponent(new Date(Date.now() - 2 * 864e5).toISOString());
+      // 72 ore: se un giro salta, il mattino dopo i post ci sono ancora; i doppioni li ferma fb_pubblicati.
+      const da = encodeURIComponent(new Date(Date.now() - 3 * 864e5).toISOString());
       (await get(`imprese_pubbliche?created_at=gte.${da}&select=id,tipo,nome_attivita,nome,mestiere,citta,provincia&order=created_at.asc&limit=10`))
         .forEach(i => post.push({ chiave: `imp:${i.id}`, ...testoIscritto(i) }));
       (await get(`subappalti?attivo=eq.true&created_at=gte.${da}&select=id,tipo,nome_impresa,lavoro,citta&order=created_at.asc&limit=10`))
