@@ -4255,6 +4255,8 @@ Banchi: `tools/banco-gestionale.js app` ZERO difetti; `tools/banco-chat-studio.m
 ⬜ Da decidere con Alex: Giornate conta persone e pratiche di TUTTI i reparti («la squadra è una», scelta del 3 nov): nel reparto «ferramenta» comparivano «david» e le potature del giardiniere nell'elenco delle pratiche.
 Deciso da Alex («due sì» + «pubblica»), `?v=24nov-gio2`, tutte le facce:
 - **Giornate per reparto** (`_gNelReparto` in `js/gest-giornate.js`): persone, pratiche/lavori, ore, «Come ieri», spese, fatture e pieni solo del reparto aperto (persone senza reparto dappertutto). ⛔ Annulla la scelta del 3 nov «la squadra è una». «Ore fatte» dell'Agenda resta di tutta l'azienda (lo dice la sua riga).
+- ⛔ Trovato dal vivo dopo il push 5b67d7d: le ore si leggevano SENZA `mestiere_id`, quindi col filtro del reparto il mese restava vuoto. Ora `gest_ore` legge anche `mestiere_id` (e «Come ieri» guarda solo il reparto). ⚠️ Il banco non lo vedeva: le righe finte hanno tutte le colonne qualunque sia il `select`.
+- Riprovato sul sito vero: placeholder dello studio, «Accatastamento Bianchi» trovata dall'AI, persone e pratiche solo del reparto, «2 giornate salvate · 1 spesa aggiunta», «misure in cantiere» non tradotto, «Le pratiche del mese», «Tempo speso nel mese», niente «Benzina e km», PDF «Alessio Pinto · Resoconto dell'attività» ✔. Pulito.
 - **Spese dette nel racconto** (`giorSpeseDa`, `giorSpeseHTML`, `giorScriviSpese`): dal «cosa» dell'AI, importi con €/euro dopo pagato/speso/comprato/versato → righe con la spunta sotto la scheda; al «Salva» vanno in `gest_spese` sul lavoro della scheda (`c._lavId` scritto da `giorScrivi`). Niente AI in più. Non in «modifica».
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI

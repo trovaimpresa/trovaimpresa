@@ -333,7 +333,7 @@ async function giorCarica(){
   const [ro,rl,rh]=await Promise.all([
     sb.from("gest_operatori").select("id,nome,mestiere_id,costo_orario").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
     sb.from("gest_lavori").select("id,descrizione,dove,stato,mestiere_id,created_at").eq("user_id",sbUid).is("eliminato_il",null).order("created_at",{ascending:false}).limit(200),
-    sb.from("gest_ore").select("id,data,ore,operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).gte("data",a).lt("data",b)
+    sb.from("gest_ore").select("id,data,ore,operatore_id,lavoro_id,rapportino_id,mestiere_id").eq("user_id",sbUid).is("eliminato_il",null).gte("data",a).lt("data",b)
   ]);
   if(ro.error||rl.error||rh.error){ throw new Error((ro.error||rl.error||rh.error).message); }
   giorOps=_gNelReparto(ro.data,true); giorLav=_gNelReparto(rl.data);
@@ -410,7 +410,9 @@ async function giorCarica(){
   giorUltima=null;
   try{
     const oggi=_gOggi();
-    const ru=await sb.from("gest_ore").select("data").eq("user_id",sbUid).is("eliminato_il",null).lt("data",oggi).order("data",{ascending:false}).limit(1);
+    let qU=sb.from("gest_ore").select("data").eq("user_id",sbUid).is("eliminato_il",null).lt("data",oggi);
+    if(_gMest()) qU=qU.eq("mestiere_id",_gMest());   /* 24 nov 2026: «Come ieri» del reparto */
+    const ru=await qU.order("data",{ascending:false}).limit(1);
     let dU=!ru.error&&ru.data&&ru.data[0]&&ru.data[0].data;
     /* piu' vecchia di una settimana non e' «come ieri»: non si propone */
     if(dU&&(new Date(oggi+"T12:00")-new Date(dU+"T12:00"))/864e5>7) dU=null;
