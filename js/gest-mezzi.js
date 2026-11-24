@@ -547,6 +547,7 @@
       if(rt.error||!rt.data||!rt.data.length)_tarMsg=" — il tagliando però non è salvato"+(rt.error&&/column|schema cache/i.test(rt.error.message||"")?": manca sql/2026-11-24-mezzi-tagliando-km.sql":", riprova");
     }
     closeSheet();renderMezzi();renderAttrezzature();
+    try{ rinfresca("riepilogo"); }catch(_){}  /* 24 nov: tagliando e uscite cambiano l'Assistente */
     if(_senzaChi){toast("Salvato, ma «Chi ce l'ha» no: manca sql/2026-11-20-strumenti-chi-ce-l-ha.sql");return;}
     if(_tarMsg){toast((id?"Aggiornato":(categoria==="attrezzatura"?"Strumento aggiunto":"Mezzo aggiunto"))+_tarMsg);return;}
     const _pro=(ruoloUtente==='professionista');
@@ -661,7 +662,7 @@
       if(!km.vuoto&&(prima==null||km.n>prima)){
         try{ await sb.from("gest_mezzi").update({km_attuali:km.n}).eq("id",m.id).eq("user_id",sbUid).select("id"); }catch(e){}
       }
-      closeSheet(); await renderMezzi();
+      closeSheet(); await renderMezzi(); try{ rinfresca("riepilogo"); }catch(_){}
       toast("Uscita registrata: "+(riga.chi_nome||"")+" ha "+m.nome);
     }finally{ _mzSalvo=false; }
   }
@@ -717,7 +718,7 @@
       if(!km.vuoto&&(prima==null||km.n>prima)){
         try{ await sb.from("gest_mezzi").update({km_attuali:km.n}).eq("id",m.id).eq("user_id",sbUid).select("id"); }catch(e){}
       }
-      closeSheet(); await renderMezzi();
+      closeSheet(); await renderMezzi(); try{ rinfresca("riepilogo"); }catch(_){}
       toast("Rientrato ✔"+((!km.vuoto&&u.km_uscita!=null)?" — "+mzKmTesto(km.n-(+u.km_uscita))+" fatti":""));
     }finally{ _mzSalvo=false; }
   }
@@ -791,7 +792,7 @@
           <div class="field"><label>Si fa ogni (km)</label><input id="m-tag-ogni" type="text" inputmode="numeric" value="${ogni?mzPunti(ogni):""}" placeholder="Es. 30.000"></div>
           <div class="field"><label>Ultimo fatto a (km)</label><input id="m-tag-ult" type="text" inputmode="numeric" value="${ult!=null?mzPunti(ult):""}" placeholder="Es. 21.000"></div></div>
         <p class="sh-nota" id="m-tag-nota" style="margin-top:0">${m.id?mzTagliandoNota(m,ogni,ult):"Scrivi ogni quanti km va fatto: te lo ricorda il gestionale."}</p>
-        ${km!=null?`<button type="button" class="btn" data-action="mz-tag-fatto" data-km="${km}" style="width:100%">🔧 Tagliando fatto adesso (${mzKmTesto(km)})</button>`:""}
+        ${km!=null?`<button type="button" class="btn" data-action="mz-tag-fatto" data-km="${km}" style="width:100%;margin:6px 0 10px;font-size:16px">🔧 Tagliando fatto adesso (${mzKmTesto(km)})</button>`:""}
         <p class="sh-nota">I km arrivano da soli dalle uscite e dai rientri. Quando mancano ${mzKmTesto(MZ_TAG_AVVISO)} ti avvisa: sulla scheda, nell'Assistente e nell'email del lunedì.</p>
         </div>`;
   }
