@@ -14,7 +14,7 @@
     if (document.getElementById('vfb-stile')) return;
     var st = document.createElement('style'); st.id = 'vfb-stile';
     st.textContent =
-      '.vfb-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:6px 0 20px}' +
+      '.vfb-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin:6px 0 20px}' +
       '.vfb-c{display:block;background:#fff;border:1px solid var(--ti-bd,#dde3ea);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 4px 14px rgba(10,42,77,.07)}' +
       '.vfb-c img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#eef2f7}' +
       '.vfb-t{padding:14px 16px 16px}.vfb-t b{display:block;font-size:19px;color:#0a2a4d;line-height:1.25}' +
