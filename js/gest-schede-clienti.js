@@ -843,7 +843,10 @@
       _pre:"",_lab:"Promemoria: ",_prom:true,_az:vai("promemoria","edit-prom",p.id)}); });
     /* le stesse quattro date della vista gest_mezzi_scadenze */
     const piuMesi=(d,n)=>{const x=new Date(d+"T12:00:00");const g=x.getDate();x.setMonth(x.getMonth()+n);if(x.getDate()<g)x.setDate(0);return ymd(x.getFullYear(),x.getMonth(),x.getDate());};
+    /* 24 nov 2026 — allo studio coi Mezzi nascosti, solo gli strumenti (come lo Scadenzario) */
+    const _soloStr=typeof _mzSoloStrumenti==="function"&&_mzSoloStrumenti();
     ok(rm).forEach(m=>{
+      if(_soloStr&&m.categoria!=="attrezzatura")return;
       const tab=m.categoria==="attrezzatura"?"attrezzature":"mezzi"; /* 18 nov: era m.tipo, che e' testo libero */
       [["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]].forEach(c=>{
         if(m[c[0]])out.push({id:m.id,titolo:c[1]+" · "+(m.nome||"mezzo"),data:m[c[0]],fatta:false,_az:vai(tab,"edit-mezzo",m.id)});

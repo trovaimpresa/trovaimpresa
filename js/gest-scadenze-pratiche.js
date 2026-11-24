@@ -37,7 +37,7 @@
      ============================================================ */
   const SCAD_PERSONA=[["visita_medica_scadenza","Visita medica","Sicurezza"],
                       ["formazione_scadenza","Formazione sicurezza","Sicurezza"],
-                      ["documento_scadenza","Documento d'identita'","Documento"],
+                      ["documento_scadenza","Documento d'identit\u00e0","Documento"],
                       ["permesso_scadenza","Permesso di soggiorno","Documento"]];
   async function scadenzePersone(mid){
     if(!sb||!sbUid)return [];
@@ -69,6 +69,14 @@
      un mezzo o a uno strumento (la categoria la legge renderScadenze) */
   function _mzIcona(id){ const c=(window._mezCat||{})[id]; return c==="attrezzatura"?"🔧":"🚚"; }
   function _mzEliminato(){ return ruoloUtente==='professionista'?"(strumento eliminato)":"(mezzo eliminato)"; }
+  /* 24 nov 2026 (studio, voce Scadenze e promemoria) — allo studio senza Mezzi
+     nel menu uscivano «Revisione · escavatore» e «Assicurazione · escavatore»
+     (i mezzi senza reparto dell'impresa). Come la tendina del modulo: allo
+     studio coi Mezzi nascosti si vedono solo gli strumenti. La usa anche il
+     Calendario (calAltreDate). */
+  function _mzSoloStrumenti(){
+    try{ return ruoloUtente==='professionista'&&typeof tabNascosto==='function'&&!!tabNascosto("mezzi"); }catch(e){ return false; }
+  }
   async function scadenzeMezzi(mid){
     if(!sb||!sbUid)return [];
     try{
@@ -76,8 +84,10 @@
         .select("id,nome,tipo,categoria,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
         .eq("user_id",sbUid).or(_cliOr(mid||curMestiere())).is("eliminato_il",null);
       const out=[];
+      const _soloStr=_mzSoloStrumenti();
       (mz||[]).forEach(function(m){
         const att=m.categoria==="attrezzatura"; /* 18 nov: era m.tipo, che e' testo libero («Trapano») */
+        if(_soloStr&&!att)return;
         const _attN=(ruoloUtente==='professionista')?"Strumento":"Attrezzatura";
         const base={_mezzo:true,_mzId:m.id,_tab:att?"attrezzature":"mezzi",_nome:m.nome||(att?_attN:"Mezzo"),
                     tipo_pratica:att?_attN:"Mezzo",stato:"aperta"};
@@ -241,6 +251,17 @@
     /* 18 nov 2026 — il numero della linguetta «Scadenze» (quelle da fare) */
     window._spN=window._spN||{};window._spN.scad=(conta.scadute||0)+(conta.prossime||0);window._spN.scadMid=mid;
     try{ if(typeof spUnisci==="function") spUnisci(); }catch(e){}
+    /* 24 nov 2026 — il numero dei Promemoria sulla linguetta restava quello
+       vecchio: un promemoria scritto da Tasse e fisco o da «Parla» segna solo
+       «da ridisegnare» la linguetta che non si vede, e qui c'era «Promemoria (0)».
+       Si conta di nuovo ogni volta (una domanda piccola, solo il numero). */
+    try{
+      if(typeof spUnito==="function"&&spUnito()){
+        sb.from("promemoria").select("id",{count:"exact",head:true}).eq("user_id",sbUid)
+          .is("eliminato_il",null).or("stato.is.null,stato.neq.fatto")
+          .then(function(r){ if(r&&!r.error&&r.count!=null){ window._spN.prom=r.count; try{spUnisci();}catch(e){} } });
+      }
+    }catch(e){}
     let L=filtra(scadTutte,scadVista);
     /* 18 nov 2026 — collaudo dello Scadenzario: in «Tutte» una scadenza fatta
        stava in mezzo a quelle ancora da fare (ordine per data): adesso le fatte
@@ -570,12 +591,21 @@
     const note=$("#s-note").value.trim();
     const ripeti_mesi=$("#s-ripeti")?(+$("#s-ripeti").value||0):0;
     const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,operatore_id,data_scadenza,note,avvisa,ripeti_mesi};
+    /* 24 nov 2026 (studio, Scadenze e promemoria) — CAMBIATA LA DATA, GLI
+       AVVISI RIPARTONO. L'email del mattino segna in «avvisi» le tappe gia'
+       mandate (30, 7, 1). Spostando le integrazioni dal 15 gennaio al 15
+       febbraio (proroga del Comune) restava «30,7»: della data nuova non
+       arrivava piu' l'avviso dei 30 e dei 7 giorni. Come «inviato» dei Promemoria. */
+    if(id){
+      const _vec=(scadCache||[]).find(x=>String(x.id)===String(id));
+      if(!_vec||String(_vec.data_scadenza||"")!==data_scadenza) row.avvisi=null;
+    }
     /* Se sql/gest-scadenze-pratiche.sql non è ancora stato eseguito, le colonne
        nuove non esistono: invece di far fallire tutto il salvataggio le tolgo una
        alla volta e riprovo (stessa scelta già fatta nei Dati azienda). */
     /* ripeti_mesi si toglie come le altre se la colonna non c'e' ancora:
        chi non ha eseguito sql/gest-scadenze-ripeti.sql continua a salvare */
-    const OPZ=["lavoro_id","avvisa","ripeti_mesi","operatore_id"];
+    const OPZ=["lavoro_id","avvisa","ripeti_mesi","operatore_id","avvisi"];
     const tolte=[];
     async function prova(){
       return id

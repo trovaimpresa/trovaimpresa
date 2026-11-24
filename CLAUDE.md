@@ -4176,8 +4176,27 @@ Foto fatte col banco (`/tmp/lavoro/foto.js` + `dati-cal.js`: finto `sb.from` con
 Pubblicato ef907d9, Netlify ok, riprovato sul sito vero 1440 e 375: «Chi ci va» (Tutti 3 · Giulia 1 · Nessuno 2, filtra giusto), «Ci va:» nel giorno, deposito viola + legenda, SCIA al Comune arancio e non rossa («1 pratica in ritardo» = solo il rilievo), taratura col nome ✔. Pulito.
 ⛔ Trovato dal vivo: sul telefono un nome lungo faceva uscire la tendina «Chi ci va» dallo schermo (anche nella Mappa): sistemato in css/gestionale.css (larga quanto lo schermo sotto i 600 px).
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: SCADENZE E PROMEMORIA
+
+⚠️ Il Cestino dello studio del 24 nov NON risulta ancora pubblicato (ultimo commit online e7b63c1, Calendario): non riprovato. Detto ad Alex.
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati, provati e cancellati in UNA chiamata (`window._provaSP` / `_provaSP2` scritte nella pagina; la chiamata lunga si lancia senza aspettarla e si legge `window._RSP2`, se no scade a 45 s): cliente, collaboratrice Giulia, stazione totale, pratica SCIA; scadenze integrazioni (collegata a pratica e cliente), deposito sismico, taratura ogni anno (strumento + persona), polizza RC ogni anno, quota albo 31/01 ogni anno, crediti, corso di Giulia, firma col cliente, una scaduta (01/10/2026); promemoria quota Ordine (ogni anno), backup 31/01 (ogni mese), chiamare il Comune. Visti: viste Tutte/Scadute/Prossime/Fatte ✔, «Segna fatta» → prossima 01/03/2028 con strumento e persona ✔, Riapri + Segna fatta → «la prossima c'è già» ✔, 31/01 ogni anno → 31/01/2028 ✔, cliente nel Cestino → «Rossi Mario (nel cestino)» ✔, Giulia nel Cestino → domanda «Ha 2 scadenze aperte», vanno con lei e tornano con «Rimetti a posto» ✔, scadenza nel Cestino «— scade il 30/04/2027» e ritorno ✔, promemoria ogni anno → 20/01/2028 ✔, «Rimanda» → +7 giorni ✔, Butta con domanda ✔, pallino del menu, Calendario, Assistente «1 scadenza passata» ✔, telefono 375: niente fuori schermo, niente sotto 13 px ✔. Pulito ogni volta: conteggi uguali a prima (scadenze 2, promemoria 0, lavori 5, clienti 2, persone 1, mezzi 2).
+
+Sistemato (`?v=24nov-sp`):
+1. ⛔ Allo studio coi Mezzi nascosti, Scadenzario e Calendario mostravano «Revisione · escavatore», «Assicurazione · escavatore», «Verifica periodica» (mezzi senza reparto). `_mzSoloStrumenti()` in `js/gest-scadenze-pratiche.js` (studio + `tabNascosto("mezzi")`): solo gli strumenti, in `scadenzeMezzi` e in `calAltreDate` (js/gest-schede-clienti.js). La tendina del modulo lo faceva già dal 20 nov. ⚠️ Col conto di Alex `_tiTipoVero` torna «artigiano» dopo un po': per provarlo va rimesso.
+2. ⛔ Cambiando la DATA di una scadenza (proroga del Comune) gli avvisi non ripartivano: l'email segna in `gest_scadenze.avvisi` le tappe già mandate («30,7») e della data nuova non arrivava più niente. Ora `_saveScad` mette `avvisi=null` se la data cambia (come `inviato` dei Promemoria); stessa data → restano. Provato dal vivo. Tutte le facce.
+3. Promemoria «Segna fatto» con l'elenco non ancora in memoria non faceva niente, senza dirlo: `promStato` va a prendere la riga (come lo Scadenzario). Tutte le facce.
+4. Linguetta «Promemoria (n)» vecchia quando il promemoria nasce fuori (Tasse e fisco «Ricordamelo», «Parla»): `renderScadenze` riconta i promemoria da fare (una domanda col solo numero).
+5. Parole dello studio: elenco vuoto dei Promemoria diceva «ordinare il materiale prima della pratica» (il traduttore cambiava «cantiere») → «rinnovare la polizza»; email del mattino allo studio «Documenti dei collaboratori», «Strumenti e carte: cosa scade», «Apri gli strumenti» (#attrezzature) anche nell'oggetto (`netlify/functions/promemoria-mattina.js`, `parole`), provata con `costruisciEmail` finta.
+6. «Documento d'identita'» → «Documento d'identità» (scadenze della persona). Tutte le facce.
+7. Assistente, scheda «Scadenze»: ora conta anche la carta e i crediti formativi come il pallino del menu e lo Scadenzario (`pScadPers` in js/gest-riepilogo.js).
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni (`(0,eval)(String(fn).replace(…))`; ⚠️ incollare le funzioni nel javascript_tool NON le sostituisce: lì sono locali).
+
+Proposte con foto (in attesa del sì di Alex): «Rimanda ▾» nella scadenza (Di una settimana / Di un mese / Di 3 mesi, dalla SUA data, gli avvisi ripartono) e il tipo «Iscrizione all'albo» nella tendina dello studio.
+⬜ Non provati: l'email del mattino vera (parte una volta al giorno), «Parla» e Chat che scrivono un promemoria (crediti), un collaboratore vero dal telefono.
+⬜ Visto, non toccato: la linguetta viola «F» copre la prima lettera della riga sotto le linguette sul telefono (vale per tutte le sezioni, già segnato il 18 nov).
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4278,6 +4297,21 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Calendario ↔ Cestino: ✔ pratica nel Cestino sparisce con la sua scadenza, torna con «Rimetti a posto».
 - Calendario ↔ Mappa: — i sopralluoghi del giorno non hanno «il giro» sulla carta.
 - Si può unire: NO (Calendario = tutte le date dello studio; Agenda = chi fa cosa). Con «Chi ci va» (fatto il 24 nov) si parlano senza unirle.
+
+- Scadenze e promemoria ↔ Pratiche: ✔ la scadenza si attacca alla pratica (nome nella riga), va nel Cestino e torna con lei; integrazioni del Comune proposte dalla pratica.
+- Scadenze e promemoria ↔ Clienti: ✔ cliente nella riga, «(nel cestino)» dal 24 nov.
+- Scadenze e promemoria ↔ Strumenti: ✔ tarature e verifiche; dal 24 nov allo studio niente mezzi (escavatore). Prossima taratura con strumento e persona.
+- Scadenze e promemoria ↔ Collaboratori: ✔ documenti della persona in sola lettura; le sue scadenze vanno nel Cestino e tornano con lei.
+- Scadenze e promemoria ↔ Crediti formativi: ✔ riga «ne mancano N» da ottobre; dal 24 nov anche nell'Assistente.
+- Scadenze e promemoria ↔ Fatture / Fornitori / Carte: ✔ da incassare, da pagare, scadenza della carta (sola lettura, aprono la loro scheda).
+- Scadenze e promemoria ↔ Calendario: ✔ scadenze e promemoria nel giorno; dal 24 nov niente mezzi allo studio.
+- Scadenze e promemoria ↔ Assistente: ✔ «N scadenze passate»; dal 24 nov la scheda conta carte e crediti come il pallino.
+- Scadenze e promemoria ↔ Tasse e fisco / Parla: ✔ «Ricordamelo» scrive un promemoria; dal 24 nov il numero della linguetta si aggiorna.
+- Scadenze e promemoria ↔ email del mattino: ✔ avvisi 30/7/1; dal 24 nov ripartono se cambi la data; parole dello studio.
+- Scadenze e promemoria ↔ Cestino: ✔ scadenza e promemoria vanno e tornano («— scade il …»).
+- Scadenze e promemoria ↔ app del collaboratore: — non vede le scadenze dello studio (giusto; vede le sue pratiche).
+- Scadenze e promemoria ↔ Ricerca in alto: — le scadenze non si cercano (da guardare a fine giro).
+- Si può unire: già unite (18 nov) in una voce con due linguette. Resta così.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

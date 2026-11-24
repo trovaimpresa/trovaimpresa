@@ -303,9 +303,15 @@ function cappelloHTML(d) {
 }
 
 function costruisciEmail(d) {
+  /* 24 nov 2026 (studio, voce Scadenze e promemoria) — allo studio niente
+     «squadra» e «mezzi»: sono i collaboratori e gli strumenti. */
   const parole = d.pro
-    ? { lavori: 'Pratiche in ritardo', apri: 'Apri le pratiche' }
-    : { lavori: 'Lavori in ritardo',   apri: 'Apri i lavori' };
+    ? { lavori: 'Pratiche in ritardo', apri: 'Apri le pratiche',
+        squadra: 'Documenti dei collaboratori', apriSquadra: 'Apri i collaboratori',
+        mezzi: 'Strumenti e carte: cosa scade', apriMezzi: 'Apri gli strumenti', linkMezzi: '#attrezzature' }
+    : { lavori: 'Lavori in ritardo',   apri: 'Apri i lavori',
+        squadra: 'Documenti della squadra', apriSquadra: 'Apri la squadra',
+        mezzi: 'Mezzi e carte: cosa scade', apriMezzi: 'Apri i mezzi', linkMezzi: '#mezzi' };
 
   /* I promemoria che ha scritto lui. L'ora sta DENTRO la riga, non decide
      l'orario dell'email: si scrive «oggi alle 15:00» perche' l'email parte
@@ -395,8 +401,8 @@ function costruisciEmail(d) {
   ${sezione('#e65100', parole.lavori, rLav, parole.apri, SITO + '#lavori')}
   ${sezione('#e65100', 'Preventivi senza risposta', rPrevAtt, 'Apri i preventivi', SITO + '#preventivi')}
   ${sezione('#c62828', 'Fatture dei fornitori da pagare', rForn, 'Apri i fornitori', SITO + '#fornitori')}
-  ${sezione('#0066ff', 'Documenti della squadra', rSquadra, 'Apri la squadra', SITO + '#squadra')}
-  ${sezione('#0066ff', 'Mezzi e carte: cosa scade', rMezzi, 'Apri i mezzi', SITO + '#mezzi')}
+  ${sezione('#0066ff', parole.squadra, rSquadra, parole.apriSquadra, SITO + '#squadra')}
+  ${sezione('#0066ff', parole.mezzi, rMezzi, parole.apriMezzi, SITO + parole.linkMezzi)}
   <div style="padding:6px 26px 28px;border-top:1px solid #edf1f6;margin-top:6px">
     <p style="font-size:14px;color:#7a8798;line-height:1.7;margin:18px 0 0">
       ${d.completo
@@ -420,8 +426,12 @@ function oggetto(d) {
   if (d.inArrivo.length)      pezzi.push(plurale(d.inArrivo.length, 'scadenza in arrivo', 'scadenze in arrivo'));
   if ((d.prevAtt || []).length) pezzi.push(plurale(d.prevAtt.length, 'preventivo senza risposta', 'preventivi senza risposta'));
   if ((d.forn || []).length)    pezzi.push(plurale(d.forn.length, 'fattura fornitore da pagare', 'fatture fornitori da pagare'));
-  if ((d.squadra || []).length) pezzi.push(plurale(d.squadra.length, 'documento della squadra', 'documenti della squadra'));
-  if ((d.mezzi || []).length)   pezzi.push(plurale(d.mezzi.length, 'scadenza di un mezzo o di una carta', 'scadenze di mezzi e carte'));
+  if ((d.squadra || []).length) pezzi.push(d.pro
+    ? plurale(d.squadra.length, 'documento di un collaboratore', 'documenti dei collaboratori')
+    : plurale(d.squadra.length, 'documento della squadra', 'documenti della squadra'));
+  if ((d.mezzi || []).length)   pezzi.push(d.pro
+    ? plurale(d.mezzi.length, 'scadenza di uno strumento o di una carta', 'scadenze di strumenti e carte')
+    : plurale(d.mezzi.length, 'scadenza di un mezzo o di una carta', 'scadenze di mezzi e carte'));
   if (d.completo) {
     if ((d.promPassati || []).length) pezzi.push(plurale(d.promPassati.length, 'promemoria da fare', 'promemoria da fare'));
     if (d.scadute.length) pezzi.push(plurale(d.scadute.length, 'scadenza già passata', 'scadenze già passate'));

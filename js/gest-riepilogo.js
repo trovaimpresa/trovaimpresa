@@ -238,7 +238,14 @@
     ]);
     /* le scadenze delle persone (visita medica, formazione, documento,
        permesso): una lettura sola, e non aspetta niente nemmeno lei */
-    const pScadPers=scadenzePersone(mid);
+    /* 24 nov 2026 (studio, Scadenze e promemoria) — anche la scadenza delle
+       carte e i crediti formativi che mancano: lo Scadenzario e il pallino del
+       menu li contano, la scheda «Scadenze» qui no (numeri diversi). */
+    const pScadPers=Promise.all([
+      scadenzePersone(mid),
+      (typeof scadenzeCarte==="function"?scadenzeCarte(mid):Promise.resolve([])).catch(()=>[]),
+      (typeof scadenzeCrediti==="function"?scadenzeCrediti():Promise.resolve([])).catch(()=>[])
+    ]).then(a=>a[0].concat(a[1],a[2]));
 
     /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
     /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo

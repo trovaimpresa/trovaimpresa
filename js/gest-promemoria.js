@@ -203,7 +203,11 @@
       viste: "#prom-viste", visteDef: PROM_VISTE, vista: promVista,
       conta: conta, azioneVista: "prom-vista",
       vuoto: tabVuoto("Le cose che non devi dimenticare",
-        "Pagare l’F24, chiamare il commercialista, ordinare il materiale prima del cantiere. Le scrivi qui e te le ritrovi nell’email del mattino.",
+        /* 24 nov 2026 (studio) — il traduttore dello studio la faceva diventare
+           «ordinare il materiale prima della pratica»: allo studio la sua frase. */
+        (typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista"
+          ? "Pagare l’F24, chiamare il commercialista, rinnovare la polizza. Le scrivi qui e te le ritrovi nell’email del mattino."
+          : "Pagare l’F24, chiamare il commercialista, ordinare il materiale prima del cantiere. Le scrivi qui e te le ritrovi nell’email del mattino."),
         _SVGV + '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
         { t: "+ Scrivi il primo promemoria", a: "new-prom" }),
       colonne: [{ lab: "Promemoria", w: "36%" }, { lab: "Quando", w: "20%" },
@@ -403,8 +407,15 @@
      sposta alla data dopo e lo lascia aperto. Un F24 lo scrivi una volta
      sola, non due volte l'anno per sempre. */
   async function promStato(id, stato) {
-    const p = promCache.find(x => String(x.id) === String(id));
-    if (!p) return;
+    let p = promCache.find(x => String(x.id) === String(id));
+    /* 24 nov 2026 — se l'elenco non e' ancora in memoria (aperto da fuori,
+       o ridisegno in corso) «Segna fatto» non faceva niente, senza dirlo.
+       Adesso si va a prendere la riga, come fa lo Scadenzario. */
+    if (!p) {
+      const r = await sb.from("promemoria").select("*").eq("id", id).eq("user_id", sbUid).maybeSingle();
+      if (r.error || !r.data) { toast("Non trovo questo promemoria: riprova."); promRidisegna(); return; }
+      p = r.data;
+    }
 
     let row;
     if (stato === "fatto" && p.ripeti_mesi) {
