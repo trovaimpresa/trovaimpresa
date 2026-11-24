@@ -100,8 +100,9 @@ async function opConta(){
 function opVaiScheda(s){
   opScheda=s;
   document.querySelectorAll("#op-tabs [data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===s));
-  ["lavori","foto","preventivi","chat","archivio"].forEach(k=>{const p=document.getElementById("op-p-"+k);if(p)p.classList.toggle("hidden",k!==s);});
+  ["lavori","mezzi","foto","preventivi","chat","archivio"].forEach(k=>{const p=document.getElementById("op-p-"+k);if(p)p.classList.toggle("hidden",k!==s);});
   if(s==="foto")opRenderFoto();
+  if(s==="mezzi"&&window.opRenderMezzi)opRenderMezzi();
   if(s==="preventivi"&&window.opRenderPrev)opRenderPrev();
   if(s==="chat"&&window.opRenderChat)opRenderChat();
   if(s==="archivio"){renderCal();renderDay();opRenderArchivio();}

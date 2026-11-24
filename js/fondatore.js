@@ -289,6 +289,7 @@
     "2026-11-20-giornata-didascalia.sql": "gest_rapportini.didascalia",
     "2026-11-20-sal-impresa.sql": "gest_sal.impresa_esecutrice",
     "2026-11-24-fattura-ente-pubblico.sql": "gest_fatture.scissione gest_fatture.cig gest_fatture.cup gest_fatture.rif_pa",
+    "2026-11-24-mezzi-uscite.sql": "gest_mezzi.km_attuali gest_mezzi_uscite.km_uscita gest_mezzi_uscite.rientro_il",
     "2026-11-24-incarichi-preventivo.sql": "incarichi_richieste.preventivo_creato_id",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",

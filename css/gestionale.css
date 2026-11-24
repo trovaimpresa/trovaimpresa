@@ -6519,3 +6519,11 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
    lo fissava a blu scuro sull'elemento = scritta invisibile sul fondo blu */
 .btn-primary.quick-add,.sheet .btn-primary.quick-add{color:#fff}
 #pz-esito .seg button{font-size:16px;min-height:44px}
+
+/* 24 nov 2026 — uscite e rientri dei mezzi: il registro nella scheda del mezzo */
+.mz-reg{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--bordo);font-size:15px}
+.mz-reg:last-of-type{border-bottom:0}
+.mz-reg-d{color:var(--testo-2);font-variant-numeric:tabular-nums}
+.mz-reg-k{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mz-btn{white-space:nowrap}
+@media (max-width:600px){.mz-reg{grid-template-columns:1fr auto}.mz-reg-d{grid-column:1/-1}}

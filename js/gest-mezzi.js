@@ -61,6 +61,8 @@
   let mezziNolMap={};
   /* 20 nov 2026 (voce Strumenti) — usi nelle pratiche/lavori e nomi di chi ce l'ha */
   let mezziUsiMap={}, mezziOpNomi={};
+  /* 24 nov 2026 — uscite e rientri: per ogni mezzo l'uscita aperta e l'ultimo rientro */
+  let mezziUscMap={};
   function mezzoChiUso(m){
     const pro=(ruoloUtente==='professionista'), n=mezziUsiMap[m.id]||0;
     const chi=m.operatore_id&&mezziOpNomi[String(m.operatore_id)];
@@ -91,8 +93,8 @@
     /* 20 nov 2026 (voce Strumenti) — «Chi ce l'ha» (operatore_id, sql/2026-11-20-strumenti-chi-ce-l-ha.sql):
        se la colonna manca si rilegge senza, poi la versione corta come prima */
     const _colErr=r=>r.error&&/column|schema cache/i.test(r.error.message||"");
-    const [rmz,{data:vw},{data:cb},rsx,rnl,rlm,rop,rtar]=await Promise.all([
-      _leggiMezzi(_MZCOL+",operatore_id").then(r=>_colErr(r)?_leggiMezzi(_MZCOL):r).then(r=>_colErr(r)?_leggiMezzi(_MZCORTO):r),
+    const [rmz,{data:vw},{data:cb},rsx,rnl,rlm,rop,rtar,rusc]=await Promise.all([
+      _leggiMezzi(_MZCOL+",operatore_id,km_attuali").then(r=>_colErr(r)?_leggiMezzi(_MZCOL+",operatore_id"):r).then(r=>_colErr(r)?_leggiMezzi(_MZCOL):r).then(r=>_colErr(r)?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid),
@@ -106,8 +108,17 @@
       Promise.resolve(sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)).then(r=>r,()=>null),
       /* la prossima taratura ancora aperta di ogni strumento: la mostra il modulo */
       Promise.resolve(sb.from("gest_scadenze").select("id,mezzo_id,data_scadenza,ripeti_mesi,stato").eq("user_id",sbUid)
-        .eq("tipo_pratica","Taratura strumento").not("mezzo_id","is",null).neq("stato","fatta").order("data_scadenza",{ascending:true})).then(r=>r,()=>null)
+        .eq("tipo_pratica","Taratura strumento").not("mezzo_id","is",null).neq("stato","fatta").order("data_scadenza",{ascending:true})).then(r=>r,()=>null),
+      /* 24 nov 2026 — uscite e rientri (sql/2026-11-24-mezzi-uscite.sql): se la tabella manca resta vuoto */
+      Promise.resolve(sb.from("gest_mezzi_uscite").select("id,mezzo_id,operatore_id,chi_nome,lavoro_id,motivo,km_uscita,km_rientro,uscita_il,rientro_il")
+        .eq("user_id",sbUid).is("eliminato_il",null).order("uscita_il",{ascending:false}).limit(500)).then(r=>r,()=>null)
     ]);
+    mezziUscMap={};
+    ((rusc&&!rusc.error&&rusc.data)||[]).forEach(x=>{
+      const o=mezziUscMap[x.mezzo_id]||(mezziUscMap[x.mezzo_id]={aperta:null,ultima:null});
+      if(!x.rientro_il){ if(!o.aperta)o.aperta=x; }
+      else if(!o.ultima)o.ultima=x;
+    });
     window._mzTaratura={};
     ((rtar&&!rtar.error&&rtar.data)||[]).forEach(x=>{ if(!window._mzTaratura[x.mezzo_id])window._mzTaratura[x.mezzo_id]=x; });
     mezziUsiMap={};
@@ -196,12 +207,17 @@
     if(window._mezziKo){listaNonLetta(box,attrezzo?(STRU?"gli strumenti":"le attrezzature"):"i mezzi",attrezzo?"attrezzature":"mezzi",attrezzo?"#attr-viste":"#mezzi-viste");return;}
     const tutti=mezziCache.filter(m=> attrezzo ? m.categoria==="attrezzatura" : m.categoria!=="attrezzatura");
     const filtro=attrezzo?attrezzFilter:mezziFilter;
-    const filtra=(A,v)=>v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.slice();
-    const conta={};MEZZI_VISTE.forEach(v=>conta[v.k]=filtra(tutti,v.k).length);
+    /* 24 nov 2026 — «Liberi» e «Fuori» solo per i mezzi: le attrezzature non escono col registro */
+    const _viste=attrezzo?MEZZI_VISTE.filter(v=>v.k==="tutti"||v.k==="manutenzione"):MEZZI_VISTE;
+    const _fuori=m=>!!(mezziUscMap[m.id]&&mezziUscMap[m.id].aperta);
+    const filtra=(A,v)=>v==="manutenzione"?A.filter(m=>m.stato==="manutenzione")
+      :(v==="fuori"?A.filter(_fuori)
+      :(v==="liberi"?A.filter(m=>!_fuori(m)&&(!m.stato||m.stato==="disponibile")):A.slice()));
+    const conta={};_viste.forEach(v=>conta[v.k]=filtra(tutti,v.k).length);
     const L=filtra(tutti,filtro);
     renderTabella({
       id:attrezzo?"attrezzature":"mezzi", box:attrezzo?"#attr-list":"#mezzi-list",
-      viste:attrezzo?"#attr-viste":"#mezzi-viste", visteDef:MEZZI_VISTE, vista:filtro, conta:conta,
+      viste:attrezzo?"#attr-viste":"#mezzi-viste", visteDef:_viste, vista:filtro, conta:conta,
       azioneVista:attrezzo?"attrezzo-filtro":"mezzo-filtro",
       vuoto:tabVuoto(
         tutti.length?(attrezzo?(STRU?"Nessuno strumento con questo filtro":"Nessuna attrezzatura con questo filtro"):"Nessun mezzo con questo filtro")
@@ -244,7 +260,7 @@
       cards:()=>L.map(m=>mezzoCard(m,scadMap[m.id])).join("")
     });
   }
-  const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"manutenzione",lab:"In manutenzione"}];
+  const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"liberi",lab:"Liberi"},{k:"fuori",lab:"Fuori"},{k:"manutenzione",lab:"In manutenzione"}];
   /* 11 nov 2026 — collaudo 3.14. Le date scritte NEL MODULO del mezzo
      (assicurazione, revisione, collaudo, verifica) non entravano nella
      vista gest_mezzi_scadenze, che conta solo le righe dello Scadenzario:
@@ -328,11 +344,22 @@
     /* 7 nov 2026: con una scadenza passata l'etichetta non puo' dire
        «Disponibile» in verde. Diventa «Da rinnovare» in rosso
        (manutenzione e fuori uso restano: dicono gia' che non va). */
-    const etic=mezzoEtichetta(m,md);
-    return schedaJob({
+    let etic=mezzoEtichetta(m,md);
+    /* 24 nov 2026 — uscite e rientri: chi ce l'ha adesso, i km, il pulsante */
+    const _u=(m.categoria!=="attrezzatura")?(mezziUscMap[m.id]||{}):{};
+    const _km=(m.categoria!=="attrezzatura")?mzKm(m):null;
+    let _chi=mezzoChiUso(m)?"👤 "+esc(mezzoChiUso(m)):"", _rit="";
+    if(_u.aperta){
+      _chi=`<b>👤 Fuori con ${esc(_u.aperta.chi_nome||"—")} ${esc(mzQuando(_u.aperta.uscita_il))}</b>`;
+      if(etic.lab==="Disponibile"||etic.lab==="In uso")etic={lab:"Fuori",bg:"var(--info-bg)",fg:"var(--info)"};
+    }else if(_u.ultima){
+      const kf=(_u.ultima.km_rientro!=null&&_u.ultima.km_uscita!=null)?(+_u.ultima.km_rientro-(+_u.ultima.km_uscita)):null;
+      _rit="↩ Rientrato "+esc(mzQuando(_u.ultima.rientro_il))+(_u.ultima.chi_nome?" con "+esc(_u.ultima.chi_nome):"")+(kf!=null?" · "+mzKmTesto(kf):"");
+    }
+    const _html=schedaJob({
       tono, titolo:esc(m.nome),
       destra:`<span class="stato" style="background:${etic.bg};color:${etic.fg}">${etic.lab}</span>`,
-      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", mezzoChiUso(m)?"👤 "+esc(mezzoChiUso(m)):"", carbTesto, scTesto],
+      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", _km!=null?"🛣 "+mzKmTesto(_km):"", _chi, carbTesto, _rit, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[
         /* 18 nov 2026 — i rifornimenti sono dei mezzi: sulla betoniera non si offrono (come gia' nella tabella) */
@@ -341,6 +368,11 @@
         {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
         {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
       ].filter(Boolean)});
+    if(m.categoria==="attrezzatura")return _html;
+    const _btn=_u.aperta
+      ?`<button class="btn-primary btn-sm mz-btn" data-action="mz-rientra" data-id="${esc(String(m.id))}">↩ Rientrato</button>`
+      :`<button class="btn-primary btn-sm mz-btn" data-action="mz-esce" data-id="${esc(String(m.id))}">→ Esce</button>`;
+    return _html.replace(/<\/div><\/div>\s*$/,_btn+"</div></div>");
   }
   function mezzoForm(m,catIniziale){
     const isNew=!m;m=m||{};
@@ -424,6 +456,8 @@
       +`<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button>`);
     ctrAscolta('mezzo');
+    /* 24 nov 2026 — il registro delle uscite sotto le note (solo i mezzi gia' salvati) */
+    if(!isNew&&!attrezzo)mzRegistro(m.id);
   }
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){campoManca($("#m-nome"),"Manca il nome: scrivilo qui.");return;}
@@ -495,4 +529,206 @@
     const _era=id?((mezziCache.find(x=>String(x.id)===String(id))||{}).categoria==="attrezzatura"?"attrezzatura":"mezzo"):null;
     if(id&&!_pro&&_era!==categoria){toast(categoria==="attrezzatura"?"Aggiornato — adesso sta fra le Attrezzature":"Aggiornato — adesso sta fra i Mezzi");return;}
     toast(id?"Aggiornato":(categoria==="attrezzatura"?(_pro?"Strumento aggiunto ✔":"Attrezzatura aggiunta ✔"):"Mezzo aggiunto ✔"));
+  }
+
+
+  /* ═══ 24 NOVEMBRE 2026 — USCITE E RIENTRI DEI MEZZI ═══════════════════
+     Chi prende il furgone, con quanti km, dove va; e quando torna.
+     Tabella gest_mezzi_uscite (sql/2026-11-24-mezzi-uscite.sql). Qui scrive
+     il titolare; l'operaio scrive dalla sua app (js/op-mezzi.js) passando da
+     gest_mezzo_prendo / gest_mezzo_riporto, che controllano il permesso «mezzi».
+     ⚠️ Un mezzo ha UNA sola uscita aperta: lo tiene l'indice unico del
+     database, quindi due tocchi insieme non fanno due uscite.
+     ═════════════════════════════════════════════════════════════════════ */
+  function mzPunti(n){ return String(Math.round(+n)).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+  function mzKmTesto(n){ return mzPunti(n)+" km"; }
+  /* i km di adesso: il piu' alto fra quelli scritti sul mezzo e quelli del registro */
+  function mzKm(m){
+    const u=mezziUscMap[m.id]||{};
+    let k=(m.km_attuali!=null&&m.km_attuali!=="")?+m.km_attuali:null;
+    [u.aperta&&u.aperta.km_uscita, u.ultima&&u.ultima.km_rientro, u.ultima&&u.ultima.km_uscita].forEach(x=>{
+      if(x!=null&&x!==""&&(k==null||+x>k))k=+x;
+    });
+    return k;
+  }
+  function mzQuando(ts){
+    if(!ts)return "";
+    const d=new Date(ts), oggi=new Date();
+    const g=Math.round((new Date(oggi.toDateString())-new Date(d.toDateString()))/86400000);
+    const hh=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+    if(g===0)return "oggi alle "+hh;
+    if(g===1)return "ieri alle "+hh;
+    return "il "+d.toLocaleDateString("it-IT")+" alle "+hh;
+  }
+  /* un numero di km scritto a mano: «177.117», «177117», «177 117» */
+  function mzLeggiKm(sel){
+    const el=$(sel); const t=((el&&el.value)||"").trim();
+    if(!t)return {vuoto:true};
+    if(!/^[\d.\s]+(,\d+)?$/.test(t))return {errore:true};
+    const n=Math.round(+t.replace(/[.\s]/g,"").replace(",","."));
+    if(!isFinite(n)||n<0||n>9999999)return {errore:true};
+    return {n};
+  }
+  function mzTabellaManca(err){ return /gest_mezzi_uscite|relation|schema cache/i.test((err&&err.message)||""); }
+  let _mzSalvo=false;
+
+  async function mzEsceForm(id){
+    const m=mezziCache.find(x=>String(x.id)===String(id)); if(!m)return;
+    const k=mzKm(m), mid=curMestiere();
+    let lav=[];
+    try{
+      const r=await sb.from("gest_lavori").select("id,descrizione,dove,cliente_id,data_prevista,stato")
+        .eq("user_id",sbUid).eq("mestiere_id",mid).is("eliminato_il",null).neq("stato","fatto")
+        .order("data_prevista",{ascending:true}).limit(200);
+      lav=(r&&r.data)||[];
+    }catch(e){}
+    const _cli=c=>((cliCache||[]).find(x=>String(x.id)===String(c))||{}).nome||"";
+    const _tit=l=>{const c=_cli(l.cliente_id);const d=(l.descrizione||"").slice(0,50);return [d||c||"Lavoro",c&&d?c:"",l.dove||""].filter(Boolean).join(" — ");};
+    const _pro=(ruoloUtente==='professionista');
+    const lavOpts=`<option value="">— nessuno —</option>`+lav.map(l=>`<option value="${esc(String(l.id))}">${esc(_tit(l))}</option>`).join("");
+    const pers=Object.entries(mezziOpNomi).sort((a,b)=>a[1].localeCompare(b[1]));
+    const chiOpts=`<option value="">Io (titolare)</option>`+pers.map(p=>`<option value="${esc(p[0])}">${esc(p[1])}</option>`).join("");
+    openSheetGrande("Esce — "+esc(m.nome)+(m.targa?" · "+esc(m.targa):""),
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b"><div class="sh-tit">Chi lo prende</div>
+          <div class="field"><label>Persona</label><select id="mz-chi">${chiOpts}</select></div>
+          <p class="sh-nota" style="margin-top:0">Data e ora si scrivono da sole quando premi «Registra l'uscita».${pers.length?"":" Le persone le aggiungi in Squadra."}</p></div>
+        <div class="sh-b"><div class="sh-tit">I chilometri</div>
+          <div class="field"><label>Km alla partenza</label><input id="mz-km" type="text" inputmode="numeric" value="${k!=null?mzPunti(k):""}" placeholder="Es. 177.117"></div>
+          <p class="sh-nota" style="margin-top:0">${k!=null?"Sono quelli dell'ultima volta. Se sul cruscotto c'è un altro numero, correggilo.":"Scrivi quelli del cruscotto: al rientro il gestionale conta i km fatti."}</p></div>
+      </div><div class="sh-col">
+        <div class="sh-b"><div class="sh-tit">Dove va</div>
+          <div class="field"><label>${_pro?"Pratica":"Lavoro"}</label><select id="mz-lav">${lavOpts}</select></div>
+          <div class="field"><label>Motivo <span style="font-weight:400">(se vuoi)</span></label><input id="mz-motivo" maxlength="300" placeholder="Es. porta il materiale, va dal fornitore"></div></div>
+        <div class="sh-b"><div class="sh-tit">Al rientro</div>
+          <p class="sh-nota" style="margin-top:0">Sulla scheda del mezzo compare «↩ Rientrato»: si scrivono i km d'arrivo e il gestionale conta da solo i km fatti. Gli operai lo fanno dalla loro app, scheda «Mezzi», se in Squadra hanno il permesso «Mezzi».</p></div>
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="mz-esce-salva" data-id="${esc(String(m.id))}">Registra l'uscita</button>`);
+  }
+
+  async function mzEsceSalva(id){
+    if(_mzSalvo)return;
+    const m=mezziCache.find(x=>String(x.id)===String(id)); if(!m)return;
+    const km=mzLeggiKm("#mz-km");
+    if(km.errore){campoManca($("#mz-km"),"Scrivi solo il numero dei km, es. 177.117");return;}
+    const prima=mzKm(m);
+    if(!km.vuoto&&prima!=null&&km.n<prima&&typeof window.tiChiedi==="function"){
+      if(!(await window.tiChiedi("Hai scritto "+mzKmTesto(km.n)+", ma l'ultima volta erano "+mzKmTesto(prima)+".",{titolo:"I chilometri sono giusti?",si:"Sì, sono giusti",no:"No, li correggo"}))){
+        const e=$("#mz-km"); if(e){try{e.focus();e.select();}catch(_){}} return;
+      }
+    }
+    const opId=($("#mz-chi")||{}).value||null;
+    const riga={user_id:sbUid, mezzo_id:m.id, operatore_id:opId,
+      chi_nome:opId?(mezziOpNomi[opId]||null):"Titolare",
+      lavoro_id:($("#mz-lav")||{}).value||null,
+      motivo:((($("#mz-motivo")||{}).value)||"").trim().slice(0,300)||null,
+      km_uscita:km.vuoto?null:km.n};
+    _mzSalvo=true;
+    try{
+      const {data,error}=await sb.from("gest_mezzi_uscite").insert(riga).select("id");
+      if(error){
+        if(error.code==="23505"){toast("Questo mezzo risulta già fuori: prima registra il rientro");closeSheet();renderMezzi();return;}
+        if(mzTabellaManca(error)){toast("Manca sql/2026-11-24-mezzi-uscite.sql: l'uscita non è salvata");return;}
+        toast("Errore: "+error.message);return;
+      }
+      if(!data||!data.length){toast("Non salvato: nessuna riga scritta");return;}
+      if(!km.vuoto&&(prima==null||km.n>prima)){
+        try{ await sb.from("gest_mezzi").update({km_attuali:km.n}).eq("id",m.id).eq("user_id",sbUid).select("id"); }catch(e){}
+      }
+      closeSheet(); await renderMezzi();
+      toast("Uscita registrata: "+(riga.chi_nome||"")+" ha "+m.nome);
+    }finally{ _mzSalvo=false; }
+  }
+
+  async function mzRientraForm(id){
+    const m=mezziCache.find(x=>String(x.id)===String(id)); if(!m)return;
+    const u=(mezziUscMap[m.id]||{}).aperta;
+    if(!u){toast("Questo mezzo non risulta fuori");renderMezzi();return;}
+    const kmU=u.km_uscita;
+    openSheetGrande("Rientro — "+esc(m.nome)+(m.targa?" · "+esc(m.targa):""),
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b"><div class="sh-tit">Com'è uscito</div>
+          <div class="dato"><b>Chi</b> ${esc(u.chi_nome||"—")}</div>
+          <div class="dato"><b>Quando</b> ${esc(mzQuando(u.uscita_il))}</div>
+          <div class="dato"><b>Km alla partenza</b> ${kmU!=null?mzKmTesto(kmU):"non scritti"}</div>
+          ${u.motivo?`<div class="dato"><b>Motivo</b> ${esc(u.motivo)}</div>`:""}
+        </div>
+      </div><div class="sh-col">
+        <div class="sh-b"><div class="sh-tit">I chilometri all'arrivo</div>
+          <div class="field"><label>Km sul cruscotto</label><input id="mz-km2" type="text" inputmode="numeric" placeholder="${kmU!=null?"Es. "+mzPunti(+kmU+50):"Es. 177.203"}"></div>
+          <p class="sh-nota" id="mz-fatti" style="margin-top:0">${kmU!=null?"Scrivili e qui vedi i km fatti.":"Se non li sai lascia vuoto: il rientro si registra lo stesso."}</p></div>
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="mz-rientra-salva" data-id="${esc(String(m.id))}">Registra il rientro</button>`);
+    const inp=$("#mz-km2");
+    if(inp&&kmU!=null)inp.addEventListener("input",()=>{
+      const r=mzLeggiKm("#mz-km2"), f=$("#mz-fatti"); if(!f)return;
+      if(r.vuoto){f.textContent="Scrivili e qui vedi i km fatti.";f.style.color="";return;}
+      if(r.errore){f.textContent="Scrivi solo il numero, es. 177.203";f.style.color="var(--err)";return;}
+      const d=r.n-(+kmU);
+      if(d<0){f.textContent="Sono meno di quelli della partenza ("+mzKmTesto(kmU)+")";f.style.color="var(--err)";return;}
+      f.textContent="Km fatti: "+mzKmTesto(d);f.style.color="";
+    });
+    try{inp&&inp.focus();}catch(e){}
+  }
+
+  async function mzRientraSalva(id){
+    if(_mzSalvo)return;
+    const m=mezziCache.find(x=>String(x.id)===String(id)); if(!m)return;
+    const u=(mezziUscMap[m.id]||{}).aperta; if(!u){closeSheet();renderMezzi();return;}
+    const km=mzLeggiKm("#mz-km2");
+    if(km.errore){campoManca($("#mz-km2"),"Scrivi solo il numero dei km, es. 177.203");return;}
+    if(!km.vuoto&&u.km_uscita!=null&&km.n<+u.km_uscita){
+      campoManca($("#mz-km2"),"Sono meno dei km alla partenza ("+mzKmTesto(u.km_uscita)+")");return;
+    }
+    _mzSalvo=true;
+    try{
+      const {data,error}=await sb.from("gest_mezzi_uscite").update({rientro_il:new Date().toISOString(),km_rientro:km.vuoto?null:km.n})
+        .eq("id",u.id).eq("user_id",sbUid).is("rientro_il",null).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!data||!data.length){toast("Il rientro era già registrato");closeSheet();renderMezzi();return;}
+      const prima=mzKm(m);
+      if(!km.vuoto&&(prima==null||km.n>prima)){
+        try{ await sb.from("gest_mezzi").update({km_attuali:km.n}).eq("id",m.id).eq("user_id",sbUid).select("id"); }catch(e){}
+      }
+      closeSheet(); await renderMezzi();
+      toast("Rientrato ✔"+((!km.vuoto&&u.km_uscita!=null)?" — "+mzKmTesto(km.n-(+u.km_uscita))+" fatti":""));
+    }finally{ _mzSalvo=false; }
+  }
+
+  /* il registro dentro la scheda del mezzo: in cima l'ultima uscita */
+  async function mzRegistro(mezzoId){
+    const col=document.querySelector("#sheet .sh-cols .sh-col:last-child"); if(!col)return;
+    const box=document.createElement("div"); box.className="sh-b"; box.id="mz-registro";
+    box.innerHTML='<div class="sh-tit">Uscite e rientri</div><p class="sh-nota" style="margin-top:0">Sto leggendo…</p>';
+    col.appendChild(box);
+    const r=await Promise.resolve(sb.from("gest_mezzi_uscite").select("id,chi_nome,lavoro_id,motivo,km_uscita,km_rientro,uscita_il,rientro_il")
+      .eq("user_id",sbUid).eq("mezzo_id",mezzoId).is("eliminato_il",null).order("uscita_il",{ascending:false}).limit(30)).then(x=>x,()=>null);
+    if(!document.body.contains(box))return;
+    if(!r||r.error){box.innerHTML='<div class="sh-tit">Uscite e rientri</div><p class="sh-nota" style="margin-top:0">Non riesco a leggere le uscite: riprova fra poco.</p>';return;}
+    const L=r.data||[];
+    if(!L.length){box.innerHTML='<div class="sh-tit">Uscite e rientri</div><p class="sh-nota" style="margin-top:0">Ancora nessuna uscita. Dalla scheda del mezzo premi «→ Esce».</p>';return;}
+    let tot=0;
+    const righe=L.map(x=>{
+      const kf=(x.km_rientro!=null&&x.km_uscita!=null)?(+x.km_rientro-(+x.km_uscita)):null;
+      if(kf!=null)tot+=kf;
+      const quando=new Date(x.uscita_il).toLocaleDateString("it-IT");
+      const km=x.rientro_il?(kf!=null?mzKmTesto(kf):"km non scritti"):"<b style=\"color:var(--info)\">fuori adesso</b>";
+      return `<div class="mz-reg"><span class="mz-reg-d">${esc(quando)}</span><span class="mz-reg-c">${esc(x.chi_nome||"—")}${x.motivo?" · "+esc(x.motivo):""}</span><span class="mz-reg-k">${km}</span></div>`;
+    }).join("");
+    box.innerHTML='<div class="sh-tit">Uscite e rientri</div>'+righe
+      +(tot?`<p class="sh-nota">In tutto, in queste ${L.length} uscite: ${mzKmTesto(tot)}.</p>`:"");
+  }
+
+  if(!window.__mzUsciteAscolto){
+    window.__mzUsciteAscolto=1;
+    document.addEventListener("click",function(e){
+      const b=e.target.closest&&e.target.closest("[data-action]"); if(!b)return;
+      const a=b.getAttribute("data-action"), id=b.getAttribute("data-id");
+      if(a==="mz-esce"){e.preventDefault();e.stopPropagation();mzEsceForm(id);}
+      else if(a==="mz-rientra"){e.preventDefault();e.stopPropagation();mzRientraForm(id);}
+      else if(a==="mz-esce-salva"){e.preventDefault();mzEsceSalva(id);}
+      else if(a==="mz-rientra-salva"){e.preventDefault();mzRientraSalva(id);}
+    });
   }

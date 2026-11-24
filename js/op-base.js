@@ -182,7 +182,8 @@ async function forseSonoIlCapo(){
    avevano davvero: agenda, lavori, foto e note. Clienti, fatture e pagamenti
    non li hanno mai avuti nella barra nemmeno prima, e restano chiusi. */
 const PERMESSI_PARTENZA={calendario:true,lavori:true,foto:true,note:true,
-                         clienti:false,fatture:false,pagamenti:false};
+                         clienti:false,fatture:false,pagamenti:false,
+                         mezzi:true /* 24 nov 2026: come in gest_mezzi_io() */};
 function permessiMai(){ return !MIO.permessi || Object.keys(MIO.permessi).length===0; }
 function puo(k){
   if(permessiMai())return PERMESSI_PARTENZA[k]===true;

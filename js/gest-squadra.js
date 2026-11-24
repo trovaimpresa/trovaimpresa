@@ -703,9 +703,11 @@
        colleghi (solo i nomi: costo orario, documenti e recapiti restano
        chiusi, vedi sql/gest-squadra-nomi.sql). Va data a chi in cantiere
        tiene il conto delle ore, di solito il capo squadra. */
-    {key:"rapportini",label:"Rapportini", d:"Può scrivere il rapportino di fine giornata: le ore di tutta la squadra su quel lavoro, i materiali usati. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Lavori."}
+    {key:"rapportini",label:"Rapportini", d:"Può scrivere il rapportino di fine giornata: le ore di tutta la squadra su quel lavoro, i materiali usati. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Lavori."},
+    /* 24 nov 2026 — uscite e rientri dei mezzi dall'app (js/op-mezzi.js) */
+    {key:"mezzi",     label:"Mezzi",      d:"Dalla sua app prende un mezzo e lo riporta, scrivendo i km. Vede solo nome, targa, km e chi ce l'ha."}
   ];
-  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti","rapportini"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note","mezzi"],preposto:["calendario","lavori","foto","note","clienti","rapportini","mezzi"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
   /* 20 nov 2026 (studio, voce Collaboratori) — I PERMESSI DETTI DA STUDIO.
      Le descrizioni parlavano di «lavori», «squadra», «materiali» e due righe
      dicevano «Va insieme a Lavori» sotto una casella che allo studio si chiama
@@ -720,7 +722,7 @@
     rapportini:"Può scrivere il resoconto della giornata: le ore di chi ci ha lavorato su quella pratica. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Pratiche."
   };
   function permDescr(p){ return (_sqPro()&&PERMS_D_PRO[p.key])||p.d; }
-  function permNascosto(k){ return _sqPro()&&k==="pagamenti"; }
+  function permNascosto(k){ return _sqPro()&&(k==="pagamenti"||k==="mezzi"); }
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm)&&!permNascosto(ch.dataset.perm));
