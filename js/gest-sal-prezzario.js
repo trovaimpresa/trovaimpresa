@@ -1840,6 +1840,14 @@
            +'<b>Attenzione:</b> '+senzaPrezzo+' voci su '+voci.length+' entrerebbero a <b>0,00 €</b>. '
            +'Spesso sono i titoli dei capitoli, ma se sono voci vere controlla la colonna del prezzo nel file.</div>')
         : (senzaPrezzo?('<div class="sh-nota">'+senzaPrezzo+' voci non hanno un prezzo e entrano a 0,00 € (di solito sono i titoli dei capitoli).</div>'):''))
+      /* 24 nov 2026 (sì di Alex): un file coi PREZZI SUOI (onorari, listino
+         suo) non e' una tariffa: con «I miei prezzi» le voci entrano come
+         prezzo tuo (fonte «mio») e stanno in «I tuoi prezzi». */
+      +'<div class="field"><label>Che cos\'è questo file?</label><div class="seg" id="pz-cosa">'
+      +  '<button data-v="tariffa" class="on">Una tariffa (Regione, Ordine…)</button>'
+      +  '<button data-v="miei">I miei prezzi</button></div></div>'
+      +'<div class="sh-nota" id="pz-cosa-nota" style="display:none">Le voci entrano come <b>prezzi tuoi</b>: le trovi in «I tuoi prezzi» e vengono per prime quando cerchi.</div>'
+      +'<div id="pz-tariffa-box">'
       +'<div class="field"><label>Come si chiama questa tariffa?</label>'
       +  '<input id="pz-nome"'+_noAuto()+' value="'+esc(_pzNomeDaFile(file.name))+'" placeholder="Es. Tariffa Regione Lazio 2025"></div>'
       +'<div class="sh-nota">È il nome che vedrai nella tendina quando fai un computo, e quello che finisce sul documento.</div>'
@@ -1850,12 +1858,21 @@
           +'</select></div>'
         : '')
       +'<div id="pz-confronto"></div>'
+      +'</div>'
       +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
       +  '<button type="button" class="btn-primary quick-add" data-action="pz-vai">Importa le '+voci.length+' voci</button>'
       +  '<button type="button" class="btn-ghost quick-add" data-action="pz-annulla">Annulla</button>'
       +'</div></div>';
     const sa=$("#pz-agg");
     if(sa)sa.onchange=pzConfronta;
+    bindSeg("pz-cosa");
+    const _cs=$("#pz-cosa");
+    if(_cs)_cs.addEventListener("click",function(){ setTimeout(function(){
+      const miei=(segVal("pz-cosa")==="miei");
+      const tb=$("#pz-tariffa-box"), no=$("#pz-cosa-nota");
+      if(tb)tb.style.display=miei?"none":"";
+      if(no)no.style.display=miei?"":"none";
+    },0); });
     const ni=$("#pz-nome");if(ni){ni.focus();ni.select();}
   }
 
@@ -1907,9 +1924,11 @@
   }
   async function _pzEsegui(){
     if(!pzPend){toast("Scegli prima un file");return;}
-    const nome=String(($("#pz-nome")&&$("#pz-nome").value)||"").trim();
+    const miei=($("#pz-cosa")?segVal("pz-cosa")==="miei":false);
+    const nome=miei?"mio":String(($("#pz-nome")&&$("#pz-nome").value)||"").trim();
     if(!nome){toast("Dai un nome a questa tariffa");return;}
-    const vecchia=($("#pz-agg")&&$("#pz-agg").value)||"";
+    if(!miei&&nome.toLowerCase()==="mio"){toast("«mio» è il nome dei prezzi tuoi: scegli «I miei prezzi» o dai un altro nome");return;}
+    const vecchia=miei?"":(($("#pz-agg")&&$("#pz-agg").value)||"");
     const inCestino=(vecchia&&segVal("pz-vecchia")==="cestino");
 
     /* la vecchia va nel cestino PRIMA, con una sola richiesta: js/cestino.js
@@ -1922,7 +1941,7 @@
     }
     /* doppioni: solo dentro la STESSA tariffa. Lo stesso codice in due regioni
        diverse e' normale e non va tolto. */
-    const gia=new Set(pzPend.vecchie.filter(x=>x.fonte===nome&&!(inCestino&&x.fonte===vecchia))
+    const gia=new Set(pzPend.vecchie.filter(x=>(miei?(!x.fonte||x.fonte==="mio"):x.fonte===nome)&&!(inCestino&&x.fonte===vecchia))
       .map(x=>_ppPiatto((x.codice||"")+"§"+(x.descrizione||""))));
     const nuove=[];let doppie=0;
     pzPend.voci.forEach(v=>{
@@ -1932,7 +1951,7 @@
       nuove.push(Object.assign({user_id:sbUid,fonte:nome},v));
     });
     if(!nuove.length){
-      _pzEsito("Non c'era niente di nuovo da importare: tutte le "+doppie+" voci erano già dentro «"+esc(nome)+"».","err");
+      _pzEsito("Non c'era niente di nuovo da importare: tutte le "+doppie+" voci erano già dentro "+(miei?"i tuoi prezzi":"«"+esc(nome)+"»")+".","err");
       return;
     }
     let messe=0;
@@ -1948,6 +1967,13 @@
       _pzEsito("Sto caricando… "+messe+" di "+nuove.length);
     }
     ppTutte=[];ppFontiDb=null;pzPend=null;
+    if(miei){
+      _pzEsito("<b>Importate "+messe+" voci nei tuoi prezzi</b>: le trovi in «I tuoi prezzi»."
+        +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):""));
+      rinfresca("prezzario");
+      toast("I tuoi prezzi: "+messe+" voci importate ✔");
+      return;
+    }
     _pzEsito("<b>Importate "+messe+" voci</b> nella tariffa «"+esc(nome)+"»."
       +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):"")
       +(inCestino?(_cestOn()?(" La tariffa «"+esc(vecchia)+"» è nel Cestino: se serve la rimetti a posto da lì."):(" La tariffa «"+esc(vecchia)+"» è stata eliminata per sempre: il cestino non era attivo.")):"")

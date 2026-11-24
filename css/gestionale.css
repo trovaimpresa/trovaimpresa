@@ -6512,3 +6512,10 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .pz-fonti{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .pz-fonti .btn{font-size:16px;padding:10px 16px;min-height:44px}
 .pz-fonti .btn:not(.btn-primary){background:#fff}
+/* 24 nov 2026 — importazione del prezzario: «Importa le N voci» aveva la scritta
+   dello stesso blu del fondo (quick-add + btn-primary), e le scelte a 13 px */
+/* ⛔ vale per TUTTI i «btn-primary quick-add» (computo: «Aggiungi la misura», «Aggiungi il
+   capitolo», «Salva il capitolo», analisi): .quick-add li colorava d'azzurro, blu-scuro.js
+   lo fissava a blu scuro sull'elemento = scritta invisibile sul fondo blu */
+.btn-primary.quick-add,.sheet .btn-primary.quick-add{color:#fff}
+#pz-esito .seg button{font-size:16px;min-height:44px}
