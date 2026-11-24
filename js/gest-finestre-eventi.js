@@ -1111,6 +1111,11 @@
          mettiamo via a mano, se no restavano vive e continuavano a contare
          nel "da pagare" agganciate a un fornitore che non c'e' più. */
       try{ await sb.from("gest_fatture_fornitori").delete().eq("fornitore_id",id).eq("user_id",sbUid); }catch(e){}
+      /* 24 nov 2026 (collaudo Cestino dello studio) — anche i suoi DOCUMENTI.
+         Restavano vivi e invisibili (la scheda del fornitore non c'era piu'), e
+         «Elimina per sempre» del fornitore si rifiutava per colpa loro. Col
+         Cestino questa «delete» scrive solo la data: tornano col fornitore. */
+      if(window.cestinoAttivo&&window.cestinoAttivo()){ try{ await sb.from("gest_foto").delete().eq("fornitore_id",id).eq("user_id",sbUid); }catch(e){} }
       closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore nel cestino: lo riprendi da lì");return;
     }
     if(a==="new-fattf")return fattfForm(null);

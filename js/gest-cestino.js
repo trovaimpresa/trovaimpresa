@@ -4,7 +4,7 @@
      gestionale. Qui si vedono e si rimettono a posto.
      Si legge con sb.raw(), la porta di servizio che salta il filtro. */
   const CEST_COSE=[
-    {t:"gest_lavori",      lab:"Pratiche e lavori", labImp:"Lavori",        campo:"descrizione", ic:"🧰"},
+    {t:"gest_lavori",      lab:"Pratiche", labImp:"Lavori",        campo:"descrizione", ic:"🧰"},   /* 24 nov 2026: allo studio «Pratiche» (era «Pratiche e lavori») */
     {t:"gest_clienti",     lab:"Clienti",           campo:"nome",           ic:"👤"},
     {t:"gest_preventivi",  lab:"Preventivi",        campo:"titolo",         ic:"📄"},
     /* 11 nov 2026 — collaudo 3.6: una bozza non ha numero e il Cestino
@@ -44,6 +44,8 @@
      nome:function(r){
        let chi="";
        try{ const f=(typeof fornCache!=="undefined"?fornCache:[]).find(function(x){return String(x.id)===String(r.fornitore_id);}); if(f)chi=f.nome||""; }catch(e){}
+       /* 24 nov 2026 — col fornitore nel Cestino fornCache non lo ha: si prende da CEST_NOMI_ALTRI */
+       if(!chi)chi=CEST_ALTRI["f"+String(r.fornitore_id||"")]||"";
        const imp=+r.importo||0;
        return "Fattura"+(r.numero?" n. "+r.numero:"")+(chi?" — "+chi:"")+(imp?" · "+eur2(imp):"");
      }},
@@ -51,9 +53,11 @@
     /* 18 nov 2026 (collaudo di Giornate): le ore non hanno un nome, la riga diceva solo «del 18/11/2026» */
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true,
      nome:function(r){
-       const n=String(r.nota||"").trim(); if(n) return n;
+       const n=String(r.nota||"").trim();
        const o=+r.ore||0;
-       return (o?String(o).replace(".",",")+(o===1?" ora":" ore"):"Ore")+(r.data?" del "+fdate(r.data):"");
+       /* 24 nov 2026 — di quale pratica/lavoro (due righe «2,5 ore del 20/11» non si distinguevano) */
+       const q=CEST_LAV[String(r.lavoro_id||"")];
+       return (n||((o?String(o).replace(".",",")+(o===1?" ora":" ore"):"Ore")+(r.data?" del "+fdate(r.data):"")))+(q?" — "+q:"");
      }},
     /* 15 agosto 2026 — il rapportino di cantiere.
        ⚠️ "campo" non basta e per questo c'e' "nome": un rapportino non ha ne'
@@ -63,10 +67,10 @@
        Il nome del lavoro lo va a prendere cestNomiLavori(), qui sotto.
        NIENTE "foglia": sotto al rapportino ci sono le ore, quindi "Elimina per
        sempre" deve passare dalla funzione del database che guarda la catena. */
-    {t:"gest_rapportini",  lab:"Rapportini di cantiere", labImp:"Giornate", campo:"materiali", ic:"📋",
+    {t:"gest_rapportini",  lab:"Giornate", labImp:"Giornate", campo:"materiali", ic:"📋",   /* 24 nov 2026: «Rapportini di cantiere» allo studio diventava «Rapportini di pratica» */
      nome:function(r){
        const q=CEST_LAV[String(r.lavoro_id||"")];
-       return (ruoloUtente==='professionista'?"Rapportino del ":"Giornata del ")+fdate(r.data)+(q?(" — "+q):"");
+       return "Giornata del "+fdate(r.data)+(q?(" — "+q):"");
      }},
     /* 14 settembre 2026 — i promemoria. Senza questa riga, buttarne uno lo
        faceva sparire e basta: la riga restava nel database con eliminato_il
@@ -84,14 +88,18 @@
        dieci righe uguali e non si saprebbe quale si sta rimettendo a posto.
        NIENTE "foglia": sotto al SAL ci sono le sue righe. */
     {t:"gest_sal",         lab:"Stati di avanzamento", labImp:"Acconti", campo:"numero",       ic:"📈",
-     nome:function(r){ return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(r.numero||"?")+" del "+fdate(r.data); }},
+     nome:function(r){ const c=CEST_ALTRI["c"+String(r.computo_id||"")];   /* 24 nov 2026: di quale computo */
+       return (ruoloUtente==='professionista'?"SAL":"Acconto")+" n. "+(r.numero||"?")+" del "+fdate(r.data)+(c?" — "+c:""); }},
     {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", labImp:"Voci del tuo prezzario", campo:"descrizione", ic:"🏷", foglia:true},
     /* 19 nov 2026 — le foto e i video caricati dalla Galleria non hanno
        nome_file (e gest_video quella colonna non ce l'ha proprio): nel Cestino
        erano «(senza nome)», tutti uguali. Adesso «Foto prima del lavoro —
        <lavoro>». Il nome del lavoro lo prende cestNomiLavori(). */
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true,
-     nome:function(r){ return String(r.nome_file||"").trim()||cestNomeMedia("Foto",r); }},
+     nome:function(r){ const f=String(r.nome_file||"").trim();
+       /* 24 nov 2026 — «CILA.pdf» e basta non dice di quale pratica */
+       if(f){ const q=CEST_LAV[String(r.lavoro_id||"")]||CEST_ALTRI["f"+String(r.fornitore_id||"")]; return f+(q?" — "+q:""); }
+       return cestNomeMedia("Foto",r); }},
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true,
      nome:function(r){ return cestNomeMedia("Video",r); }},
     /* 19 nov 2026 (collaudo Cestino) — i preventivi che manda l'operaio
@@ -149,7 +157,14 @@
        L'elenco e' lo stesso di REPARTO_CONTENUTO, scritto in un posto solo,
        cosi' cancellazione e ripristino non possono piu' scollarsi. */
     gest_mestieri : REPARTO_CONTENUTO.map(function(v){return [v[0],"mestiere_id",v[1],v[2]];}),
-    gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]],
+    gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"],
+                    /* 24 nov 2026 — anche i suoi documenti (relazioni, preventivi in PDF) */
+                    ["gest_foto","fornitore_id","documento","documenti"]],
+    /* 24 nov 2026 (collaudo Cestino dello studio) — il computo nel Cestino
+       lasciava VIVI i suoi SAL: non si vedevano da nessuna parte e «Elimina per
+       sempre» del computo si rifiutava («1 stato di avanzamento non è nel
+       cestino»), senza una schermata da cui buttarlo. Adesso vanno e tornano insieme. */
+    gest_computi:[["gest_sal","computo_id","SAL","SAL"]],
     /* 15 agosto 2026 — le ore del rapportino tornano su con lui.
        Se ne vanno insieme (gest_rapportino_cestina le mette via nello stesso
        istante), quindi devono anche tornare insieme: rimettere a posto il
@@ -192,7 +207,7 @@
     gest_fornitori        :[_REP],
     gest_rapportini       :[_REP,_LAV],
     gest_fatture_fornitori:[["gest_fornitori","fornitore_id","fornitore"]],
-    gest_foto             :[_LAV],
+    gest_foto             :[_LAV,["gest_fornitori","fornitore_id","fornitore"]],   /* 24 nov 2026: anche il documento del fornitore */
     gest_video            :[_LAV]
   };
   /* Quanto largo e' "nello stesso momento". I figli vengono messi via qualche
@@ -242,6 +257,26 @@
      piu' capire cosa si sta rimettendo a posto.
      ============================================================ */
   let CEST_LAV={};
+  /* 24 nov 2026 — i nomi dei fornitori (per le loro fatture) e dei computi
+     (per i SAL), letti anche se sono nel Cestino. Chiavi «f<id>» e «c<id>». */
+  let CEST_ALTRI={};
+  async function cestNomiAltri(risposte){
+    CEST_ALTRI={};
+    if(!sb||!sbUid||!sb.raw)return;
+    const f={}, c={};
+    (risposte||[]).forEach(function(x){
+      (x.righe||[]).forEach(function(r){
+        if((x.c.t==="gest_fatture_fornitori"||x.c.t==="gest_foto")&&r.fornitore_id)f[String(r.fornitore_id)]=1;
+        if(x.c.t==="gest_sal"&&r.computo_id)c[String(r.computo_id)]=1;
+      });
+    });
+    const giri=[];
+    if(Object.keys(f).length)giri.push(sb.raw("gest_fornitori").select("id,nome").eq("user_id",sbUid).in("id",Object.keys(f))
+      .then(function(r){ (r&&r.data||[]).forEach(function(z){ if(z.nome)CEST_ALTRI["f"+z.id]=String(z.nome).slice(0,45); }); },function(){}));
+    if(Object.keys(c).length)giri.push(sb.raw("gest_computi").select("id,titolo").eq("user_id",sbUid).in("id",Object.keys(c))
+      .then(function(r){ (r&&r.data||[]).forEach(function(z){ if(z.titolo)CEST_ALTRI["c"+z.id]=String(z.titolo).slice(0,45); }); },function(){}));
+    try{ await Promise.all(giri); }catch(e){}
+  }
   /* 19 nov 2026 — il nome di una foto o di un video della Galleria */
   function cestNomeMedia(cosa,r){
     const q=CEST_LAV[String((r&&r.lavoro_id)||"")];
@@ -260,9 +295,10 @@
     CEST_LAV={};
     const ids={};
     (risposte||[]).forEach(function(x){
-      if(["gest_rapportini","gest_foto","gest_video"].indexOf(x.c.t)<0)return;
+      if(["gest_rapportini","gest_foto","gest_video","gest_ore"].indexOf(x.c.t)<0)return;
       (x.righe||[]).forEach(function(r){ if(r.lavoro_id)ids[String(r.lavoro_id)]=true; });
     });
+    await cestNomiAltri(risposte);
     const elenco=Object.keys(ids);
     if(!elenco.length||!sb||!sbUid)return;
     try{
@@ -858,7 +894,9 @@
       const _praP=d=>ruoloUtente==='professionista'&&d.pa.lab==="lavoro";
       /* 20 nov 2026 — anche «la persona» e' femminile */
       const _femP=d=>_praP(d)||d.pa.lab==="persona";
-      const el=daTirareSu.map(function(d){return "\u2022 "+(_praP(d)?"la pratica":(_femP(d)?"la ":"il ")+d.pa.lab)+(d.nome?" «"+d.nome+"»":"");}).join("\n");
+      /* 24 nov 2026 — allo studio il mezzo e' «lo strumento» */
+      const _strP=d=>ruoloUtente==='professionista'&&d.pa.lab==="mezzo";
+      const el=daTirareSu.map(function(d){return "\u2022 "+(_praP(d)?"la pratica":(_strP(d)?"lo strumento":(_femP(d)?"la ":"il ")+d.pa.lab))+(d.nome?" «"+d.nome+"»":"");}).join("\n");
       const uno=daTirareSu.length===1, fem=uno&&_femP(daTirareSu[0]);
       if(!(await gconfirm("È ancora nel cestino:\n"+el+"\n\n"
         +"Se rimetto a posto solo questa, non "+(uno?(fem?"la":"lo"):"li")+" ritrovi.\n\n"
@@ -926,7 +964,7 @@
        tornato: «Rimesso a posto ✔ — e con lui anche altre 2 cose…». Adesso
        il nome fra «» e i figli contati per tipo («e con lui 2 scadenze»). */
     const _insieme=daTirareSu.map(function(d){
-      const art=(_proC&&d.pa.lab==="lavoro")?"alla pratica":(d.pa.lab==="persona"?"alla persona":"al "+d.pa.lab);
+      const art=(_proC&&d.pa.lab==="lavoro")?"alla pratica":(d.pa.lab==="persona"?"alla persona":((_proC&&d.pa.lab==="mezzo")?"allo strumento":"al "+d.pa.lab));
       return art+(d.nome?" «"+d.nome+"»":"");
     });
     /* 19 nov 2026 (voce Pratiche) — la pratica e' femminile */
@@ -960,7 +998,7 @@
     gest_computi:"computi", gest_computo_capitoli:"capitoli del computo",
     gest_computo_voci:"voci del computo", gest_computo_misure:"misure del computo",
     gest_prezzi_propri:"voci del tuo elenco prezzi",
-    gest_rapportini:"rapportini di cantiere",
+    gest_rapportini:"giornate",   /* 24 nov 2026: si chiamano «Giornate» nel menu */
     gest_foto:"foto e documenti", gest_video:"video", gest_note:"note",
     gest_fattura_righe:"righe della fattura", gest_preventivo_righe:"righe del preventivo",
     gest_fattura_lavori:"collegamenti fattura-lavoro", gest_lavoro_mezzi:"mezzi usati",
@@ -968,7 +1006,15 @@
     /* 13 nov 2026 (quarto giro) — tre nomi di tabella uscivano a schermo */
     gest_sal:"stati di avanzamento", gest_sal_righe:"righe dello stato di avanzamento",
     gest_preventivi_link:"link mandati al cliente", gest_analisi_righe:"righe dell'analisi dei prezzi",
-    gest_op_preventivi:"preventivi dell'operaio"
+    gest_op_preventivi:"preventivi dell'operaio",
+    /* 24 nov 2026 — uscivano come «altre cose collegate» */
+    gest_operatore_documenti:"documenti della persona", gest_pagamenti:"pagamenti registrati",
+    gest_acquisti:"acquisti"
+  };
+  /* 24 nov 2026 — i pezzi che «Elimina per sempre» si porta via con una domanda sola */
+  const CEST_PEZZI={
+    gest_fornitori:{col:"fornitore_id",tab:["gest_foto","gest_fatture_fornitori"]},
+    gest_computi:  {col:"computo_id",  tab:["gest_sal"]}
   };
   function cestElenco(v){
     /* 11 nov 2026 — «1 righe della fattura»: con 1 si usa il singolare */
@@ -979,12 +1025,17 @@
       gest_spese:"spesa",gest_ore:"ora lavorata",gest_crediti:"credito formativo",gest_computi:"computo",
       gest_computo_capitoli:"capitolo del computo",gest_computo_voci:"voce del computo",
       gest_computo_misure:"misura del computo",gest_prezzi_propri:"voce del tuo elenco prezzi",
-      gest_rapportini:"rapportino di cantiere",gest_foto:"foto o documento",gest_video:"video",gest_note:"nota",
+      gest_rapportini:"giornata",gest_operatore_documenti:"documento della persona",gest_pagamenti:"pagamento registrato",gest_acquisti:"acquisto",gest_foto:"foto o documento",gest_video:"video",gest_note:"nota",
       gest_fattura_lavori:"collegamento fattura-lavoro",gest_lavoro_mezzi:"mezzo usato",
       gest_carte_movimenti:"movimento della carta",gest_rifornimenti:"rifornimento",
       gest_sal:"stato di avanzamento",gest_sal_righe:"riga dello stato di avanzamento",
       gest_preventivi_link:"link mandato al cliente",gest_analisi_righe:"riga dell'analisi dei prezzi"};
-    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+((+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||(+x.n===1?"altra cosa collegata":"altre cose collegate"));}).join("\n");
+    /* 24 nov 2026 — allo studio niente parole da cantiere */
+    const PRO=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?{
+      gest_lavori:["pratica","pratiche"], gest_mezzi:["strumento","strumenti"],
+      gest_operatori:["collaboratore","collaboratori"], gest_lavoro_mezzi:["strumento usato","strumenti usati"],
+      gest_operatore_documenti:["documento del collaboratore","documenti del collaboratore"]}:{};
+    return (v||[]).map(function(x){const p=PRO[x.tabella];return "\u2022 "+x.n+" "+((p&&p[+x.n===1?0:1])||(+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||(+x.n===1?"altra cosa collegata":"altre cose collegate"));}).join("\n");
   }
 
   /* 14 nov 2026 (quinto giro, n. 12) — «Fattura … eliminato oggi»: la parola
@@ -1056,6 +1107,24 @@
        di cosa se ne va, e se dice Sì si buttano insieme. Solo per ore e
        spese: se c'e' collegato altro (una fattura, un preventivo) resta il
        rifiuto di prima. */
+    /* 24 nov 2026 (collaudo Cestino dello studio) — la stessa strada anche per
+       il FORNITORE (i suoi documenti e le sue fatture) e per il COMPUTO (i
+       suoi SAL). Prima: fornitore con un documento o computo con un SAL gia'
+       nel Cestino = «Non posso eliminare», e quei pezzi non si vedevano da
+       nessuna parte. Vicolo cieco. */
+    const _pz=CEST_PEZZI[x.tab];
+    if(prova.ok===false && !_secondoGiro && _pz && x.tab!=="gest_lavori" && (prova.vivi||[]).length
+       && prova.vivi.every(function(v){return _pz.tab.indexOf(v.tabella)>=0;})){
+      if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nHa ancora dentro:\n"
+        +cestElenco(prova.vivi)+"\n\n"
+        +(prova.vivi.reduce(function(a,v){return a+(+v.n||0);},0)===1?"Se ne va anche quella.":"Se ne vanno anche loro.")
+        +" Questa volta sparisce davvero e non si recupera pi\u00f9.")))return;
+      for(const v of prova.vivi){
+        const r=await sb.from(v.tabella).delete().eq("user_id",sbUid).eq(_pz.col,x.id).select("id");
+        if(r.error){toast("Non eliminato: "+r.error.message);return;}
+      }
+      return cestDefinitivo(i,true,x);
+    }
     if(prova.ok===false && !_secondoGiro && x.tab==="gest_lavori" && (prova.vivi||[]).length
        /* 14 nov 2026 (quinto giro, n. 3) — anche il RAPPORTINO e' un pezzo del
           lavoro: prima un lavoro con un rapportino non si eliminava (e dal
@@ -1530,16 +1599,25 @@
     if(!sbUid)return;
     const c=compCache.find(x=>String(x.id)===String(id))||{};
     const conCestino=(window.cestinoAttivo&&window.cestinoAttivo());
+    /* 24 nov 2026 (collaudo Cestino dello studio) — i SAL del computo vanno nel
+       Cestino con lui e tornano con lui (CEST_FIGLI). Prima restavano vivi e
+       invisibili, e il computo non si poteva piu' eliminare per sempre. */
+    const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+    let nSal=0;
+    try{ const rs=await sb.from("gest_sal").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("computo_id",id); nSal=rs.count||0; }catch(_){}
+    const _salT=nSal?(_pro?(nSal===1?"1 SAL":nSal+" SAL"):(nSal===1?"1 acconto":nSal+" acconti")):"";
     if(!(await gconfirm(conCestino
-      ? "Mettere il computo «"+(c.titolo||"")+"» nel cestino?\n\nLo ritrovi nel Cestino e lo puoi rimettere a posto quando vuoi."
-      : "Eliminare il computo «"+(c.titolo||"")+"»?\n\nSe ne vanno anche i suoi capitoli, le lavorazioni e le misure, e non si recupera.")))return;
+      ? "Mettere il computo «"+(c.titolo||"")+"» nel cestino?\n\n"+(_salT?("Ha "+_salT+": "+(nSal===1?"va":"vanno")+" nel Cestino insieme a lui.\n\n"):"")+"Lo ritrovi nel Cestino e lo puoi rimettere a posto quando vuoi."
+      : "Eliminare il computo «"+(c.titolo||"")+"»?\n\nSe ne vanno anche i suoi capitoli, le lavorazioni e le misure"+(_salT?(" e "+_salT):"")+", e non si recupera.")))return;
     const {data,error}=await sb.from("gest_computi").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    /* col Cestino acceso questa «delete» scrive solo la data: SAL e computo si ripescano insieme */
+    if(nSal&&conCestino){ try{ await sb.from("gest_sal").delete().eq("user_id",sbUid).eq("computo_id",id); }catch(_){} }
     closeSheet();
     await renderComputi();
-    rinfresca("riepilogo","cestino");
-    toast(conCestino?"Messo nel cestino ✔":"Eliminato");
+    rinfresca("riepilogo","cestino","sal");
+    toast(conCestino?("Computo nel cestino"+(_salT?" con "+_salT:"")+": lo riprendi da lì"):"Eliminato");
   }
 
   /* ---- REPORT & STATISTICHE ---- */

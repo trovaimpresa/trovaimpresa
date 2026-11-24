@@ -4132,6 +4132,22 @@ Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pa
 
 Funzione nuova («facciamo il tuo consiglio e pubblica» di Alex), tutte le facce, `?v=24nov-mp2`:
 - **«Chi ci va»** nella Mappa (`#mp-chi-box` / `#mp-chi` in `gestionale-app.html`, `mpChi` + ascoltatore `change` in `js/gest-galleria-mappa.js`): Tutti (N) · ogni persona (N) · Nessuno (N), contati su quello che guardi («da fare» o «tutte»); «Nessuno» comprende chi è nel Cestino, come l'Agenda. Filtra lista, pin e «senza indirizzo». Se la persona non ha niente: «Niente da mostrare sulla carta di Giulia…». Senza persone la tendina non c'è. Provato dal vivo prima del push (Giulia 2, Marco 1, Nessuno 3, Bruno 0; 1440 e 375, select 44 px, testo 16 px). Pulito.
+Pubblicato 128248e, Netlify ok, riprovato sul sito vero 1440: Chi ci va (Giulia 2, Tutti), testo dell'utente protetto anche nel fumetto, fatta/Aprila, Assistente 3 · 0,9 · 1 km ✔. Pulito.
+
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CESTINO
+
+⚠️ Chrome non raggiungibile (Alex dal telefono) e sito/database bloccati dalla nuvola: prova fatta (1) sul DATABASE VERO via MCP, come info@trovaimpresa.com, reparto «ferramenta», «PROVA CONTROLLORE», tutto in UN `do $$ … raise exception` (si annulla da solo: 0 righe rimaste, conteggi uguali: lavori 5, file 16, 1 preventivo nel Cestino di un'altra sessione); (2) sulla pagina col banco (`?vedi=professionista`, 1440 e 375, 16 cose nel Cestino). ⬜ La prova sul sito vero col browser va rifatta quando Alex è al computer.
+Provati nel database: pratica (con scadenze aperta e fatta, ore, foto, documento, fattura fornitore, computo+SAL), cliente, collaboratore (anche con documento), strumento + taratura, fornitore + fattura (+ documento), computo + SAL, credito con attestato; «Elimina per sempre» (prova e conferma), «Rimetti a posto» con i figli (finestra 2 minuti).
+
+Sistemato (`?v=24nov-cest`):
+1. ⛔ Computo nel Cestino: i SAL restavano VIVI e invisibili (l'elenco SAL nasconde quelli col computo nel Cestino) e «Elimina per sempre» del computo si rifiutava («1 stato di avanzamento non è nel cestino») → vicolo cieco. Ora `delComputo` li mette nel Cestino con lui (lo dice: «Ha 1 SAL: va nel Cestino insieme a lui»), `CEST_FIGLI.gest_computi` li riporta su, e «Elimina per sempre» se li porta via con UNA domanda (`CEST_PEZZI`, vale anche per i computi già buttati prima). Provato nel database.
+2. ⛔ Fornitore con un DOCUMENTO (relazione PDF): stesso vicolo cieco (`gest_foto.fornitore_id` è a cascata). Ora i documenti vanno e tornano col fornitore (`del-forn` + `CEST_FIGLI`), «Elimina per sempre» li toglie con una domanda e cancella anche il file; il documento rimesso a posto da solo chiede di riportare il fornitore (`CEST_PADRE.gest_foto`).
+3. Nomi nel Cestino (`cestNomiAltri`, `CEST_ALTRI`): fattura del fornitore col nome del fornitore anche se è nel Cestino («Fattura n. 88 — Studio topografico Neri · 610,00 €», prima solo «Fattura n. 88»); «SAL n. 1 … — <computo>»; ore e documenti con la pratica («CILA.pdf — Frazionamento…»); documento del fornitore col fornitore. Così la ricerca «neri» trova fornitore, fattura e documento.
+4. Parole dello studio: tipo «Pratiche» (era «Pratiche e lavori»), «Giornate» / «Giornata del …» (era «Rapportini di pratica»), nell'elenco di «Elimina per sempre» pratiche/strumenti/collaboratori, «lo strumento» quando si rimette a posto una taratura; «documenti della persona», «pagamenti registrati», «acquisti» (uscivano «altre cose collegate»).
+5. Report: cliente o collaboratore nel Cestino → le sue ore e la classifica dicevano «—». Ora «Giulia Bianchi (nel cestino) 3 h» (letti con `sb.raw`). Provato col banco.
+Banco `tools/banco-gestionale.js app`: ZERO difetti.
+Funzione nuova (sì di Alex, foto prima): sul telefono (≤600 px) le scelte per tipo del Cestino stanno su una riga sola che scorre di lato (`#cest-riass .cest-tipi` in `css/gestionale-stile.css`, `?v=38`). Vale per tutte le facce.
+⬜ Non provati: browser vero; un collaboratore vero dal telefono; «Svuota» su pratiche con ore vive dice «usa Elimina per sempre sulla riga» (giusto, ma non fa da solo).
 
 # 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CLIENTI
 
@@ -4482,6 +4498,17 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Prezzario ↔ Ricerca in alto: — le voci non si cercano da lì (si cercano nel Prezzario).
 - Prezzario ↔ Fatture: — la fattura nasce dal preventivo (le voci passano da lì); nel modulo fattura non c'è «Prendi dal prezzario».
 - Si può unire: NO, è l'archivio dei prezzi; dal 24 nov «I tuoi prezzi» separa gli onorari dalla tariffa.
+- Cestino ↔ Pratiche: ✔ scadenze aperte vanno e tornano con la pratica; foto, ore e documenti restano ma spariscono da Galleria/Agenda («(nel cestino)»); «Elimina per sempre» li porta via con una domanda.
+- Cestino ↔ Computo / Stati di avanzamento: ✔ dal 24 nov i SAL vanno e tornano col computo (prima restavano vivi e invisibili).
+- Cestino ↔ Fornitori: ✔ fatture e, dal 24 nov, documenti vanno e tornano col fornitore; nomi giusti nel Cestino.
+- Cestino ↔ Collaboratori / app del collaboratore: ✔ scadenze con lei, accesso tolto (al ritorno lo dice: «Nuovo invito»); l'app legge col Cestino acceso.
+- Cestino ↔ Strumenti: ✔ tarature con lo strumento.
+- Cestino ↔ Crediti formativi: ✔ l'attestato si cancella col corso solo con «Elimina per sempre».
+- Cestino ↔ Report: ✔ dal 24 nov cliente/collaboratore nel Cestino col nome «(nel cestino)». Le ore di una pratica nel Cestino non contano (come il suo margine).
+- Cestino ↔ Clienti: ✔ pratiche e computi restano («Collegati: … Restano dove sono»). — la Mappa non usa l'indirizzo di un cliente nel Cestino (la pratica va in «senza indirizzo»).
+- Cestino ↔ Assistente / Agenda / Mappa: ✔ (vedi le loro righe).
+- Cestino ↔ Ricerca in alto: — la ricerca in alto non guarda il Cestino (c'è la sua casella).
+- Si può unire: NO, il Cestino è uno solo per tutte le voci.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

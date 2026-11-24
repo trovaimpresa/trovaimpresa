@@ -53,12 +53,17 @@
     const mid=curMestiere();
     const _rR=await Promise.all([
       sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
-      sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+      /* 24 nov 2026 (collaudo Cestino dello studio) — cliente o collaboratore
+         nel Cestino: le sue ore e la sua classifica restavano, ma col nome «—».
+         Si leggono anche quelli nel Cestino, col nome «… (nel cestino)». */
+      (sb.raw?sb.raw("gest_clienti"):sb.from("gest_clienti")).select("id,nome,eliminato_il").eq("user_id",sbUid).or(_cliOr(mid)),
+      (sb.raw?sb.raw("gest_operatori"):sb.from("gest_operatori")).select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
     /* 12 nov 2026 — regola 20: senza rete non si scrivono guadagni a zero */
     if(letturaKo(_rR[0])){listaNonLetta(box,"il report","report");return;}
-    const [{data:lav},{data:cl},{data:ops}]=_rR;
+    const _nelC=x=>Object.assign({},x,{nome:(x.nome||"")+(x.eliminato_il?" (nel cestino)":"")});
+    const [{data:lav},{data:_cl0},{data:_ops0}]=_rR;
+    const cl=(_cl0||[]).map(_nelC), ops=(_ops0||[]).map(_nelC);
     const L=lav||[];
     let SP=[];
     if(L.length){const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",L.map(l=>l.id));SP=sp||[];}

@@ -335,3 +335,11 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
    3 righe, ma lo spazio sotto (7 px) lasciava vedere la cima della QUARTA riga,
    tagliata a meta'. Sotto si lascia solo lo spazio che non arriva alla riga dopo. */
 .wrap section .job .job-note.job-note{padding-top:5px !important;padding-bottom:3px !important}
+
+/* 24 nov 2026 (collaudo Cestino dello studio) — sul telefono le 13 scelte per
+   tipo del Cestino riempivano tutto lo schermo: una riga sola che scorre di lato. */
+@media (max-width:600px){
+  #cest-riass .cest-tipi{flex-wrap:nowrap !important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-right:-16px !important;padding-right:16px;padding-bottom:4px}
+  #cest-riass .cest-tipi::-webkit-scrollbar{display:none}
+  #cest-riass .cest-tipi button{flex:0 0 auto;white-space:nowrap;min-height:44px}
+}
