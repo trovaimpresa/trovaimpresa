@@ -148,6 +148,8 @@
     /* 12 nov 2026: stesso numero che si vede all'ingresso (renderContatori): le bozze da prezzare */
     if(typeof setCnt==="function")setCnt("#cnt-computi",compCache.filter(c=>c.stato==="bozza").length,"attesa");
     else{const cnt=$("#cnt-computi");if(cnt)cnt.textContent=compCache.length?String(compCache.length):"";}
+    /* 24 nov 2026 — studio: numero della linguetta (js/gest-studio-unite.js) */
+    try{if(typeof stSegnaLetto==="function")stSegnaLetto("computi");}catch(e){}
 
     const L=compCache.filter(c=>compFiltro==="tutti"||c.stato===compFiltro);
     const conta={};COMP_VISTE.forEach(v=>conta[v.k]=compCache.filter(c=>v.k==="tutti"||c.stato===v.k).length);

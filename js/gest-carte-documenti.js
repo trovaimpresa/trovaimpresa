@@ -821,6 +821,8 @@
     const letti=await dsCarica();
     if(letti===null){dsCache=[];listaNonLetta(box,"le richieste dal sito","dalsito","#ds-viste");return;}
     dsCache=letti;
+    /* 24 nov 2026 — studio: numero della linguetta (js/gest-studio-unite.js) */
+    try{if(typeof stSegnaLetto==="function")stSegnaLetto("dalsito");}catch(e){}
     const aperte=dsCache.filter(r=>r._stato==="nuova"||r._stato==="vista");
     const conta={
       da_fare:aperte.length,

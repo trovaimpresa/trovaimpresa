@@ -1222,6 +1222,8 @@
       if(b.classList.contains("sp-dentro")){const _spb=$('nav.tabs button[data-tab="scadenzario"]');if(_spb)_spb.classList.add("active");}
       /* 18 nov 2026 — Agenda sta dentro «Squadra e agenda» */
       if(b.classList.contains("ag-dentro")){const _agb=$('nav.tabs button[data-tab="squadra"]');if(_agb)_agb.classList.add("active");}
+      /* 24 nov 2026 — studio: SAL dentro «Computo e SAL», Richieste dal sito dentro «Preventivi e richieste» */
+      if(b.classList.contains("st-dentro")){const _stb=$('nav.tabs button[data-tab="'+(b.dataset.tab==="sal"?"computi":"preventivi")+'"]');if(_stb)_stb.classList.add("active");}
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
       /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
          rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si

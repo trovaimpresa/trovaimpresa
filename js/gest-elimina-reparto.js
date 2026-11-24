@@ -689,6 +689,7 @@
     /* 18 nov 2026 — il numero della linguetta «Agenda»: i lavori da fare */
     window._sqN=window._sqN||{};window._sqN.ag=L.filter(l=>l.stato!=="fatto").length;window._sqN.agMid=curMestiere();
     try{if(typeof agUnisci==="function")agUnisci();}catch(e){}
+    try{if(typeof stUnisci==="function")stUnisci();}catch(e){}
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
     /* 18 nov 2026 — si' di Alex: nella tendina «Nessuno assegnato» e, accanto a
        ogni nome, quanti lavori ha (di quelli che si stanno guardando: «Da fare»

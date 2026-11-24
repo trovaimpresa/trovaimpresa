@@ -4346,7 +4346,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
 - Collaboratori (Assistente) ↔ Ore fatte: ✔ dal 21 nov le ore del mese della scheda leggono anche gest_ore (stessa regola del Report).
-- Si può unire: Agenda + Collaboratori allo studio NO (deciso da Alex il 18 nov: lo studio le tiene separate). Da riguardare a fine giro: con «Pratiche (N)» sulla scheda le due voci si parlano senza unirle.
+- Si può unire: ✔ UNITE il 24 nov (sì di Alex, foto approvata): «Collaboratori e agenda», linguette «Collaboratori (N)» / «Agenda (N)» (prima, dal 18 nov, separate).
 - Stati di avanzamento ↔ Computo metrico: ✔ il SAL vive dentro il computo (righe, prezzi, ribasso, capitoli); «Fai un SAL» apre il computo sulla linguetta giusta.
 - Stati di avanzamento ↔ Pratiche: ✔ dal 20 nov riquadro «Computo e stati di avanzamento» nella pratica, «Apri» e chiudendo si torna nella pratica.
 - Stati di avanzamento ↔ Fatture: — allo studio giusto così dal 20 nov (la fattura del SAL la fa l'impresa). La parcella della direzione lavori non nasce dal SAL.
@@ -4355,7 +4355,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Stati di avanzamento ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto»; il computo è il padre del SAL.
 - Stati di avanzamento ↔ Ricerca in alto: — i SAL non si trovano (si trova il computo? da guardare a fine giro).
 - Stati di avanzamento ↔ Clienti: ✔ il cliente arriva dal computo (PDF «Spett.le», elenco).
-- Si può unire: Stati di avanzamento dentro Computo metrico? NO per ora: l'elenco di tutti i SAL serve (chiesto da Alex il 20 ago); con il riquadro nella pratica si parlano senza unirle.
+- Si può unire: ✔ UNITE il 24 nov (sì di Alex, foto approvata): «Computo e SAL», linguette «Computi (N)» / «Stati di avanzamento (N)» (telefono «SAL»). L'elenco di tutti i SAL resta, nella sua linguetta.
 
 - Fornitori ↔ Pratiche: ✔ la fattura collegata entra nel margine («Fatture fornitori»); dal 20 nov il collegamento non si perde più modificando la fattura. ✔ dal 20 nov nella pratica c'è l'elenco delle sue fatture, con «Apri» e «+ Fattura» (si torna nella pratica).
 - Fornitori ↔ Fatture e parcella: ✔ dal 20 nov la fattura al cliente propone di riaddebitare le fatture dei fornitori della pratica nel rimborso spese. — la PARCELLA (preventivo) no: nasce prima delle spese. Aiuti delle spese corretti il 20 nov.
@@ -4487,7 +4487,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Richieste dal sito ↔ Pratiche: — la richiesta non diventa pratica direttamente (passa dal preventivo: «Accettato → crea pratica»). Giusto.
 - Richieste dal sito ↔ Chat con AI: ✔ dal 24 nov (secondo giro) la chat legge gli incarichi (`incarichi_sito`).
 - Richieste dal sito ↔ Ricerca in alto: — la ricerca non le trova (da guardare a fine giro).
-- Si può unire: NO, è la porta d'ingresso dei clienti dal sito; si potrebbe pensare di metterla dentro Preventivi come linguetta, ma il pallino e la riga nell'Assistente bastano.
+- Si può unire: ✔ UNITE il 24 nov (sì di Alex, foto approvata): «Preventivi e richieste», linguette «Preventivi (N)» / «Richieste dal sito (N da fare)» (telefono «Dal sito»). Il pallino #cnt-dalsito è spostato sulla voce Preventivi (stesso elemento: numero = Assistente).
 
 - Prezzario ↔ Preventivi e parcella: ✔ «€ Prendi dal prezzario» nel preventivo; dal 24 nov prima i prezzi tuoi (onorari), «a corpo», conta «usata».
 - Prezzario ↔ Computo metrico: ✔ la tariffa regionale nella lavorazione e «Prendi i prezzi dal prezzario»; «Salva nel mio prezzario». — nel computo i prezzi tuoi non vengono prima (giusto: lì si usa la tariffa).
@@ -4520,3 +4520,15 @@ Chiesto da Alex (come sulla sua pagina personale «Giornate di cantiere»), foto
 - **PDF del mese** (`giorPdf`): in fondo «Foto dei lavori» giornata per giornata (`gxFotoMesePdf`, 1000 px q .72); qui il cantiere si scrive (è per te/consulente).
 - Anteprime col banco: `/tmp/anteprima/foto.js` (copia del sito + storage finto + jspdf locale). Banco `tools/banco-gestionale.js app`: ZERO difetti.
 - ⬜ Da fare nel secondo giro: spesa con la carta aziendale collegata alla giornata (un posto solo per i soldi, come `js/op-spese-foto.js`); foto prima/dopo, lavoro svolto e spesa con carta nell'app operatore.
+
+# 24 NOVEMBRE 2026 — STUDIO: TRE VOCI UNITE CON LE LINGUETTE (sì di Alex, foto approvate)
+
+Fine del giro «una voce per volta»: adesso il gestionale dello studio si guarda tutto insieme. Tappa 1 = unire le voci che da sole non hanno senso.
+- «Computo e SAL» (Computo metrico + Stati di avanzamento) e «Preventivi e richieste» (Preventivi + Richieste dal sito): `js/gest-studio-unite.js` (`stUnisci`, `stSegnaLetto`), NUOVO, incluso subito dopo gest-squadra.js. Solo `professionista`.
+- «Collaboratori e agenda»: `agUnito()` in js/gest-squadra.js non esclude più lo studio; nomi dello studio dentro `agUnisci` (Collaboratori / Agenda).
+- ⛔ Non si cancella niente: #sal e #dalsito restano, i pulsanti del menu restano con la classe `.st-dentro` (nascosti). Chi li preme da fuori (Assistente, Chat `[vai:sal]`, «Fai un SAL», hash) arriva lo stesso e nel menu si accende la voce unita (`js/gest-finestre-eventi.js`; `js/gest-chat.js` accetta `.st-dentro`).
+- Numeri delle linguette: li segnano i render (`stSegnaLetto` in renderComputi, renderSalTutti, renderPreventivi, renderDalSito) per il reparto corrente; l'altra linguetta si legge una volta in silenzio. Richieste dal sito = «da fare» (nuova + vista), come il pallino.
+- Telefono: la seconda linguetta ha il nome corto (`.st-lung` / `.st-corto`, sotto 560 px): «SAL», «Dal sito».
+- CSS in fondo al blocco unioni di css/gestionale-stile.css (`?v=39`). MANUALE dello studio in chat-gestionale.mjs aggiornato (banco-chat-studio: 38 verdi).
+- Provato sul sito vero iniettando il codice nuovo (playwright non c'è nel banco): linguette, menu, arrivo da fuori su #sal e #dalsito, pallino spostato; 375 px niente fuori.
+- NON unite (detto ad Alex): Giornate + Agenda (Giornate scrive, Agenda legge, numeri già uguali); Fornitori + Carte (da guardare nel giro della Tappa 2).

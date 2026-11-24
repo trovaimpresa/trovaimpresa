@@ -44,33 +44,33 @@
      #agenda restano, e resta il pulsante «agenda» del menu, solo che non si
      vede (classe .ag-dentro): chi lo «preme» da fuori (Riepilogo, Chat
      [vai:agenda], #agenda) funziona come prima.
-     ⛔ Lo STUDIO TECNICO resta com'era (voci «Collaboratori» e «Agenda»
-        separate): Alex lo guarda quando si fa il giro dello studio.
+     24 nov 2026 (sì di Alex, foto approvata): anche lo STUDIO TECNICO le
+        unisce, «Collaboratori e agenda» (prima, dal 18 nov, separate).
      I numeri: Squadra = persone del reparto, Agenda = lavori da fare.
      Li scrivono renderDip e renderAgenda in window._sqN. */
   function agUnito(){
     try{
-      if(ruoloUtente==='professionista')return false;
       if(!document.querySelector('nav.tabs button[data-tab="agenda"]'))return false;
       return !(typeof tabNascosto==="function"&&(tabNascosto("squadra")||tabNascosto("agenda")));
     }catch(e){ return false; }
   }
   function agUnisci(){
-    const uni=agUnito(), tutto="Squadra e agenda";
+    const pro=(ruoloUtente==='professionista');
+    const uni=agUnito(), tutto=pro?"Collaboratori e agenda":"Squadra e agenda", nomeS=pro?"Collaboratori":"Squadra";
     const bS=document.querySelector('nav.tabs button[data-tab="squadra"]'),
           bA=document.querySelector('nav.tabs button[data-tab="agenda"]');
     if(bA)bA.classList.toggle("ag-dentro",uni);
     if(uni&&bA&&bS&&bA.classList.contains("active"))bS.classList.add("active");
-    if(bS&&ruoloUtente!=='professionista'){const s=bS.querySelector("span");const t=uni?tutto:"Squadra";if(s&&s.textContent!==t)s.textContent=t;}
+    if(bS){const s=bS.querySelector("span");const t=uni?tutto:nomeS;if(s&&s.textContent!==t)s.textContent=t;}
     const N=window._sqN||{};
     let mid=null;try{mid=typeof curMestiere==="function"?curMestiere():null;}catch(e){}
     const nS=(N.sq!=null&&N.sqMid===mid)?N.sq:null, nA=(N.ag!=null&&N.agMid===mid)?N.ag:null;
     const lab=(t,n)=>t+(n!=null?" ("+n+")":"");
-    [["squadra","Squadra"],["agenda","Agenda operatore"]].forEach(function(x){
+    [["squadra",nomeS],["agenda",pro?"Agenda":"Agenda operatore"]].forEach(function(x){
       const sec=document.getElementById(x[0]);if(!sec)return;
       const sh=sec.querySelector(".sec-head");if(!sh)return;
       const h=sh.querySelector("h2");
-      if(ruoloUtente!=='professionista'){const t=uni?tutto:x[1];if(h&&h.textContent!==t)h.textContent=t;}
+      {const t=uni?tutto:x[1];if(h&&h.textContent!==t)h.textContent=t;}
       let g=sec.querySelector(".ag-ling");
       const vista=x[0]==="agenda"?document.getElementById("ag-vista"):null;
       if(!uni){
@@ -79,7 +79,7 @@
         return;
       }
       if(!g){g=document.createElement("div");g.className="segm mz-ling ag-ling";sh.after(g);}
-      const html='<button type="button" data-ag="squadra"'+(x[0]==="squadra"?' class="on"':'')+'>'+lab("Squadra",nS)+'</button>'
+      const html='<button type="button" data-ag="squadra"'+(x[0]==="squadra"?' class="on"':'')+'>'+lab(nomeS,nS)+'</button>'
         +'<button type="button" data-ag="agenda"'+(x[0]==="agenda"?' class="on"':'')+'>'+lab("Agenda",nA)+'</button>';
       if(g.innerHTML!==html)g.innerHTML=html;
       /* «Lavori / Ore fatte» scende sotto le linguette */

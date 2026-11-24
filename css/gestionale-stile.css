@@ -314,6 +314,11 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #appview nav.tabs button.sp-dentro{display:none!important}
 /* 18 nov 2026 — SQUADRA E AGENDA: una voce sola, due linguette (js/gest-squadra.js, agUnisci) */
 #appview nav.tabs button.ag-dentro{display:none!important}
+/* 24 nov 2026 — STUDIO: «Computo e SAL» e «Preventivi e richieste» (js/gest-studio-unite.js, stUnisci).
+   Sul telefono la seconda linguetta ha il nome corto (SAL, Dal sito). */
+#appview nav.tabs button.st-dentro{display:none!important}
+#appview .wrap section .segm.st-ling .st-corto{display:none}
+@media(max-width:560px){#appview .wrap section .segm.st-ling .st-lung{display:none}#appview .wrap section .segm.st-ling .st-corto{display:inline}}
 #appview .wrap section .sp-nota{margin:-6px 0 14px;font-size:16px;color:var(--testo-2,#475569)}
 #appview .wrap section .segm.mz-ling{display:flex;width:100%;max-width:560px;margin:0 0 16px;padding:4px}
 #appview .wrap section .segm.mz-ling button{flex:1;height:48px;font-size:18px;font-weight:700}

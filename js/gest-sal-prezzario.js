@@ -251,6 +251,8 @@
     salTuttiCache=(rs.data||[]).filter(x=>!!salTuttiComp[String(x.computo_id)]);
 
     const cnt=$("#cnt-sal");if(cnt)cnt.textContent=salTuttiCache.length?String(salTuttiCache.length):"";
+    /* 24 nov 2026 — studio: numero della linguetta (js/gest-studio-unite.js) */
+    try{if(typeof stSegnaLetto==="function")stSegnaLetto("sal");}catch(e){}
 
     const _vd=_salStudio()?SAL_VISTE_STUDIO:SAL_VISTE;
     if(!_vd.some(v=>v.k===salFiltro))salFiltro="tutti";

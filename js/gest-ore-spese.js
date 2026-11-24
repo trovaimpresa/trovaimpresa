@@ -1262,6 +1262,8 @@
     if(letturaKo(_rPv)){listaNonLetta(box,"i preventivi","preventivi","#prev-viste");return;}
     const pv=_rPv.data, cl=_rCl&&_rCl.data;
     prevCache=pv||[];
+    /* 24 nov 2026 — studio: numero della linguetta (js/gest-studio-unite.js) */
+    try{if(typeof stSegnaLetto==="function")stSegnaLetto("preventivi");}catch(e){}
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
     let tot={};
     if(prevCache.length){
