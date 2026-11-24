@@ -681,6 +681,10 @@
   const _dsData=r=>String(r.created_at||"").slice(0,10);
   const _dsCosa=r=>r.categoria_lavoro||r.tipo_lavoro||"Richiesta di preventivo";
   const _dsSt=r=>DS_STATI[r._stato]||DS_STATI.nuova;
+  /* 24 nov 2026 — l'urgenza arriva dal modulo come codice (bassa/media/alta):
+     si scrive con le parole che il cliente ha scelto. */
+  const DS_URG={bassa:"Nessuna fretta",media:"Entro qualche settimana",alta:"Urgente"};
+  const _dsUrg=u=>{const k=String(u||"").trim().toLowerCase();return DS_URG[k]||String(u||"");};
 
   async function dsCarica(){
     if(!sb||!sbUid)return [];
@@ -729,7 +733,7 @@
          Se la colonna manca si rilegge senza (paracadute). */
       const _q=c=>sb.from("incarichi_richieste").select(c)
         .in("professionista_id",ids).order("created_at",{ascending:false}).limit(300);
-      const _base="id,nome,email,telefono,prestazione,comune,urgenza,note,documenti,stato,risposta_at,visto_il,created_at";
+      const _base="id,nome,email,telefono,prestazione,comune,urgenza,note,documenti,stato,risposta,onorario,risposta_at,visto_il,created_at";
       let r=await _q(_base+",preventivo_creato_id");
       if(r.error)r=await _q(_base);
       if(r.error)return [];
@@ -740,7 +744,8 @@
         return {id:String(x.id),_inc:true,nome:x.nome,citta:x.comune,categoria_lavoro:x.prestazione,
           descrizione:x.note,urgenza:x.urgenza,risposta_at:x.risposta_at,visto_il:x.visto_il,
           created_at:x.created_at,email:x.email,telefono:x.telefono,
-          documenti:Array.isArray(x.documenti)?x.documenti:[],_stato:st,_prevId:x.preventivo_creato_id||null};
+          documenti:Array.isArray(x.documenti)?x.documenti:[],_stato:st,_prevId:x.preventivo_creato_id||null,
+          risposta:x.risposta||"",onorario:x.onorario||""};
       });
     }catch(e){return [];}
   }
@@ -803,7 +808,7 @@
         "Arrivata "+q.testo,
         esc(_dsCosa(r)),
         r.citta?esc(r.citta):null,
-        r.urgenza?"Urgenza: "+esc(r.urgenza):null
+        r.urgenza?"Urgenza: "+esc(_dsUrg(r.urgenza)):null
       ],
       nota:r.descrizione?esc(r.descrizione):null,
       azioni:dsVoci(r)

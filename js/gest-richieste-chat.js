@@ -104,7 +104,7 @@
         <div class="sh-b">
         <div class="sh-tit">Chi ha scritto</div>
         ${riga("Nome",[r.nome,r.cognome].filter(Boolean).join(" "))}
-        ${riga("Città",r.citta)}
+        ${riga(r._inc?"Comune dell'immobile":"Città",r.citta)}
         ${riga("Indirizzo",r.via)}
         <div class="field"><label>Contatti</label>
           <div id="ds-contatti">
@@ -115,15 +115,21 @@
         <div class="sh-tit">Quando</div>
         ${riga("Arrivata",q.testo)}
         ${riga("Stato",st.lab)}
-        ${r.risposta_at?riga("Già risposto dal sito","sì"):""}
+        ${r.risposta_at&&!r.risposta?riga("Già risposto dal sito","sì"):""}
         </div>
+        ${r._inc&&r.risposta?`<div class="sh-b">
+        <div class="sh-tit">La tua risposta dal pannello</div>
+        ${riga("Mandata",fdate(String(r.risposta_at||"").slice(0,10)))}
+        ${riga("Cosa hai scritto",r.risposta)}
+        ${riga("Onorario indicato",r.onorario)}
+        </div>`:""}
         </div><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Cosa chiede</div>
         ${riga(r._inc?"Prestazione":"Lavoro",_dsCosa(r))}
         ${riga("Descrizione",r.descrizione)}
         ${riga("Quando gli servirebbe",r.data_preferita?fdate(String(r.data_preferita).slice(0,10)):"")}
-        ${riga("Urgenza",r.urgenza)}
+        ${riga("Urgenza",_dsUrg(r.urgenza))}
         ${riga("Budget",r.budget)}
         ${riga("Metri quadri",r.mq)}
         ${riga("Piano",r.piano)}
@@ -134,7 +140,7 @@
         <div class="sh-b" style="border:2px solid #7c5cff;background:#f6f3ff">
         <div class="sh-tit">\u2728 Risposta pronta</div>
         <div id="ds-risp-box">
-          <p style="margin:0 0 10px;font-size:16px">L'AI scrive la risposta al cliente con i tuoi prezzi. Tu la leggi e la modifichi. Costa 1 credito.</p>
+          <p style="margin:0 0 10px;font-size:16px">L'AI scrive la risposta al cliente con i tuoi ${(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"onorari":"prezzi"}. Tu la leggi e la modifichi. Costa 1 credito.</p>
           <button class="btn-primary" type="button" id="ds-risp-go">Scrivi la risposta</button>
         </div>
         </div>
@@ -237,7 +243,7 @@
         .map(x=>"- "+String(x.descrizione).slice(0,110)+": "+x.prezzo_unitario+" euro"+(x.unita?" al "+x.unita:"")
           +(x.fonte==="mio"?" (prezzo mio)":" (riferimento "+(x.fonte||"prezzario")+", indicativo)")).join("\n");
       const campi=[["Lavoro",_dsCosa(r)],["Descrizione",r.descrizione],["Città",r.citta],
-        ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",r.urgenza],["Quando serve",r.data_preferita],
+        ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",_dsUrg(r.urgenza)],["Quando serve",r.data_preferita],
         ["Budget del cliente",r.budget],["Altro",r.note_aggiuntive],["Foto allegata",r.foto?"si":""]]
         .filter(x=>x[1]).map(x=>x[0]+": "+x[1]).join("\n");
       const _studio=typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
@@ -321,20 +327,20 @@
     const contatti=await dsContattiDi(r);
 
     const nomeCli=[r.nome,r.cognome].filter(Boolean).join(" ").trim()||"Cliente dal sito";
-    let cliId=null;
+    let cliId=null, _dsGia=null;
     const telSec=String(contatti.telefono||"").replace(/\D/g,"");
     if(telSec){
       const {data:gia}=await sb.from("gest_clienti")
-        .select("id,telefono").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
+        .select("id,nome,telefono").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
       const trovato=(gia||[]).find(c=>String(c.telefono||"").replace(/\D/g,"")===telSec);
-      if(trovato)cliId=trovato.id;
+      if(trovato){cliId=trovato.id;_dsGia=trovato;}
     }else if(contatti.email){
       /* 18 nov 2026: senza telefono (incarichi) ogni clic rifaceva il cliente */
       const {data:giaE}=await sb.from("gest_clienti")
-        .select("id,email").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
+        .select("id,nome,email").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
       const em=String(contatti.email).trim().toLowerCase();
       const trovE=(giaE||[]).find(c=>String(c.email||"").trim().toLowerCase()===em);
-      if(trovE)cliId=trovE.id;
+      if(trovE){cliId=trovE.id;_dsGia=trovE;}
     }
     if(!cliId){
       const {data:nuovo,error:eC}=await sb.from("gest_clienti").insert({
@@ -350,6 +356,14 @@
       toast("Cliente aggiunto in rubrica ✔");
     }
 
+    /* 24 nov 2026 — il cliente che c'era gia' si riconosce dal telefono o
+       dall'email. Se in rubrica ha un altro nome lo si dice: prima il
+       preventivo nasceva su quel cliente senza una parola. */
+    if(_dsGia){
+      const _n1=String(_dsGia.nome||"").trim();
+      if(_n1&&_n1.toLowerCase()!==nomeCli.toLowerCase())
+        toast("Ho usato il cliente che hai già con lo stesso "+(telSec?"telefono":"indirizzo email")+": «"+_n1+"». Se è un'altra persona, cambialo nella tendina «Cliente».");
+    }
     closeSheet();
     const desc=[_dsCosa(r),r.descrizione].filter(Boolean).join(" — ");
     await prevForm(null,{

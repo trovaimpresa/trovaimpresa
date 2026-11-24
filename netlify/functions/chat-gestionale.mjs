@@ -152,7 +152,16 @@ const ATTREZZI = {
   note_calendario: { tabella:'gest_note',        campi:'id,data,testo',            ordine:'data', data:'data', cestino:false,   nome:'le note scritte sui giorni del calendario' },
   richieste_sito:  { tabella:'preventivi_safe',  campi:'id,nome,citta,categoria_lavoro,tipo_lavoro,descrizione,urgenza,budget,data_preferita,created_at,risposta_at,visto_il',
                      ordine:'created_at', data:'created_at', livello:'impresa', cestino:false,
-                     nome:'le richieste di preventivo arrivate dai clienti del sito (di tutta l\'attivita\', non di un reparto). visto_il vuoto = non ancora aperta' }
+                     nome:'le richieste di preventivo arrivate dai clienti del sito (di tutta l\'attivita\', non di un reparto). visto_il vuoto = non ancora aperta' },
+  /* ⛔ 24 nov 2026 (studio, voce Richieste dal sito) — allo studio tecnico il
+     cliente non manda un «preventivo» ma una RICHIESTA DI INCARICO (tabella
+     incarichi_richieste, colonna professionista_id = imprese.id). Prima la
+     chat non la leggeva e allo studio rispondeva «nessuna richiesta» con le
+     richieste lì. Stesso livello 'impresa', altra colonna (colImpresa).
+     ⚠️ Niente email e telefono: alla chat non servono. */
+  incarichi_sito:  { tabella:'incarichi_richieste', campi:'id,nome,prestazione,comune,urgenza,note,stato,onorario,created_at,risposta_at,visto_il',
+                     ordine:'created_at', data:'created_at', livello:'impresa', colImpresa:'professionista_id', cestino:false,
+                     nome:'le richieste di INCARICO arrivate allo studio tecnico dai clienti del sito (di tutto lo studio, non di un reparto). visto_il vuoto = non ancora aperta. urgenza: bassa = nessuna fretta, media = entro qualche settimana, alta = urgente' }
 
 };
 // ---------------------------------------------------------------------
@@ -238,7 +247,7 @@ const DOVE_SI_CERCA = {
   fornitori:['nome','categoria'], scadenze:['titolo'], computi:['titolo','numero'], sal:[],
   mezzi:['nome','targa'], operatori:['nome'], fatture_fornitori:['numero'],
   mezzi_scadenze:['nome','targa'], rifornimenti:['distributore'], carte_saldo:['nome'], rapportini:['note'],
-  promemoria:['testo'], note_calendario:['testo'], richieste_sito:['nome','categoria_lavoro','tipo_lavoro','descrizione','citta']
+  promemoria:['testo'], note_calendario:['testo'], richieste_sito:['nome','categoria_lavoro','tipo_lavoro','descrizione','citta'], incarichi_sito:['nome','prestazione','note','comune']
 };
 const NUMERO_INTERO = { fatture:'numero', preventivi:'numero', sal:'numero' };
 const FORMA_STATO = /^[a-z_]{2,20}$/;
@@ -267,7 +276,7 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
   let filtri;
   if (a.livello === 'impresa') {
     if (!o.impresaId) return { errore: 'non trovo la tua scheda su TrovaImpresa, quindi non vedo le richieste' };
-    filtri = { impresa_id: String(o.impresaId) };
+    filtri = {}; filtri[a.colImpresa || 'impresa_id'] = String(o.impresaId);
   } else if (a.livello === 'account') {
     filtri = { user_id: uid };
   } else {
@@ -298,7 +307,7 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
     if (o.dal && FORMA_GIORNO.test(String(o.dal))) q.dal = String(o.dal);
     if (o.al  && FORMA_GIORNO.test(String(o.al)))  q.al  = String(o.al);
   }
-  if (o.vuoto === 'visto_il' && cosa === 'richieste_sito') q.vuoto = 'visto_il';
+  if (o.vuoto === 'visto_il' && (cosa === 'richieste_sito' || cosa === 'incarichi_sito')) q.vuoto = 'visto_il';
   if (cosa === 'lavori' && o.statoPratica && PRATICA_STATI_OK.indexOf(String(o.statoPratica)) >= 0) q.statoPratica = String(o.statoPratica);
   if (cosa === 'lavori' && o.praticheAlComune) q.inPratica = ['depositata', 'istruttoria', 'integrazioni'];
   /* 24 nov 2026 (studio, voce Chat) — «cosa deve fare Giulia?»: senza questo
@@ -1462,6 +1471,7 @@ async function agenda(clientDati, uid, reparto, oggi, base) {
   if (base && base.ruolo === 'professionista') {
     pezzi.pratiche_integrazioni_richieste = ['lavori', { statoPratica: 'integrazioni', prossime: true }];
     pezzi.pratiche_al_comune = ['lavori', { praticheAlComune: true, prossime: true }];
+    pezzi.incarichi_non_aperti = ['incarichi_sito', { vuoto: 'visto_il', quanti: 10 }];
   }
   const nomi = Object.keys(pezzi);
   const esiti = await Promise.all(nomi.map(function (k) {
@@ -1715,7 +1725,8 @@ function istruzioniFisse(ruolo) {
    domanda, 0,042 $. La parte DEL GIORNO (reparto, sezione, calendario,
    parole del ruolo) cambia e va dopo, fuori dalla memoria. */
 const PAROLE_RUOLO = {
-  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Nel suo menu «Strumenti» è una voce da sola, senza linguette. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nelle Scadenze. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri. COMPILARE LE PRATICHE PER LUI: quando ti dice una pratica nuova («CILA bagno Rossi via Roma 3 Rieti») usa `compila_lavoro` riempiendo ANCHE pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep e i dati catastali che ti ha detto; quando ti dice una novità su una pratica che c\'è («la CILA di Rossi è stata protocollata ieri, prot. 4567», «il Comune ha chiesto le integrazioni») usa `modifica_lavoro`. Se ti manda con il «+» la foto o il PDF della ricevuta di deposito, della visura catastale o della lettera del Comune, leggila e riempi le caselle da lì: protocollo, foglio, particella e subalterno SOLO se si leggono bene, mai indovinati. Per «cosa ho fermo al Comune», «quali pratiche aspettano» usa `agenda` (pratiche_integrazioni_richieste e pratiche_al_comune, con giorni_dal_deposito) o `elenco_cose` su lavori con `stato_pratica`. Le integrazioni richieste sono la cosa più urgente: dillo per prime. Quando metti una pratica a «integrazioni», digli in una riga che al Salva il gestionale gli propone la scadenza a 30 giorni (se il Comune gli ha dato un\'altra data, la cambia dallo Scadenzario). '
+  professionista: 'RICHIESTE DAL SITO DELLO STUDIO: allo studio i clienti mandano RICHIESTE DI INCARICO: le vedi con `incarichi_sito` (e con `richieste_sito` le richieste di preventivo, se ce ne sono): guardale TUTTE E DUE prima di dire che non ce ne sono. '
+    + 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Nel suo menu «Strumenti» è una voce da sola, senza linguette. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nelle Scadenze. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri. COMPILARE LE PRATICHE PER LUI: quando ti dice una pratica nuova («CILA bagno Rossi via Roma 3 Rieti») usa `compila_lavoro` riempiendo ANCHE pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep e i dati catastali che ti ha detto; quando ti dice una novità su una pratica che c\'è («la CILA di Rossi è stata protocollata ieri, prot. 4567», «il Comune ha chiesto le integrazioni») usa `modifica_lavoro`. Se ti manda con il «+» la foto o il PDF della ricevuta di deposito, della visura catastale o della lettera del Comune, leggila e riempi le caselle da lì: protocollo, foglio, particella e subalterno SOLO se si leggono bene, mai indovinati. Per «cosa ho fermo al Comune», «quali pratiche aspettano» usa `agenda` (pratiche_integrazioni_richieste e pratiche_al_comune, con giorni_dal_deposito) o `elenco_cose` su lavori con `stato_pratica`. Le integrazioni richieste sono la cosa più urgente: dillo per prime. Quando metti una pratica a «integrazioni», digli in una riga che al Salva il gestionale gli propone la scadenza a 30 giorni (se il Comune gli ha dato un\'altra data, la cambia dallo Scadenzario). '
     + 'LO STATO DELLA PRATICA lo dici come sta scritto in pratica_stato, senza dedurlo: depositata = «depositata», istruttoria = «in istruttoria», integrazioni = «integrazioni richieste». Una pratica si nomina una volta sola anche se sta in due elenchi. Non cambiare lo stato di una pratica (modifica_lavoro) se non te l\'ha chiesto o se non sta scritto chiaro nel foglio che ti ha mandato. '
     + 'LA RITENUTA D\'ACCONTO: nelle fatture e nelle parcelle dello studio il «totale» di `soldi_del_reparto` e di `fatture_totali` è GIÀ TOLTA la ritenuta: è quello che il cliente bonifica. Lì non usare la regola «totale (imponibile)». Scrivi ESATTAMENTE così: «X € da incassare (Y € il documento, ritenuta già tolta)», dove X è il totale e Y è `totale_documento` (o l\'imponibile se non l\'hai). Esempio: «425,00 € da incassare (525,00 € il documento, ritenuta già tolta)». Vale anche per le bozze. ⛔ Mai chiamare «imponibile» il numero più basso, e non spiegare il perché con frasi tipo «totale più basso dell\'imponibile»: basta la riga dell\'esempio. Nei preventivi_totali cassa e ritenuta ci sono: se valgono 0, di\' che in quella parcella non sono segnate.',
   artigiano: 'QUESTO ISCRITTO È UN ARTIGIANO: nel suo menu la voce si chiama «Lavori e interventi» e il computo «Computo da prezzare».',

@@ -29,5 +29,13 @@ const pt = C.costruisciLettura('preventivi_totali', U, M, {});
 prova('parcella: cassa e ritenuta leggibili', /cassa/.test(pt.campi) && /ritenuta/.test(pt.campi) && /compenso/.test(pt.campi));
 const schema = JSON.stringify(C.STRUMENTI.find(s => s.name === 'elenco_cose').input_schema);
 prova('elenco_cose ha il filtro persona', /"persona"/.test(schema));
+// 24 nov 2026 — richieste di incarico dello studio
+const qi = C.costruisciLettura('incarichi_sito', U, M, { impresaId: 36, vuoto: 'visto_il' });
+prova('incarichi: filtro sulla scheda giusta (professionista_id)', qi.filtri && qi.filtri.professionista_id === '36' && !qi.filtri.impresa_id && !qi.filtri.user_id);
+prova('incarichi: senza scheda non legge', !!C.costruisciLettura('incarichi_sito', U, M, {}).errore);
+prova('incarichi: niente email e telefono', !/email|telefono/.test(qi.campi));
+prova('incarichi: «non ancora aperte»', qi.vuoto === 'visto_il');
+prova('richieste dei preventivi: filtro impresa_id come prima', C.costruisciLettura('richieste_sito', U, M, { impresaId: 36 }).filtri.impresa_id === '36');
+prova('studio: la chat guarda anche gli incarichi', /incarichi_sito/.test(pr));
 console.log((ko ? '✗ ' : '✓ ') + ok + ' verdi, ' + ko + ' rosse');
 process.exit(ko ? 1 : 0);

@@ -4276,6 +4276,13 @@ Banchi: `tools/banco-gestionale.js app` e `noleggio` ZERO difetti; `controllo-pu
 Deciso da Alex («si pubblica»): colonna `incarichi_richieste.preventivo_creato_id uuid` (`sql/2026-11-24-incarichi-preventivo.sql`, migrazione `incarichi_preventivo_creato_24nov2026` GIÀ ESEGUITA, riga in PROVE). `dsIncarichi` la legge (paracadute se manca), `dsSegna` la scrive al «Preventivo fatto»: allo studio c'è «Apri il preventivo» e «Riapri» torna «Preventivo fatto». Le richieste trasformate prima del 24 nov non ce l'hanno.
 ⬜ Non provati dopo le correzioni (il browser si è scollegato a metà sessione): i 7 punti qui sopra sul sito vero, la nuova «Risposta pronta» (1 credito), un documento allegato dal cliente, l'email nuova.
 
+Secondo giro (altra chat, in parallelo con questa; `?v=24nov-ds3`), provato dal vivo prima del push con 3 incarichi «PROVA CONTROLLORE», poi cancellati:
+8. ⛔ Urgenza scritta come codice («Urgenza: alta / bassa / media») → «Urgente / Nessuna fretta / Entro qualche settimana» (`_dsUrg` in js/gest-carte-documenti.js), elenco, scheda e risposta AI.
+9. ⛔ Risposta e onorario mandati dal pannello non si vedevano nel gestionale: riquadro «La tua risposta dal pannello» (data, testo, onorario). «Comune dell'immobile» al posto di «Città».
+10. ⛔ «Crea il preventivo» riusava in silenzio un cliente con lo stesso telefono anche con un altro nome (dal vivo: «Mario Rossi» finiva su «Edilizia Bianchi srl», non salvato). Ora lo dice. Tutte le facce.
+11. ⛔ Chat con AI allo studio: «Non hai richieste dal sito» con 3 incarichi lì. Attrezzo `incarichi_sito` (`colImpresa:'professionista_id'`, niente email/telefono), `incarichi_non_aperti` nell'agenda dello studio, regola in `PAROLE_RUOLO.professionista`. Banco `tools/banco-chat-studio.mjs` 38 verdi (sabotaggio accusato).
+⚠️ Due chat hanno fatto la stessa voce insieme: prima di cominciare una voce, `git log origin/main` per vedere se c'è già.
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
 Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate, Richieste dal sito.
 (✔ parlano · ✗ parlano male · — non parlano)
@@ -4438,7 +4445,8 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Richieste dal sito ↔ Clienti: ✔ cliente nuovo in rubrica, niente doppioni (stesso telefono o stessa email).
 - Richieste dal sito ↔ Assistente: ✔ «N richieste dal sito da aprire» = pallino del menu.
 - Richieste dal sito ↔ Pratiche: — la richiesta non diventa pratica direttamente (passa dal preventivo: «Accettato → crea pratica»). Giusto.
-- Richieste dal sito ↔ Chat con AI / Ricerca in alto: — la chat non legge le richieste dal sito; la ricerca non le trova (da guardare a fine giro).
+- Richieste dal sito ↔ Chat con AI: ✔ dal 24 nov (secondo giro) la chat legge gli incarichi (`incarichi_sito`).
+- Richieste dal sito ↔ Ricerca in alto: — la ricerca non le trova (da guardare a fine giro).
 - Si può unire: NO, è la porta d'ingresso dei clienti dal sito; si potrebbe pensare di metterla dentro Preventivi come linguetta, ma il pallino e la riga nell'Assistente bastano.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
