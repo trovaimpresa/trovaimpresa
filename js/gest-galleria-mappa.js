@@ -413,6 +413,13 @@
      scelta veniva ignorata e il pulsante diceva «Tutti» sopra la lista dei
      soli lavori da fare. */
   let mpGuasto=false, mpVecchi=null, mpRifai=false, mpRifaiForza=false;
+  /* 24 nov 2026 (consiglio accettato da Alex) — «Chi ci va»: solo i posti di
+     una persona. "" = tutti, "_nessuno" = nessuno assegnato (anche chi e' nel
+     Cestino, come l'Agenda), altrimenti l'id della persona. */
+  let mpChi="";
+  document.addEventListener("change",function(e){
+    if(e.target&&e.target.id==="mp-chi"){mpChi=e.target.value||"";renderMappa();}
+  });
 
   function mpLeggiCache(){
     if(mpCache)return mpCache;
@@ -525,9 +532,15 @@
   function mpSenzaHtml(lista){
     if(!lista||!lista.length)return "";
     const n=lista.length;
-    return '<div class="mp-avviso mp-avviso-lieve mp-senza"><span><b>'+(n===1?'1 lavoro senza indirizzo':n+' lavori senza indirizzo')+'</b>, '
-      +(n===1?'non è sulla carta':'non sono sulla carta')+'. Aprilo e scrivi il campo «Dove».</span>'
-      +lista.map(l=>'<div class="mp-senza-r"><span>'+esc(l.descrizione||"Lavoro")+'</span>'
+    /* 24 nov 2026 (collaudo Mappa dello studio) — «1 pratica… Aprilo»: le
+       parole si scrivono qui, giuste per tutte e due le facce. Il nome della
+       pratica sta in .mp-u: e' dell'utente, il traduttore non lo tocca. */
+    const pro=_mpPro();
+    const tit=pro?(n===1?'1 pratica senza indirizzo':n+' pratiche senza indirizzo'):(n===1?'1 lavoro senza indirizzo':n+' lavori senza indirizzo');
+    const apri=pro?(n===1?'Aprila':'Aprile'):(n===1?'Aprilo':'Aprili');
+    return '<div class="mp-avviso mp-avviso-lieve mp-senza"><span><b>'+tit+'</b>, '
+      +(n===1?'non è sulla carta':'non sono sulla carta')+'. '+apri+' e scrivi il campo «Dove».</span>'
+      +lista.map(l=>'<div class="mp-senza-r"><span class="mp-u">'+esc(l.descrizione||(pro?"Pratica":"Lavoro"))+'</span>'
         +'<button type="button" class="btn" data-action="mp-apri" data-id="'+esc(String(l.id))+'">Apri</button></div>').join("")
       +'</div>';
   }
@@ -575,6 +588,13 @@
     }
   }
 
+  /* 24 nov 2026 — la faccia dello studio tecnico */
+  function _mpPro(){return ruoloUtente==='professionista';}
+  /* testo dell'UTENTE (nome della pratica, indirizzo, cliente, collaboratore):
+     sta in .mp-u, che e' nell'elenco _SKIP_UTENTE. Prima «Rilievo del cantiere
+     Bianchi» diventava «Rilievo della pratica Bianchi» nella lista e nel fumetto. */
+  function _mpU(t){return '<span class="mp-u">'+esc(t||"")+'</span>';}
+
   function mpLargFumetto(){
     const w=(document.getElementById("mp-mappa")||{}).clientWidth||400;
     return Math.max(180,Math.min(300,w-90));
@@ -589,6 +609,8 @@
   async function renderMappa(forza){
     const box=$("#mp-lista"), avviso=$("#mp-avviso");
     if(!box)return;
+    /* 24 nov 2026 — la legenda: allo studio «Fatta» (la pratica) */
+    try{const lf=document.querySelector("#mappa .mp-legenda .dot.done");if(lf&&lf.nextSibling)lf.nextSibling.nodeValue=_mpPro()?"Fatta":"Fatto";}catch(e){}
     if(!sb||!sbUid||!cur){box.innerHTML="";return;}
     if(mpInCorso){mpRifai=true;if(forza)mpRifaiForza=true;return;}
     mpInCorso=true;
@@ -650,6 +672,27 @@
          «string "mp-mappa" is not a function». */
       let LAV=(lav||[]);
       if(mpVista==="aperti")LAV=LAV.filter(l=>l.stato!=="fatto");
+      /* 24 nov 2026 — «Chi ci va»: la tendina conta quello che si sta
+         guardando («da fare» o «tutti»), poi si tiene solo la persona scelta */
+      const _nessuno=l=>!l.operatore_id||!mpOp[l.operatore_id];
+      const chiBox=document.getElementById("mp-chi-box"), chiSel=document.getElementById("mp-chi");
+      const opIds=Object.keys(mpOp);
+      if(chiBox&&chiSel){
+        if(!opIds.length){chiBox.hidden=true;mpChi="";}
+        else{
+          if(mpChi&&mpChi!=="_nessuno"&&!mpOp[mpChi])mpChi="";
+          const nOp=id=>LAV.filter(l=>String(l.operatore_id)===String(id)).length;
+          const nomi=opIds.map(id=>({id,nome:String(mpOp[id].nome||"").trim()||"Senza nome",n:nOp(id)}))
+            .sort((a,b)=>a.nome.localeCompare(b.nome,"it"));
+          chiSel.innerHTML='<option value="">Tutti ('+LAV.length+')</option>'
+            +nomi.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nome)+' ('+x.n+')</option>').join("")
+            +'<option value="_nessuno">Nessuno ('+LAV.filter(_nessuno).length+')</option>';
+          chiSel.value=mpChi;
+          chiBox.hidden=false;
+        }
+      }
+      if(mpChi==="_nessuno")LAV=LAV.filter(_nessuno);
+      else if(mpChi)LAV=LAV.filter(l=>String(l.operatore_id)===String(mpChi));
       const voci=LAV.map(l=>{
         const c=cliMap[l.cliente_id];
         /* cliIndirizzo() mette insieme via + CAP + citta' + provincia: prima
@@ -773,11 +816,11 @@
           const peso=v.l.stato==="fatto"?0:(inRitardo(v.l.stato,v.l.data_prevista,v.l.pratica_stato)?2:1);
           const chiave=pt.lat.toFixed(5)+","+pt.lon.toFixed(5);
           const g=mpGruppi[chiave]||(mpGruppi[chiave]={lav:[],peso:0,m:null});
-          g.lav.push({t:v.l.descrizione||"Lavoro",ind:v.ind,km,id:v.l.id,strada});
+          g.lav.push({t:v.l.descrizione||(_mpPro()?"Pratica":"Lavoro"),ind:v.ind,km,id:v.l.id,strada});
           g.peso=Math.max(g.peso,peso);
           const icona=mpPinIcona(["#059669","#D97706","#DC2626"][g.peso],g.lav.length);
           /* 19 nov 2026 (sì di Alex) — nel fumetto «Apri il lavoro» e «Indicazioni» */
-          const fumetto=g.lav.map(x=>"<b>"+esc(x.t)+"</b><br>"+esc(x.ind)
+          const fumetto=g.lav.map(x=>"<b>"+_mpU(x.t)+"</b><br>"+_mpU(x.ind)
               +(x.km!=null?"<br><b>"+mpFormattaKm(x.km)+"</b> dall'ufficio":"")
               +'<div class="mp-fum-btn"><button type="button" class="btn" data-action="mp-apri" data-id="'+esc(String(x.id))+'">Apri il lavoro</button>'
               +'<button type="button" class="btn" data-action="mp-strada" data-q="'+esc(x.strada)+'">Indicazioni</button></div>').join("<hr style='border:0;border-top:1px solid #e3e8ef;margin:10px 0'>");
@@ -792,15 +835,26 @@
       mpSalvaPunti(mpDaSalvare);
       /* metto da parte le distanze: la scheda Mappa del Riepilogo le legge da qui
          senza rifare nessun calcolo e senza chiamare nessun servizio */
-      const C2=mpLeggiCache();C2.km={};
+      /* 24 nov 2026 — non si azzera piu': l'Assistente cerca i km di OGNI
+         pratica aperta per il suo indirizzo, e con «Tutti» o con un altro
+         reparto qui dentro finivano solo quelli dell'ultima vista (anche le
+         FATTE: «La pratica più vicina 0,7 km» era una pratica gia' chiusa). */
+      const C2=mpLeggiCache();if(!C2.km)C2.km={};
       righe.forEach(r=>{if(r.km!=null)C2.km[mpChiave(r.ind)]=r.km;});
       mpSalvaCache();
 
       /* 6) la lista sotto la carta */
       const senzaHtml=mpSenzaHtml(senzaInd);
+      if(!righe.length&&mpChi){
+        /* 24 nov 2026 — con una persona scelta: non e' che mancano gli indirizzi */
+        const chiN=mpChi==="_nessuno"?"senza nessuno":("di "+String((mpOp[mpChi]&&mpOp[mpChi].nome)||"").trim().split(/\s+/)[0]);
+        box.innerHTML='<div class="mp-avviso mp-avviso-lieve"><span>Niente da mostrare sulla carta '+esc(chiN)+'. Scegli «Tutti» in «Chi ci va» per vedere gli altri.</span></div>'+senzaHtml;
+        finito=true;
+        return;
+      }
       if(!righe.length){
         box.innerHTML=tabVuoto("Nessun cantiere da mostrare",
-          "Scrivi il campo «Dove» nei lavori, oppure l'indirizzo nelle schede clienti.",
+          "Scrivi il campo «Dove» "+(_mpPro()?"nelle pratiche":"nei lavori")+", oppure l'indirizzo nelle schede clienti.",
           _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>')+senzaHtml;
         finito=true;
         return;
@@ -808,7 +862,7 @@
       const nonTrovati=pPart?righe.filter(r=>!r.p&&!r.guasto).length:0;
       box.innerHTML=
         (mpGuasto?'<div class="mp-avviso"><span>Il servizio della carta adesso non risponde. Riprova fra qualche minuto con <b>Ricalcola distanze</b>.</span></div>':"")
-        +(nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Controlla il campo «Dove» del lavoro e scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b>.</div>':"")
+        +(nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Controlla il campo «Dove» '+(_mpPro()?'della pratica':'del lavoro')+' e scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b>.</div>':"")
         +'<div class="mp-righe">'
         +righe.map(r=>{
           /* 19 nov 2026 — un lavoro FATTO non e' in ritardo: prima la data
@@ -818,13 +872,13 @@
           const rit=inRitardo(r.l.stato,r.l.data_prevista,r.l.pratica_stato);
           return '<div class="mp-riga'+(r.p?"":" senza")+'">'
             +'<div class="mp-r-testo">'
-            +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'
-            +  '<div class="mp-r-sub">'+esc(r.ind)
-            +    (r.c?' · '+esc(r.c.nome||""):"")
-            +    ' · '+(fatto?'<span class="mp-fatto">fatto</span> · ':"")+'<span class="'+(rit?"q-passato":q.classe)+'">'+(rit?"in ritardo ("+esc(q.testo)+")":esc(q.testo))+'</span>'
+            +  '<div class="mp-r-tit">'+_mpU(r.l.descrizione||(_mpPro()?"Pratica":"Lavoro"))+'</div>'
+            +  '<div class="mp-r-sub">'+_mpU(r.ind)
+            +    (r.c?' · '+_mpU(r.c.nome||""):"")
+            +    ' · '+(fatto?'<span class="mp-fatto">'+(_mpPro()?'fatta':'fatto')+'</span> · ':"")+'<span class="'+(rit?"q-passato":q.classe)+'">'+(rit?"in ritardo ("+esc(q.testo)+")":esc(q.testo))+'</span>'
             +    (r.ipotesi&&!r.sospetto?' · <span class="mp-ipotesi">comune ipotizzato: '+esc(comuneUff)+'</span>':"")
             +    (r.circa?' · <span class="mp-ipotesi">via trovata, numero no</span>':"")
-            +    (fatto?"":' · <span class="mp-civa">Ci va: '+esc((mpOp[r.l.operatore_id]&&mpOp[r.l.operatore_id].nome)||"nessuno")+'</span>')
+            +    (fatto?"":' · <span class="mp-civa">Ci va: '+((mpOp[r.l.operatore_id]&&mpOp[r.l.operatore_id].nome)?_mpU(mpOp[r.l.operatore_id].nome):"nessuno")+'</span>')
             +    '</div>'
             +'</div>'
             +'<div class="mp-r-dist">'

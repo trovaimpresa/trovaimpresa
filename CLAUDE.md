@@ -4114,9 +4114,27 @@ Funzione nuova (foto prima, «il tuo consiglio facciamolo e pubblica» di Alex),
 - **«📄 PDF delle foto»** sul titolo di ogni pratica in Galleria (`galPdfPratica` in `js/gest-galleria-mappa.js`, azione `gal-pdf`, stile `.gal-pdf`): «Documentazione fotografica» (studio) / «Foto del lavoro» (impresa), intestazione come il PDF delle Giornate (logo + Dati azienda), pratica/cliente/luogo/data, «Prima dei lavori» e «Fine lavori», foto 2 per riga numerate con data (e chi, se non sei tu), firma «Il tecnico» allo studio, «Pag. x di y». Usa `gxImmagine` di `js/gest-giornate-extra.js`. I video non ci vanno (lo dice).
 - Filtro «Cliente» in Galleria: mostrato in foto, NON scelto da Alex (non fatto).
 ⬜ Non provati: un collaboratore vero dal telefono; .mov da iPhone; Scarica sul telefono vero.
+Pubblicato 39a51c3, Netlify ok, riprovato sul sito vero 1440: PDF delle foto (Documentazione fotografica, 2 pagine, firma Il tecnico), parole dello studio, Foto dal menu in Galleria ✔. Pulito.
+
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: MAPPA
+
+Prova da geometra dal vivo (`?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati, letti e cancellati in UNA chiamata (`window._provaMappa(leggi)` scritta nella pagina): cliente srl con indirizzo, collaboratrice Giulia, 7 pratiche (sopralluogo CILA domani, rilievo in ritardo «Via Garibaldi 100» senza comune, DOCFA senza «Dove» → indirizzo del cliente, APE fatta, frazionamento senza indirizzo, indirizzo sbagliato, Milano). Visti: distanze (0,9 · 1 · 449 km), «Pratiche da fare / Tutte», pin e fumetti, «Indicazioni», «Manda a Giulia» (WhatsApp con «Portami lì» al punto), punto salvato nella pratica per l'app, pratica nel Cestino sparisce ✔, servizio della carta giù (finto `fetch` che fallisce) → in 3 s «non risponde» e le distanze di prima restano ✔, telefono 375 (niente fuori, solo la scritta © OpenStreetMap a 12 px, di Leaflet). Pulito: lavori 5, clienti 2, persone 1 come prima; tolte dalla memoria del browser le 12 voci di prova della carta.
+⚠️ «Via Garibaldi 100» senza comune → «scrivi anche il comune» è GIUSTO: la carta gratuita conosce solo quella di Fara in Sabina.
+
+Sistemato (`?v=24nov-mp`):
+1. ⛔ Il traduttore dello studio cambiava il TESTO DELL'UTENTE nella Mappa: «Rilievo del cantiere Bianchi» → «Rilievo della pratica Bianchi» (lista e fumetto). Nome, indirizzo, cliente e collaboratore adesso stanno in `.mp-u` (`_mpU`), aggiunta a `_SKIP_UTENTE` in `js/gest-ingresso.js`.
+2. ⛔ Assistente, scheda Mappa: «La pratica più vicina 0,7 km» era una pratica FATTA e «Il più lontano 129 km» un lavoro chiuso (prendeva tutti i km dell'ultima vista). Ora cerca i km delle sole pratiche aperte del reparto per indirizzo; la Mappa non azzera più la memoria dei km. «La più lontana» allo studio.
+3. ⛔ Assistente: «4 pratiche aperte con un indirizzo», la Mappa ne mostrava 5: leggeva i clienti senza indirizzo. Ora `id,nome,indirizzo,cap,citta,prov,paese`.
+4. Parole dello studio alla fonte (`_mpPro`): «fatta», legenda «Fatta», «Controlla il campo «Dove» della pratica», «1 pratica senza indirizzo… Aprila» (impresa: «Aprilo/Aprili»), elenco vuoto «nelle pratiche».
+5. App del collaboratore (`opPuntoOk` in `js/op-schede.js`): cliente estero → il punto della Mappa non valeva (il gestionale mette «, Svizzera» in coda). Provato in node, 6 casi.
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni.
+⬜ Non provati: un collaboratore vero dal suo telefono; il navigatore su iPhone vero.
+
+Funzione nuova («facciamo il tuo consiglio e pubblica» di Alex), tutte le facce, `?v=24nov-mp2`:
+- **«Chi ci va»** nella Mappa (`#mp-chi-box` / `#mp-chi` in `gestionale-app.html`, `mpChi` + ascoltatore `change` in `js/gest-galleria-mappa.js`): Tutti (N) · ogni persona (N) · Nessuno (N), contati su quello che guardi («da fare» o «tutte»); «Nessuno» comprende chi è nel Cestino, come l'Agenda. Filtra lista, pin e «senza indirizzo». Se la persona non ha niente: «Niente da mostrare sulla carta di Giulia…». Senza persone la tendina non c'è. Provato dal vivo prima del push (Giulia 2, Marco 1, Nessuno 3, Bruno 0; 1440 e 375, select 44 px, testo 16 px). Pulito.
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4180,6 +4198,18 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Galleria ↔ Ricerca in alto: — le foto non si cercano (si cerca la pratica).
 - Galleria ↔ Giornate: ✔ le foto prima/dopo delle Giornate sono le stesse righe (stessi tipi).
 - Si può unire: Galleria NO (allo studio è l'archivio delle foto di tutte le pratiche); dentro la pratica basta il conteggio + il collegamento.
+
+- Mappa ↔ Pratiche: ✔ «Apri» apre la pratica; il punto trovato si salva nella pratica. Pratica nel Cestino → sparisce dalla Mappa.
+- Mappa ↔ Clienti: ✔ senza «Dove» usa l'indirizzo del cliente; nome del cliente nella riga.
+- Mappa ↔ Dati azienda: ✔ l'ufficio è il punto di partenza; senza indirizzo «Apri Dati azienda».
+- Mappa ↔ Collaboratori: ✔ «Ci va: …» e «Manda a …» (WhatsApp con «Portami lì»).
+- Mappa ↔ app del collaboratore: ✔ punto, km e navigatore passano alla pratica (dal codice; cliente estero sistemato il 24 nov).
+- Mappa ↔ Assistente: ✔ dal 24 nov numeri uguali (pratiche aperte con indirizzo, più vicina e più lontana solo fra le aperte).
+- Mappa ↔ Agenda: ✔ dal 24 nov «Chi ci va» nella Mappa (i posti di una persona, «Nessuno» come l'Agenda). — l'Agenda non dice i km.
+- Mappa ↔ Calendario: — i sopralluoghi di domani non hanno «il giro» sulla carta.
+- Mappa ↔ Cestino: ✔ (vedi Pratiche).
+- Mappa ↔ Ricerca in alto / Strumenti / Fornitori: — non c'entrano.
+- Si può unire: Mappa NO (allo studio serve per i sopralluoghi); con Agenda si parlano meglio con un filtro «chi ci va», non unendole.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

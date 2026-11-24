@@ -44,7 +44,12 @@ function opIndCliente(cl){
 function opDove(l){const cl=CLIENTI[l.cliente_id];return (l.dove||"").trim()||opIndCliente(cl);}
 function opPuntoOk(l){
   const n=s=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
-  return l&&l.dove_lat!=null&&l.dove_lon!=null&&!!l.dove_geo&&n(l.dove_geo)===n(opDove(l));
+  if(!(l&&l.dove_lat!=null&&l.dove_lon!=null&&!!l.dove_geo))return false;
+  const g=n(l.dove_geo), d=n(opDove(l));
+  /* 24 nov 2026 — cliente estero: il gestionale mette in coda il paese
+     («…, Svizzera», paeseCoda) e qui no. Se il lavoro non ha un «Dove» suo,
+     vale anche l'indirizzo del cliente seguito dal paese. */
+  return g===d||(!(l.dove||"").trim()&&!!d&&g.indexOf(d+", ")===0&&g.slice(d.length+2).indexOf(",")<0);
 }
 function opSuIphone(){const s=navigator.userAgent||"";return /iPhone|iPad|iPod/i.test(s)||(/Macintosh/.test(s)&&navigator.maxTouchPoints>1);}
 /* il punto di partenza lo mette il telefono, che sa dov'e' */

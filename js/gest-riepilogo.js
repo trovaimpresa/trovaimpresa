@@ -248,7 +248,10 @@
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
+        /* 24 nov 2026 (collaudo Mappa dello studio) — anche l'indirizzo: la
+           scheda Mappa conta le pratiche «con un indirizzo», e quelle che
+           usano l'indirizzo del cliente qui risultavano senza (4 invece di 5). */
+        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,paese").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
@@ -1092,10 +1095,22 @@
          VECCHIA, cioe' le distanze sbagliate di prima. Adesso e' la stessa
          costante per tutti e due, quindi non si possono piu' scollare. */
       const C=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");
-      const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
+      /* 24 nov 2026 (collaudo Mappa dello studio) — si guardano SOLO le
+         pratiche aperte di questo reparto, cercando i km del loro indirizzo.
+         Prima si prendevano tutti i km messi da parte dall'ultima Mappa:
+         con «Tutti» la piu' vicina era una pratica FATTA (0,7 km) e la piu'
+         lontana un lavoro chiuso di 129 km, mentre le due aperte erano a
+         0,9 e 1 km. */
+      const KM=C.km||{};
+      const km=conIndirizzo.map(l=>{
+        const c=CLI.find(x=>x.id===l.cliente_id);
+        const ind=(l.dove||"").trim()||cliIndirizzo(c).trim();
+        return KM[mpChiave(ind)];
+      }).filter(v=>typeof v==="number").sort((a,b)=>a-b);
       if(km.length){
+        const pro=ruoloUtente==='professionista';
         mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0]),fisso:1},
-                {t:"Il più lontano",v:mpFormattaKm(km[km.length-1]),fisso:1}];
+                {t:pro?"La più lontana":"Il più lontano",v:mpFormattaKm(km[km.length-1]),fisso:1}];
       }
     }catch(e){}
     C.push(rieCard({
