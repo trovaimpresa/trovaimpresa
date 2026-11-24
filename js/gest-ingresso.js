@@ -69,7 +69,7 @@
      chiusa qui sopra (una parola si cambia solo se e' intera), ma questi due
      restano nell'elenco lo stesso: sono contenuto dell'utente e non vanno
      toccati nemmeno per caso. */
-  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,.cai-desc,.cp-orig,#co-qe-a,.ti-orig,.pz-desc,.cp-d,.cp-cap,.mp-u,textarea';
+  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,.cai-desc,.cp-orig,#co-qe-a,.ti-orig,.pz-desc,.cp-d,.cp-cap,.mp-u,.gior-u,textarea';
   /* 24 nov 2026 — «.mp-u»: nella Mappa il nome della pratica, l'indirizzo, il
      cliente e il collaboratore. «Rilievo del cantiere Bianchi» diventava
      «Rilievo della pratica Bianchi» nella lista e nel fumetto. */

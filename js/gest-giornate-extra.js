@@ -57,14 +57,23 @@ async function gxCarica() {
   const ids = [...new Set((giorRighe || []).map(g => g.lavoro_id).filter(Boolean))];
   const vuota = Promise.resolve({ data: [] });
   const tenta = async q => { try { const r = await q; return (r && !r.error && r.data) || []; } catch (e) { return []; } };
-  const [foto, spese, rif, fatt, mezzi] = await Promise.all([
+  let [foto, spese, rif, fatt, mezzi] = await Promise.all([
     tenta(ids.length ? sb.from("gest_foto").select("id,lavoro_id,tipo,created_at,storage_path").eq("user_id", sbUid).in("lavoro_id", ids).in("tipo", ["da_fare", "fatto"]).gte("created_at", isoDa).lt("created_at", isoA) : vuota),
     tenta(sb.from("gest_spese").select("id,lavoro_id,descrizione,importo,data,created_at").eq("user_id", sbUid)
       .or('and(data.gte.' + da + ',data.lt.' + a + '),and(data.is.null,created_at.gte."' + isoDa + '",created_at.lt."' + isoA + '")')),
-    tenta(sb.from("gest_rifornimenti").select("id,data,importo,km,mezzo_id,distributore").eq("user_id", sbUid).gte("data", da).lt("data", a)),
+    tenta(sb.from("gest_rifornimenti").select("id,data,importo,km,mezzo_id,distributore,mestiere_id").eq("user_id", sbUid).gte("data", da).lt("data", a)),
     tenta(sb.from("gest_fatture_fornitori").select("id,lavoro_id,data,importo,numero").eq("user_id", sbUid).gte("data", da).lt("data", a)),
     tenta(sb.from("gest_mezzi").select("id,nome,mestiere_id").eq("user_id", sbUid).order("nome"))
   ]);
+  /* 24 nov 2026 — solo il reparto aperto (come le giornate): spese e
+     fatture dei lavori di questo reparto, pieni del reparto */
+  const _mid = (typeof _gMest === "function") ? _gMest() : null;
+  if (_mid) {
+    const lavRep = new Set((typeof giorLav !== "undefined" ? giorLav : []).map(l => String(l.id)));
+    spese = spese.filter(x => lavRep.has(String(x.lavoro_id)));
+    fatt = fatt.filter(x => !x.lavoro_id || lavRep.has(String(x.lavoro_id)));
+    rif = rif.filter(x => !x.mestiere_id || String(x.mestiere_id) === String(_mid));
+  }
   /* 10 nov 2026 — regola di Alessio: in cima sempre le ULTIME salvate */
   const ultimePrima = (x, y) => String(y.created_at || "").localeCompare(String(x.created_at || ""));
   foto.sort(ultimePrima); spese.sort(ultimePrima);
@@ -120,13 +129,18 @@ function gxHtmlGiorno(g, primaDelGiorno) {
   }
   if (d.fatt.length) ha.push('<span>' + GX_IC.fatt + d.fatt.length + (d.fatt.length === 1 ? " fattura" : " fatture") + " · " + gxEuro(gxSomma(d.fatt)) + '</span>');
   /* 20 nov 2026 — il lavoro svolto, per il cliente (gest_rapportini.didascalia) */
-  const dida = g.didascalia ? '<div class="gx-dida"><b>Lavoro svolto:</b> ' + esc(g.didascalia) + '</div>' : "";
+  const dida = g.didascalia ? '<div class="gx-dida"><b>Lavoro svolto:</b> <span class="gior-u">' + esc(g.didascalia) + '</span></div>' : "";
+  /* 24 nov 2026 — allo studio: niente «Benzina e km» (chiede un mezzo, e allo
+     studio i Mezzi sono nascosti: mandava a una voce del menu che non c'e')
+     e «Fattura del fornitore» al posto di «Fattura o bolla». Se c'e' gia'
+     un pieno segnato si vede lo stesso, sopra. */
+  const pro = (typeof _gPro==="function"&&_gPro());
   return dida + (ha.length ? '<div class="gx-ha">' + ha.join("") + '</div>' : "")
     + '<div class="gx-btn">'
     + '<button type="button" data-gx="foto" data-k="' + k + '">' + GX_IC.foto + 'Foto</button>'
     + '<button type="button" data-gx="spesa" data-k="' + k + '">' + GX_IC.spesa + 'Spesa</button>'
-    + '<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + 'Benzina e km</button>'
-    + '<button type="button" data-gx="fatt" data-k="' + k + '">' + GX_IC.fatt + 'Fattura o bolla</button>'
+    + (pro ? '' : '<button type="button" data-gx="benz" data-k="' + k + '">' + GX_IC.benz + 'Benzina e km</button>')
+    + '<button type="button" data-gx="fatt" data-k="' + k + '">' + GX_IC.fatt + (pro ? 'Fattura del fornitore' : 'Fattura o bolla') + '</button>'
     + '<button type="button" class="gx-cli" data-gx="cliente" data-k="' + k + '">' + GX_IC.pdf + 'Per il cliente</button>'
     + '</div>';
 }
@@ -204,9 +218,10 @@ async function gxVediFoto(g) {
   const col = (tit, tipo, n) => '<div class="gx-pd-col"><div class="gx-pd-t"><h4>' + tit + (n ? ' <span>(' + n + ')</span>' : '') + '</h4>'
     + '<button type="button" class="btn" data-gx="foto" data-tipo="' + tipo + '" data-k="' + k + '">' + GX_IC.foto + (tipo === "da_fare" ? "+ Foto prima" : "+ Foto dopo") + '</button></div>'
     + '<div class="gx-griglia" id="gx-g-' + tipo + '"><div class="loading">Carico…</div></div></div>';
+  const pro = (typeof _gPro==="function"&&_gPro());
   openSheetGrande("Foto",
-    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
-    + '<div class="gx-pd" id="gx-pd">' + col("Prima del lavoro", "da_fare", d.prima.length) + col("Dopo il lavoro", "fatto", d.dopo.length) + '</div></div>',
+    '<div class="sh-b sh-centro"><div class="sh-tit gior-u">' + esc(gxTitolo(g)) + '</div>'
+    + '<div class="gx-pd" id="gx-pd">' + col(pro ? "Prima dei lavori" : "Prima del lavoro", "da_fare", d.prima.length) + col(pro ? "Fine lavori" : "Dopo il lavoro", "fatto", d.dopo.length) + '</div></div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button>'
     + '<button class="btn-primary b-save" data-gx="cliente" data-k="' + k + '">Per il cliente</button>');
   const bp = document.getElementById("gx-g-da_fare"), bd = document.getElementById("gx-g-fatto");
@@ -234,15 +249,16 @@ function gxSpesaApri(g) {
   const d = gxDella(g, false);
   const righe = d.spese.map(function (s) {
     const aspetta = gxTogli === "spesa:" + s.id;
-    return '<div class="gx-riga"><div class="t">' + esc(s.descrizione || "Spesa") + '</div><b>' + gxEuro(s.importo) + '</b>'
+    return '<div class="gx-riga"><div class="t gior-u">' + esc(s.descrizione || "Spesa") + '</div><b>' + gxEuro(s.importo) + '</b>'
       + (aspetta ? '<button type="button" class="gx-si" data-gx="spesa-togli-si" data-id="' + esc(String(s.id)) + '">Sì, togli</button>'
                  : '<button type="button" class="gx-link" data-gx="spesa-togli" data-id="' + esc(String(s.id)) + '">togli</button>')
       + '</div>';
   }).join("");
+  const pro = (typeof _gPro==="function"&&_gPro());
   openSheetGrande("Spesa",
-    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
+    '<div class="sh-b sh-centro"><div class="sh-tit gior-u">' + esc(gxTitolo(g)) + '</div>'
     + (righe ? '<div class="gx-lista">' + righe + '</div>' : '')
-    + '<div class="field"><label>Cosa hai comprato</label><input type="text" id="gx-sp-desc" placeholder="Es. sabbia e cemento" autocomplete="off"></div>'
+    + '<div class="field"><label>' + (pro ? 'Cosa hai pagato' : 'Cosa hai comprato') + '</label><input type="text" id="gx-sp-desc" placeholder="' + (pro ? 'Es. diritti di segreteria, visure catastali' : 'Es. sabbia e cemento') + '" autocomplete="off"></div>'
     + '<div class="field"><label>Quanto hai speso (€)</label><input type="text" id="gx-sp-imp" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>'
     + '</div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button>'
@@ -256,7 +272,7 @@ async function gxSpesaSalva(btn) {
   /* 18 nov 2026: «12o» si leggeva 12 (la lettera spariva zitta) */
   if (testo && (importo == null || gxNonNumero(testo))) { toast("Non ho capito l'importo: scrivilo come 12,50"); return; }
   if (importo == null || importo <= 0) { toast("Scrivi quanto hai speso, per esempio 12,50"); return; }
-  if (!descrizione) { toast("Scrivi cosa hai comprato"); return; }
+  if (!descrizione) { toast(((typeof _gPro==="function"&&_gPro())) ? "Scrivi cosa hai pagato" : "Scrivi cosa hai comprato"); return; }
   if (btn) btn.disabled = true;
   const r = await sb.from("gest_spese").insert({ user_id: sbUid, lavoro_id: gxAperta.lavoro_id, descrizione: descrizione, importo: importo, data: gxAperta.data }).select("id");
   if (r.error || !r.data || !r.data.length) { if (btn) btn.disabled = false; toast("Spesa non salvata: " + ((r.error && r.error.message) || "riprova")); return; }
@@ -425,15 +441,16 @@ function gxResoconto(g) {
   const senzaRap = !g.rapportino_id;
   const manca = (typeof giorDidaManca !== "undefined" && giorDidaManca);
   const fotoTxt = !d.foto.length ? "Nel PDF non ci sono foto." : "Nel PDF: " + [d.prima.length ? d.prima.length + " foto prima" : "", d.dopo.length ? d.dopo.length + " foto dopo" : ""].filter(Boolean).join(" e ") + ".";
+  const pro = (typeof _gPro==="function"&&_gPro());
   openSheetGrande("Per il cliente",
-    '<div class="sh-b sh-centro"><div class="sh-tit">' + esc(gxTitolo(g)) + '</div>'
+    '<div class="sh-b sh-centro"><div class="sh-tit gior-u">' + esc(gxTitolo(g)) + '</div>'
     + (senzaRap || manca
       ? '<p class="gx-vuoto">' + (manca ? "Il lavoro svolto non si può ancora salvare: manca un aggiornamento del database. Il PDF esce lo stesso, con le foto." : "Questa giornata è stata segnata nel modo vecchio: il lavoro svolto non si può salvare. Il PDF esce lo stesso, con le foto.") + '</p>'
       : '<div class="field"><label for="gx-dida">Lavoro svolto (lo legge il cliente)</label>'
-        + '<textarea id="gx-dida" rows="4" placeholder="Es. Rimosse le vecchie piastrelle e posate le nuove in gres nel bagno.">' + esc(g.didascalia || "") + '</textarea></div>'
+        + '<textarea id="gx-dida" rows="4" placeholder="' + (pro ? 'Es. Sopralluogo con rilievo delle misure dell\'appartamento per la CILA.' : 'Es. Rimosse le vecchie piastrelle e posate le nuove in gres nel bagno.') + '">' + esc(g.didascalia || "") + '</textarea></div>'
         + '<div class="gx-dida-ai"><button type="button" class="btn" data-gx="dida-ai" data-k="' + k + '">Scrivilo con l\'AI · 1 credito</button><span>guarda le foto e le note della giornata</span></div>')
     + '<div class="gx-dida-foto">' + GX_IC.foto + '<span>' + esc(fotoTxt) + '</span> <button type="button" class="gx-link blu" data-gx="vedi-foto" data-k="' + k + '">Aggiungi o guarda le foto</button></div>'
-    + '<p class="gx-dida-nota">Nel PDF non ci sono i nomi degli operai, le ore, le spese, le note e l\'indirizzo.</p>'
+    + '<p class="gx-dida-nota">' + (pro ? 'Nel PDF non ci sono i nomi dei collaboratori, le ore, le spese, le note e l\'indirizzo.' : 'Nel PDF non ci sono i nomi degli operai, le ore, le spese, le note e l\'indirizzo.') + '</p>'
     + '</div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button>'
     + (senzaRap || manca ? '' : '<button class="btn" data-gx="dida-salva" data-k="' + k + '">Salva</button>')
@@ -530,11 +547,15 @@ async function gxPdfCliente(g) {
   if (typeof window.gestLogoPdf === "function") { try { st.y = await window.gestLogoPdf(doc, M, st.y) || st.y; } catch (e) {} }
   /* il nome della ditta: Dati azienda; se e' vuoto, il nome del profilo */
   let nome = "";
-  try { const ra = await sb.from("gest_azienda").select("nome,ragione_sociale").eq("user_id", sbUid).maybeSingle(); nome = (ra && ra.data && (ra.data.nome || ra.data.ragione_sociale)) || ""; } catch (e) {}
+  /* 24 nov 2026 — leggeva anche «ragione_sociale», che in gest_azienda NON
+     esiste: la lettura falliva sempre e usciva il nome del profilo del sito
+     («Admin TrovaImpresa») invece di quello di Dati azienda. */
+  try { const ra = await sb.from("gest_azienda").select("nome").eq("user_id", sbUid).maybeSingle(); nome = (ra && ra.data && ra.data.nome) || ""; } catch (e) {}
   if (!nome) { try { const ri = await sb.from("imprese").select("nome_attivita").eq("user_id", sbUid).maybeSingle(); nome = (ri && ri.data && ri.data.nome_attivita) || ""; } catch (e) {} }
   if (nome) { doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(10, 42, 77); doc.text(T(nome), M, st.y + 2); doc.setTextColor(0); st.y += 9; }
   doc.setDrawColor(255, 136, 0); doc.setLineWidth(0.8); doc.line(M, st.y, W - M, st.y); st.y += 11;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(21); doc.text("Resoconto del lavoro", M, st.y); st.y += 7.5;
+  const pro = (typeof _gPro==="function"&&_gPro());
+  doc.setFont("helvetica", "bold"); doc.setFontSize(21); doc.text(pro ? "Resoconto dell'attività" : "Resoconto del lavoro", M, st.y); st.y += 7.5;
   const data = gxDataLunga(g.data, true);
   doc.setFont("helvetica", "normal"); doc.setFontSize(12); doc.setTextColor(90); doc.text(T(data.charAt(0).toUpperCase() + data.slice(1)), M, st.y); doc.setTextColor(0); st.y += 10;
   if (dida) {
@@ -542,7 +563,7 @@ async function gxPdfCliente(g) {
     righe.forEach(r => { if (st.y > 280) { doc.addPage(); st.y = 18; } doc.text(r, M, st.y); st.y += 6; });
     st.y += 6;
   }
-  for (const [tit, lista] of [["Prima del lavoro", d.prima], ["Dopo il lavoro", d.dopo]]) {
+  for (const [tit, lista] of [[pro ? "Prima dei lavori" : "Prima del lavoro", d.prima], [pro ? "Fine lavori" : "Dopo il lavoro", d.dopo]]) {
     if (!lista.length) continue;
     if (st.y + 60 > 284) { doc.addPage(); st.y = 18; }
     doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(tit, M, st.y); st.y += 5;
@@ -560,7 +581,7 @@ async function gxFotoMesePdf(doc, y, M, W) {
   const giornate = [...(giorRighe || [])].sort((a, b) => a.data.localeCompare(b.data)).map(g => ({ g, d: gxDella(g, false) })).filter(x => x.d.foto.length);
   if (!giornate.length) return y;
   doc.addPage(); st.y = 20;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text("Foto dei lavori", M, st.y); st.y += 9;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text(((typeof _gPro==="function"&&_gPro())) ? "Foto delle pratiche" : "Foto dei lavori", M, st.y); st.y += 9;
   for (const { g, d } of giornate) {
     if (st.y + 70 > 284) { doc.addPage(); st.y = 20; }
     doc.setFont("helvetica", "bold"); doc.setFontSize(12);

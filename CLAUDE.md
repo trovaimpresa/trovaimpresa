@@ -4237,8 +4237,28 @@ Banco NUOVO `tools/banco-chat-studio.mjs` (31 prove, 4 sabotaggi tutti accusati)
 ⬜ Non provati: «Parla» dentro la chat (dettatura: il microfono del browser di Claude è bloccato), un PDF vero col «+», un collaboratore vero.
 ⬜ Visto, non toccato: «Apri il preventivo» allo studio (la voce del menu si chiama «Preventivi»: coerente).
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: GIORNATE
+
+⚠️ Il Cestino dello studio del 24 nov NON è pubblicato (ultimo commit online d68a4f9, Chat con AI): non riprovato. La Chat con AI del 24 nov è online.
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375), dati creati con `window._pgCrea()` e cancellati con `window._pgPulisci()` (tutto quello nato dopo l'ora di partenza nel reparto; `gest_giornate_proposte` ha `creato_il`, si cancella per id): cliente srl, Giulia (20 €/h), 2 pratiche (CILA Rossi depositata 1.500 €, Accatastamento Bianchi 600 €), date 2027. «Racconta la giornata» con l'AI vera (io + Giulia, sopralluogo, catasto, 16 € di diritti), «io» → «aggiungimi», Salva, «Spesa» 52,50 € diritti di segreteria, «modifica» (pratica cambiata), «Per il cliente» + PDF, Riepilogo, PDF del mese (testo letto avvolgendo `jsPDF.save`), giornata mandata da Giulia → «Approva». Numeri uguali: Giornate 320 € tempo speso = Report (240 + 80) ✔, spese 52,50 = Report ✔, «speso finora il 20%» ✔, Agenda «Ore fatte» 16 h (8 + 8) = Report «Ore per collaboratore» ✔. Telefono 375: niente fuori, niente sotto 13 px, pulsanti ≥ 44 px ✔. Pulito: conteggi uguali a prima (lavori 5, clienti 2, persone 1, ore 1, rapportini 1, spese 0, foto 5, deposito 5), niente `gior_io_` nel browser.
+
+Sistemato (`?v=24nov-gio`):
+1. ⛔ Il traduttore cambiava il TESTO DELL'UTENTE: «misure in cantiere con l'impresa» → «misure in pratica», «stazione totale in pratica», anche il nome della pratica e «Come ieri». Ora sta in `.gior-u` (in `_SKIP_UTENTE`, js/gest-ingresso.js): righe del mese, giornate da approvare, «Come ieri», Riepilogo, titoli delle finestre, spese, lavoro svolto.
+2. ⛔ L'AI scriveva «Catasto» come pratica e al Salva nasceva una pratica vuota «Catasto». Allo studio: `giorPraticaDa(dove,cosa)` cerca la pratica vera con le parole del posto e del racconto (provato dal vivo: «Accatastamento Bianchi»); `giorFermaPraticaNuova` al primo «Salva» dice «Non trovo la pratica «Catasto»… premi di nuovo «Salva» e la creo» (anche in «modifica»). Impresa e artigiano come prima.
+3. ⛔ «Per il cliente» (tutte le facce): il PDF non prendeva MAI il nome di Dati azienda (leggeva `ragione_sociale`, colonna che non esiste) → usciva «Admin TrovaImpresa». Ora `select("nome")`.
+4. «I pratiche del mese» → «Le pratiche del mese»; «Manodopera del mese» → «Tempo speso nel mese» (come il Report).
+5. Allo studio via «Acquisti del mese» (merce da fatture e bolle, tolto in Fornitori il 20 nov) e via «Benzina e km» (chiede un mezzo e mandava alla voce «Mezzi», nascosta allo studio; un pieno già segnato si vede lo stesso). «Fattura o bolla» → «Fattura del fornitore».
+6. Parole dello studio alla fonte: esempio del racconto e della casella «Pratica» (niente Campoloniano/tetto), «tu chi sei fra i collaboratori?», «Non contare le mie ore», Spesa «Cosa hai pagato» (es. diritti di segreteria), Foto «Prima dei lavori / Fine lavori», «Per il cliente» con «dei collaboratori» (era «degli collaboratori») e l'esempio da studio, PDF «Resoconto dell'attività», giornate da approvare «insieme a foto e spese», Riepilogo e PDF del mese «Giorni per collaboratore», «Giorni per pratica», «Pratica», «Spese, benzina e fatture», «Fatture dei fornitori», «Foto delle pratiche», consulente «pratica per pratica».
+7. Chat con AI dello studio (chiesto da Alex in questa sessione): bozza con ritenuta detta «X € da incassare (Y € il documento, ritenuta già tolta)», mai «più basso dell'imponibile» (`PAROLE_RUOLO` in chat-gestionale.mjs; prova nuova in `tools/banco-chat-studio.mjs`, rossa sulla versione di prima).
+Banchi: `tools/banco-gestionale.js app` ZERO difetti; `tools/banco-chat-studio.mjs` 32 verdi. Prova locale coi dati finti: `/tmp/lavoro/gior.js` (testo dell'utente protetto, parole dello studio, `giorPraticaDa`, il fermo al Salva).
+⬜ Non provati: l'app del collaboratore dal suo telefono (letto il codice: `js/op-studio.js` traduce «Cantiere», «Manda al titolare», «Ricevuta o fattura»); «Scrivilo con l'AI» del lavoro svolto (1 credito, l'AI parla da cantiere?); la notifica della sera e l'email al consulente.
+⬜ Da decidere con Alex: Giornate conta persone e pratiche di TUTTI i reparti («la squadra è una», scelta del 3 nov): nel reparto «ferramenta» comparivano «david» e le potature del giardiniere nell'elenco delle pratiche.
+Deciso da Alex («due sì» + «pubblica»), `?v=24nov-gio2`, tutte le facce:
+- **Giornate per reparto** (`_gNelReparto` in `js/gest-giornate.js`): persone, pratiche/lavori, ore, «Come ieri», spese, fatture e pieni solo del reparto aperto (persone senza reparto dappertutto). ⛔ Annulla la scelta del 3 nov «la squadra è una». «Ore fatte» dell'Agenda resta di tutta l'azienda (lo dice la sua riga).
+- **Spese dette nel racconto** (`giorSpeseDa`, `giorSpeseHTML`, `giorScriviSpese`): dal «cosa» dell'AI, importi con €/euro dopo pagato/speso/comprato/versato → righe con la spunta sotto la scheda; al «Salva» vanno in `gest_spese` sul lavoro della scheda (`c._lavId` scritto da `giorScrivi`). Niente AI in più. Non in «modifica».
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4377,6 +4397,20 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Chat ↔ Cestino: ✔ quello nel Cestino non lo vede (`senzaCestino`). Le chat si buttano con la ×.
 - Chat ↔ Ricerca in alto: — le chat non si cercano (archivio per reparto con la data).
 - Si può unire: NO. La chat è la porta «chiedi» di tutte le voci; l'Assistente la apre con la domanda già scritta.
+
+- Giornate ↔ Pratiche: ✔ ogni giornata sta su una pratica; spese e tempo entrano nel margine («speso finora il N%»). ✔ dal 24 nov l'AI trova la pratica vera e allo studio una pratica nuova non nasce zitta. — dalla giornata non si apre la pratica.
+- Giornate ↔ Agenda (Ore fatte): ✔ stesse righe di gest_ore, ore uguali (16 h = 8 + 8, provato).
+- Giornate ↔ Report: ✔ tempo speso, spese e «Ore per collaboratore» uguali (provato).
+- Giornate ↔ Collaboratori: ✔ nomi nuovi entrano in Collaboratori al Salva; costo orario da lì. ✔ dal 24 nov solo le persone del reparto (deciso da Alex).
+- Giornate ↔ Assistente: ✔ «Il tuo mese» conta le giornate con la stessa regola (giorGruppi) e dal 24 nov tutte e due solo del reparto: numeri uguali.
+- Giornate ↔ Spese della pratica: ✔ dal 24 nov le spese dette nel racconto vanno fra le spese della pratica al Salva.
+- Giornate ↔ Fornitori: ✔ «Fattura del fornitore» apre il modulo di sempre, la fattura entra nel margine della pratica.
+- Giornate ↔ Galleria: ✔ le foto prima/dopo sono le stesse righe; dal 24 nov «Prima dei lavori / Fine lavori» come la Galleria.
+- Giornate ↔ app del collaboratore: ✔ la giornata mandata dal telefono arriva in «Da approvare» e con «Approva» entra (provato con una riga di prova); dal codice l'app dice «Manda al titolare».
+- Giornate ↔ Cestino: ✔ una giornata va nel Cestino (rapportino + ore) e torna.
+- Giornate ↔ Chat con AI / Parla: ✔ «Parla» scrive le giornate con la stessa giorScrivi.
+- Giornate ↔ Clienti: — il cliente non si vede nella giornata (si vede nella pratica); il PDF «Per il cliente» non porta il nome del cliente (voluto: niente indirizzo).
+- Si può unire: Giornate dentro Agenda («Ore fatte»)? NO per ora: Giornate scrive (racconto, spese, PDF per il consulente e per il cliente), Agenda legge le ore; si parlano già coi numeri uguali.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

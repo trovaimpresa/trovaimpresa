@@ -61,6 +61,108 @@ function _gMeseNome(ym){ const [y,m]=ym.split("-"); return GIOR_MESI[+m-1].charA
 function _gData(iso){ const d=new Date(iso+"T12:00"); return GIOR_GG[d.getDay()]+" "+d.getDate()+" "+GIOR_MESI[d.getMonth()]; }
 function _gSposta(ym,n){ let [y,m]=ym.split("-").map(Number); m+=n; if(m<1){m=12;y--;} if(m>12){m=1;y++;} return y+"-"+String(m).padStart(2,"0"); }
 function _gNorm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim(); }
+/* 24 nov 2026 (collaudo Giornate dello studio tecnico) — LE PAROLE DELLO
+   STUDIO alla fonte. Il traduttore della pagina sbagliava («I pratiche del
+   mese», «degli collaboratori») e i PDF non li vede. Il testo dell'UTENTE
+   (nomi delle pratiche, «cosa avete fatto», lavoro svolto, spese) sta in
+   .gior-u, che e' in _SKIP_UTENTE (js/gest-ingresso.js): prima «misure in
+   cantiere con l'impresa» diventava «misure in pratica con l'impresa». */
+/* 24 nov 2026 (deciso da Alex: «si», reparti separati) — GIORNATE PER
+   REPARTO. Prima Giornate contava persone, pratiche e giornate di TUTTI i
+   reparti («la squadra e' una», 3 nov): nel reparto «ferramenta» uscivano
+   le persone e le potature del giardiniere. Adesso come la schermata dei
+   reparti promette («pratiche, clienti, collaboratori e calendario non si
+   mischiano») e come Report e Assistente: solo il reparto aperto. Le
+   persone senza reparto si vedono dappertutto. Senza reparto aperto non si
+   filtra niente. ⚠️ «Ore fatte» dell'Agenda resta di tutta l'azienda
+   (scelta del 6 set, lo dice la sua riga). */
+function _gNelReparto(righe,persone){
+  const mid=_gMest(); if(!mid) return righe||[];
+  return (righe||[]).filter(x=>String(x.mestiere_id||"")===String(mid)||(persone&&!x.mestiere_id));
+}
+/* 24 nov 2026 (sì di Alex, foto approvata) — LE SPESE DETTE NEL RACCONTO.
+   «Pagati 16 € di diritti di segreteria», «spesi 45 euro di sabbia»: sotto
+   la scheda una riga con la spunta; al «Salva» va fra le spese di quella
+   pratica/lavoro (gest_spese, come «Spesa» della giornata). Si leggono dal
+   «cosa» scritto dall'AI: solo importi con «€/euro» dopo pagato/speso/
+   comprato/versato. Niente AI in piu', niente crediti. */
+function giorSpeseDa(testo){
+  const out=[]; const t=String(testo||"");
+  const rx=/(?:pagat[oiae]|spes[oiae]|comprat[oiae]|versat[oiae])\s+(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:€|euro)\s+(?:(?:di|per|in|del|dei|della|delle|al|alla)\s+)?/gi;
+  let m; while((m=rx.exec(t))){
+    let n=m[1]; n=/,\d{1,2}$/.test(n)?n.replace(/\./g,"").replace(",","."):(/^\d{1,3}(\.\d{3})+$/.test(n)?n.replace(/\./g,""):n);
+    const imp=Math.round(parseFloat(n)*100)/100; if(!(imp>0)) continue;
+    let d=t.slice(m.index+m[0].length).split(/[.;\n]|\s+(?:e|ed)\s+(?:poi\s+)?(?:pagat|spes|comprat|versat|anche)|,\s+(?:poi\s+)?(?:pagat|spes|comprat|versat)/i)[0].trim().slice(0,80);
+    d=d.replace(/^(?:il|lo|la|i|gli|le|l')\s*/i,"");
+    if(d.length<2) continue;
+    d=d.charAt(0).toUpperCase()+d.slice(1);
+    out.push({desc:d,imp,on:true});
+  }
+  return out;
+}
+function giorSpeseHTML(c,i){
+  if(!c.spese||!c.spese.length) return "";
+  return `<div><div class="glab">Spese dette nel racconto</div>${c.spese.map((x,j)=>`<label class="gspe"><input type="checkbox" data-gior-spe="${i}:${j}" ${x.on?"checked":""}><span class="gior-u">${esc(x.desc)}</span><b>${esc(_gEuro(x.imp))}</b></label>`).join("")}
+    <div class="gnota" style="margin-top:6px">${_gP("Al «Salva» va fra le spese di questo lavoro, come «Spesa». Togli la spunta se non la vuoi.","Al «Salva» va fra le spese di questa pratica, come «Spesa». Togli la spunta se non la vuoi.")}</div></div>`;
+}
+document.addEventListener("change",e=>{
+  const x=e.target&&e.target.closest&&e.target.closest("[data-gior-spe]"); if(!x||!giorProp) return;
+  const [i,j]=x.dataset.giorSpe.split(":").map(Number); const c=giorProp[i];
+  if(c&&c.spese&&c.spese[j]) c.spese[j].on=x.checked;
+});
+async function giorScriviSpese(schede){
+  let n=0,ko=0;
+  for(const c of schede){
+    if(!c._lavId||!Array.isArray(c.spese)) continue;
+    for(const x of c.spese){
+      if(!x.on) continue;
+      const r=await sb.from("gest_spese").insert({user_id:sbUid,lavoro_id:c._lavId,descrizione:x.desc,importo:x.imp,data:c.data}).select("id");
+      if(r.error||!r.data||!r.data.length) ko++; else n++;
+    }
+  }
+  return {n,ko};
+}
+function _gPro(){ try{ return typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista"; }catch(e){ return false; } }
+function _gP(impresa,studio){ return _gPro()?studio:impresa; }
+/* 24 nov 2026 — ALLO STUDIO «Catasto», «Comune», «ufficio tecnico» sono POSTI,
+   non pratiche. L'AI scriveva «Catasto» come pratica e al Salva nasceva una
+   pratica vuota «Catasto» (senza tipo, senza cliente). Qui si cerca la
+   pratica vera fra quelle che ci sono, con le parole del posto e di «cosa»
+   («visure per l'accatastamento Bianchi» -> «Accatastamento Bianchi»).
+   Se non e' sicura (nessuna, o due a pari merito) resta quello che ha
+   detto l'AI, e ci pensa giorFermaPraticaNuova al Salva. */
+const GIOR_PAROLE_VUOTE=new Set(["della","delle","dello","degli","dalla","nella","sulla","pratica","lavoro","lavori","presso","sopralluogo","casa","appartamento"]);
+function giorPraticaDa(dove,cosa){
+  const k=_gNorm(dove);
+  if(k&&giorLav.some(l=>_gNorm(_gNomeLav(l))===k)) return dove;
+  const testo=" "+_gNorm(dove+" "+(cosa||""))+" ";
+  const mid=String(_gMest()||"");
+  let best=null,bp=0,pari=false;
+  giorLav.forEach(l=>{
+    const parole=[...new Set(_gNorm(_gNomeLav(l)).split(" ").filter(p=>p.length>=4&&!GIOR_PAROLE_VUOTE.has(p)))];
+    if(!parole.length) return;
+    const n=parole.filter(p=>testo.indexOf(" "+p+" ")>=0).length;
+    if(!n) return;
+    const punti=n/parole.length+(String(l.mestiere_id||"")===mid?0.001:0);
+    if(punti>bp+1e-9){ best=l; bp=punti; pari=false; } else if(Math.abs(punti-bp)<1e-9) pari=true;
+  });
+  return (best&&!pari&&bp>=0.5)?_gNomeLav(best):dove;
+}
+/* 24 nov 2026 — allo studio una pratica che non c'e' NON nasce zitta: al
+   primo «Salva» lo si dice; se la vuole davvero, ripreme «Salva». */
+let giorNuovaSi=new Set();
+function giorFermaPraticaNuova(schede){
+  if(!_gPro()) return false;
+  for(const c of schede){
+    if(c.lavoro_id) continue;
+    const k=_gNorm(c.dove); if(!k) continue;
+    if(giorLav.some(l=>_gNorm(_gNomeLav(l))===k)||giorNuovaSi.has(k)) continue;
+    giorNuovaSi.add(k);
+    giorDisegna({t:"Non trovo la pratica «"+String(c.dove).trim()+"». Sceglila dall'elenco (tocca la casella «Pratica»). Se è davvero una pratica nuova, premi di nuovo «Salva» e la creo.",k:"err"});
+    return true;
+  }
+  return false;
+}
 function _gNomeLav(l){ return (l && (l.descrizione || l.dove)) || "Cantiere"; }
 function _gIoKey(){ return "gior_io_"+(typeof sbUid!=="undefined"?sbUid:""); }
 function _gIo(){ try{ return localStorage.getItem(_gIoKey())||""; }catch(e){ return ""; } }
@@ -198,6 +300,10 @@ const _gIc = {
 #giornate .gmz{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 #giornate .gmzr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:17px}
 #giornate .gmzr b{min-width:110px;color:var(--testo,#0f172a);overflow-wrap:anywhere}
+#giornate .gspe{display:flex;align-items:center;gap:10px;border:1.5px solid #cbd5e1;border-radius:10px;padding:10px 12px;font-size:16px;background:#fff;margin-top:6px;cursor:pointer}
+#giornate .gspe input{width:22px;height:22px;flex:0 0 auto}
+#giornate .gspe span{flex:1;min-width:0;overflow-wrap:anywhere}
+#giornate .gspe b{white-space:nowrap}
 @media(max-width:560px){#giornate .gmzr b{flex-basis:100%}}
 #giornate .gvuoto{color:var(--testo-2,#475569);text-align:center;padding:8px 0}
 `;
@@ -230,8 +336,8 @@ async function giorCarica(){
     sb.from("gest_ore").select("id,data,ore,operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).gte("data",a).lt("data",b)
   ]);
   if(ro.error||rl.error||rh.error){ throw new Error((ro.error||rl.error||rh.error).message); }
-  giorOps=ro.data||[]; giorLav=rl.data||[];
-  const ore=rh.data||[];
+  giorOps=_gNelReparto(ro.data,true); giorLav=_gNelReparto(rl.data);
+  const ore=_gNelReparto(rh.data);
   const ids=[...new Set(ore.map(o=>o.rapportino_id).filter(Boolean))];
   let rap={};
   if(ids.length){
@@ -309,7 +415,8 @@ async function giorCarica(){
     /* piu' vecchia di una settimana non e' «come ieri»: non si propone */
     if(dU&&(new Date(oggi+"T12:00")-new Date(dU+"T12:00"))/864e5>7) dU=null;
     if(dU){
-      const rg=await sb.from("gest_ore").select("operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).eq("data",dU);
+      const rg=await sb.from("gest_ore").select("operatore_id,lavoro_id,rapportino_id,mestiere_id").eq("user_id",sbUid).is("eliminato_il",null).eq("data",dU);
+      if(!rg.error&&rg.data) rg.data=_gNelReparto(rg.data);
       if(!rg.error&&rg.data&&rg.data.length){
         const per={};
         rg.data.forEach(o=>{ const k=String(o.lavoro_id||""); (per[k]||(per[k]=new Set())).add(String(o.operatore_id||"")); });
@@ -420,6 +527,9 @@ function giorTotali(righe){
    --------------------------------------------------------------------- */
 async function renderGiornate(){
   const box=document.getElementById("gior-box"); if(!box) return;
+  /* 24 nov 2026 — allo studio niente «Acquisti del mese» (merce letta da
+     fatture e bolle): tolto in Fornitori il 20 nov, restava qui. */
+  { const ab=document.querySelector('#giornate [data-acq="mese"]'); if(ab) ab.style.display=_gPro()?"none":""; }
   if(!giorMese) giorMese=_gOggi().slice(0,7);
   if(typeof sb==="undefined"||!sb||!sbUid){ box.innerHTML='<div class="gb"><div class="gvuoto">Accedi per segnare le giornate.</div></div>'; return; }
   if(!giorSera) giorSeraLeggi().then(()=>{ if(document.getElementById("gior-box")&&!giorProp) giorDisegna(); }).catch(()=>{});
@@ -441,10 +551,10 @@ function giorDisegna(msg){
   if(tot.length) h+=`<div class="gt">${tot.map(([n,t])=>`<div><span>${esc(n)}</span><b>${t.g}</b><span>${t.g===1?"giorno":"giorni"}</span></div>`).join("")}</div>`;
 
   if(giorProposte.length){
-    h+=`<div class="gb gpro"><h4>Da approvare (${giorProposte.length})</h4><div class="gnota">Le hanno mandate i tuoi operai. «Approva» le mette nel mese con 8 ore, insieme a foto, spese e bolle.</div>`;
+    h+=`<div class="gb gpro"><h4>Da approvare (${giorProposte.length})</h4><div class="gnota">${_gP("Le hanno mandate i tuoi operai. «Approva» le mette nel mese con 8 ore, insieme a foto, spese e bolle.","Le hanno mandate i tuoi collaboratori. «Approva» le mette nel mese con 8 ore, insieme a foto e spese.")}</div>`;
     giorProposte.forEach(p=>{
-      h+=`<div class="gpr"><div class="w">${esc(giorNomeOp(p.operatore_id))} · ${esc(_gData(p.data))}</div>
-        <div class="c"><b>${esc(p.dove)}</b>${p.cosa?" — "+esc(p.cosa):""}</div>
+      h+=`<div class="gpr"><div class="w gior-u">${esc(giorNomeOp(p.operatore_id))} · ${esc(_gData(p.data))}</div>
+        <div class="c gior-u"><b>${esc(p.dove)}</b>${p.cosa?" — "+esc(p.cosa):""}</div>
         ${typeof gpcExtraHTML==="function"?gpcExtraHTML(p):""}
         <div class="grow"><button type="button" class="gsi" data-gior="pro-si" data-id="${esc(p.id)}">Approva</button><button type="button" class="gno" data-gior="pro-no" data-id="${esc(p.id)}">Scarta</button></div></div>`;
     });
@@ -457,7 +567,7 @@ function giorDisegna(msg){
   }
 
   h+=`<div class="gb"><h4>Racconta la giornata</h4>
-    <textarea id="gior-voce" placeholder="«Oggi io, Wahid e Luis a Campoloniano, rifatto il tetto»">${esc(giorVoce)}</textarea>
+    <textarea id="gior-voce" placeholder="${_gP("«Oggi io, Wahid e Luis a Campoloniano, rifatto il tetto»","«Oggi io e Giulia sopralluogo per la CILA Rossi, poi visure al catasto»")}">${esc(giorVoce)}</textarea>
     <button type="button" class="gbig" data-gior="compila" ${giorOccupato?"disabled":""}>${giorOccupato?"Ci penso…":"Compila la giornata"}</button>
     <div class="gmsg ${msg&&msg.k||""}" id="gior-msg">${esc(msg&&msg.t||"")}</div>
     ${!giorProp&&giorUltima?giorIeriHTML():""}
@@ -477,8 +587,8 @@ function giorDisegna(msg){
       const chi=[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))];
       const mezze=g.ore.filter(o=>(+o.ore||0)<GIOR_ORE_GIORNO).map(o=>giorNomeOp(o.operatore_id)+" "+String(+o.ore).replace(".",",")+" ore");
       const L=_gNomeLav(giorLavoro(g.lavoro_id));
-      h+=`<div class="gv"><div class="t"><div class="w">${esc(chi.join(", "))}</div>
-        <div class="c">${esc(L)}${g.cosa?" — "+esc(g.cosa):""}${mezze.length?" ("+esc(mezze.join(", "))+")":""}</div></div>
+      h+=`<div class="gv"><div class="t"><div class="w gior-u">${esc(chi.join(", "))}</div>
+        <div class="c gior-u">${esc(L)}${g.cosa?" — "+esc(g.cosa):""}${mezze.length?" ("+esc(mezze.join(", "))+")":""}</div></div>
         <div class="az">${g.rapportino_id?`<button type="button" class="glink" data-gior="mod" data-k="${esc(g.k)}">modifica</button>`:""}<button type="button" class="glink rosso" data-gior="del" data-k="${esc(g.k)}">cancella</button></div></div>`;
       if(giorModifica===g.k){
         h+=`<div class="gcard"><textarea id="gior-mod-t">${esc(g.nota!=null?g.nota:g.cosa)}</textarea><div class="grow"><button type="button" class="gbig blu" data-gior="mod-salva" data-k="${esc(g.k)}">Salva</button><button type="button" class="btn" data-gior="mod-no" style="flex:0 0 auto">Annulla</button></div></div>`;
@@ -497,9 +607,9 @@ function giorDisegna(msg){
   const can=giorCostiCantieri();
   if(can.length){
     const conCosto=can.some(c=>c.euro>0);
-    h+=`<div class="gb"><h4>I cantieri del mese</h4>`;
+    h+=`<div class="gb"><h4>${_gP("I cantieri del mese","Le pratiche del mese")}</h4>`;
     can.forEach(c=>{
-      h+=`<div class="gcan"><span class="n">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`;
+      h+=`<div class="gcan"><span class="n gior-u">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`;
       const a=giorAvanz[c.id];
       if(a&&!a.fatto){
         const pc=Math.round(a.speso/a.importo*100), w=Math.max(0,Math.min(100,pc));
@@ -510,10 +620,11 @@ function giorDisegna(msg){
     });
     if(conCosto){
       const tot=can.reduce((a,c)=>a+c.euro,0);
-      h+=`<div class="gcan tot"><span class="n">Manodopera del mese</span><span class="e">${esc(_gEuro(tot))}</span></div>
-        <div class="gnota">Ore segnate × costo orario di ognuno (lo scrivi in Squadra).</div>`;
+      h+=`<div class="gcan tot"><span class="n">${_gP("Manodopera del mese","Tempo speso nel mese")}</span><span class="e">${esc(_gEuro(tot))}</span></div>
+        <div class="gnota">${_gP("Ore segnate × costo orario di ognuno (lo scrivi in Squadra).","Ore segnate × costo orario di ognuno (lo scrivi in Collaboratori).")}</div>`;
     } else {
-      h+=`<div class="gnota">Scrivi il costo orario dei tuoi operai in <button type="button" class="glink" data-gior="squadra">Squadra</button> e qui vedi quanto ti costa ogni cantiere.</div>`;
+      h+=_gPro()?`<div class="gnota">Scrivi il costo orario dei tuoi collaboratori in <button type="button" class="glink" data-gior="squadra">Collaboratori</button> e qui vedi quanto ti costa ogni pratica.</div>`
+        :`<div class="gnota">Scrivi il costo orario dei tuoi operai in <button type="button" class="glink" data-gior="squadra">Squadra</button> e qui vedi quanto ti costa ogni cantiere.</div>`;
     }
     h+=`</div>`;
   }
@@ -531,7 +642,7 @@ function giorDisegna(msg){
   /* il consulente del lavoro */
   if(giorCdl){
     h+=`<div class="gb"><h4>Consulente del lavoro</h4>
-      <div class="gnota">Il primo di ogni mese gli mando le giornate del mese finito: giorni e ore di ognuno, cantiere per cantiere, e il file per Excel.</div>
+      <div class="gnota">Il primo di ogni mese gli mando le giornate del mese finito: giorni e ore di ognuno, ${_gP("cantiere per cantiere","pratica per pratica")}, e il file per Excel.</div>
       <input type="text" id="gior-cdl-email" inputmode="email" autocomplete="email" placeholder="Email del consulente" value="${esc(giorCdl.email)}">
       <label class="gspunta"><input type="checkbox" id="gior-cdl-invio" ${giorCdl.invio?"checked":""}> Mandagliele ogni mese</label>
       <div class="grow"><button type="button" class="gbig blu" data-gior="cdl-salva">Salva</button><button type="button" class="btn" data-gior="cdl-prova" style="flex:0 0 auto">Mandale a me per prova</button></div>
@@ -559,10 +670,10 @@ function giorDisegnaProp(){
   const serveIo=giorProp.some(c=>c.chi.has("IO"))&&!io;
   let h=`<div class="gb gprop"><h4>${giorModK?"Modifica la giornata":"Controlla e salva"}</h4>`;
   if(serveIo){
-    h+=`<div><div class="glab">Hai detto «io»: tu chi sei nella squadra?</div><select data-gior-io>
+    h+=`<div><div class="glab">${_gP("Hai detto «io»: tu chi sei nella squadra?","Hai detto «io»: tu chi sei fra i collaboratori?")}</div><select data-gior-io>
       <option value="">Scegli…</option>${giorOps.map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("")}
       <option value="+">Non ci sono ancora: aggiungimi</option>
-      <option value="-">Non lavoro in cantiere (non contare me)</option></select>
+      <option value="-">${_gP("Non lavoro in cantiere (non contare me)","Non contare le mie ore")}</option></select>
       ${giorIoNuovo?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-io-nome" placeholder="Il tuo nome"><button type="button" class="btn" data-gior="io-ok" style="flex:0 0 auto">Aggiungi</button></div>`:""}</div>`;
   }
   const lavNomi=[...new Set(giorLav.map(_gNomeLav))];
@@ -571,7 +682,7 @@ function giorDisegnaProp(){
     const nomi=giorOps.map(o=>o.nome).concat(giorNuovi);
     h+=`<div class="gcard" data-card="${i}">
       <div class="grow"><div><div class="glab">Giorno</div><input type="date" data-f="data" value="${esc(c.data)}"></div>
-      <div><div class="glab">Cantiere</div><input type="text" data-f="dove" list="gior-lavori" value="${esc(c.dove)}" placeholder="Es. Campoloniano"></div></div>
+      <div><div class="glab">Cantiere</div><input type="text" data-f="dove" list="gior-lavori" value="${esc(c.dove)}" placeholder="${_gP("Es. Campoloniano","Es. CILA Rossi")}"></div></div>
       <div><div class="glab">Chi ha lavorato</div><div class="gchips">${nomi.map(n=>{
         const on=c.chi.has(n)||(c.chi.has("IO")&&io&&io!=="-"&&giorNomeOp(io)===n);
         const nuovo=giorNuovi.includes(n);
@@ -580,7 +691,8 @@ function giorDisegnaProp(){
         ${giorAggiungi===i?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-nuovo" placeholder="Nome"><button type="button" class="btn" data-gior="piu-ok" data-i="${i}" style="flex:0 0 auto">Aggiungi</button></div>`:""}
         ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}
         ${giorMezzeHTML(c,i,nomi,io)}</div>
-      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" placeholder="Spese e note qui">${esc(c.cosa)}</textarea></div>
+      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" placeholder="${_gP("Spese e note qui","Cosa avete fatto, note")}">${esc(c.cosa)}</textarea></div>
+      ${giorModK?"":giorSpeseHTML(c,i)}
       ${giorProp.length>1?`<button type="button" class="glink rosso" data-gior="togli" data-i="${i}" style="align-self:flex-start">Togli questa</button>`:""}
     </div>`;
   });
@@ -620,7 +732,7 @@ function giorIeriHTML(){
   const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
   const tit=giorUltima.data===_gYmd(ieri)?"Come ieri":"Come "+_gData(giorUltima.data);
   const det=giorUltima.schede.map(c=>[...c.chi].join(", ")+" · "+c.dove).join(" — ");
-  return `<button type="button" class="gieri" data-gior="ieri"><b>${esc(tit)}</b><span>${esc(det)}</span></button>`;
+  return `<button type="button" class="gieri" data-gior="ieri"><b>${esc(tit)}</b><span class="gior-u">${esc(det)}</span></button>`;
 }
 function giorDaNome(n){
   const k=_gNorm(n); if(!k) return null;
@@ -632,7 +744,7 @@ async function giorCompila(){
   const ta=document.getElementById("gior-voce"); const t=(ta&&ta.value||"").trim(); giorVoce=t;
   if(t.length<5){ giorDisegna({t:"Detta o scrivi prima com'è andata la giornata.",k:"err"}); return; }
   const tk=await giorToken(); if(!tk){ giorDisegna({t:"Sessione scaduta: esci e rientra.",k:"err"}); return; }
-  giorLeggiProp(); giorOccupato=true; giorDisegna();
+  giorLeggiProp(); giorOccupato=true; giorNuovaSi=new Set(); giorDisegna();
   let j=null, err="";
   try{
     const r=await fetch(GIOR_URL_AI,{method:"POST",headers:{Authorization:"Bearer "+tk,"Content-Type":"application/json"},
@@ -662,7 +774,8 @@ async function giorCompila(){
     cosa=cosa.charAt(0).toUpperCase()+cosa.slice(1);
     /* 18 nov 2026: «mezza giornata» detta nel racconto accende «Mezza giornata» per chi sta in quella scheda (si vede e si cambia prima del Salva) */
     const mezza=/mezza\s+giornata/i.test(cosa)?new Set(chi):new Set();
-    return {data:d,chi,dove,cosa,mezza};
+    if(_gPro()) dove=giorPraticaDa(dove,cosa);
+    return {data:d,chi,dove,cosa,mezza,spese:giorSpeseDa(cosa)};
   });
   giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});
 }
@@ -682,7 +795,7 @@ async function giorAssicura(){
     sb.from("gest_lavori").select("id,descrizione,dove,stato,mestiere_id,created_at").eq("user_id",sbUid).is("eliminato_il",null).order("created_at",{ascending:false}).limit(200)
   ]);
   if(ro.error||rl.error) throw new Error((ro.error||rl.error).message);
-  giorOps=ro.data||[]; giorLav=rl.data||[];
+  giorOps=_gNelReparto(ro.data,true); giorLav=_gNelReparto(rl.data);
 }
 async function giorTrovaLavoro(dove,data){
   const mest=_gMest();
@@ -770,6 +883,7 @@ async function giorScrivi(schede){
     /* 10 nov 2026: se la scheda porta gia' il lavoro (giornata mandata dal telefono), si usa quello */
     const lav=(c.lavoro_id&&giorLav.find(l=>String(l.id)===String(c.lavoro_id)))||await giorTrovaLavoro(c.dove,c.data);
     const mid=lav.mestiere_id||mest;
+    c._lavId=lav.id;   /* 24 nov 2026: per le spese dette nel racconto */
     /* 4. il rapportino */
     const rr=await sb.from("gest_rapportini").insert({user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,data:c.data,note:c.cosa.trim()||null}).select("id");
     if(rr.error||!rr.data||!rr.data.length){ throw new Error("Non salvato: "+((rr.error&&rr.error.message)||"nessuna riga")+"."); }
@@ -797,19 +911,21 @@ async function giorSalva(){
     const mezze=[...(c.mezza||[])].map(n=>n==="IO"?(io&&io!=="-"?giorNomeOp(io):null):n).filter(Boolean);
     return {...c,nomi:[...new Set(nomi)],mezze};
   });
-  if(giorProp.some(c=>c.chi.has("IO"))&&!io){ giorDisegna({t:"Dimmi chi sei tu nella squadra (la tendina in alto), poi premi «Salva».",k:"err"}); return; }
+  if(giorProp.some(c=>c.chi.has("IO"))&&!io){ giorDisegna({t:_gP("Dimmi chi sei tu nella squadra (la tendina in alto), poi premi «Salva».","Dimmi chi sei tu fra i collaboratori (la tendina in alto), poi premi «Salva»."),k:"err"}); return; }
   for(const c of schede){
     if(!c.nomi.length){ giorDisegna({t:"In una scheda non c'è nessuno: tocca almeno un nome.",k:"err"}); return; }
     if(!c.dove.trim()){ giorDisegna({t:"In una scheda manca il cantiere.",k:"err"}); return; }
   }
-  let fatte=0;
+  if(giorFermaPraticaNuova(schede)) return;
+  let fatte=0, sp={n:0,ko:0};
   try{ fatte=await giorScrivi(schede); }
   catch(e){ giorDisegna({t:e.message,k:"err"}); if(e.parziale) await renderGiornate(); return; }
+  try{ sp=await giorScriviSpese(schede); }catch(e){ sp={n:0,ko:1}; }
   giorProp=null; giorNuovi=[]; giorVoce="";
   { const tv=document.getElementById("gior-voce"); if(tv) tv.value=""; }   /* 18 nov 2026: se no giorDisegna lo rileggeva dalla casella e il racconto restava li', pronto per un doppione */
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();
-  giorDisegna({t:fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔",k:"ok"});
+  giorDisegna({t:(fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔")+(sp.n?(sp.n===1?" · 1 spesa aggiunta":" · "+sp.n+" spese aggiunte"):"")+(sp.ko?" · "+sp.ko+(sp.ko===1?" spesa non salvata: aggiungila da «Spesa»":" spese non salvate: aggiungile da «Spesa»"):""),k:sp.ko?"err":"ok"});
   if(fatte>0&&typeof window.tiSpunta==="function") window.tiSpunta(fatte===1?"Giornata salvata":fatte+" giornate salvate");
 }
 
@@ -984,7 +1100,9 @@ async function giorModTutto(){
       giorOps.push(data[0]);
     }
     const vecchio=giorLavoro(g.lavoro_id);
-    const lav=(vecchio&&_gNorm(_gNomeLav(vecchio))===_gNorm(c.dove))?vecchio:await giorTrovaLavoro(c.dove,c.data);
+    const stesso=!!(vecchio&&_gNorm(_gNomeLav(vecchio))===_gNorm(c.dove));
+    if(!stesso&&giorFermaPraticaNuova([c])) return;
+    const lav=stesso?vecchio:await giorTrovaLavoro(c.dove,c.data);
     const mid=lav.mestiere_id||_gMest();
     const idOp=n=>giorOps.find(x=>x.nome===n).id;
     const mieId=new Set(g.ore.map(o=>String(o.id)));
@@ -1112,18 +1230,18 @@ async function giorPdf(){
     y+=8;
   }
   const oreTxt=t=>t.g+(t.g===1?" giorno":" giorni")+(t.o&&t.o!==t.g*GIOR_ORE_GIORNO?" ("+String(Math.round(t.o*10)/10).replace(".",",")+" ore)":"");
-  tabella("1. Giorni per lavoratore",["Lavoratore","Lavorato"],Object.entries(per).sort((a,b)=>a[0].localeCompare(b[0])).map(([n,t])=>[n,oreTxt(t)]),[90,90]);
-  tabella("2. Giorni per cantiere",["Cantiere","Giorni"],Object.entries(luoghi).map(([l,n])=>[l,String(n)]),[140,40]);
-  tabella("3. Giorno per giorno",["Giorno","Cantiere / lavoro","Chi ha lavorato"],
+  tabella(_gP("1. Giorni per lavoratore","1. Giorni per collaboratore"),[_gP("Lavoratore","Collaboratore"),"Lavorato"],Object.entries(per).sort((a,b)=>a[0].localeCompare(b[0])).map(([n,t])=>[n,oreTxt(t)]),[90,90]);
+  tabella(_gP("2. Giorni per cantiere","2. Giorni per pratica"),[_gP("Cantiere","Pratica"),"Giorni"],Object.entries(luoghi).map(([l,n])=>[l,String(n)]),[140,40]);
+  tabella("3. Giorno per giorno",["Giorno",_gP("Cantiere / lavoro","Pratica"),"Chi ha lavorato"],
     giorRighe.map(g=>[_gData(g.data),_gNomeLav(giorLavoro(g.lavoro_id))+(g.cosa?" - "+g.cosa:""),[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))].join(", ")]),[32,88,60]);
   /* 20 nov 2026 (chiesto da Alex): spese, benzina, fatture e bolle anche nel PDF, coi totali — come nel Riepilogo */
   const q=giorQuarta();
   if(q.righe.length){
     const E=n=>_gEuro(n).replace(/\u00a0/g," ");
-    tabella("4. Spese, benzina, fatture e bolle",["Giorno","Tipo","Cosa","Euro"],q.righe.map(r=>[r.giorno,r.tipo,r.cosa,r.euro?E(r.euro):""]),[30,40,82,28]);
+    tabella(_gP("4. Spese, benzina, fatture e bolle","4. Spese, benzina e fatture"),["Giorno","Tipo","Cosa","Euro"],q.righe.map(r=>[r.giorno,r.tipo,r.cosa,r.euro?E(r.euro):""]),[30,40,82,28]);
     const t=q.tot, tr=[];
     if(t.spese) tr.push(["Spese",E(t.spese)]); if(t.benz) tr.push(["Benzina",E(t.benz)]);
-    if(t.km) tr.push(["Chilometri",Math.round(t.km).toLocaleString("it-IT")+" km"]); if(t.fatt) tr.push(["Fatture e bolle",E(t.fatt)]);
+    if(t.km) tr.push(["Chilometri",Math.round(t.km).toLocaleString("it-IT")+" km"]); if(t.fatt) tr.push([_gP("Fatture e bolle","Fatture dei fornitori"),E(t.fatt)]);
     if(tr.length) tabella("Totali del mese",["Voce","Totale"],tr,[90,90]);
   }
   /* 20 nov 2026 (chiesto da Alex): in fondo le foto prima e dopo di ogni giornata */
@@ -1143,7 +1261,8 @@ function giorQuarta(){
   const righe=[];
   (D.spese||[]).forEach(r=>righe.push({d:giorno(r),tipo:"Spesa",cosa:[r.descrizione||"Spesa",lav(r.lavoro_id)].filter(Boolean).join(" - "),euro:+r.importo||0}));
   (D.rif||[]).forEach(r=>righe.push({d:r.data||"",tipo:"Benzina e km",cosa:[typeof gxNomeMezzo==="function"?gxNomeMezzo(r.mezzo_id):"",r.km?Math.round(+r.km).toLocaleString("it-IT")+" km":"",r.distributore||""].filter(Boolean).join(" - ")||"Benzina",euro:+r.importo||0}));
-  (D.fatt||[]).forEach(r=>righe.push({d:r.data||"",tipo:"Fattura o bolla",cosa:[r.numero?"n. "+r.numero:"",lav(r.lavoro_id)].filter(Boolean).join(" - ")||"Fattura o bolla",euro:+r.importo||0}));
+  const _tf=_gP("Fattura o bolla","Fattura del fornitore");
+  (D.fatt||[]).forEach(r=>righe.push({d:r.data||"",tipo:_tf,cosa:[r.numero?"n. "+r.numero:"",lav(r.lavoro_id)].filter(Boolean).join(" - ")||_tf,euro:+r.importo||0}));
   righe.sort((a,b)=>a.d.localeCompare(b.d));
   righe.forEach(r=>{ r.giorno=r.d?_gData(r.d):""; });
   const somma=a=>(a||[]).reduce((s,x)=>s+(+x.importo||0),0);
@@ -1157,20 +1276,20 @@ function giorQuarta(){
    --------------------------------------------------------------------- */
 function giorRiepilogo(){
   const {per,luoghi}=giorTotali(giorRighe);
-  const riga=(a,b)=>'<div class="gx-riga"><span class="t">'+esc(a)+'</span><b>'+esc(b)+'</b></div>';
+  const riga=(a,b)=>'<div class="gx-riga"><span class="t gior-u">'+esc(a)+'</span><b>'+esc(b)+'</b></div>';
   const sez=(t,c)=>'<div class="sh-b sh-centro"><div class="sh-tit">'+esc(t)+'</div>'+c+'</div>';
   const oreTxt=t=>t.g+(t.g===1?" giorno":" giorni")+(t.o&&t.o!==t.g*GIOR_ORE_GIORNO?" ("+String(Math.round(t.o*10)/10).replace(".",",")+" ore)":"");
   const ord=[...giorRighe].sort((a,b)=>a.data.localeCompare(b.data));
   const date=[...new Set(ord.map(g=>g.data))];
-  let h=sez("1. Giorni per lavoratore",'<div class="gx-lista">'+Object.entries(per).sort((a,b)=>b[1].g-a[1].g||a[0].localeCompare(b[0])).map(([n,t])=>riga(n,oreTxt(t))).join("")+'</div>')
-    +sez("2. Giorni per cantiere",'<div class="gx-lista">'+Object.entries(luoghi).sort((a,b)=>b[1]-a[1]).map(([l,n])=>riga(l,n+(n===1?" giorno":" giorni"))).join("")+'</div>')
+  let h=sez(_gP("1. Giorni per lavoratore","1. Giorni per collaboratore"),'<div class="gx-lista">'+Object.entries(per).sort((a,b)=>b[1].g-a[1].g||a[0].localeCompare(b[0])).map(([n,t])=>riga(n,oreTxt(t))).join("")+'</div>')
+    +sez(_gP("2. Giorni per cantiere","2. Giorni per pratica"),'<div class="gx-lista">'+Object.entries(luoghi).sort((a,b)=>b[1]-a[1]).map(([l,n])=>riga(l,n+(n===1?" giorno":" giorni"))).join("")+'</div>')
     +sez("3. Giorno per giorno",'<div class="gx-lista">'+date.map(d=>'<div class="gx-riga grp-g"><div class="t"><div class="grp-d">'+esc(_gData(d))+'</div>'
-      +ord.filter(g=>g.data===d).map(g=>'<div class="grp-w">'+esc([...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))].join(", "))+'</div><div class="grp-c">'+esc(_gNomeLav(giorLavoro(g.lavoro_id))+(g.cosa?" — "+g.cosa:""))+'</div>').join("")
+      +ord.filter(g=>g.data===d).map(g=>'<div class="grp-w gior-u">'+esc([...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))].join(", "))+'</div><div class="grp-c gior-u">'+esc(_gNomeLav(giorLavoro(g.lavoro_id))+(g.cosa?" — "+g.cosa:""))+'</div>').join("")
       +'</div></div>').join("")+'</div>');
   const q=giorQuarta();
   if(q.righe.length){
-    h+=sez("4. Spese, benzina, fatture e bolle",(typeof gxHtmlTotali==="function"?gxHtmlTotali():"")
-      +'<div class="gx-lista">'+q.righe.map(r=>'<div class="gx-riga"><div class="t"><div class="grp-w">'+esc(r.cosa)+'</div><div class="grp-c">'+esc(r.giorno+" · "+r.tipo)+'</div></div>'+(r.euro?'<b>'+esc(_gEuro(r.euro))+'</b>':'')+'</div>').join("")+'</div>');
+    h+=sez(_gP("4. Spese, benzina, fatture e bolle","4. Spese, benzina e fatture"),(typeof gxHtmlTotali==="function"?gxHtmlTotali():"")
+      +'<div class="gx-lista">'+q.righe.map(r=>'<div class="gx-riga"><div class="t"><div class="grp-w gior-u">'+esc(r.cosa)+'</div><div class="grp-c">'+esc(r.giorno+" · "+r.tipo)+'</div></div>'+(r.euro?'<b>'+esc(_gEuro(r.euro))+'</b>':'')+'</div>').join("")+'</div>');
   }
   openSheetGrande("Riepilogo di "+esc(_gMeseNome(giorMese)),'<div class="grp-riep">'+h+'</div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button><button class="btn-primary b-save" data-gior-riep="pdf">Scarica il PDF</button>');

@@ -14,6 +14,7 @@ prova('impresa e artigiano hanno lo stesso testo fisso (memoria condivisa)', C.i
 prova('regola «cosa deve fare una persona» per tutti', im.indexOf('COSA DEVE FARE UNA PERSONA') >= 0 && st.indexOf('COSA DEVE FARE UNA PERSONA') >= 0);
 const pr = C.PAROLE_RUOLO.professionista;
 prova('studio: ritenuta già tolta, mai imponibile il numero più basso', /GIÀ TOLTA la ritenuta/.test(pr) && /Mai chiamare «imponibile» il numero più basso/.test(pr));
+prova('studio: ritenuta detta «X € da incassare (Y € il documento, ritenuta già tolta)»', pr.indexOf('«X € da incassare (Y € il documento, ritenuta già tolta)»') >= 0 && pr.indexOf('PIÙ BASSO') < 0 && pr.indexOf('documento Y €, ritenuta') < 0);
 prova('studio: stato della pratica come sta scritto', /senza dedurlo/.test(pr));
 // letture
 const U = '11111111-1111-4111-8111-111111111111', M = '22222222-2222-4222-8222-222222222222', G = '33333333-3333-4333-8333-333333333333';
