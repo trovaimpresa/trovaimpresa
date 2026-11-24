@@ -4283,8 +4283,24 @@ Secondo giro (altra chat, in parallelo con questa; `?v=24nov-ds3`), provato dal 
 11. ⛔ Chat con AI allo studio: «Non hai richieste dal sito» con 3 incarichi lì. Attrezzo `incarichi_sito` (`colImpresa:'professionista_id'`, niente email/telefono), `incarichi_non_aperti` nell'agenda dello studio, regola in `PAROLE_RUOLO.professionista`. Banco `tools/banco-chat-studio.mjs` 38 verdi (sabotaggio accusato).
 ⚠️ Due chat hanno fatto la stessa voce insieme: prima di cominciare una voce, `git log origin/main` per vedere se c'è già.
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: PREZZARIO
+
+⚠️ Il Cestino dello studio del 24 nov NON è pubblicato (ultimo commit online 63b7199, Richieste dal sito): non riprovato.
+Prova da geometra dal vivo su trovaimpresa.com (browser integrato, `?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375). Dati creati e cancellati con `window._provaPz(leggi)` (5 onorari: APE 250 a corpo, rilievo 400 al giorno, CILA + DL 1.200 a corpo, vacazione 55 l'ora, DOCFA 600; date portate ad agosto con `update created_at` per farli «vecchi» come quelli veri) e `window._pzPulisci()` (`sb.raw(...)` è una FUNZIONE: `sb.raw("tabella")`, non `sb.raw.from`). Provati: ricerca nel Prezzario e nel preventivo, «€ Prendi dal prezzario» (CILA 1.200 + APE 250 = 1.450 a corpo, `usata_volte` +1), scheda della voce e Salva (250 → 280), Importa CSV di una tariffa onorari («a corpo», «1.150,00»), Chat con AI (3 domande). Prezzario di nuovo a 12.764 voci, 0 righe di prova, 0 preventivi di prova.
+
+Sistemato (`?v=24nov-pz`), tutte le facce:
+1. ⛔ I PREZZI TUOI SPARIVANO SOTTO LA TARIFFA. Nel preventivo, «APE», «CILA», «rilievo» davano 8 voci della Tariffa del Lazio (piezometri, «cilindrico») e gli onorari NO; nel Prezzario la «demolizione di tramezzi» di Alex era la 109ª di «demolizione» (la tariffa è più nuova, passa davanti). Ora `_ppCercaMiei` (le voci con fonte «mio» o vuota si cercano a parte) + `_ppMieiPrima` (prima le tue, poi la parola intera: «APE» non è «cAPEzzale»; parole corte intere, lunghe dall'inizio della parola) + `_ppUnisci`, in `js/gest-computo.js`. Le usano il Prezzario (`renderPrezzario`) e il preventivo (`prevPzCerca`). ⚠️ La ricerca dentro la lavorazione del COMPUTO (`ppCerca`) NON è cambiata (lì si cerca nella tariffa).
+2. ⛔ Chat con AI: «quanto ho messo per un giorno di rilievo?» → «non ho una tariffa a giornata», con la voce lì (la ricerca va in ordine di CODICE e una voce scritta a mano non ne ha). `miei_prezzi` in `chat-gestionale.mjs` legge a parte le voci tue (fonte mio/vuota), le mette davanti con `tuo: true`; descrizione dell'attrezzo aggiornata.
+3. Preventivo: senza parola diceva «Ne ho trovate 500» (le voci in memoria) su 12.764 → niente numero; con la tariffa grande «più di N». Il testo del prezzario nella ricerca passava dal traduttore («Rilievo in cantiere» → «in pratica»): ora `.ti-orig`. Una voce della tariffa occupava un intero schermo del telefono: 3 righe (`#prev-pz-lista .ti-orig`, css/gestionale.css).
+4. «1.200,00 € / corpo» → «1.200,00 € a corpo» (schede, tendina della scheda, preventivo); «a corpo» scritto così in un file importato vale come «corpo» (`_pzCorpo`).
+5. Parole dello studio (`_pzStudio`): ricerca «Es. APE, CILA, rilievo, catasto», riga sotto il titolo «I tuoi onorari e le voci che usi sempre…», categoria «Es. Onorari, Rilievi, Catasto», prezzario vuoto con gli onorari. Per tutti: «mai usata in un computo o in un preventivo» (prima solo computo). Segnaposto della ricerca accorciati: sul telefono si tagliavano.
+Banchi: `tools/banco-gestionale.js app` ZERO difetti; `tools/banco-chat-studio.mjs` 38 verdi; `controllo-push.js` verde.
+
+Funzione nuova (sì di Alex, foto prima), tutte le facce: **«Tutte (N) · I tuoi prezzi (N) · <tariffa> (N)»** in cima al Prezzario (`pzFonte`, `_pzFiltro`, `_pzFontiConta`, `_pzFontiDisegna` in `js/gest-sal-prezzario.js`, stile `.pz-fonti` in fondo a `css/gestionale.css`). Compare solo con almeno 2 gruppi. Il filtro vale per elenco, «Mostra altre» e ricerca. Provato dal vivo: Tutte 12.764 · I tuoi 2 · Lazio 12.762; 375 px niente fuori, pulsanti 16 px.
+⬜ Non provati: un collaboratore; il telefono vero; una tariffa di onorari importata che dovrebbe valere come «prezzi tuoi» (proposta per dopo: spunta «sono i miei prezzi» all'import).
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate, Richieste dal sito.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti, Calendario, Scadenze e promemoria, Assistente, Chat con AI, Giornate, Richieste dal sito, Prezzario.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4448,6 +4464,16 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Richieste dal sito ↔ Chat con AI: ✔ dal 24 nov (secondo giro) la chat legge gli incarichi (`incarichi_sito`).
 - Richieste dal sito ↔ Ricerca in alto: — la ricerca non le trova (da guardare a fine giro).
 - Si può unire: NO, è la porta d'ingresso dei clienti dal sito; si potrebbe pensare di metterla dentro Preventivi come linguetta, ma il pallino e la riga nell'Assistente bastano.
+
+- Prezzario ↔ Preventivi e parcella: ✔ «€ Prendi dal prezzario» nel preventivo; dal 24 nov prima i prezzi tuoi (onorari), «a corpo», conta «usata».
+- Prezzario ↔ Computo metrico: ✔ la tariffa regionale nella lavorazione e «Prendi i prezzi dal prezzario»; «Salva nel mio prezzario». — nel computo i prezzi tuoi non vengono prima (giusto: lì si usa la tariffa).
+- Prezzario ↔ Chat con AI: ✔ dal 24 nov `miei_prezzi` legge prima i prezzi tuoi (`tuo: true`).
+- Prezzario ↔ Richieste dal sito: ✔ «Risposta pronta» allo studio usa gli onorari (fonte «mio»).
+- Prezzario ↔ Assistente: ✔ scheda «N voci nel tuo prezzario».
+- Prezzario ↔ Cestino: ✔ la voce va e torna.
+- Prezzario ↔ Ricerca in alto: — le voci non si cercano da lì (si cercano nel Prezzario).
+- Prezzario ↔ Fatture: — la fattura nasce dal preventivo (le voci passano da lì); nel modulo fattura non c'è «Prendi dal prezzario».
+- Si può unire: NO, è l'archivio dei prezzi; dal 24 nov «I tuoi prezzi» separa gli onorari dalla tariffa.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

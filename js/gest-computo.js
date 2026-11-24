@@ -3050,6 +3050,52 @@
       .order("created_at",{ascending:false}).limit(quante||200);
     return error?[]:(data||[]);
   }
+  /* ============================================================
+     ⛔ 24 nov 2026 — collaudo del Prezzario (studio): I PREZZI TUOI
+     SPARIVANO SOTTO LA TARIFFA REGIONALE.
+     ============================================================
+     Trovato dal vivo: un geometra scrive i suoi onorari (APE 250 € a corpo,
+     CILA 1.200 €, rilievo 400 € al giorno) e nel preventivo, cercando «APE»,
+     «CILA» o «rilievo», uscivano 8 voci della Tariffa del Lazio (piezometri,
+     apparecchi cilindrici…) e i suoi NO. E nella voce Prezzario la sua
+     «demolizione di tramezzi» stava alla posizione 109 di «demolizione»:
+     la tariffa e' arrivata dopo, quindi e' piu' «nuova» e passava davanti.
+     Adesso: le voci TUE (fonte «mio», o vuota come prima del 18 nov) si
+     cercano a parte e stanno in cima; poi quelle dove la parola cercata e'
+     una parola intera («APE», non «cAPEzzale»); poi il resto, come prima. */
+  function _ppMia(x){ return !!x&&(!x.fonte||x.fonte==="mio"); }
+  async function _ppCercaMiei(q,quante){
+    if(!sb||!sbUid)return [];
+    const parole=_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean).map(_ppRadice)
+      .map(w=>w.replace(/[^a-z0-9.]/g,"")).filter(w=>w.length>=2).slice(0,6);
+    let qy=sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null)
+      .or("fonte.eq.mio,fonte.is.null");
+    parole.forEach(function(p){
+      qy=qy.or("descrizione.ilike.%"+p+"%,codice.ilike.%"+p+"%,categoria.ilike.%"+p+"%");
+    });
+    const {data,error}=await qy.order("usata_volte",{ascending:false})
+      .order("created_at",{ascending:false}).limit(quante||100);
+    return error?[]:(data||[]);
+  }
+  /* mette in fila: prima le tue, poi la parola intera, poi il resto (ordine di prima) */
+  function _ppMieiPrima(L,q){
+    const parole=_ppPiatto(q||"").split(/[^a-z0-9]+/).filter(w=>w.length>=2);
+    const intera=x=>{
+      if(!parole.length)return 0;
+      const t=" "+_ppPiatto((x.codice||"")+" "+(x.descrizione||"")+" "+(x.categoria||"")).replace(/[^a-z0-9]+/g," ")+" ";
+      /* corta (APE, CILA, DL): parola intera; lunga: l'inizio della parola
+         senza la vocale finale (rilievo / rilievi) */
+      return parole.every(p=>p.length<5?t.indexOf(" "+p+" ")>=0:t.indexOf(" "+_ppRadice(p))>=0)?0:1;
+    };
+    return (L||[]).map((x,i)=>[x,_ppMia(x)?0:1,intera(x),i])
+      .sort((a,b)=>(a[1]-b[1])||(a[2]-b[2])||(a[3]-b[3])).map(z=>z[0]);
+  }
+  /* unione senza doppioni: prima A, poi quello di B che manca */
+  function _ppUnisci(A,B){
+    const ids=new Set(), out=[];
+    (A||[]).concat(B||[]).forEach(function(x){ const k=String(x.id); if(!ids.has(k)){ids.add(k);out.push(x);} });
+    return out;
+  }
   /* ⛔ 18 nov 2026 — LE TARIFFE SI CHIEDONO AL DATABASE, NON ALLA MEMORIA.
      ppFonti() le prende dalle 500 voci piu' usate: una tariffa appena
      importata (tutte le voci usate 0 volte) non c'era, e nella tendina

@@ -194,23 +194,37 @@
     if(!ppTutte.length){ const e=await ppCarica(); if(e){box.innerHTML='<p class="fatt-empty">Non riesco a leggere il prezzario.</p>';return;} }
     const q=String(($("#prev-pz-cerca")&&$("#prev-pz-cerca").value)||"").trim();
     let L=_ppFiltra(ppTutte,q);
+    /* ⛔ 24 nov 2026 (collaudo del Prezzario dello studio): cercando «APE»,
+       «CILA» o «rilievo» uscivano 8 voci della Tariffa del Lazio e gli onorari
+       del geometra NO (le 8 piu' usate erano tutte della tariffa). Adesso le
+       voci TUE si cercano sempre a parte e stanno in cima; poi la parola
+       intera; poi il resto. Vale per tutte le facce: il prezzo tuo prima. */
+    const mie=await _ppCercaMiei(q,q?40:20);
     if(q&&ppTetto){
       const db=await _ppCercaDb(q,null,40);
-      const ids=new Set(L.map(x=>String(x.id)));
-      db.forEach(x=>{ if(!ids.has(String(x.id))){ids.add(String(x.id));L.push(x);} });
+      L=_ppUnisci(L,db);
     }
     if(giro!==prevPzGiro)return;   /* nel frattempo ha scritto altro */
+    L=_ppMieiPrima(_ppUnisci(mie,L),q);
     prevPzCache=L.slice(0,8);
     if(!ppTutte.length){box.innerHTML='<p class="fatt-empty">Il prezzario è vuoto: le voci le scrivi nella voce Prezzario del menu.</p>';return;}
     if(!prevPzCache.length){box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola.</p>';return;}
     box.innerHTML=prevPzCache.map(x=>
       '<div class="spesa-row" data-action="prev-pz-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
-      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
-      +'<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
+      /* 24 nov 2026: .ti-orig = testo del prezzario, il traduttore dello studio
+         non lo tocca («Rilievo in cantiere» diventava «Rilievo in pratica») */
+      +'<span><span class="ti-orig">'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")+'</span>'
+      +'<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?(prevUnita(x.unita)==="corpo"?" ":" / ")+esc(prevUnitaTesto(x.unita)):"")
       +((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
       +(x.fonte?(" · "+(x.fonte==="mio"?"prezzo tuo":esc(x.fonte))):"")
       +'</small></span><b></b></div>').join("")
-      +((L.length>prevPzCache.length)?'<div class="sh-nota">Ne ho trovate '+L.length+': qui sopra le 8 che usi di più. Scrivi una parola in più per restringere.</div>':'');
+      /* 24 nov 2026: senza parola diceva «Ne ho trovate 500» (le voci in
+         memoria) su un prezzario da 12.764: un numero falso. Senza parola non
+         si conta; con la tariffa grande si dice «più di». */
+      +((L.length>prevPzCache.length)?'<div class="sh-nota">'
+        +(q?('Ne ho trovate '+((ppTetto&&L.length>=40)?'più di '+L.length:L.length)+': qui sopra prima i prezzi tuoi, poi quelli che usi di più. Scrivi una parola in più per restringere.')
+           :'Qui sopra prima i prezzi tuoi, poi quelli che usi di più. Scrivi una parola per cercare.')
+        +'</div>':'');
   }
   function prevPzUsa(id){
     const x=prevPzCache.find(v=>String(v.id)===String(id));if(!x)return;

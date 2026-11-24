@@ -1333,19 +1333,79 @@
   let pzTot=0, pzQ="", pzDb=[], pzVisti={}, pzGiro=0, pzDbTetto=false;
   const PZ_DB=300;
   function _pzOrdina(qy){ return qy.order("usata_volte",{ascending:false}).order("created_at",{ascending:false}).order("id"); }
+  /* 24 nov 2026: «1.200,00 € / corpo» non si dice: «a corpo», come nel
+     preventivo (prevUnitaTesto). Solo come si legge: nel database resta «corpo». */
+  function _pzCorpo(u){ const k=String(u==null?"":u).toLowerCase().replace(/[^a-z]/g,""); return k==="corpo"||k==="acorpo"||k==="ac"; }
+  function _pzUm(u){ const s=String(u==null?"":u).trim(); if(_pzCorpo(s))return "a corpo"; return (typeof _umSchermo==="function")?_umSchermo(s):s; }
+  /* ============================================================
+     24 nov 2026 — «TUTTE · I TUOI PREZZI · TARIFFA» (sì di Alex, foto approvata)
+     ============================================================
+     Con la tariffa della Regione dentro (12.762 voci) i prezzi scritti a mano
+     (onorari dello studio, prezzi suoi dell'impresa) non si vedevano mai:
+     stavano in mezzo, mai usati. Tre pulsanti in alto: tutte, solo le tue
+     (fonte «mio» o vuota), una tariffa. Compaiono solo se ci sono almeno due
+     gruppi. Il filtro vale per l'elenco, «Mostra altre» e la ricerca. */
+  let pzFonte="", pzFontiN=null;
+  function _pzFiltro(qy){
+    if(pzFonte==="mio")return qy.or("fonte.eq.mio,fonte.is.null");
+    if(pzFonte)return qy.eq("fonte",pzFonte);
+    return qy;
+  }
+  async function _pzFontiConta(){
+    if(pzFontiN)return pzFontiN;
+    try{
+      if(ppFontiDb==null&&typeof ppCaricaFonti==="function")await ppCaricaFonti();
+      const tar=(ppFontiDb||[]).filter(f=>f&&f!=="mio");
+      const base=()=>sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true}).eq("user_id",sbUid).is("eliminato_il",null);
+      const [rt,rm,...rf]=await Promise.all([base(),base().or("fonte.eq.mio,fonte.is.null")].concat(tar.slice(0,8).map(f=>base().eq("fonte",f))));
+      pzFontiN={tutte:(rt&&rt.count)||0, mio:(rm&&rm.count)||0, tar:tar.slice(0,8).map((f,i)=>({f:f,n:(rf[i]&&rf[i].count)||0})).filter(x=>x.n>0)};
+    }catch(e){ pzFontiN={tutte:0,mio:0,tar:[]}; }
+    return pzFontiN;
+  }
+  function _pzFontiDisegna(){
+    let bar=document.getElementById("pz-fonti");
+    const N=pzFontiN;
+    const gruppi=N?((N.mio>0?1:0)+N.tar.length):0;
+    if(!N||gruppi<2){ if(bar)bar.remove(); if(pzFonte&&N&&gruppi<2){pzFonte="";} return; }
+    if(!bar){
+      bar=document.createElement("div"); bar.id="pz-fonti"; bar.className="pz-fonti";
+      const es=$("#pz-esito"); if(es&&es.parentNode)es.parentNode.insertBefore(bar,es); else return;
+      bar.addEventListener("click",function(ev){
+        const b=ev.target.closest("[data-pzf]"); if(!b)return;
+        const f=b.getAttribute("data-pzf");
+        if(f===pzFonte)return;
+        pzFonte=f; renderPrezzario();
+      });
+    }
+    const _n=n=>Number(n||0).toLocaleString("it-IT");
+    const bot=(f,t)=>'<button type="button" class="btn'+(pzFonte===f?' btn-primary':'')+'" data-pzf="'+esc(f)+'">'+esc(t)+'</button>';
+    bar.innerHTML=bot("","Tutte ("+_n(N.tutte)+")")
+      +(N.mio>0?bot("mio","I tuoi prezzi ("+_n(N.mio)+")"):"")
+      +N.tar.map(x=>bot(x.f,x.f+" ("+_n(x.n)+")")).join("");
+  }
   function _pzRicorda(arr){ (arr||[]).forEach(function(x){ pzVisti[String(x.id)]=x; }); }
 
   async function renderPrezzario(daCache){
     filoMetti("prezzario","prezzario");
     const box=$("#pz-list");if(!box)return;
+    /* 24 nov 2026 (studio): «tramezzo, intonaco, pavimento» a un geometra non
+       dice niente: lui nel prezzario tiene gli ONORARI (APE, CILA, rilievo) e
+       la tariffa regionale per i computi. Le scritte fisse si cambiano qui. */
+    const _pzStudio=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+    const _ce0=$("#pz-cerca");
+    if(_ce0)_ce0.placeholder=_pzStudio?"Es. APE, CILA, rilievo, catasto":"Es. tramezzo, intonaco, pavimento";   /* corte: sul telefono la scritta lunga si tagliava */
+    const _in0=document.querySelector("#prezzario .gal-intro");
+    if(_in0)_in0.textContent=_pzStudio
+      ?"I tuoi onorari e le voci che usi sempre, scritti una volta sola. Quelli che usi di più stanno in cima."
+      :"Le voci che usi sempre, scritte una volta sola. Quelle che usi di più stanno in cima.";
     const cnt=$("#cnt-prezzario");
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Prezzario","Accedi per usare il tuo prezzario.","");return;}
     /* 6 nov 2026 — «Mostra altre» e la ricerca non rileggono le mille voci
        dal database: usano quelle gia' lette (daCache===true) */
     if(!(daCache===true&&pzCache.length)){
       const [r1,r2]=await Promise.all([
-        _pzOrdina(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null)).limit(PZ_MAX),
-        sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true}).eq("user_id",sbUid).is("eliminato_il",null)
+        _pzOrdina(_pzFiltro(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null))).limit(PZ_MAX),
+        _pzFiltro(sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true}).eq("user_id",sbUid).is("eliminato_il",null))
       ]);
       const error=r1.error;
       if(error){
@@ -1360,6 +1420,8 @@
       pzTot=Math.max(pzCache.length,(r2&&!r2.error&&r2.count)||0);
       pzVisti={};_pzRicorda(pzCache);
       pzMostra=PZ_PASSO;pzQ="";pzDb=[];
+      pzFontiN=null;
+      _pzFontiConta().then(_pzFontiDisegna);
     }
     if(cnt)cnt.textContent="";   /* 12 nov 2026 (terzo giro): «1000» accanto a Prezzario sembrava mille cose da fare */
     const q=String(($("#pz-cerca")&&$("#pz-cerca").value)||"").trim();
@@ -1369,9 +1431,13 @@
     if(q&&!tutte&&q!==pzQ){
       const giro=++pzGiro;
       box.innerHTML='<p class="fatt-empty">Cerco «'+esc(q)+'» in tutte le '+pzTot.toLocaleString("it-IT")+' voci…</p>';
-      const db=await _ppCercaDb(q,null,PZ_DB);
+      /* 24 nov 2026: le voci TUE si cercano a parte, se no sotto 12.000 voci
+         della tariffa non arrivavano (vedi _ppCercaMiei in gest-computo.js) */
+      const [db,mie]=await Promise.all([
+        pzFonte==="mio"?Promise.resolve([]):_ppCercaDb(q,pzFonte||null,PZ_DB),
+        (pzFonte&&pzFonte!=="mio")?Promise.resolve([]):_ppCercaMiei(q,100)]);
       if(giro!==pzGiro)return;            /* nel frattempo ha scritto altro */
-      pzQ=q;pzDb=db;pzDbTetto=(db.length>=PZ_DB);_pzRicorda(db);
+      pzQ=q;pzDb=_ppUnisci(mie,db);pzDbTetto=(db.length>=PZ_DB);_pzRicorda(pzDb);
     }
     if(!q){pzQ="";pzDb=[];pzDbTetto=false;}
     let L=_ppFiltra(pzCache,q);
@@ -1379,9 +1445,11 @@
       const ids=new Set(L.map(x=>String(x.id)));
       pzDb.forEach(function(x){ if(!ids.has(String(x.id))){ids.add(String(x.id));L.push(x);} });
     }
+    /* 24 nov 2026: cercando, prima le voci tue, poi la parola intera (APE, non cAPEzzale) */
+    if(q)L=_ppMieiPrima(L,q);
     /* senza ricerca, «Mostra altre» va avanti anche oltre le prime 1000 */
     if(!q&&pzMostra>pzCache.length&&pzCache.length<pzTot){
-      const {data:altre}=await _pzOrdina(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null))
+      const {data:altre}=await _pzOrdina(_pzFiltro(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null)))
         .range(pzCache.length,pzCache.length+PZ_MAX-1);
       const ids=new Set(pzCache.map(x=>String(x.id)));
       (altre||[]).forEach(function(x){ if(!ids.has(String(x.id))){ids.add(String(x.id));pzCache.push(x);} });
@@ -1390,15 +1458,21 @@
     }
     const nTot=pzTot.toLocaleString("it-IT");
 
+    if(!pzCache.length&&pzFonte){
+      box.innerHTML='<p class="fatt-empty">'+(pzFonte==="mio"?"Non hai ancora prezzi tuoi: premi «+ Nuova voce».":"In questa tariffa non c'è niente.")+'</p>';
+      return;
+    }
     if(!pzCache.length){
       box.innerHTML=tabVuoto("Il prezzario è vuoto",
-        "Puoi scrivere le voci una per una, oppure caricare tutto il tuo prezzario da un file Excel qui sopra. Poi nel computo le ritrovi cercando una parola.",
+        _pzStudio
+          ?"Scrivi una volta sola i tuoi onorari (APE, CILA, rilievo, accatastamento…), oppure carica la tariffa della Regione da un file Excel qui sopra. Poi nel preventivo e nel computo li ritrovi cercando una parola."
+          :"Puoi scrivere le voci una per una, oppure caricare tutto il tuo prezzario da un file Excel qui sopra. Poi nel computo e nel preventivo le ritrovi cercando una parola.",
         _SVGV+'<path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
         {t:"+ Scrivi la prima voce",a:"new-prezzo"});
       return;
     }
     if(!L.length){
-      box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola. Hai '+nTot+' voci nel prezzario.</p>';
+      box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola. '+(pzFonte?('Qui ce ne sono '+nTot+': prova su «Tutte».'):('Hai '+nTot+' voci nel prezzario.'))+'</p>';
       return;
     }
     /* ===== 18 agosto 2026 — LE VOCI DIVENTANO SCHEDE =====
@@ -1416,7 +1490,7 @@
       +    '<button type="button" class="btn btn-sm pz-x pz-apri" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">Apri</button>'
       +  '</div>'
       +  '<div class="pz-desc">'+esc(x.descrizione||"(senza descrizione)")+'</div>'
-      +  '<div class="pz-prezzo">'+eur2(x.prezzo_unitario)+(x.unita?'<small> / '+esc(x.unita)+'</small>':'')+'</div>'
+      +  '<div class="pz-prezzo">'+eur2(x.prezzo_unitario)+(x.unita?'<small>'+(_pzCorpo(x.unita)?' ':' / ')+esc(_pzUm(x.unita))+'</small>':'')+'</div>'
       +  '<div class="pz-meta">'
       +    (x.categoria?esc(x.categoria)+' · ':'')
       /* 18 nov 2026: «mio» non dice niente a chi legge: e' il prezzo suo */
@@ -1448,9 +1522,10 @@
        per cambiare il prezzo) l'unita' diventava vuota. Provato dal vivo.
        Adesso l'unita' della voce si aggiunge alla tendina, come fa gia'
        _uniMetti() dentro la lavorazione del computo. */
-    const _uni=String(x.unita||"").trim();
+    /* 24 nov 2026: «a corpo» scritto cosi' nel file importato e' la voce «corpo» della tendina */
+    const _uni=_pzCorpo(x.unita)?"corpo":String(x.unita||"").trim();
     const uniOpts='<option value="">— unità —</option>'+UNITA.map(u=>
-      '<option value="'+u+'"'+(u===_uni?" selected":"")+'>'+u+'</option>').join("")
+      '<option value="'+u+'"'+(u===_uni?" selected":"")+'>'+(u==="corpo"?"a corpo":u)+'</option>').join("")
       +((_uni&&UNITA.indexOf(_uni)<0)?('<option value="'+esc(_uni)+'" selected>'+esc(_uni)+'</option>'):"");
     openSheetGrande(isNew?"Nuova voce del prezzario":"Voce del prezzario",
        '<div class="sh-cols"><div class="sh-col">'
@@ -1464,7 +1539,7 @@
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Per ritrovarla</div>'
-      +  '<div class="field"><label>Categoria</label><input id="pz-cat"'+_noAuto()+' value="'+esc(x.categoria||"")+'" placeholder="Es. Demolizioni, Intonaci, Pavimenti"></div>'
+      +  '<div class="field"><label>Categoria</label><input id="pz-cat"'+_noAuto()+' value="'+esc(x.categoria||"")+'" placeholder="'+((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")?"Es. Onorari, Rilievi, Catasto":"Es. Demolizioni, Intonaci, Pavimenti")+'"></div>'
       +  '<div class="field"><label>Da dove viene questo prezzo</label><input id="pz-fonte"'+_noAuto()+' value="'+esc((x.fonte&&x.fonte!=="mio")?x.fonte:"")+'" placeholder="Vuoto = è un prezzo tuo"></div>'
       +  '<div class="sh-nota">La fonte serve quando fra sei mesi ti chiedi perché quel prezzo era proprio quello.</div>'
       +'</div>'
@@ -1473,7 +1548,7 @@
       +  '<div class="sh-nota">Se la scrivi qui, entra da sola nella lavorazione ogni volta che usi questa voce.</div>'
       +'</div>'
       +(isNew?'':'<div class="sh-b"><div class="sh-tit">Quanto la usi</div><div class="sh-nota">'
-        +((+x.usata_volte)?("L'hai usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")+": sta in cima alla ricerca."):"Non l'hai ancora mai usata in un computo.")
+        +((+x.usata_volte)?("L'hai usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")+": sta in cima alla ricerca."):"Non l'hai ancora mai usata in un computo o in un preventivo.")
         +'</div></div>')
       +'</div></div>',
 

@@ -4763,6 +4763,9 @@ body:has(#ti-fondatore) .sheet--grande{
 #pz-list .pz-cod{grid-area:testa;justify-self:start;font-size:14px!important;padding:2px 8px!important;width:auto!important}
 #pz-list .pz-x{grid-area:x;align-self:center}
 #pz-list .pz-desc{grid-area:desc;font-size:16px!important;line-height:1.4!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* 24 nov 2026 (Prezzario dello studio): nella ricerca dentro il preventivo una voce
+   della tariffa occupava un intero schermo del telefono. Tre righe, come le schede. */
+#prev-pz-lista .ti-orig{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 #pz-list .pz-prezzo{grid-area:prezzo;text-align:right;font-size:19px!important;white-space:nowrap}
 #pz-list .pz-meta{grid-area:meta;text-align:right;font-size:14px!important;white-space:nowrap;align-self:start}
 @media(max-width:760px){
@@ -6505,3 +6508,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .cal-lav-bar.dep,.cal-lista .cal-lav-bar.dep{background:#7C3AED}
 .dot.dep{background:#7C3AED}
 .day-job .stato.dep{background:#EDE9FE;color:#5B21B6}
+/* 24 nov 2026 — Prezzario: «Tutte · I tuoi prezzi · Tariffa» (js/gest-sal-prezzario.js, _pzFontiDisegna) */
+.pz-fonti{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.pz-fonti .btn{font-size:16px;padding:10px 16px;min-height:44px}
+.pz-fonti .btn:not(.btn-primary){background:#fff}

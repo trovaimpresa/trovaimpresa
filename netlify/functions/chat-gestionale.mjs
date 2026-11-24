@@ -1434,7 +1434,7 @@ const STRUMENTI = [
   },
   {
     name: 'miei_prezzi',
-    description: 'Legge la LISTA DEI PREZZI di chi chiede (quelli che ha salvato lui: voce, unità, prezzo). Usalo prima di fare un preventivo, con una parola della voce («piastrelle», «tinteggiatura»). Senza parola dà quelli che usa di più.',
+    description: 'Legge la LISTA DEI PREZZI di chi chiede (quelli che ha salvato lui: voce, unità, prezzo). Usalo prima di fare un preventivo, con una parola della voce («piastrelle», «tinteggiatura»; per uno studio «APE», «rilievo», «CILA»). Senza parola dà quelli che usa di più. Le righe con `tuo: true` sono i prezzi che ha scritto LUI (vengono prima): se la domanda è «quanto chiedo / quanto ho messo», rispondi con quelle; le altre sono della tariffa caricata (es. Regione).',
     input_schema: { type:'object', properties: { parola: { type:'string' } } }
   }
 ];
@@ -2274,8 +2274,25 @@ export default async function (req) {
           const paroleP = paroleDi(inp.parola, 4);
           if (!uid) esito = { errore: 'manca chi sta chiedendo' };
           else if (paroleP.length) {
+            /* ⛔ 24 nov 2026 (collaudo del Prezzario dello studio): «quanto ho messo
+               per un giorno di rilievo?» → «non ho trovato una tariffa a giornata»,
+               con la voce «Rilievo … 400 € al giorno» del geometra li'. La ricerca
+               va in ordine di CODICE e una voce scritta a mano non ne ha: finiva
+               dopo le 120 della tariffa. Adesso i prezzi TUOI (fonte «mio» o
+               vuota) si leggono a parte e stanno davanti, segnati `tuo: true`. */
+            const formeP = paroleP.map(formaParola).filter(Boolean);
+            const rmMiei = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario,categoria,codice',
+              filtri: { user_id: uid }, senzaCestino: true, oppure: 'fonte.eq.mio,fonte.is.null', ordine: 'usata_volte', limite: 300, soloConta: false });
+            const miei = (rmMiei.righe || []).map(function (x) {
+              const t = normaTesto((x.descrizione || '') + ' ' + (x.categoria || ''));
+              return { x: x, n: formeP.filter(function (f) { return f.js.test(t); }).length };
+            }).filter(function (o) { return o.n > 0; }).sort(function (a, b) { return b.n - a.n; })
+              .map(function (o) { return Object.assign({}, o.x, { tuo: true }); });
             const rm = await cercaNelPrezzario(dati, uid, paroleP, 'descrizione,unita,prezzo_unitario,categoria', 300);
-            esito = rm.errore ? { errore: rm.errore } : { righe: (rm.righe || []).slice(0, RIGHE_MAX)
+            const visteP = {};
+            miei.forEach(function (x) { visteP[String(x.descrizione || '') + '|' + x.prezzo_unitario] = 1; });
+            const altreP = (rm.righe || []).filter(function (x) { return !visteP[String(x.descrizione || '') + '|' + x.prezzo_unitario]; });
+            esito = (rm.errore && !miei.length) ? { errore: rm.errore } : { righe: miei.concat(altreP).slice(0, RIGHE_MAX)
               .map(function (x) { return Object.assign({}, x, { descrizione: String(x.descrizione || '').slice(0, 320) }); }) };
           } else {
             if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
