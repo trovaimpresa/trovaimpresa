@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/gestionale.css?v=24nov-gal">
+<link rel="stylesheet" href="/css/gestionale.css?v=24nov-cal">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=36">
 
@@ -351,6 +351,9 @@
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">Oggi</button><button class="btn" data-action="cal-next">›</button></div></div>
+      <!-- 24 nov 2026 (si' di Alex) — solo le pratiche di una persona, come la Mappa -->
+      <div class="filtri cal-filtri"><div class="filtro" id="cal-chi-box" hidden><label class="filtro-lab" for="cal-chi">Chi ci va</label>
+        <select class="filtro-sel" id="cal-chi"></select></div></div>
       <div class="cal-rit" id="cal-rit" data-action="cal-ritardo" hidden></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span><i class="dot scad"></i>Scadenza</span><span><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Nota</span></div>
@@ -779,7 +782,7 @@
 <script src="/js/gest-ingresso.js?v=24nov-mp"></script>
 <script src="/js/gest-ai-moduli.js?v=24nov-cli2"></script>
 <script src="/js/gest-riepilogo-schede.js?v=20nov-ag"></script>
-<script src="/js/gest-schede-clienti.js?v=24nov-cal"></script>
+<script src="/js/gest-schede-clienti.js?v=24nov-cal2"></script>
 <script src="/js/gest-carte-documenti.js?v=20nov-fo"></script>
 <script src="/js/gest-richieste-chat.js?v=20nov-stru"></script>
 <script src="/js/gest-scadenze-pratiche.js?v=24nov-cli2"></script>

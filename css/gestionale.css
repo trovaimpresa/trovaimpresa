@@ -6494,3 +6494,12 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 #report .rep-anni-sub{font-size:14px;color:var(--testo-3,#5f6b7a);font-weight:400}
 #report .rep-apri{margin-top:8px}
 @media (max-width:600px){ #report .rep-anni-pc{display:none} #report .rep-anni-tel{display:table} }
+
+/* 24 nov 2026 (si' di Alex) — CALENDARIO: «Chi ci va» e il giorno del deposito */
+.cal-filtri{margin:0 0 10px}
+.cal-filtri .filtro[hidden]{display:none}
+.cal-chi-n{color:var(--testo-2);font-weight:600}
+.day-chi{font-size:15px;color:var(--testo-2);margin-top:2px}
+.cal-lav-bar.dep,.cal-lista .cal-lav-bar.dep{background:#7C3AED}
+.dot.dep{background:#7C3AED}
+.day-job .stato.dep{background:#EDE9FE;color:#5B21B6}

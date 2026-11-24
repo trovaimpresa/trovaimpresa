@@ -4168,7 +4168,10 @@ Sistemato (`?v=24nov-cal`):
 5. App del collaboratore (`js/op-agenda-giorno.js`): «Fatto» → «Fatta» allo studio; nel giorno due pratiche dello stesso cliente erano uguali (titolo = nome del cliente) → sotto c'è anche cosa c'è da fare.
 Banco `tools/banco-gestionale.js app`: ZERO difetti prima e dopo. Correzioni provate sulla pagina vera rimettendo le funzioni (`fn.toString()` + sostituzione).
 
-Proposte con foto (aspettano il sì di Alex), script pronto in `/tmp/lavoro/funzioni-nuove.py` della sessione: **«Chi ci va»** nel Calendario (nome accanto alla pratica, «Ci va: …» nel riquadro, tendina come la Mappa: Tutti / persona / Nessuno, filtra solo pratiche e depositi) e **il giorno del deposito** (solo studio: riga viola «Depositata: …» nel giorno di `pratica_data_dep`, legenda «Deposito», apre la pratica).
+Funzioni nuove (foto prima, «Si e si pubblica» di Alex), `?v=24nov-cal2`, css `?v=24nov-cal`:
+- **«Chi ci va»** nel Calendario (tutte le facce): nome (prima parola) accanto alla pratica nella casella e nell'elenco del telefono (`.cal-chi-n`), «Ci va: Nome Cognome» nel riquadro del giorno (`.day-chi`), tendina `#cal-chi-box` / `#cal-chi` sopra la griglia come la Mappa: Tutti (N) · persona (N) · Nessuno (N), contati sulle pratiche del MESE guardato; «Nessuno» comprende chi è nel Cestino. Filtra solo pratiche e depositi: scadenze, promemoria e note restano. Senza persone la tendina non c'è. Codice: `calOp`, `calChi`, `calChiNome`, `calChiPassa`, `calChiTendina` in `js/gest-schede-clienti.js`; `renderCal` legge anche `operatore_id,pratica_data_dep` (se una colonna manca rilegge senza).
+- **Il giorno del deposito** (solo studio): riga viola «Depositata: …» nel giorno di `pratica_data_dep` (`calDep`, `calDepRiga`, `.cal-lav-bar.dep`, `.dot.dep`, `.stato.dep` #7C3AED), legenda «Deposito» (`.cal-leg-dep`), nel riquadro «Depositata», apre la pratica. Conta nei 3 posti della casella.
+Foto fatte col banco (`/tmp/lavoro/foto.js` + `dati-cal.js`: finto `sb.from` con pratiche, persone, scadenze). Banco `tools/banco-gestionale.js app`: ZERO difetti.
 ⬜ Non provato: collaboratore vero dal suo telefono (letto il codice); fattura vera da incassare (vietato emetterla).
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
@@ -4189,7 +4192,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Agenda ↔ Pratiche: ✔ «Apri» apre la pratica e «Indietro» torna all'Agenda; assegnare il collaboratore dalla pratica aggiorna la tendina.
 - Agenda ↔ Collaboratori: ✔ dal 20 nov «Pratiche (N)» sulla scheda apre l'Agenda filtrata; persona nel Cestino → ora le sue pratiche stanno in «Nessuno assegnato» (20 nov).
 - Agenda ↔ Assistente: ✔ scheda «Agenda» con i numeri uguali (dal 20 nov non conta chi è nel Cestino). dal 20 nov dice anche «N pratiche senza nessuno».
-- Agenda ↔ Calendario: ✔ le stesse pratiche con la data. — Il Calendario non dice chi ci va.
+- Agenda ↔ Calendario: ✔ le stesse pratiche con la data; dal 24 nov il Calendario dice chi ci va.
 - Agenda (Ore fatte) ↔ Pratiche / Giornate del collaboratore: ✔ le ore del «Registro delle ore» entrano. ✔ dal 20 nov le ore scritte si aprono pratica per pratica, con «Apri le Giornate di …».
 - Agenda ↔ Cestino: ✔ dal 20 nov si ridisegna dopo «Rimetti a posto».
 - Agenda ↔ app del collaboratore: ✔ il collaboratore vede le pratiche assegnate («Pratiche di adesso», dal codice; non provato con un suo account).
@@ -4262,17 +4265,17 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Clienti ↔ Ricerca in alto: ✔ dal 24 nov anche codice fiscale, PEC, codice destinatario e i clienti senza reparto.
 - Si può unire: NO, Clienti resta voce sola (la scheda è il punto da cui partono preventivi, pratiche e fatture).
 
-- Calendario ↔ Pratiche: ✔ la data prevista; «Apri» apre la pratica; «+ Pratica in questa data» con la data già messa; dal 24 nov il colore del ritardo uguale a Pratiche (al Comune non è in ritardo). — il giorno del deposito non c'è (proposta).
+- Calendario ↔ Pratiche: ✔ la data prevista; «Apri» apre la pratica; «+ Pratica in questa data» con la data già messa; dal 24 nov il colore del ritardo uguale a Pratiche (al Comune non è in ritardo) e il giorno del deposito in viola.
 - Calendario ↔ Scadenze e promemoria: ✔ scadenze delle pratiche, integrazioni, promemoria; aprono la loro scheda.
 - Calendario ↔ Strumenti: ✔ dal 24 nov la taratura col nome dello strumento.
 - Calendario ↔ Fornitori: ✔ «Da pagare» apre la fattura e si torna al Calendario.
 - Calendario ↔ Fatture: ✔ «Da incassare» (provato solo in memoria).
-- Calendario ↔ Collaboratori / Agenda: — il Calendario non dice chi va al sopralluogo (proposta «Chi ci va», come la Mappa).
+- Calendario ↔ Collaboratori / Agenda: ✔ dal 24 nov «Chi ci va» (nome accanto alla pratica, tendina come la Mappa e l'Agenda, «Nessuno» comprende chi è nel Cestino).
 - Calendario ↔ app del collaboratore: ✔ vede i giorni delle sue pratiche; dal 24 nov «Fatta» e cosa c'è da fare sotto il cliente. — non vede scadenze e promemoria dello studio (giusto).
 - Calendario ↔ Assistente: ✔ la riga «in ritardo» usa la stessa regola di Pratiche.
 - Calendario ↔ Cestino: ✔ pratica nel Cestino sparisce con la sua scadenza, torna con «Rimetti a posto».
 - Calendario ↔ Mappa: — i sopralluoghi del giorno non hanno «il giro» sulla carta.
-- Si può unire: NO (Calendario = tutte le date dello studio; Agenda = chi fa cosa). Con «Chi ci va» si parlano senza unirle.
+- Si può unire: NO (Calendario = tutte le date dello studio; Agenda = chi fa cosa). Con «Chi ci va» (fatto il 24 nov) si parlano senza unirle.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

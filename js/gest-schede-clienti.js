@@ -639,14 +639,54 @@
     return false;
   }
 
-  let calJobs=[], calScad=[];
+  let calJobs=[], calScad=[], calDep=[], calOp={}, calChi="";
+  /* ===== 24 nov 2026 (si' di Alex) — «CHI CI VA» E IL GIORNO DEL DEPOSITO =====
+     Il calendario non diceva chi va al sopralluogo: adesso il nome sta accanto
+     alla pratica e la tendina «Chi ci va» (come la Mappa) tiene solo le sue.
+     "" = tutti, "_nessuno" = nessuno assegnato (anche chi e' nel Cestino, come
+     Agenda e Mappa). La tendina filtra pratiche e depositi: scadenze,
+     promemoria e note restano, sono dello studio. */
+  const calChiNome=(j,intero)=>{const o=j&&j.operatore_id&&calOp[j.operatore_id];if(!o)return "";const n=String(o.nome||"").trim();return intero?n:n.split(/\s+/)[0];};
+  const calChiPassa=j=>!calChi||(calChi==="_nessuno"?!(j.operatore_id&&calOp[j.operatore_id]):String(j.operatore_id)===String(calChi));
+  const calDepRiga=x=>({id:x.id,titolo:"Depositata: "+x.titolo,data:x.data,fatta:false,_dep:true,_pre:"",_lab:"",
+    _az:'data-action="edit-job" data-id="'+esc(String(x.id))+'" title="Apri la pratica"'});
+  function calChiTendina(){
+    const box=document.getElementById("cal-chi-box"), sel=document.getElementById("cal-chi");
+    if(!box||!sel)return;
+    const ids=Object.keys(calOp);
+    if(!ids.length){box.hidden=true;calChi="";return;}
+    if(calChi&&calChi!=="_nessuno"&&!calOp[calChi])calChi="";
+    const y=cal.getFullYear(), m=cal.getMonth(), mese=ymd(y,m,1).slice(0,7);
+    const delMese=calJobs.filter(j=>String(j.data_prevista||"").slice(0,7)===mese);
+    const nomi=ids.map(id=>({id,nome:String(calOp[id].nome||"").trim()||"Senza nome",n:delMese.filter(j=>String(j.operatore_id)===String(id)).length}))
+      .sort((a,b)=>a.nome.localeCompare(b.nome,"it"));
+    sel.innerHTML='<option value="">Tutti ('+delMese.length+')</option>'
+      +nomi.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nome)+' ('+x.n+')</option>').join("")
+      +'<option value="_nessuno">Nessuno ('+delMese.filter(j=>!(j.operatore_id&&calOp[j.operatore_id])).length+')</option>';
+    sel.value=calChi; box.hidden=false;
+  }
+  document.addEventListener("change",function(e){
+    if(e.target&&e.target.id==="cal-chi"){calChi=e.target.value||"";renderCal();}
+  });
   const _calPro=()=>typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     let _calKo=false;   /* 12 nov 2026 — regola 20 */
-    if(sb&&sbUid){const {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];_calKo=!!_eCal;}
+    calOp={};
+    if(sb&&sbUid){
+      /* 24 nov 2026 (si' di Alex) — anche chi ci va (operatore_id) e, allo
+         studio, il giorno del deposito. Se una colonna manca si rilegge senza. */
+      let {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato,operatore_id,pratica_data_dep").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      if(_eCal&&/column|schema cache/i.test(_eCal.message||""))({data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()));
+      calJobs=data||[];_calKo=!!_eCal;
+      try{const ro=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere());(ro.data||[]).forEach(o=>{calOp[o.id]=o;});}catch(e){}
+    }
     else calJobs=[];
+    calChiTendina();
+    /* il giorno del deposito (solo studio): una riga sua, apre la pratica */
+    calDep=_calPro()?calJobs.filter(j=>j.pratica_data_dep).map(j=>({id:j.id,data:j.pratica_data_dep,titolo:j.descrizione||"Pratica",operatore_id:j.operatore_id})):[];
+    const _jobsVisti=calJobs.filter(calChiPassa), _depVisti=calDep.filter(calChiPassa);
     /* ===== 12 agosto 2026 — LE SCADENZE SUL CALENDARIO =====
        Il calendario leggeva UNA tabella sola: i lavori. Le scadenze — DURC,
        assicurazioni, revisioni, tarature, visite mediche — hanno tutte una
@@ -705,10 +745,10 @@
        leggono, e il «+N» dice quante ne restano — non si perde niente. */
     const MAX_CELLA=3;
     for(let d=1;d<=days;d++){
-      const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
+      const ds=ymd(y,m,d), jobs=_jobsVisti.filter(l=>l.data_prevista===ds);
       const scaduto=ds<todayStr();
-      /* le scadenze del giorno, sotto i lavori e con la loro barretta */
-      const sc=calScad.filter(x=>x.data===ds);
+      /* le scadenze del giorno, sotto i lavori e con la loro barretta (prima i depositi) */
+      const sc=_depVisti.filter(x=>x.data===ds).map(calDepRiga).concat(calScad.filter(x=>x.data===ds));
       /* 12 agosto 2026 (sera) — i posti nella cella sono MAX_CELLA IN TUTTO, non
          quattro per i lavori piu' altri quattro per le scadenze. Prima si
          potevano vedere otto righe e il "+N" era calcolato lo stesso su
@@ -721,11 +761,12 @@
            e il riquadro del giorno). Prima la casella la faceva rossa. */
         const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
         const tit=j.descrizione||(_calPro()?"Pratica":"Lavoro");
-        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}</span></span>`;
+        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}${calChiNome(j)?` <span class="cal-chi-n">· ${esc(calChiNome(j))}</span>`:""}</span></span>`;
       }).join("");
       const righeSc=sc.slice(0,nSc).map(x=>{
         const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
-        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</span></span>`;
+        const cls2=x._dep?"dep":cls;
+        return `<span class="cal-lav"><i class="cal-lav-bar ${cls2}"></i><span class="cal-lav-t">${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</span></span>`;
       }).join("");
       const tot=jobs.length+sc.length, mostrate=nJobs+nSc;
       const piu=tot>mostrate?`<span class="cal-piu">+${tot-mostrate}</span>`:"";
@@ -759,6 +800,8 @@
     }
     /* 24 nov 2026 — allo studio la legenda dice «Fatta» (la pratica), come la Mappa */
     try{const lf=document.querySelector("#calendario .cal-legend .dot.done");if(lf&&lf.nextSibling)lf.nextSibling.nodeValue=_calPro()?"Fatta":"Fatto";}catch(e){}
+    /* 24 nov 2026 — la legenda del deposito, solo allo studio */
+    try{const lg=document.querySelector("#calendario .cal-legend");if(lg){let s=lg.querySelector(".cal-leg-dep");if(_calPro()&&!s){lg.insertAdjacentHTML("beforeend",'<span class="cal-leg-dep"><i class="dot dep"></i>Deposito</span>');}else if(!_calPro()&&s)s.remove();}}catch(e){}
     calListaTelefono(y,m,days);
     /* 17 nov 2026 — senza rete l'elenco del telefono diceva «Niente in
        programma» sotto il riquadro rosso: una bugia (regola 20). */
@@ -879,7 +922,8 @@
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d);
       if(meseOggi&&ds<oggi)continue;
-      const jobs=calJobs.filter(l=>l.data_prevista===ds), sc=calScad.filter(x=>x.data===ds), nota=noteCache[ds];
+      const jobs=calJobs.filter(calChiPassa).filter(l=>l.data_prevista===ds), nota=noteCache[ds];
+      const sc=calDep.filter(calChiPassa).filter(x=>x.data===ds).map(calDepRiga).concat(calScad.filter(x=>x.data===ds));
       if(!jobs.length&&!sc.length&&!nota&&ds!==oggi)continue;
       const scaduto=ds<oggi, dd=new Date(y,m,d);
       const nome=GG[dd.getDay()], tit=nome.charAt(0).toUpperCase()+nome.slice(1)+" "+d+" "+mesi[m];
@@ -888,10 +932,10 @@
       jobs.forEach(j=>{
         const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
         h+='<div class="cl-r" data-action="edit-job" data-id="'+esc(String(j.id))+'"><i class="cal-lav-bar '+cls+'"></i>'
-          +'<span class="cl-t">'+esc(j.descrizione||(_calPro()?"Pratica":"Lavoro"))+'</span><span class="cl-f">\u203a</span></div>';
+          +'<span class="cl-t">'+esc(j.descrizione||(_calPro()?"Pratica":"Lavoro"))+(calChiNome(j)?' <span class="cal-chi-n">\u00b7 '+esc(calChiNome(j))+'</span>':'')+'</span><span class="cl-f">\u203a</span></div>';
       });
       sc.forEach(x=>{
-        const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
+        const cls=x._dep?"dep":(x.fatta?"fatto":(scaduto?"ritardo":"scad"));
         const az=x._az?x._az:x._persona?'data-action="scad-persona" data-id="'+esc(String(x._opId||""))+'"'
                            :'data-action="edit-scad" data-id="'+esc(String(x.id))+'"';
         h+='<div class="cl-r" '+az+'><i class="cal-lav-bar '+cls+'"></i>'
@@ -923,7 +967,7 @@
         calendario la barretta blu c'e' e la legenda lo promette; appena
         aprivi il giorno diventava "Da fare" col pallino ambra. */
   function openDay(ds){
-    const jobs=calJobs.filter(l=>l.data_prevista===ds);
+    const jobs=calJobs.filter(calChiPassa).filter(l=>l.data_prevista===ds);
     const list=jobs.length?jobs.map(j=>{
       const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds,j.pratica_stato);
       const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
@@ -931,11 +975,11 @@
       const lab=sf?(_calPro()?'Fatta':'Fatto'):(late?'In ritardo':(inCorso?'In corso':'Da fare'));
       const dot=sf?'done':(late?'ritardo':(inCorso?'corso':'todo'));  /* .dot.corso esiste gia' nel CSS, la usa la legenda del calendario */
       return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="${_calPro()?"Apri la pratica":"Apri il lavoro"}"><i class="dot ${dot}"></i>
-        <div style="flex:1"><b>${esc(j.descrizione||"(senza descrizione)")}</b></div>
+        <div style="flex:1"><b>${esc(j.descrizione||"(senza descrizione)")}</b>${calChiNome(j,true)?`<div class="day-chi">Ci va: ${esc(calChiNome(j,true))}</div>`:""}</div>
         <span class="stato ${cls}">${lab}</span></div>`;}).join("")
       :"";
     /* le scadenze di quel giorno: sola lettura, ma almeno si vedono */
-    const scDel=calScad.filter(x=>x.data===ds);
+    const scDel=calDep.filter(calChiPassa).filter(x=>x.data===ds).map(calDepRiga).concat(calScad.filter(x=>x.data===ds));
     /* 12 agosto 2026 (sera) — queste righe usano .day-job, che nel CSS ha la
        manina (cursor:pointer): stamattina ho reso cliccabili i lavori e ho
        aggiunto queste SENZA azione, ricreando lo stesso difetto che avevo
@@ -948,6 +992,8 @@
         ? `data-action="scad-persona" data-id="${esc(String(x._opId||""))}" title="Apri la scheda della persona"`
         : `data-action="edit-scad" data-id="${esc(String(x.id))}" title="Apri la scadenza"`;
       /* 17 nov 2026 — il pallino di una scadenza e' quello della legenda (.dot.scad), non l'ambra del «Da fare» */
+      if(x._dep)return `<div class="day-job" ${azione}><i class="dot dep"></i>
+        <div style="flex:1"><b>${esc(x.titolo)}</b></div><span class="stato dep">Depositata</span></div>`;
       return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'scad')}"></i>
         <div style="flex:1"><b>${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</b></div>
         <span class="stato ${x.fatta?'fatto':(late?'ritardo':'scad')}">${x._prom?(x.fatta?'Fatto':(late?'Passato':'Promemoria')):(x.fatta?'Fatta':(late?'Scaduta':'Scadenza'))}</span></div>`;}).join(""):"";
