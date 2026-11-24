@@ -562,7 +562,7 @@
       +'<div class="sh-b">'
       +'<div class="sh-tit">La fattura</div>'
       +'<div class="field"><label>Fornitore</label><select id="ff-forn">'+fops+'</select>'
-      +(fornCache.length?'':'<div class="campo-aiuto">Con la foto qui sopra lo aggiungo io. A mano: <button type="button" class="aic-link" data-action="new-forn">+ Nuovo fornitore</button></div>')
+      +(fornCache.length?'':'<div class="campo-aiuto">Con la foto qui sopra lo aggiungo io. A mano: <button type="button" class="aic-link" data-action="new-forn-da-ff">+ Nuovo fornitore</button></div>')
       +'</div>'
       +'<div class="row2">'
       +'<div class="field"><label>Numero della sua fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'

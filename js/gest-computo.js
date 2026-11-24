@@ -474,7 +474,7 @@
       /* la 7 c'e' SOLO su una variante: su un computo normale non ci
          sarebbe niente da confrontare, e una voce che non fa mai niente
          e' peggio di una voce che non c'e' */
-      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,_cpar("Acconti (SAL)","Acconti a lavoro fatto")],[6,_cpar("Cronoprogramma","Calendario dei lavori")]]
+      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,_cpar("Stati di avanzamento (SAL)","Acconti a lavoro fatto")],[6,_cpar("Cronoprogramma","Calendario dei lavori")]]
          .concat(c.variante_di?[[7,"Cosa è cambiato"]]:[])
          .map(function(v){
            /* su un computo che non e' ancora stato salvato l'unica cosa che
@@ -3825,3 +3825,18 @@
       try{ blocco.scrollIntoView({block:"start",inline:"nearest"}); }catch(_){ blocco.scrollIntoView(true); }
     },320);
   }
+
+/* 24 nov 2026 (giro della pratica, studio) — scegli la pratica nel computo:
+   se cliente e luogo sono vuoti si prendono dalla pratica. Prima restavano
+   vuoti e il PDF del computo usciva senza «Spett.le». */
+document.addEventListener("change",async function(e){
+  const s=e.target; if(!s||s.id!=="co-lav"||!s.value)return;
+  const cli=document.getElementById("co-cli"), dove=document.getElementById("co-luogo");
+  if((!cli||cli.value)&&(!dove||dove.value.trim()))return;
+  try{
+    const {data}=await sb.from("gest_lavori").select("cliente_id,dove").eq("id",s.value).eq("user_id",sbUid).maybeSingle();
+    if(!data)return;
+    if(cli&&!cli.value&&data.cliente_id&&[...cli.options].some(o=>o.value===String(data.cliente_id))){cli.value=String(data.cliente_id);cli.dispatchEvent(new Event("change",{bubbles:true}));}
+    if(dove&&!dove.value.trim()&&data.dove){dove.value=data.dove;dove.dispatchEvent(new Event("input",{bubbles:true}));}
+  }catch(_){}
+});

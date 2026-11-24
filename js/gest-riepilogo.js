@@ -473,7 +473,9 @@
        perdita di 1.200 € nel Riepilogo non veniva segnalato mai. */
     const ffPerL={};FFO.forEach(x=>{if(x.lavoro_id)ffPerL[x.lavoro_id]=(ffPerL[x.lavoro_id]||0)+(+x.importo||0);});
     const mdRie=await pMd;                        /* partita piu' su, qui si aspetta */
-    const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)]);
+    /* 24 nov 2026 — il rimborso spese in fattura entra anche qui (come scheda e Report) */
+    let rimL={};try{if(typeof rimborsiInFattura==="function")rimL=await rimborsiInFattura(L.filter(l=>ffPerL[l.id]||spPerL[l.id]).map(l=>l.id));}catch(e){}
+    const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)],rimL[String(l.id)]);
     const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id]||ffPerL[l.id]||mdRie.per[String(l.id)])&&_margL(l)<0);
     /* 3 nov 2026 — «STAI ANDANDO IN PERDITA»: un lavoro NON finito che ha gia'
        speso l'80% (o piu') di quello che vale, ma non e' ancora sotto zero.

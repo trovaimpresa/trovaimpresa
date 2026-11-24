@@ -404,6 +404,16 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     closeSheet();renderFornitori();rinfresca("riepilogo");
+    /* 24 nov 2026 — si era partiti dalla fattura da pagare: si torna lì */
+    if(!id&&window._ffRitorno){
+      const R=window._ffRitorno;window._ffRitorno=null;
+      try{
+        const _imp=parseFloat(String(R.importo||"").replace(/\./g,"").replace(",","."));
+        await fattfForm({fornitore_id:data[0].id,lavoro_id:R.lavoro_id,numero:R.numero||null,data:R.data||null,
+          importo:isNaN(_imp)?null:_imp,scadenza:R.scadenza||null,note:R.note||null});
+        if(R.pratica)window._tornaPraticaDaFf=R.pratica;
+      }catch(e){}
+    }
     toast(avvisoTi?"Salvato, ma il collegamento TrovaImpresa no: manca la migrazione SQL (gest-fornitori-plus)":(id?"Aggiornato ✔":"Fornitore aggiunto ✔"));
   }
 

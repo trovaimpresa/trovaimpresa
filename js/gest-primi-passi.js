@@ -115,7 +115,7 @@
       }).join("");
 
       var html = finito && !leggi(TIENI)
-        ? '<div class="pp-fine"><b>Bravo, hai mandato il tuo primo preventivo!</b><span>Quando il cliente lo accetta, lo trovi in Preventivi e ne fai un lavoro. Vuoi che togliamo l\'aiuto?</span>'
+        ? '<div class="pp-fine"><b>Bravo, hai mandato il tuo primo preventivo!</b><span>Quando il cliente lo accetta, lo trovi in Preventivi e ne fai '+((typeof ruoloUtente!=="undefined"&&ruoloUtente==='professionista')?'una pratica':'un lavoro')+'. Vuoi che togliamo l\'aiuto?</span>'
           + '<div class="pp-fine-btn"><button type="button" class="btn-primary" data-pp-chiudi="1">Sì, toglilo</button>'
           + '<button type="button" class="btn" data-pp-tieni="1">Tienilo ancora</button></div></div>'
         : '<div class="pp-primo pp-tre"><div class="pp-tre-testa"><div><h3>' + (finito ? 'Fatto: il primo preventivo è partito' : 'Il tuo primo preventivo in 3 passi') + '</h3>'

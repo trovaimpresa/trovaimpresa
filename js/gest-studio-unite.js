@@ -43,7 +43,7 @@
       if(t==="computi")return (typeof compCache!=="undefined"&&compCache&&compCache.length!=null)?compCache.length:null;
       if(t==="sal")return (typeof salTuttiCache!=="undefined"&&salTuttiCache)?salTuttiCache.length:null;
       if(t==="preventivi")return (typeof prevCache!=="undefined"&&prevCache)?prevCache.length:null;
-      if(t==="dalsito")return (typeof dsCache!=="undefined"&&dsCache)?dsCache.filter(function(r){return r._stato==="nuova"||r._stato==="vista";}).length:null;
+      if(t==="dalsito")return (typeof dsCache!=="undefined"&&dsCache)?dsCache.filter(function(r){return r._stato==="nuova";}).length:null;   /* = pallino del menu e Assistente («da aprire») */
     }catch(e){}
     return null;
   }

@@ -442,7 +442,8 @@
     }catch(e){ oreLette=false; }
     await margineSquadraFresca(senzaCosto);   /* DIFFICILE 6: persona aggiunta da un altro telefono */
     const imp=($("#j-imp")?(_numIt("#j-imp")||0):(+importo||0));
-    const marg=margineLavoro(imp,tot,totFF,md);
+    let rim=0;try{rim=(await rimborsiInFattura([lavoroId]))[String(lavoroId)]||0;}catch(e){}
+    const marg=margineLavoro(imp,tot,totFF,md,rim);
     /* ⚠️ 18 agosto 2026 — «Spese: −0,00 €». Il meno era scritto a mano
        davanti al numero, sempre, anche quando di spese non ce n'erano.
        Un meno davanti a zero non vuol dire niente e si legge male: adesso
@@ -451,6 +452,7 @@
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span>`
       +`<span>Spese: <span class="sp">${_meno(tot)}</span></span>`
       +(totFF?`<span>Fatture fornitori: <span class="sp">${_meno(totFF)}</span></span>`:"")
+      +(rim?`<span>Rimborso spese in fattura: <span class="pos">+${eur2(rim)}</span></span>`:"")
       +(md?`<span>Manodopera: <span class="sp">${_meno(md)}</span></span>`:"")
       +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`
       /* 12 agosto 2026 (sera) — la riga sotto diceva "contate al costo medio della
@@ -552,8 +554,38 @@
     });
     return {per:perLav, senzaNome:senzaNome, senzaCosto:senzaCosto};
   }
-  function margineLavoro(importo,spese,fattForn,manodopera){
-    return (+importo||0)-(+spese||0)-(+fattForn||0)-(+manodopera||0);
+  function margineLavoro(importo,spese,fattForn,manodopera,rimborsi){
+    return (+importo||0)+(+rimborsi||0)-(+spese||0)-(+fattForn||0)-(+manodopera||0);
+  }
+  /* 24 nov 2026 (giro della pratica, studio) — IL RIMBORSO SPESE IN FATTURA.
+     La fattura del geologo (300) entrava nei costi della pratica, ma la
+     fattura al cliente la riaddebitava nel «Rimborso spese» (300): la pratica
+     diceva «guadagno 1.647,50» quando i 300 tornavano indietro. Adesso il
+     rimborso delle fatture collegate alla pratica (gest_fattura_lavori) entra
+     nel margine. Una fattura con più pratiche: diviso in parti uguali.
+     Contano bozze, emesse e pagate; no annullate, no note di credito. */
+  async function rimborsiInFattura(lavoroIds){
+    const per={};
+    try{
+      const ids=(lavoroIds||[]).map(String).filter(Boolean);
+      if(!ids.length||!sb||!sbUid)return per;
+      const {data:fl}=await sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids);
+      const fids=[...new Set((fl||[]).map(x=>String(x.fattura_id)))];
+      if(!fids.length)return per;
+      const [{data:ft},{data:tutti}]=await Promise.all([
+        sb.from("gest_fatture").select("id,spese_iva,stato,tipo").eq("user_id",sbUid).in("id",fids),
+        sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("fattura_id",fids)
+      ]);
+      (ft||[]).forEach(function(f){
+        const r=+f.spese_iva||0;
+        if(r<=0||f.stato==="annullata"||/nota/.test(String(f.tipo||"")))return;
+        const suoi=(tutti||[]).filter(x=>String(x.fattura_id)===String(f.id)).map(x=>String(x.lavoro_id));
+        if(!suoi.length)return;
+        const parte=r/suoi.length;
+        suoi.forEach(function(l){ if(ids.indexOf(l)>=0)per[l]=(per[l]||0)+parte; });
+      });
+    }catch(e){}
+    return per;
   }
   /* legge in un colpo solo quello che serve alla manodopera di un reparto.
      Se la tabella delle ore non c'e' ancora, torna tutto a zero senza rompere
@@ -866,7 +898,7 @@
     const ore=oreOk?(r2.data||[]):[];
 
     if(!raps.length){
-      lista.innerHTML='<p class="fatt-empty">Nessun rapportino. Li scrive la squadra dal telefono, oppure lo scrivi tu qui sotto e lo fai firmare al cliente.</p>';
+      lista.innerHTML='<p class="fatt-empty">Nessun rapportino. '+(ruoloUtente==='professionista'?'Li scrivono i collaboratori dalla loro app':'Li scrive la squadra dal telefono')+', oppure lo scrivi tu qui sotto e lo fai firmare al cliente.</p>';
       return;
     }
 

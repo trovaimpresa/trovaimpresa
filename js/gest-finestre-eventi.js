@@ -571,6 +571,11 @@
        filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
     const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
     if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
+    /* 24 nov 2026 (giro della pratica) — tornando nella pratica da un'altra
+       finestra (fattura del fornitore, ecc.) i pulsanti in alto («Segna fatto»,
+       «Foto», «Altro ▾») sparivano: arrivano solo col clic sulla scheda. Si
+       riprendono da li', se la scheda e' a schermo. */
+    try{if(!_azPendenti&&typeof AZ_APRI!=="undefined")_azPendenti=AZ_APRI["edit-job:"+String(id)]||null;}catch(_){}
     jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);renderLavPreventivo(data.id);}
     try{_lavFoto=_lavValori();}catch(_){_lavFoto=null;}
   }
@@ -1069,6 +1074,16 @@
        vera si modifica con "sq-edit" e sta su gest_operatori. */
     /* ---- Fornitori ---- */
     if(a==="new-forn")return fornForm(null);
+    /* 24 nov 2026 (giro della pratica, studio) — «+ Nuovo fornitore» da dentro la
+       fattura da pagare: prima, salvato il fornitore, si chiudeva tutto e la
+       fattura che stavi scrivendo spariva. Ora si torna alla fattura, col
+       fornitore nuovo già scelto e quello che avevi scritto ancora lì. */
+    if(a==="new-forn-da-ff"){
+      const v=s=>{const e=document.querySelector(s);return e?e.value:"";};
+      window._ffRitorno={lavoro_id:v("#ff-lav")||null,numero:v("#ff-num"),data:v("#ff-data"),
+        importo:v("#ff-imp"),scadenza:v("#ff-scad"),note:v("#ff-note"),pratica:window._tornaPraticaDaFf||null};
+      return fornForm(null);
+    }
     if(a==="forn-scheda")return fornScheda(id);
     if(a==="edit-forn")return fornForm(fornCache.find(x=>String(x.id)===String(id)));
     if(a==="edit-forn-full"){

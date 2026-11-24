@@ -815,7 +815,22 @@
       ctrAscolta('lavoro');
       return;
     }
-    const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
+    /* 24 nov 2026 (giro della pratica, studio) — se il cliente della pratica non
+       è nella tendina (appena creato da una richiesta dal sito, o nel Cestino)
+       la tendina restava su «— scegli —» e «Salva» lo cancellava dalla pratica.
+       Ora c'è sempre: il nome si legge un attimo dopo. */
+    let cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
+    if(job.clienteId&&!cliCache.some(c=>String(c.id)===String(job.clienteId))){
+      cliOpts+=`<option value="${esc(job.clienteId)}" selected data-cli-manca="1">Cliente della pratica</option>`;
+      setTimeout(async function(){
+        try{
+          const {data}=await _sbTutto("gest_clienti").select("id,nome,eliminato_il").eq("id",job.clienteId).limit(1);
+          const c=data&&data[0], o=document.querySelector('#j-cli option[data-cli-manca]');
+          if(c&&o){o.textContent=(c.nome||"Cliente")+(c.eliminato_il?" (nel cestino)":"");
+            if(!c.eliminato_il&&!cliCache.some(x=>String(x.id)===String(c.id)))cliCache.push({id:c.id,nome:c.nome});}
+        }catch(e){}
+      },0);
+    }
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     /* 18 nov 2026 — collaudo dell'Agenda operatore: se chi ci va non e' piu' in
        squadra (e' nel Cestino) la tendina restava su «— nessuno —» e premendo
@@ -886,7 +901,7 @@
       </div>
       ${bloccoScadenzePratica()}
       <div class="sh-b sh-b-d">
-      <div class="field campo-titolo" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
+      <div class="field campo-titolo" id="spese-wrap" style="display:none"><label>💶 ${ruoloUtente==='professionista'?'Spese di questa pratica':'Spese e materiali di questo lavoro'}</label>
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
@@ -928,7 +943,7 @@
         <div class="spese-list" id="rap-list"></div>
         <!-- 13 nov 2026 (lista «MANCA», n. 6) — il rapportino da far firmare al cliente -->
         <button type="button" class="btn quick-add" data-action="rapf-nuovo" style="margin-top:8px">＋ Rapportino da far firmare</button>
-        <div class="campo-aiuto">Li scrive la squadra dal telefono, oppure tu qui: il cliente firma col dito sullo schermo. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme.</div></div>
+        <div class="campo-aiuto">${ruoloUtente==='professionista'?'Li scrivono i collaboratori dalla loro app':'Li scrive la squadra dal telefono'}, oppure tu qui: il cliente firma col dito sullo schermo. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme.</div></div>
       <div class="field campo-titolo"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"

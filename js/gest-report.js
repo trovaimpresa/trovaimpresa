@@ -253,10 +253,13 @@
        i lavori uno per uno non tornava mai col totale, e la differenza era
        esattamente lo stipendio della squadra. */
     const totMD=Object.keys(_md.per).reduce(function(s,k){return s+(+_md.per[k]||0);},0);
+    /* 24 nov 2026 — il rimborso spese delle fatture al cliente (riaddebito dei fornitori) */
+    let rimPer={};try{if(typeof rimborsiInFattura==="function")rimPer=await rimborsiInFattura(L.filter(l=>ffPer[l.id]||spPer[l.id]).map(l=>l.id));}catch(e){}
+    try{repData.rimPer=rimPer;}catch(e){}
     let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]||ffPer[l.id]||_md.per[String(l.id)])
       .map(l=>({id:l.id,d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
-                ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0}));
-    ML.forEach(m=>{m.marg=margineLavoro(m.inc,m.sp,m.ff,m.md);
+                ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0, rim:rimPer[String(l.id)]||0}));
+    ML.forEach(m=>{m.marg=margineLavoro(m.inc,m.sp,m.ff,m.md,m.rim);
       /* 19 nov 2026 — la barra grigia e' TUTTO quello che e' uscito (spese +
          fornitori + manodopera), come il guadagno scritto accanto. Prima era
          solo le spese: «Guadagno 800» con una barra grigia quasi vuota. */
@@ -270,7 +273,7 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.cost/mlMax*100,m.cost?1:0)}%"></div></div>
-      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div>
+      <div class="mlav-sub">Importo ${eur(m.inc)}${m.rim?" · Rimborso spese +"+eur(m.rim):""} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div>
       <button class="btn rep-apri" data-action="edit-job" data-id="${esc(String(m.id))}">${_repPro()?"Apri la pratica ›":"Apri il lavoro ›"}</button></div>`;
     }).join("");
     /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i
@@ -375,7 +378,7 @@
     const rows=[[_repPro()?"Pratica":"Descrizione","Stato","Data prevista",_repPro()?"Data fine":"Data fatto","Cliente",W.chi,"Ore","Importo","Spese","Fatture fornitori",W.md,"Margine","Fattura"]];
     repData.L.forEach(l=>{
       const sp=speseMap[l.id]||0, ff=ffMap[l.id]||0, md=mdMap[String(l.id)]||0;
-      rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",String(Math.round(oreLav(l)*10)/10).replace(".",","),num(l.importo),num(sp),num(ff),num(md),num(margineLavoro(l.importo,sp,ff,md)),fattLab[l.fatt_stato||"none"]!=null?fattLab[l.fatt_stato||"none"]:(l.fatt_stato||"")]);
+      rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",String(Math.round(oreLav(l)*10)/10).replace(".",","),num(l.importo),num(sp),num(ff),num(md),num(margineLavoro(l.importo,sp,ff,md,(repData.rimPer||{})[String(l.id)])),fattLab[l.fatt_stato||"none"]!=null?fattLab[l.fatt_stato||"none"]:(l.fatt_stato||"")]);
     });
     /* 19 nov 2026 (sì di Alex) — in fondo i Totali, gli stessi della schermata */
     const T=repData.tot;

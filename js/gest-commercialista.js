@@ -215,7 +215,7 @@
     try{
       const [rl,rp,rf,rc]=await Promise.all([
         sb.from("gest_lavori").select(pro?"id,descrizione,stato,data_prevista,importo,pratica_stato,pratica_tipo":"id,descrizione,stato,data_prevista,importo,pratica_stato").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
-        sb.from("gest_preventivi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
+        sb.from("gest_preventivi").select("id,numero,titolo,stato,data,cassa_perc,iva_perc,ritenuta,ritenuta_perc,spese_forfait").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
         sb.from("gest_fatture").select("id,numero,anno,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
         /* i computi si leggono a parte: se non si leggono, il resto esce lo stesso */
         sb.from("gest_computi").select("id,numero,titolo,stato,created_at").eq("user_id",sbUid).eq("cliente_id",cid).order("created_at",{ascending:false}).limit(30)
@@ -240,8 +240,17 @@
       };
       const html=
         gruppo(pro?"Pratiche":"Lavori",L.map(l=>riga("lav",l.id,(pro&&l.pratica_tipo?l.pratica_tipo+" — ":"")+(l.descrizione||(pro?"Pratica":"Lavoro")),statoLav(l)+(l.data_prevista?" · "+fdate(l.data_prevista):""),+l.importo?eur2(+l.importo):"")))
-       +gruppo("Preventivi",P.map(p=>{const t=totP[p.id];return riga("prev",p.id,"N. "+(p.numero||"—")+" — "+(p.titolo||""),(STL[p.stato]||p.stato||"")+" · "+fdate(p.data),t?eur2(+t.imponibile||0)+' <small>IVA esclusa</small>':"");}))
-       +gruppo("Computi",C.map(c=>riga("comp",c.id,"N. "+(c.numero||"—")+" — "+(c.titolo||"Computo"),(c.stato==="definitivo"?"Definitivo":"Bozza")+(c.created_at?" · "+fdate(String(c.created_at).slice(0,10)):""),"")))
+       +gruppo("Preventivi",P.map(p=>{const t=totP[p.id];
+         /* 24 nov 2026 (giro della pratica) — allo studio lo stesso numero dell'elenco
+            Preventivi e del PDF: la parcella «da incassare» (compenso + cassa…).
+            Prima qui 2.000 «IVA esclusa», nell'elenco 2.080. */
+         let imp="";
+         if(t){
+           if(pro&&typeof calcolaParcella==="function"){try{imp=eur2(calcolaParcella(+t.imponibile||0,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale)+' <small>da incassare</small>';}catch(e){imp="";}}
+           if(!imp)imp=eur2(+t.imponibile||0)+' <small>IVA esclusa</small>';
+         }
+         return riga("prev",p.id,(p.numero?"N. "+p.numero+" — ":"")+(p.titolo||""),(STL[p.stato]||p.stato||"")+" · "+fdate(p.data),imp);}))
+       +gruppo("Computi",C.map(c=>riga("comp",c.id,(c.numero?"N. "+c.numero+" — ":"")+(c.titolo||"Computo"),(c.stato==="definitivo"?"Definitivo":"Bozza")+(c.created_at?" · "+fdate(String(c.created_at).slice(0,10)):""),"")))
        +gruppo("Fatture",F.map(f=>{const t=totF[f.id];return riga("fatt",f.id,f.numero?("Fattura n. "+f.numero+"/"+(f.anno||"")):"Fattura in bozza",(STL[f.stato]||f.stato||"")+" · "+fdate(f.data),t?eur2(+t.totale||0):"");}));
       box.innerHTML='<div class="sh-tit">'+titolo+'</div>'
         +(html||'<div class="campo-aiuto">Ancora niente per questo cliente.</div>');

@@ -353,6 +353,9 @@
         return;
       }
       cliId=nuovo[0].id;
+      /* 24 nov 2026 — il cliente nuovo entra subito nella tendina delle pratiche */
+      try{if(typeof cliCache!=="undefined"&&!cliCache.some(c=>c.id===cliId))cliCache.push({id:cliId,nome:nomeCli,tipo:"privato"});}catch(e){}
+      try{if(typeof segnaDaRifare==="function")segnaDaRifare("clienti");}catch(e){}
       toast("Cliente aggiunto in rubrica ✔");
     }
 
