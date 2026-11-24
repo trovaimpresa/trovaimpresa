@@ -58,7 +58,8 @@ exports.handler = async (event) => {
     const v = await vetrina(giorno, turno);
     if (v) post.push(v);
     if (turno === 1) {
-      const da = encodeURIComponent(new Date(Date.now() - 864e5).toISOString());
+      // 48 ore: se un giro salta, il mattino dopo i post ci sono ancora; i doppioni li ferma fb_pubblicati.
+      const da = encodeURIComponent(new Date(Date.now() - 2 * 864e5).toISOString());
       (await get(`imprese_pubbliche?created_at=gte.${da}&select=id,tipo,nome_attivita,nome,mestiere,citta,provincia&order=created_at.asc&limit=10`))
         .forEach(i => post.push({ chiave: `imp:${i.id}`, ...testoIscritto(i) }));
       (await get(`subappalti?attivo=eq.true&created_at=gte.${da}&select=id,tipo,nome_impresa,lavoro,citta&order=created_at.asc&limit=10`))
@@ -78,7 +79,7 @@ exports.handler = async (event) => {
     const fatti = new Set(gia.map(x => x.chiave));
     const nuovi = post.filter(p => !fatti.has(p.chiave)).map(p => ({
       chiave: p.chiave, titolo: p.titolo, testo: p.testo, link: p.link,
-      con_foto: !!(p.foto && p.foto.length), foto: (p.foto || []).map(url => ({ url }))
+      con_foto: !!(p.foto && p.foto.length), foto: (p.foto || []).map(url => ({ type: 'url', url })) // 23 nov: Make vuole anche «type» per ogni foto
     }));
     if (!prova && nuovi.length) {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/fb_pubblicati`, {
