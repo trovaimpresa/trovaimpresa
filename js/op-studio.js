@@ -68,6 +68,7 @@
     ["Video dal capo","Video dallo studio"],
     ["Nessuna foto dal capo.","Nessuna foto dallo studio."],
     ["Nessun video dal capo.","Nessun video dallo studio."],
+    ["Nessun video dal capo.","Nessun video dallo studio."],
     ["Il capo ti ha scritto","Il titolare ti ha scritto"],
     ["il capo l'ha scartata","il titolare l'ha scartata"],
     ["aspetta il capo","aspetta il titolare"],

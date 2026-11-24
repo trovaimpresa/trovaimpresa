@@ -407,6 +407,9 @@
   #lightbox .lb-sotto{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-size:15px;font-weight:600}
   #lightbox .lb-video{max-width:100%;max-height:100%;border-radius:8px;background:#000}
   @media(max-width:700px){#lightbox.lb-gal{padding:76px 8px 56px}}
+  /* 24 nov 2026 — «Prima / Fine lavori» anche sotto: sul telefono il titolo in alto si taglia */
+  #lightbox .lb-tag{display:none}
+  @media(max-width:700px){#lightbox .lb-tag{display:inline}}
   /* ⚠️ 20 settembre 2026 — lo z-index era 90, sotto il muro del pagamento
      (999999). Dal muro adesso si possono scaricare i propri dati anche senza
      abbonamento, e il toast e' l'unica cosa che dice «Preparo l'esportazione»
@@ -1907,6 +1910,9 @@
   display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
 }
 #galleria .gal-conta{ font-size:15px; font-weight:600; color:var(--testo-3); }
+/* 24 nov 2026 — «📄 PDF delle foto» nel titolo della pratica, in fondo a destra */
+#galleria .gal-pdf{ margin-left:auto; font-size:15px; min-height:40px; padding:0 14px; align-self:center; }
+@media(max-width:700px){ #galleria .gal-pdf{ margin-left:0; width:100%; } }
 
 #galleria .thumbs{ gap:12px; margin-top:0; }
 #galleria .thumb{ width:150px; height:150px; border-radius:12px; }

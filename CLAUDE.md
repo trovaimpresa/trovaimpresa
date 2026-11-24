@@ -4094,9 +4094,29 @@ Funzioni nuove (foto prima, «Sì si pubblica» di Alex) — tutte le facce, `?v
 - **«Apri la pratica ›» / «Apri il lavoro ›»** su ogni riga di «Guadagno o perdita» (`data-action="edit-job"`, `ML[].id`): apre la scheda; chiudendo si resta nel Report.
 ⬜ Da guardare: le spese anticipate in nome del cliente (art. 15) entrano nell'«incassato» del Report e dell'Assistente (`fattImponibile`), quindi l'utile del mese le conta come guadagno. Tasse e fisco conta solo fatture pagate (voluto): uno studio senza fatture vede l'incassato nel Report e 0 in Tasse.
 ⬜ Non provato: reparto con fatture VERE pagate (vietato emetterle); `?vedi=professionista` sul conto misto mostra ancora «Mezzi» nell'Assistente.
+Pubblicato 8498503, Netlify ok, riprovato sul sito vero 1440 e 375: Anno per anno, Apri la pratica, Da fatturare, 5 h nell'Assistente ✔. Pulito.
+
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: GALLERIA
+
+Prova da geometra dal vivo (`?vedi=professionista` + `_tiTipoVero='professionista'; adattaMenuProfessionista()`, reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375): cliente, collaboratrice Giulia, 2 pratiche (frazionamento, APE) + 1 senza foto; caricate dal modulo vero foto del sopralluogo e del rilievo (4000 px → 101 KB), un documento fotografato, un video .webm, un .pdf fra le foto (rifiutato in italiano ✔); filtri pratica / chi / prima-dopo / solo video ✔; foto grande con frecce, video dentro, Scarica (indirizzo firmato ✔); «Guarda in Galleria» dalla pratica ✔; Verbale di sopralluogo: 3 foto, PDF 2 pagine ✔; Cestino e ritorno ✔; telefono: niente fuori, niente sotto 13 px. Poi cancellato tutto: conteggi uguali a prima (foto 5, video 1, lavori 5, persone 1, clienti 2; deposito 7 + 2 file).
+
+Sistemato (`?v=24nov-gal`):
+1. ⛔ App del collaboratore (`js/op-spese-foto.js`, `js/op-schede.js`): leggeva anche le foto nel Cestino e i DOCUMENTI della pratica (PDF CILA, visure) come foto rotte. Ora solo `da_fare/fatto/lavoro` e `eliminato_il` vuoto (anche i video). Provato: prima 4 righe (con documento e foto nel Cestino), dopo 2.
+2. ⛔ «📷 Foto» dal menu della pratica apriva una pagina sua: solo le foto «prima» (2 su 4), niente fine lavori e video, niente foto grande. Ora porta in Galleria filtrata sulla pratica (`galApriPratica`, usata anche da «Guarda in Galleria»). Tutte le facce. `showLavoroFoto` resta ma non la chiama più nessuno.
+3. Pratica SENZA foto: il filtro tornava su «Tutte» e si vedevano le foto delle altre. Ora resta sulla pratica e dice «nessuna foto».
+4. Parole dello studio (`_galPro`, `galParole`, `_galTag`): «Prima dei lavori / Fine lavori» (bottoni, etichette, foto grande, modulo, Cestino; `_FRASI` aggiornate), «Io» invece di «Capo», intro e nota del modulo dello studio. Il bottone «Prima<span> del lavoro</span>» non lo traduceva nessuno.
+5. Cestino: «Rimesso a posto «Foto…»» → «Rimessa» (non per i documenti). Tutte le facce.
+6. Telefono, foto grande: il titolo in alto si taglia e «Prima/Finito» spariva → ora anche nella riga sotto (`.lb-tag`).
+7. App del collaboratore dello studio: «Nessun video dal capo» → «dallo studio».
+Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni.
+
+Funzione nuova (foto prima, «il tuo consiglio facciamolo e pubblica» di Alex), tutte le facce:
+- **«📄 PDF delle foto»** sul titolo di ogni pratica in Galleria (`galPdfPratica` in `js/gest-galleria-mappa.js`, azione `gal-pdf`, stile `.gal-pdf`): «Documentazione fotografica» (studio) / «Foto del lavoro» (impresa), intestazione come il PDF delle Giornate (logo + Dati azienda), pratica/cliente/luogo/data, «Prima dei lavori» e «Fine lavori», foto 2 per riga numerate con data (e chi, se non sei tu), firma «Il tecnico» allo studio, «Pag. x di y». Usa `gxImmagine` di `js/gest-giornate-extra.js`. I video non ci vanno (lo dice).
+- Filtro «Cliente» in Galleria: mostrato in foto, NON scelto da Alex (non fatto).
+⬜ Non provati: un collaboratore vero dal telefono; .mov da iPhone; Scarica sul telefono vero.
 
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4150,6 +4170,16 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Report ↔ Clienti: ✔ «Migliori clienti» per valore delle pratiche. — dal Report non si apre il cliente.
 - Report ↔ Preventivi e parcella: — il Report non conta i preventivi (giusto: non sono soldi).
 - Si può unire: Report NO (è la voce dei numeri); la scheda «Report» dell'Assistente lo riassume.
+
+- Galleria ↔ Pratiche: ✔ «Guarda in Galleria» nella scheda e, dal 24 nov, anche «📷 Foto» del menu portano alla Galleria filtrata. — dalla Galleria non si apre la pratica.
+- Galleria ↔ Verbale di sopralluogo: ✔ le foto della pratica entrano da sole (anche quelle di fine lavori: si tolgono con la spunta).
+- Galleria ↔ app del collaboratore: ✔ vede «prima» dallo studio e carica le sue; dal 24 nov niente foto nel Cestino né documenti.
+- Galleria ↔ Collaboratori: ✔ «Chi l'ha caricata» col nome; persona nel Cestino: le foto restano.
+- Galleria ↔ Clienti: — non si filtra per cliente (proposto il 24 nov, non scelto). ✔ il PDF delle foto porta il nome del cliente.
+- Galleria ↔ Cestino: ✔ foto e video vanno e tornano col nome della pratica.
+- Galleria ↔ Ricerca in alto: — le foto non si cercano (si cerca la pratica).
+- Galleria ↔ Giornate: ✔ le foto prima/dopo delle Giornate sono le stesse righe (stessi tipi).
+- Si può unire: Galleria NO (allo studio è l'archivio delle foto di tutte le pratiche); dentro la pratica basta il conteggio + il collegamento.
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 

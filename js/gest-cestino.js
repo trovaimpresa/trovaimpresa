@@ -246,7 +246,9 @@
   function cestNomeMedia(cosa,r){
     const q=CEST_LAV[String((r&&r.lavoro_id)||"")];
     const t=String((r&&r.tipo)||"");
-    const quando=(t==="da_fare")?" prima del lavoro":((t==="fatto"||t==="lavoro")?" a lavoro finito":"");
+    /* 24 nov 2026 — allo studio «prima dei lavori» / «a fine lavori» (come in Galleria) */
+    const _pro=ruoloUtente==='professionista';
+    const quando=(t==="da_fare")?(_pro?" prima dei lavori":" prima del lavoro"):((t==="fatto"||t==="lavoro")?(_pro?" a fine lavori":" a lavoro finito"):"");
     if(!q&&!quando)return "";
     return cosa+quando+(q?(" — "+q):"");
   }
@@ -929,7 +931,8 @@
     });
     /* 19 nov 2026 (voce Pratiche) — la pratica e' femminile */
     /* 20 nov 2026 — e la persona («Persona messa nel Cestino») */
-    const _fem=(_proC&&x.tab==="gest_lavori")||x.tab==="gest_operatori", _lui=_fem?"lei":"lui";
+    /* 24 nov 2026 (collaudo Galleria) — anche la foto: «Rimesso a posto «Foto …»» */
+    const _fem=(_proC&&x.tab==="gest_lavori")||x.tab==="gest_operatori"||(x.tab==="gest_foto"&&String(x.sotto||"")!=="documento"), _lui=_fem?"lei":"lui";
     const _figli=cestContaTesto(_conta);
     toast((_fem?"Rimessa a posto":"Rimesso a posto")+(x.nome&&x.nome!=="(senza nome)"?" «"+x.nome+"»":"")+" ✔"
       +(_insieme.length?" — insieme "+_insieme.join(" e "):"")

@@ -87,7 +87,7 @@ function opLegaCard(box){
 async function opConta(){
   const ids=(LAVORI||[]).map(l=>l.id);
   if(!ids.length)return {};
-  const {data}=await sb.from("gest_foto").select("lavoro_id").in("lavoro_id",ids).is("eliminato_il",null).neq("tipo","fattura");
+  const {data}=await sb.from("gest_foto").select("lavoro_id").in("lavoro_id",ids).is("eliminato_il",null).in("tipo",["da_fare","fatto","lavoro"]);
   const m={};(data||[]).forEach(f=>{m[f.lavoro_id]=(m[f.lavoro_id]||0)+1;});
   return m;
 }
@@ -131,7 +131,7 @@ async function opRenderFoto(){
   if(!vivi.length){box.innerHTML='<div class="empty-state">Nessuna foto.</div>';return;}
   box.innerHTML='<div class="empty-state">Carico le foto…</div>';
   const ids=vivi.map(l=>l.id);
-  const {data}=await sb.from("gest_foto").select("lavoro_id,tipo,storage_path").in("lavoro_id",ids).is("eliminato_il",null).neq("tipo","fattura").order("created_at",{ascending:false});
+  const {data}=await sb.from("gest_foto").select("lavoro_id,tipo,storage_path").in("lavoro_id",ids).is("eliminato_il",null).in("tipo",["da_fare","fatto","lavoro"]).order("created_at",{ascending:false});
   const per={};(data||[]).forEach(f=>{(per[f.lavoro_id]=per[f.lavoro_id]||[]).push(f);});
   const conFoto=vivi.filter(l=>per[l.id]);
   if(!conFoto.length){box.innerHTML='<div class="empty-state">Ancora nessuna foto. Le foto si aggiungono dentro il lavoro.</div>';return;}

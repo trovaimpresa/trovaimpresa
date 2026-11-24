@@ -600,7 +600,12 @@
     if(a==="chiama"){const n=String(t.dataset.q||"").replace(/[^\d+]/g,"");if(n)location.href="tel:"+n;return;}
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
-    if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
+    /* 24 nov 2026 (collaudo Galleria dello studio) — «📷 Foto» dal menu della
+       pratica apriva una pagina sua che mostrava solo le foto «prima» (2 su 4,
+       niente fine lavori, niente video) e non le faceva ingrandire. Adesso
+       porta nella Galleria, gia' filtrata su quella pratica: la stessa strada
+       di «Guarda in Galleria» dentro la scheda. */
+    if(a==="lf-open")return galApriPratica(t.dataset.id);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     /* ---- fatture ---- */
     if(a==="new-fattura")return fattNuovaScegli();
@@ -646,15 +651,8 @@
     /* 19 nov 2026 — dalla Mappa: la strada per arrivare al cantiere, partendo da dove sei */
     if(a==="mp-strada"){mpStrada(t.dataset.q);return;}
     if(a==="mp-apri"){mpApri(t.dataset.id);return;}
-    if(a==="vai-galleria"){
-      galFilter.lav=t.dataset.id;galFilter.media="";galFilter.tipo="";galFilter.op="";
-      closeSheet();
-      const b=document.querySelector('nav.tabs button[data-tab="galleria"]');
-      if(b)b.click();
-      segmOn("#gal-media","");segmOn("#gal-tipo","");
-      renderGalleria();window.scrollTo(0,0);
-      return;
-    }
+    if(a==="vai-galleria")return galApriPratica(t.dataset.id);
+    if(a==="gal-pdf")return galPdfPratica(t.dataset.id,t);   /* 24 nov 2026: le foto della pratica in PDF */
     if(a==="gal-carica")return galCarica();
     if(a==="gal-del-foto"){/* 11 nov 2026 — regola 22: dice dove va */if((await (window.cestinoAttivo&&window.cestinoAttivo()?window.chiediCestino("questa foto","La riprendi dal Cestino quando vuoi."):tiChiedi("Eliminare per sempre questa foto?"))))galDelFoto(t.dataset.id);return;}
     if(a==="gal-del-video"){/* 11 nov 2026 — regola 22: dice dove va */if((await (window.cestinoAttivo&&window.cestinoAttivo()?window.chiediCestino("questo video","La riprendi dal Cestino quando vuoi."):tiChiedi("Eliminare per sempre questo video?"))))galDelVideo(t.dataset.id);return;}

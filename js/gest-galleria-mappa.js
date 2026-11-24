@@ -38,6 +38,35 @@
      al primo livello non si puo' USARE niente che stia nella pagina —
      lo si puo' solo nominare dentro una funzione. */
   const GAL_VUOTO=()=>_SVGV+'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
+  /* 24 nov 2026 (collaudo Galleria dello studio) — LE PAROLE DELLO STUDIO.
+     Il traduttore dello studio non arrivava ai bottoni «Prima<span> del
+     lavoro</span>» (la frase spezzata da uno span non combacia) e traduceva
+     il resto in «Prima della pratica / A pratica finita», che un geometra non
+     dice. Allo studio le foto sono quelle del sopralluogo (prima dei lavori)
+     e quelle a fine lavori; chi carica e' «Io», non «Capo».
+     Tutto in un posto solo: _galPro() e _galParola(). */
+  function _galPro(){return ruoloUtente==='professionista';}
+  function _galTag(q){return q==="prima"?"Prima":(_galPro()?"Fine lavori":"Finito");}
+  function galParole(){
+    const pro=_galPro();
+    const intro=document.querySelector("#galleria .gal-intro");
+    if(intro&&!intro.dataset.impresa)intro.dataset.impresa=intro.innerHTML;
+    if(intro)intro.innerHTML=pro
+      ?"Le foto del <b>sopralluogo</b> e del rilievo, e quelle <b>a fine lavori</b>, divise per pratica."
+      :intro.dataset.impresa;
+    const bP=document.querySelector('#gal-tipo [data-v="prima"]'), bD=document.querySelector('#gal-tipo [data-v="dopo"]');
+    if(bP)bP.innerHTML='<span class="gal-pc">'+(pro?"Prima dei lavori":"Prima del lavoro")+'</span><span class="gal-tel">Prima</span>';
+    if(bD)bD.innerHTML='<span class="gal-pc">'+(pro?"Fine lavori":"A lavoro finito")+'</span><span class="gal-tel">'+(pro?"Fine lavori":"Finito")+'</span>';
+  }
+  /* la Galleria aperta su una pratica sola (da «Guarda in Galleria» e da «📷 Foto») */
+  function galApriPratica(id){
+    galFilter.lav=String(id||"");galFilter.media="";galFilter.tipo="";galFilter.op="";
+    closeSheet();
+    const b=document.querySelector('nav.tabs button[data-tab="galleria"]');
+    if(b)b.click();
+    segmOn("#gal-media","");segmOn("#gal-tipo","");
+    renderGalleria();window.scrollTo(0,0);
+  }
   function galVuoto(box){
     box.style.display="block";
     box.innerHTML=tabVuoto("Nessuna foto o video da mostrare","Usa il pulsante «Carica foto o video» qui sopra, oppure cambia i filtri.",GAL_VUOTO());
@@ -100,7 +129,7 @@
       +'<button type="button" class="lb-b lb-scuro" data-action="close-lb">✕ Chiudi</button></div>'
       +(n>1?'<button type="button" class="lb-x lb-fr lb-sx" data-action="gal-prec" aria-label="Foto prima">‹</button>'
            +'<button type="button" class="lb-x lb-fr lb-dx" data-action="gal-succ" aria-label="Foto dopo">›</button>':"")
-      +'<div class="lb-x lb-sotto">'+(galPos+1)+' di '+n+(giorno?' · '+esc(giorno):"")+(g.op?' · '+esc(g.op):"")+'</div>');
+      +'<div class="lb-x lb-sotto"><span class="lb-tag">'+esc(g.tag)+' · </span>'+(galPos+1)+' di '+n+(giorno?' · '+esc(giorno):"")+(g.op?' · '+esc(g.op):"")+'</div>');
     lb.classList.add("open","lb-gal");
     if(g.kind==="foto"){
       if(!fotoCache[id])await galFirma("gestionale-foto",[{id,storage_path:g.path}],fotoCache);
@@ -167,7 +196,7 @@
   const galNomiOp={};      /* riserva: id -> nome, letta una volta dal database */
   function galNomeOp(v){
     if(!v)return "";
-    if(v==="Capo")return "Capo";
+    if(v==="Capo")return _galPro()?"Io":"Capo";
     const d=(dipCache||[]).find(x=>String(x.id)===String(v));
     if(d&&d.nome)return d.nome;
     return galNomiOp[String(v)]||"";
@@ -177,6 +206,7 @@
     if(!cur)return;
     const box=$("#gal-body");if(!box)return;
     const selOp=$("#gal-op-sel"), selLav=$("#gal-lav-sel");
+    galParole();
     if(!sb||!sbUid){
       if(selOp)selOp.innerHTML='<option value="">Tutti</option>';
       if(selLav)selLav.innerHTML='<option value="">'+esc(_msgPro("Tutti i cantieri"))+'</option>';
@@ -231,9 +261,13 @@
 
     /* tendina cantiere: solo i lavori che hanno almeno una foto o un video */
     const conRoba=new Set(tutteF.map(f=>f.lavoro_id).concat(tutteV.map(v=>v.lavoro_id)));
-    if(galFilter.lav&&!conRoba.has(galFilter.lav))galFilter.lav="";
+    /* 24 nov 2026 — arrivando da una pratica SENZA foto («Carica dalla
+       Galleria», «📷 Foto») il filtro tornava su «Tutte» e si vedevano le foto
+       delle altre pratiche. Se la pratica esiste il filtro resta: la Galleria
+       dice «nessuna foto» e «Carica» parte gia' su quella pratica. */
+    if(galFilter.lav&&!conRoba.has(galFilter.lav)&&!lavIds.has(galFilter.lav))galFilter.lav="";
     if(selLav)selLav.innerHTML=['<option value=""'+(galFilter.lav===""?" selected":"")+'>'+esc(_msgPro("Tutti i cantieri"))+'</option>']
-      .concat(lavArr.filter(l=>conRoba.has(l.id))
+      .concat(lavArr.filter(l=>conRoba.has(l.id)||String(l.id)===String(galFilter.lav))
         .sort((a,b)=>String(b.data_prevista||"").localeCompare(String(a.data_prevista||"")))
         .map(l=>'<option value="'+esc(l.id)+'"'+(galFilter.lav===l.id?" selected":"")+'>'+esc(l.descrizione||"Lavoro")+'</option>')).join("");
 
@@ -262,10 +296,13 @@
     gruppi.forEach((arr,k)=>{
       const nF=arr.filter(a=>a.kind==="foto").length, nV=arr.length-nF;
       const conta=[nF?nF+(nF===1?" foto":" foto"):"",nV?nV+(nV===1?" video":" video"):""].filter(Boolean).join(" · ");
+      /* 24 nov 2026 (sì di Alex) — «PDF delle foto»: solo se ci sono foto */
       html+='<div class="gal-group"><div class="gal-cantiere">'+esc(lavName[k]||"—")
-          + '<span class="gal-conta">'+conta+'</span></div><div class="thumbs">';
+          + '<span class="gal-conta">'+conta+'</span>'
+          + (nF&&k?'<button type="button" class="btn gal-pdf" data-action="gal-pdf" data-id="'+esc(k)+'">📄 PDF delle foto</button>':"")
+          + '</div><div class="thumbs">';
       arr.forEach(({x,kind})=>{
-        const q=quando(x), tag=q==="prima"?"Prima":"Finito", tcls=q==="prima"?"prima":"dopo";
+        const q=quando(x), tag=_galTag(q), tcls=q==="prima"?"prima":"dopo";
         const op=galNomeOp(x.operatore);
         galInfo[x.id]={kind,lav:lavName[k]||"",tag,op,quando:x.created_at||"",path:x.storage_path||""};
         if(kind==="foto"){
@@ -830,6 +867,85 @@
     }
   }
 
+  /* ===== 24 nov 2026 — LE FOTO DELLA PRATICA IN UN PDF (sì di Alex) =====
+     Allo studio e' la «Documentazione fotografica» da allegare alla pratica
+     (CILA, SCIA, fine lavori) o da mandare al cliente; all'impresa sono le
+     «Foto del lavoro». Intestazione come il PDF per il cliente delle
+     Giornate (logo + nome da Dati azienda), poi pratica, cliente, luogo,
+     data, e le foto due per riga, numerate, con la data. Allo studio in fondo
+     la firma del tecnico. I video non ci vanno: lo dice il messaggio. */
+  async function galPdfPratica(lavId,btn){
+    if(!sb||!sbUid||!lavId)return;
+    const pro=_galPro();
+    const {data:fs,error}=await sb.from("gest_foto").select("id,storage_path,tipo,operatore,created_at")
+      .eq("user_id",sbUid).eq("lavoro_id",lavId).order("created_at",{ascending:true});
+    if(error){toast("Non riesco a leggere le foto: "+traduciErrore(String(error.message||"")));return;}
+    const foto=(fs||[]).filter(f=>!_nonFoto(f.tipo)&&FOTO_TIPO_UI[f.tipo]);
+    if(!foto.length){toast("Su questa pratica non ci sono foto da mettere nel PDF");return;}
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return;
+    const tBtn=btn?btn.textContent:"";if(btn){btn.disabled=true;btn.textContent="Preparo il PDF…";}
+    try{
+      const {data:l}=await sb.raw("gest_lavori").select("descrizione,dove,cliente_id").eq("id",lavId).eq("user_id",sbUid).maybeSingle();
+      let cli="";
+      if(l&&l.cliente_id){try{const {data:c}=await sb.raw("gest_clienti").select("nome").eq("id",l.cliente_id).maybeSingle();cli=(c&&c.nome)||"";}catch(e){}}
+      const doc=new J({unit:"mm",format:"a4"}),W=210,M=15,FONDO=282;
+      const T=x=>String(x==null?"":x).replace(/[\u2013\u2014]/g,"-").replace(/[^\x00-\xFF€]/g,"");
+      let y=18;
+      if(typeof window.gestLogoPdf==="function"){try{y=await window.gestLogoPdf(doc,M,y)||y;}catch(e){}}
+      let nome="";
+      try{const ra=await sb.from("gest_azienda").select("nome,ragione_sociale").eq("user_id",sbUid).maybeSingle();nome=(ra&&ra.data&&(ra.data.nome||ra.data.ragione_sociale))||"";}catch(e){}
+      if(!nome){try{const ri=await sb.from("imprese").select("nome_attivita").eq("user_id",sbUid).maybeSingle();nome=(ri&&ri.data&&ri.data.nome_attivita)||"";}catch(e){}}
+      if(nome){doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(10,42,77);doc.text(T(nome),M,y+2);doc.setTextColor(0);y+=9;}
+      doc.setDrawColor(255,136,0);doc.setLineWidth(0.8);doc.line(M,y,W-M,y);y+=11;
+      doc.setFont("helvetica","bold");doc.setFontSize(21);doc.text(pro?"Documentazione fotografica":"Foto del lavoro",M,y);y+=9;
+      const riga=(et,v)=>{if(!v)return;doc.setFont("helvetica","bold");doc.setFontSize(11.5);doc.text(et,M,y);
+        doc.setFont("helvetica","normal");const r=doc.splitTextToSize(T(v),W-2*M-28);doc.text(r,M+28,y);y+=6*r.length;};
+      riga(pro?"Pratica":"Lavoro",(l&&l.descrizione)||"");
+      riga("Cliente",cli);
+      riga("Luogo",(l&&l.dove)||"");
+      riga("Data",fdate(todayStr()));
+      y+=5;
+      const gap=6,cw=(W-2*M-gap)/2,ch=cw*0.75,cap=7;
+      let n=0;
+      for(const [tit,quale] of [[pro?"Prima dei lavori":"Prima del lavoro","prima"],[pro?"Fine lavori":"A lavoro finito","dopo"]]){
+        const lista=foto.filter(f=>FOTO_TIPO_UI[f.tipo]===quale);
+        if(!lista.length)continue;
+        if(y+12+ch+cap>FONDO){doc.addPage();y=18;}
+        doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text(T(tit),M,y);y+=5;
+        for(let i=0;i<lista.length;i+=2){
+          if(y+ch+cap>FONDO){doc.addPage();y=18;}
+          for(let j=0;j<2&&i+j<lista.length;j++){
+            const f=lista[i+j],x=M+j*(cw+gap);n++;
+            const im=await gxImmagine(f.storage_path,1200,0.75);
+            doc.setDrawColor(226,232,240);doc.setLineWidth(0.3);doc.rect(x,y,cw,ch);
+            if(im){const k=Math.min(cw/im.w,ch/im.h),w=im.w*k,h=im.h*k;doc.addImage(im.url,"JPEG",x+(cw-w)/2,y+(ch-h)/2,w,h);}
+            else{doc.setFontSize(10);doc.setTextColor(120);doc.text("Foto non disponibile",x+cw/2,y+ch/2,{align:"center"});doc.setTextColor(0);}
+            doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(70);
+            const chi=galNomeOp(f.operatore);
+            doc.text(T("Foto "+n+" - "+fdate(String(f.created_at||"").slice(0,10))+(chi&&chi!=="Io"&&chi!=="Capo"?" - "+chi:"")),x,y+ch+4.5);
+            doc.setTextColor(0);
+          }
+          y+=ch+cap+3;
+        }
+        y+=3;
+      }
+      if(pro){
+        if(y+24>FONDO){doc.addPage();y=24;}
+        y+=8;doc.setFont("helvetica","normal");doc.setFontSize(11);
+        doc.text("Il tecnico",W-M-60,y);doc.setDrawColor(120);doc.setLineWidth(0.3);doc.line(W-M-60,y+14,W-M,y+14);
+      }
+      const tot=doc.getNumberOfPages();
+      for(let p=1;p<=tot;p++){doc.setPage(p);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(140);
+        doc.text("Pag. "+p+" di "+tot,W-M,292,{align:"right"});doc.setTextColor(0);}
+      const pul=String((l&&l.descrizione)||"pratica").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g," ").trim().slice(0,60);
+      doc.save((pro?"Documentazione fotografica - ":"Foto del lavoro - ")+pul+".pdf");
+      const nV=Object.values(galRigheVideo||{}).filter(v=>String(v.lavoro_id)===String(lavId)).length;
+      toast("PDF con "+(n===1?"1 foto":n+" foto")+" ✔"+(nV?" — i video non ci vanno: in un PDF non si guardano":""));
+    }catch(e){toast("PDF non riuscito: "+String(e&&e.message||e));}
+    finally{if(btn){btn.disabled=false;btn.textContent=tBtn;}}
+  }
+
   /* ---- finestra "Carica foto o video" ---- */
   function galUploadForm(){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -842,13 +958,13 @@
        Convertita a finestra grande a due colonne come tutte le altre. */
     openSheetGrande('Carica foto o video',
        '<div class="sh-cols"><div class="sh-col">'
-      +'<div class="sh-b"><div class="sh-tit">Di che lavoro si tratta</div>'
+      +'<div class="sh-b"><div class="sh-tit">'+(_galPro()?"Di che pratica si tratta":"Di che lavoro si tratta")+'</div>'
       +  '<div class="field"><label>Il lavoro</label>'
       +    '<select id="gu-lav"><option value="">'+esc(_msgPro("— scegli il lavoro —"))+'</option>'+lavOpts+'</select></div>'
       +  (lavOpts?'':'<div class="sh-nota" style="color:var(--attesa)">In questo reparto non hai ancora nessun lavoro: creane uno in <b>Lavori</b> e poi torna qui.</div>')
       +  '<div class="field"><label>Quando sono state fatte?</label><div class="seg" id="gu-quando">'
-      +    '<button data-v="prima" class="on">Prima del lavoro</button>'
-      +    '<button data-v="dopo">A lavoro finito</button></div></div>'
+      +    '<button data-v="prima" class="on">'+(_galPro()?"Prima dei lavori":"Prima del lavoro")+'</button>'
+      +    '<button data-v="dopo">'+(_galPro()?"Fine lavori":"A lavoro finito")+'</button></div></div>'
       +  '<div class="field"><label>Chi le ha fatte</label>'
       +    '<select id="gu-op"><option value="Capo">'+esc(_msgPro("Capo (io)"))+'</option>'+dipOpts+'</select></div>'
       +'</div>'
@@ -858,7 +974,9 @@
       +    '<input type="file" id="gu-foto" accept="image/*" multiple></div>'
       +  '<div class="field"><label>Video (uno per volta, massimo 50 MB)</label>'
       +    '<input type="file" id="gu-video" accept="video/*"></div>'
-      +  '<div class="sh-nota">Le foto del prima e del dopo sono quelle che convincono il prossimo cliente: caricale sempre.</div>'
+      +  '<div class="sh-nota">'+(_galPro()
+            ?"Le foto della pratica entrano da sole nel <b>Verbale di sopralluogo</b>: caricale tutte qui."
+            :"Le foto del prima e del dopo sono quelle che convincono il prossimo cliente: caricale sempre.")+'</div>'
       +  '<div id="gu-stato" class="gu-stato"></div>'
       +'</div>'
       +'</div></div>',

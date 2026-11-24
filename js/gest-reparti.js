@@ -673,12 +673,15 @@
     ['Questo operatore non ha lavori assegnati','Questo collaboratore non ha pratiche assegnate'],
     ['Assegna i lavori a una persona dalla scheda del lavoro','Assegna le pratiche a una persona dalla scheda della pratica'],
     ['Le foto si caricano dalla scheda del lavoro','Le foto si caricano dalla scheda della pratica'],
-    ['Prima del lavoro','Prima della pratica'],
-    ['A lavoro finito','A pratica finita'],
+    /* 24 nov 2026 (collaudo Galleria) — «Prima della pratica / A pratica
+       finita» un geometra non lo dice: le foto sono del sopralluogo (prima
+       dei lavori) e di fine lavori. */
+    ['Prima del lavoro','Prima dei lavori'],
+    ['A lavoro finito','A fine lavori'],
     ['Foto lavoro DA FARE','Foto pratica DA FARE'],
     ['Foto lavoro FATTO','Foto pratica FATTO'],
     ['per mostrarti il lavoro','per mostrarti la pratica'],
-    ['a lavoro finito','a pratica finita'],
+    ['a lavoro finito','a fine lavori'],
     ['per questo lavoro','per questa pratica'],
     /* 19 nov 2026 (voce Pratiche) — nella scheda aperta si leggeva ancora
        «Documenti di questo lavoro» e «… su questo lavoro» */

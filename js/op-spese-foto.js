@@ -90,8 +90,14 @@ async function speseSalva(id,bottone){
 }
 $("#btn-back").onclick=()=>{renderCal();renderDay();show("agenda");};
 
+/* 24 nov 2026 (collaudo Galleria dello studio) — qui si leggeva TUTTO quello
+   che sta in gest_foto per il lavoro: anche le foto buttate nel Cestino (il
+   collaboratore non passa dal filtro del Cestino del gestionale) e i
+   DOCUMENTI della pratica (PDF della CILA, visure), che finivano fra «le mie
+   foto» come immagini rotte. Adesso solo foto vere e non nel Cestino. */
+const OP_TIPI_FOTO=["da_fare","fatto","lavoro"];
 async function caricaFoto(lavoroId){
-  const {data}=await sb.from("gest_foto").select("storage_path,tipo").eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
+  const {data}=await sb.from("gest_foto").select("storage_path,tipo").eq("lavoro_id",lavoroId).in("tipo",OP_TIPI_FOTO).is("eliminato_il",null).order("created_at",{ascending:false});
   const capo=$("#lv-foto-capo"), grid=$("#lv-foto");
   capo.innerHTML="";grid.innerHTML="";
   const rows=data||[];
@@ -137,7 +143,7 @@ $("#lv-file").onchange=async e=>{
 /* video: stessa idea delle foto, ma niente compressione (troppo pesante nel
    browser) — solo il limite di 50 MB a bloccare i file troppo grandi */
 async function caricaVideo(lavoroId){
-  const {data}=await sb.from("gest_video").select("id,storage_path,tipo").eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
+  const {data}=await sb.from("gest_video").select("id,storage_path,tipo").eq("lavoro_id",lavoroId).is("eliminato_il",null).order("created_at",{ascending:false});
   const capo=$("#lv-video-capo"), grid=$("#lv-video");
   if(!capo||!grid)return;
   capo.innerHTML="";grid.innerHTML="";
