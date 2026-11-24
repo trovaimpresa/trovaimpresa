@@ -1009,7 +1009,7 @@
   async function delCli(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const pro=ruoloUtente==='professionista';
-    let nLav=0,nFat=0,nPrev=0;
+    let nLav=0,nFat=0,nPrev=0,nComp=0;
     try{
       /* 17 nov 2026 (voce Clienti) — si contano anche i PREVENTIVI: un cliente
          con solo un preventivo si buttava con «niente collegato». */
@@ -1020,19 +1020,28 @@
       ]);
       nLav=cl||0; nFat=cf||0; nPrev=cp||0;
     }catch(e){}
+    /* 24 nov 2026 (studio, voce Clienti) — anche i COMPUTI: un cliente con
+       solo un computo si buttava con «niente collegato». A parte: se la
+       lettura non va, il resto della domanda resta com'era. */
+    try{
+      const {count:cc}=await sb.from("gest_computi").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id);
+      nComp=cc||0;
+    }catch(e){}
     const pezzi=[];
     if(nLav)pezzi.push(nLav+" "+(pro?(nLav===1?"pratica":"pratiche"):(nLav===1?"lavoro":"lavori")));
     if(nPrev)pezzi.push(nPrev+" "+(nPrev===1?"preventivo":"preventivi"));
+    if(nComp)pezzi.push(nComp+" "+(nComp===1?"computo":"computi"));
     if(nFat)pezzi.push(nFat+" "+(nFat===1?"fattura":"fatture"));
     /* 9 agosto 2026 — la rassicurazione elencava solo le pratiche anche quando
        aveva appena contato una fattura: si costruisce da quello che ha trovato. */
     const restano=[];
     if(nLav)restano.push(pro?"le pratiche":"i lavori");
     if(nPrev)restano.push(nPrev===1?"il preventivo":"i preventivi");
+    if(nComp)restano.push(nComp===1?"il computo":"i computi");
     if(nFat)restano.push(nFat===1?"la fattura":"le fatture");
     /* 11 nov 2026 — collaudo 3.5: «2 lavori collegate» → l'accordo segue
        la prima cosa dell'elenco (lavori/pratiche/fatture) */
-    const _coll=nLav?(pro?(nLav===1?"collegata":"collegate"):(nLav===1?"collegato":"collegati")):nPrev?(nPrev===1?"collegato":"collegati"):(nFat===1?"collegata":"collegate");
+    const _coll=nLav?(pro?(nLav===1?"collegata":"collegate"):(nLav===1?"collegato":"collegati")):nPrev?(nPrev===1?"collegato":"collegati"):nComp?(nComp===1?"collegato":"collegati"):(nFat===1?"collegata":"collegate");
     const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
     const _c=(typeof cliCache!=="undefined"?cliCache:[]).find(x=>String(x.id)===String(id));
     const _nm=_c&&_c.nome?"«"+String(_c.nome).slice(0,80)+"»":"questo cliente";

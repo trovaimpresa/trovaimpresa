@@ -177,7 +177,7 @@
     var res=await Promise.all([
       sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine"),
       sb.from("gest_azienda").select("nome,tel,email,piva").eq("user_id",sbUid).maybeSingle(),
-      p.cliente_id?cliDelDocumento(p.cliente_id,"nome,email,telefono"):Promise.resolve({}),
+      p.cliente_id?cliDelDocumento(p.cliente_id,"nome,email,telefono,tipo,referente"):Promise.resolve({}),
       sb.from("gest_preventivi_link").select("*").eq("preventivo_id",id).eq("user_id",sbUid).maybeSingle()
     ]);
     if(res[3].error&&/gest_preventivi_link|schema cache|does not exist/i.test(res[3].error.message||"")){
@@ -492,7 +492,12 @@
     }
     /* il modulo: nome e cognome dal cliente, cellulare dalla scheda (o da chi ha firmato prima) */
     var prima=(fatta&&fatta.firmatario)||(f&&f.firmatario)||{};
-    var nomeCli=T(_inv.cli&&_inv.cli.nome), parti=nomeCli.split(/\s+/);
+    /* 24 nov 2026 (studio, voce Clienti) — per un'azienda o un condominio chi
+       firma e' il referente / l'amministratore, non la ragione sociale: prima
+       usciva «Nome: Rossi Costruzioni» e «Cognome: Srl». Senza referente le
+       caselle restano vuote, da scrivere. */
+    var _cliT=String(_inv.cli&&_inv.cli.tipo||"privato");
+    var nomeCli=(_cliT==="azienda"||_cliT==="condominio")?T(_inv.cli&&_inv.cli.referente):T(_inv.cli&&_inv.cli.nome), parti=nomeCli?nomeCli.split(/\s+/):[];
     var errore=f&&f.stato==="ERROR"?'<div class="aic-banda aic-banda--attesa" style="margin-bottom:8px"><b>L\'ultima volta non è andata:</b> '+esc(f.errore||"errore")+'</div>':'';
     return '<div class="sh-b">'+tit+fattaHtml+sotto+errore
       +'<div class="campo-aiuto" style="font-size:15px;margin-bottom:4px">Il cliente riceve un codice sul telefono e firma un PDF vero. Vale più della firma col dito. Costa '+SMS_COSTO+' crediti comprati (quelli in regalo non valgono).</div>'

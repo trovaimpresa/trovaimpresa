@@ -1036,6 +1036,21 @@
     let t=0; for(let i=0;i<10;i++){ let c=+n[i]; if(i%2===1){ c*=2; if(c>9)c-=9; } t+=c; }
     return ((10-t%10)%10)===+n[10];
   }
+  /* 24 nov 2026 (studio, voce Clienti) — il codice fiscale di una persona: la
+     16a lettera si calcola dalle altre 15 (anche con le lettere al posto dei
+     numeri, l'omocodia). Una lettera sbagliata e la fattura la scarta lo SDI. */
+  function ctrCfOk(v){
+    const s=String(v||"").replace(/\s/g,"").toUpperCase();
+    if(!/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(s)) return false;
+    const DISP=[1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23];
+    let t=0;
+    for(let i=0;i<15;i++){
+      const ch=s[i], k=/\d/.test(ch)?(+ch):(ch.charCodeAt(0)-65);
+      t+= (i%2===0)?DISP[k]:k;
+    }
+    return String.fromCharCode(65+t%26)===s[15];
+  }
+  window.ctrCfOk=ctrCfOk;
   function ctrIbanOk(v){
     const s=String(v||"").replace(/\s/g,"").toUpperCase();
     if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
@@ -1137,6 +1152,10 @@
               : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")});
       else if(nCf.length!==16&&nCf.length!==11) out.push({campo:"c-cf",grave:"arancio",
         dice:"Il codice fiscale di una persona ha 16 caratteri (11 se è un condominio o un ente): questo ne ha "+nCf.length+"."});
+      else if(String(nCf).replace(/\s/g,"").length===16&&!ctrCfOk(nCf)) out.push({campo:"c-cf",grave:"rosso",
+        dice:"Questo codice fiscale ha 16 caratteri ma uno è sbagliato: l'ultima lettera non torna con le altre. Ricontrollalo sulla tessera sanitaria."});
+      else if(String(nCf).replace(/\s/g,"").length===11&&/^\d{11}$/.test(String(nCf).replace(/\s/g,""))&&!ctrPivaOk(String(nCf).replace(/\s/g,""))) out.push({campo:"c-cf",grave:"rosso",
+        dice:"Questo codice fiscale di 11 cifre ha una cifra sbagliata: l'ultima non torna con le altre. Ricontrollalo."});
       if(nPiva&&nPiva.length!==11) out.push({campo:"c-piva",grave:"arancio",
         dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+"."});
     }

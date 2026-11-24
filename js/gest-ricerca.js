@@ -33,7 +33,10 @@
   let ctDati=null, ctTimer=null, ctCaricando=false, ctTroncato=false, ctMancanti=[];
 
   const CT_CAMPI={
-    clienti:["nome","referente","telefono","email","citta","indirizzo","piva","cf","note"],
+    /* 24 nov 2026 (studio, voce Clienti) — «cf» non esiste: la colonna e'
+       cod_fiscale. Incollando il codice fiscale di un cliente non usciva niente.
+       Anche CAP, provincia, codice destinatario e PEC, come l'elenco Clienti. */
+    clienti:["nome","referente","telefono","email","citta","cap","prov","indirizzo","piva","cod_fiscale","sdi_codice","sdi_pec","note"],
     /* 19 nov 2026 (voce Pratiche) — anche il Comune e i catastali: un geometra
        cerca «foglio 12» o la particella, e non usciva niente */
     lavori:["descrizione","dove","note","lavoro_svolto","pratica_tipo","pratica_protocollo",
@@ -77,7 +80,10 @@
     const _tbCr=document.querySelector("#tab-crediti");
     const _conCr=!!(_tbCr&&_tbCr.style.display!=="none");
     const [rc,rl,rp,rf,ro,rff,rcr,rop]=await Promise.all([
-      leggi("gest_clienti"),leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture"),
+      /* 24 nov 2026 — i clienti senza reparto (quelli di prima dei reparti) stanno
+         nell'elenco Clienti di ogni reparto: la ricerca in alto non li trovava */
+      sb.from("gest_clienti").select("*").eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null").limit(CT_TETTO),
+      leggi("gest_lavori"),leggi("gest_preventivi"),leggi("gest_fatture"),
       leggi("gest_fornitori"),leggi("gest_fatture_fornitori"),
       _conCr?sb.from("gest_crediti").select("*").eq("user_id",sbUid).limit(CT_TETTO):Promise.resolve({data:[]}),
       /* 20 nov 2026 — le persone del reparto (niente costi: si legge solo quello che si mostra) */

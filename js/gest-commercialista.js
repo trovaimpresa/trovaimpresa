@@ -169,7 +169,7 @@
       +     '<button type="button" class="btn-primary" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-prev" data-id="'+esc(c.id)+'">+ Nuovo preventivo</button>'
       +     '<button type="button" class="btn" style="font-size:17px;min-height:50px;padding:0 22px" data-action="cli-nuovo-lav" data-id="'+esc(c.id)+'">'+(ruoloUtente==='professionista'?'+ Nuova pratica':'+ Nuovo lavoro')+'</button>'
       +   '</div></div>'
-      + '<div class="sh-b" id="cli-storia"><div class="sh-tit">I suoi lavori, preventivi e fatture</div><div class="campo-aiuto">Sto guardando…</div></div>',
+      + '<div class="sh-b" id="cli-storia"><div class="sh-tit">'+(ruoloUtente==='professionista'?'Le sue pratiche, preventivi, computi e fatture':'I suoi lavori, preventivi, computi e fatture')+'</div><div class="campo-aiuto">Sto guardando…</div></div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>'
       + '<button class="btn" data-action="doc-cli" data-id="'+esc(c.id)+'">&#128206; Documenti</button>'
       + '<button class="btn-primary" data-action="edit-cli" data-id="'+esc(c.id)+'">&#9998; Modifica</button>');
@@ -204,32 +204,47 @@
      Le righe nel Cestino non arrivano: `sb` le salta da solo (js/cestino.js). */
   async function cliStoria(cid){
     const box=$("#cli-storia"); if(!box||!sb||!sbUid)return;
+    /* 24 nov 2026 (studio, voce Clienti) — allo studio si parla di PRATICHE:
+       prima uscivano «I suoi lavori…» e «Lavori (2)» con «Da fare / Fatto»
+       invece di «Depositata / Approvata». E i COMPUTI del cliente non
+       c'erano: per vederli bisognava andare nel Computo metrico. */
+    const pro=ruoloUtente==='professionista';
+    const titolo=pro?"Le sue pratiche, preventivi, computi e fatture":"I suoi lavori, preventivi, computi e fatture";
     try{
-      const [rl,rp,rf]=await Promise.all([
-        sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,importo,pratica_stato").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
+      const [rl,rp,rf,rc]=await Promise.all([
+        sb.from("gest_lavori").select(pro?"id,descrizione,stato,data_prevista,importo,pratica_stato,pratica_tipo":"id,descrizione,stato,data_prevista,importo,pratica_stato").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
         sb.from("gest_preventivi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
-        sb.from("gest_fatture").select("id,numero,anno,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30)
+        sb.from("gest_fatture").select("id,numero,anno,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
+        /* i computi si leggono a parte: se non si leggono, il resto esce lo stesso */
+        sb.from("gest_computi").select("id,numero,titolo,stato,created_at").eq("user_id",sbUid).eq("cliente_id",cid).order("created_at",{ascending:false}).limit(30)
       ]);
       if(rl.error||rp.error||rf.error)throw (rl.error||rp.error||rf.error);
-      const L=rl.data||[], P=rp.data||[], F=rf.data||[];
+      const L=rl.data||[], P=rp.data||[], F=rf.data||[], C=(rc&&!rc.error&&rc.data)||[];
       const [tp,tf]=await Promise.all([
         P.length?sb.from("gest_preventivi_totali").select("preventivo_id,imponibile,totale").in("preventivo_id",P.map(x=>x.id)):{data:[]},
         F.length?sb.from("gest_fatture_totali").select("fattura_id,totale").in("fattura_id",F.map(x=>x.id)):{data:[]}
       ]);
       const totP={};((tp&&tp.data)||[]).forEach(t=>{totP[t.preventivo_id]=t;});
       const totF={};((tf&&tf.data)||[]).forEach(t=>{totF[t.fattura_id]=t;});
-      const STL={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto",bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato",emessa:"Emessa",pagata:"Pagata"};
+      const STL={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto",bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato",emessa:"Emessa",pagata:"Pagata",insoluta:"Insoluta",annullata:"Annullata"};
+      const PST=(typeof PRATICA_STATI!=="undefined")?Object.fromEntries(PRATICA_STATI):{};
       const riga=(tipo,id,t,sotto,v)=>'<button type="button" class="cs-riga" data-cs-tipo="'+tipo+'" data-cs-id="'+esc(String(id))+'">'
         +'<span class="cs-t">'+esc(t)+'<small>'+esc(sotto)+'</small></span><span class="cs-v">'+v+'</span></button>';
       const gruppo=(tit,arr)=>arr.length?'<div class="cs-gr">'+tit+' ('+arr.length+')</div>'+arr.join(""):"";
+      const statoLav=l=>{
+        if(typeof inRitardo==="function"&&inRitardo(l.stato,l.data_prevista,l.pratica_stato))return "In ritardo";
+        if(pro&&l.stato!=="fatto"&&PST[l.pratica_stato||"da_preparare"])return PST[l.pratica_stato||"da_preparare"];
+        return (pro&&l.stato==="fatto")?"Finita":(STL[l.stato]||l.stato||"");
+      };
       const html=
-        gruppo("Lavori",L.map(l=>riga("lav",l.id,l.descrizione||"Lavoro",((typeof inRitardo==="function"&&inRitardo(l.stato,l.data_prevista,l.pratica_stato))?"In ritardo":(STL[l.stato]||l.stato||""))+" · "+fdate(l.data_prevista),+l.importo?eur2(+l.importo):"")))
+        gruppo(pro?"Pratiche":"Lavori",L.map(l=>riga("lav",l.id,(pro&&l.pratica_tipo?l.pratica_tipo+" — ":"")+(l.descrizione||(pro?"Pratica":"Lavoro")),statoLav(l)+(l.data_prevista?" · "+fdate(l.data_prevista):""),+l.importo?eur2(+l.importo):"")))
        +gruppo("Preventivi",P.map(p=>{const t=totP[p.id];return riga("prev",p.id,"N. "+(p.numero||"—")+" — "+(p.titolo||""),(STL[p.stato]||p.stato||"")+" · "+fdate(p.data),t?eur2(+t.imponibile||0)+' <small>IVA esclusa</small>':"");}))
+       +gruppo("Computi",C.map(c=>riga("comp",c.id,"N. "+(c.numero||"—")+" — "+(c.titolo||"Computo"),(c.stato==="definitivo"?"Definitivo":"Bozza")+(c.created_at?" · "+fdate(String(c.created_at).slice(0,10)):""),"")))
        +gruppo("Fatture",F.map(f=>{const t=totF[f.id];return riga("fatt",f.id,f.numero?("Fattura n. "+f.numero+"/"+(f.anno||"")):"Fattura in bozza",(STL[f.stato]||f.stato||"")+" · "+fdate(f.data),t?eur2(+t.totale||0):"");}));
-      box.innerHTML='<div class="sh-tit">I suoi lavori, preventivi e fatture</div>'
+      box.innerHTML='<div class="sh-tit">'+titolo+'</div>'
         +(html||'<div class="campo-aiuto">Ancora niente per questo cliente.</div>');
     }catch(e){
-      box.innerHTML='<div class="sh-tit">I suoi lavori, preventivi e fatture</div><div class="campo-aiuto">Non riesco a leggerli adesso. Riprova fra poco, oppure cerca il nome nella casella in alto.</div>';
+      box.innerHTML='<div class="sh-tit">'+titolo+'</div><div class="campo-aiuto">Non riesco a leggerli adesso. Riprova fra poco, oppure cerca il nome nella casella in alto.</div>';
     }
   }
   document.addEventListener("click",function(e){

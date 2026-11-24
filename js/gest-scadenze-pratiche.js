@@ -205,7 +205,13 @@
          stato eseguito, le colonne nuove semplicemente non arrivano e la sezione
          non si rompe (stessa scelta già fatta per le pratiche). */
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
+      /* 24 nov 2026 (studio, voce Clienti) — anche i clienti nel Cestino, come
+         Pratiche e Preventivi: prima la scadenza diceva «(cliente eliminato)»
+         per un cliente che si rimette a posto con un clic. */
+      ((window.cestinoAttivo&&window.cestinoAttivo()&&sb.raw)
+        ? sb.raw("gest_clienti").select("id,nome,eliminato_il")
+        : sb.from("gest_clienti").select("id,nome")
+      ).eq("user_id",sbUid).or(_cliOr(mid)),
       sb.from("gest_mezzi").select("id,nome,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
       /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache è piena
          solo se l'utente ha già aperto la sezione Pratiche, altrimenti ogni
@@ -216,7 +222,7 @@
     if(letturaKo(_rS[0])){listaNonLetta(box,"le scadenze","scadenzario");return;}
     const [{data:sc},{data:cl},{data:mz},{data:lvNomi}]=_rS;
     scadCache=sc||[];
-    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));
     /* 20 nov 2026 (voce Strumenti) — la stazione totale usciva col camion 🚚 e
        «(mezzo eliminato)»: icona e parola si decidono dalla categoria */

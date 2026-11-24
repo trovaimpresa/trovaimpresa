@@ -4133,8 +4133,24 @@ Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pa
 Funzione nuova («facciamo il tuo consiglio e pubblica» di Alex), tutte le facce, `?v=24nov-mp2`:
 - **«Chi ci va»** nella Mappa (`#mp-chi-box` / `#mp-chi` in `gestionale-app.html`, `mpChi` + ascoltatore `change` in `js/gest-galleria-mappa.js`): Tutti (N) · ogni persona (N) · Nessuno (N), contati su quello che guardi («da fare» o «tutte»); «Nessuno» comprende chi è nel Cestino, come l'Agenda. Filtra lista, pin e «senza indirizzo». Se la persona non ha niente: «Niente da mostrare sulla carta di Giulia…». Senza persone la tendina non c'è. Provato dal vivo prima del push (Giulia 2, Marco 1, Nessuno 3, Bruno 0; 1440 e 375, select 44 px, testo 16 px). Pulito.
 
+# 24 NOVEMBRE 2026 — STUDIO TECNICO, UNA VOCE PER VOLTA: CLIENTI
+
+⚠️ Il Cestino del 24 nov (chat «Collaudo voce Cestino studio») NON era pubblicato: stava solo nel suo contenitore, in attesa di «pubblica». Detto ad Alex. Questa sessione NON l'ha potuto riprovare sul sito.
+Prova: Chrome non collegato (Alex dal telefono) e trovaimpresa.com bloccato dal proxy → prove sul database vero (info@, reparto «ferramenta», «PROVA CONTROLLORE», UNA chiamata che si annulla da sola: privato con CF, srl con P.IVA e SDI, condominio con CF 11 cifre e PEC, Comune come «azienda» con codice ufficio di 6, SA di Lugano con paese CH e CAP CH-6900; pratica + parcella + computo della srl; srl nel Cestino e ritorno ✔) e sulla copia del gestionale coi dati finti del banco (`?vedi=professionista`, 1440 e 375). Conteggi dopo uguali a prima (clienti 2, lavori 5, computi 5, preventivi 5, fatture 3, scadenze 2).
+
+Sistemato (tutte le facce):
+1. ⛔ Ricerca in alto: cercava il campo «cf», che non esiste (la colonna è `cod_fiscale`): incollando il codice fiscale non usciva il cliente. Ora anche CAP, provincia, codice destinatario, PEC. E i clienti senza reparto (quelli che l'elenco Clienti mostra) non si trovavano: letti con `mestiere_id.eq.X,mestiere_id.is.null` (`js/gest-ricerca.js`).
+2. ⛔ Scheda del cliente allo studio: «I suoi lavori…», «Lavori (2)» con «Da fare/Fatto». Ora «Le sue pratiche, preventivi, computi e fatture», «Pratiche (N)» col tipo (CILA — …) e lo stato della pratica (Depositata, In istruttoria…; «Finita»). E i **computi** del cliente ci sono (aprono il computo). `cliStoria` in `js/gest-commercialista.js`.
+3. Cliente nel Cestino → la domanda contava pratiche, preventivi e fatture ma non i **computi** («Collegati: … 1 computo»). `delCli`.
+4. Scadenzario: la scadenza di un cliente nel Cestino diceva «(cliente eliminato)» → ora «Rossi Mario (nel cestino)», come Pratiche e Preventivi (`sb.raw`).
+5. Firma con codice SMS (Invia al cliente): per un'azienda o un condominio proponeva «Nome: Rossi Costruzioni / Cognome: Srl». Ora il referente / l'amministratore; se manca, caselle vuote.
+6. Controllo del cliente: il codice fiscale di 16 caratteri si verifica con l'ultima lettera (`ctrCfOk`, anche omocodia); quello di 11 cifre (condomini, enti) con la cifra di controllo. Provato: RSSMRA85T10A562S sì, …562T no.
+Banco `tools/banco-gestionale.js app`: ZERO difetti (1440, 375, 360). Versioni `?v=24nov-cli`.
+⬜ Non provato: sul sito vero col browser (Chrome spento) — da rifare dopo il push.
+Proposte con foto (aspettano il sì di Alex): **«Ente pubblico»** come quarto tipo di cliente (codice ufficio di 6, fattura per la PA con scissione dei pagamenti, CIG/CUP: oggi un Comune si mette come «Azienda» e la fattura si ferma sul «codice di 7 caratteri»); **scheda sul telefono senza i «non indicato»** (le pratiche del cliente stavano a 4 schermate di distanza).
+
 # STUDIO — MAPPA DI CHI PARLA CON CHI
-Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa.
+Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parcella, Fatture, Crediti formativi, Collaboratori, Strumenti, Agenda, Stati di avanzamento, Fornitori, Report, Galleria, Mappa, Cestino, Clienti.
 (✔ parlano · ✗ parlano male · — non parlano)
 - Strumenti ↔ Scadenze e promemoria: ✔ tarature e manutenzioni nello Scadenzario, aprono lo strumento; salvate dalla scheda si ridisegnano (20 nov).
 - Strumenti ↔ Assistente (Riepilogo): ✔ riga «strumento con scadenza passata» col nome giusto e scheda Strumenti.
@@ -4210,6 +4226,19 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Mappa ↔ Cestino: ✔ (vedi Pratiche).
 - Mappa ↔ Ricerca in alto / Strumenti / Fornitori: — non c'entrano.
 - Si può unire: Mappa NO (allo studio serve per i sopralluoghi); con Agenda si parlano meglio con un filtro «chi ci va», non unendole.
+
+- Clienti ↔ Pratiche: ✔ «+ Nuova pratica» dalla scheda col cliente già scelto; dal 24 nov la scheda elenca le pratiche col tipo e lo stato della pratica.
+- Clienti ↔ Preventivi e parcella: ✔ «+ Nuovo preventivo» dalla scheda; i preventivi nella scheda col totale senza IVA.
+- Clienti ↔ Computo metrico / Stati di avanzamento: ✔ dal 24 nov i computi del cliente nella scheda (aprono il computo); il SAL prende il cliente dal computo. — dalla scheda non si fa «+ Nuovo computo».
+- Clienti ↔ Fatture: ✔ la fattura prende i dati dal cliente (fotografia); dallo SDI «Modifica» apre «Dati per la fattura». ✗ un ente pubblico (codice ufficio di 6) non si può fatturare: proposta «Ente pubblico».
+- Clienti ↔ Scadenze e promemoria: ✔ dal 24 nov il cliente nel Cestino ha il nome «(nel cestino)».
+- Clienti ↔ Mappa: ✔ senza «Dove» la pratica usa l'indirizzo del cliente. — cliente nel Cestino: la pratica va in «senza indirizzo».
+- Clienti ↔ Report / Assistente: ✔ «Migliori clienti»; la striscia «Da guardare» nella scheda. — dal Report non si apre il cliente.
+- Clienti ↔ Agenda / Collaboratori: — non c'entrano (il cliente si vede nella pratica).
+- Clienti ↔ Pagina del cliente (preventivo-cliente) / Invia al cliente: ✔ email e telefono dalla scheda; dal 24 nov firma SMS col referente per aziende e condomini.
+- Clienti ↔ Cestino: ✔ va e torna; pratiche, preventivi, computi e fatture restano (dal 24 nov la domanda conta anche i computi).
+- Clienti ↔ Ricerca in alto: ✔ dal 24 nov anche codice fiscale, PEC, codice destinatario e i clienti senza reparto.
+- Si può unire: NO, Clienti resta voce sola (la scheda è il punto da cui partono preventivi, pratiche e fatture).
 
 # 20 NOVEMBRE 2026 — GIORNATE: FOTO PRIMA E DOPO, LAVORO SVOLTO, PDF PER IL CLIENTE (impresa e artigiano)
 
