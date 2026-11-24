@@ -677,10 +677,27 @@
     if(sb&&sbUid){
       /* 24 nov 2026 (si' di Alex) — anche chi ci va (operatore_id) e, allo
          studio, il giorno del deposito. Se una colonna manca si rilegge senza. */
+      /* ⛔ 24 nov 2026 (sera) — SENZA RETE IL RIQUADRO ROSSO ARRIVAVA DOPO 35 SECONDI.
+         Ogni lettura senza rete aspetta ~7 secondi (il gestionale riprova). Con la
+         lettura delle persone aggiunta il 24 nov (in fila dopo i lavori) le attese
+         erano cinque una dopo l'altra: per piu' di mezzo minuto restava il mese
+         di prima (o «Niente in programma»), e un'impresa poteva credere di avere
+         la giornata libera. Il banco su GitHub l'ha preso (rosso da ef907d9).
+         Adesso: lavori e persone si leggono INSIEME, e se i lavori non si leggono
+         il riquadro rosso esce SUBITO, senza aspettare scadenze e note. */
+      const _ro=sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).then(r=>r,()=>({data:null}));
       let {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato,operatore_id,pratica_data_dep").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if(_eCal&&/column|schema cache/i.test(_eCal.message||""))({data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()));
       calJobs=data||[];_calKo=!!_eCal;
-      try{const ro=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere());(ro.data||[]).forEach(o=>{calOp[o.id]=o;});}catch(e){}
+      if(_calKo){
+        $("#cal-grid").style.display="";
+        listaNonLetta("#cal-grid","il calendario","calendario");
+        const _pz=$("#cal-parz"); if(_pz){_pz.textContent="";_pz.hidden=true;}
+        const _cl=$("#cal-lista"); if(_cl)_cl.innerHTML="";
+        const _rt=$("#cal-rit"); if(_rt)_rt.hidden=true;
+        return;
+      }
+      try{const ro=await _ro;(ro.data||[]).forEach(o=>{calOp[o.id]=o;});}catch(e){}
     }
     else calJobs=[];
     calChiTendina();

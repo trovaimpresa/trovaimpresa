@@ -300,10 +300,13 @@
     if(sb&&sbUid){
       /* 24 agosto 2026 — anche qui, niente piu' filtro per reparto: tutti i
          lavori dell'azienda sul calendario, come le fatture. */
-      const {data,error:_eCalJ}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);
-      const {data:nn,error:_eCalN}=await sb.from("nol_noleggi")
-        .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
-        .eq("user_id",sbUid);
+      /* 24 nov 2026 (sera) — le due letture INSIEME: senza rete ognuna aspetta
+         ~7 secondi, in fila il riquadro rosso arrivava dopo il doppio. */
+      const [{data,error:_eCalJ},{data:nn,error:_eCalN}]=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid),
+        sb.from("nol_noleggi")
+          .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
+          .eq("user_id",sbUid)]);
       /* 12 nov 2026 (terzo giro) — regole 20 e 23: senza rete il calendario
          non dice «0 noleggi in ritardo» e non si svuota: riquadro rosso con
          Riprova. I dati letti prima restano dove sono. */
