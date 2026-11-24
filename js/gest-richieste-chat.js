@@ -796,6 +796,9 @@
       /* 9 agosto 2026 — ora che gli studi hanno la sezione Strumenti: una misura
          presa con uno strumento fuori taratura non vale, e la taratura scade */
       "Taratura strumento","Manutenzione strumento",
+      /* 24 nov 2026 (si' di Alex) — la nota del modulo diceva «rinnovo
+         dell'iscrizione», ma il tipo non c'era */
+      "Iscrizione all'albo",
       "Altro"]
     :["DURC","Assicurazione","Revisione mezzo","Bollo","Tagliando","Manutenzione programmata","Certificazione",
       "Pagamento fornitore",

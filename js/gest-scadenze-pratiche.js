@@ -562,6 +562,53 @@
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +`<button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button>`);
     ctrAscolta('scadenza');
+    /* 24 nov 2026 (si' di Alex, foto prima) — «Rimanda» come nei Promemoria */
+    if(!isNew&&s.id&&s.stato!=="fatta") scadRimandaMetti(s.id);
+  }
+  /* ===== 24 nov 2026 (si' di Alex, foto prima) — «RIMANDA ▾» NELLA SCADENZA =====
+     Il Comune concede la proroga, la polizza slitta: prima bisognava aprire
+     la data e riscriverla. Si conta dalla SUA data (e' una scadenza, non un
+     promemoria: «di un mese» vuol dire un mese dopo quella di prima).
+     Gli avvisi dell'email ripartono (avvisi=null), come in _saveScad.
+     Stesso stile del «Rimanda» dei Promemoria (classe prom-rimanda). */
+  const SCAD_RIMANDA=[["g7","Di una settimana"],["m1","Di un mese"],["m3","Di 3 mesi"]];
+  function scadRimandaMetti(id){
+    const testa=document.querySelector("#sheet .sh-head"); if(!testa)return;
+    let az=testa.querySelector(".sh-head-az");
+    if(!az){az=document.createElement("div");az.className="sh-head-az";testa.appendChild(az);}
+    if(az.querySelector(".scad-rimanda"))return;
+    const d=document.createElement("details");
+    d.className="sh-altro prom-rimanda scad-rimanda";
+    d.innerHTML='<summary class="btn btn-sm">Rimanda ▾</summary><div class="sh-altro-pop">'
+      +SCAD_RIMANDA.map(x=>'<button class="btn btn-sm" data-chiudi="1" data-action="scad-rimanda" data-id="'
+        +esc(String(id))+'" data-g="'+x[0]+'">'+x[1]+'</button>').join("")+'</div>';
+    const primo=az.querySelector(".az-prima");
+    if(primo)primo.after(d); else az.prepend(d);
+  }
+  let _scadRimando=false;
+  async function scadRimanda(id,g){
+    if(_scadRimando||!sb||!sbUid)return;
+    _scadRimando=true;
+    try{
+      const {data:s1,error:e1}=await sb.from("gest_scadenze").select("id,data_scadenza,titolo").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(e1||!s1||!s1.data_scadenza){toast("Non rimandata: "+((e1&&e1.message)||"scadenza non trovata"));return;}
+      const nuova=/^m/.test(g)?_mesiDopo(s1.data_scadenza,+String(g).slice(1)||1):_giorniDopo(s1.data_scadenza,+String(g).slice(1)||7);
+      let r=await sb.from("gest_scadenze").update({data_scadenza:nuova,avvisi:null}).eq("id",id).eq("user_id",sbUid).select("id");
+      if(r.error&&/avvisi/.test(r.error.message||""))
+        r=await sb.from("gest_scadenze").update({data_scadenza:nuova}).eq("id",id).eq("user_id",sbUid).select("id");
+      if(r.error||!r.data||!r.data.length){toast("Non rimandata: "+((r.error&&r.error.message)||"nessuna riga scritta"));return;}
+      /* la finestra aperta ha ancora la data vecchia: si chiude, se no «Salva» la rimetterebbe */
+      try{closeSheet();}catch(e){}
+      toast("Rimandata al "+fdate(nuova)+" ✔");
+      renderScadenze(); rinfresca("calendario","riepilogo");
+    }finally{_scadRimando=false;}
+  }
+  if(!window.__scadRimAscolto){
+    window.__scadRimAscolto=1;
+    document.addEventListener("click",function(e){
+      const t=e.target&&e.target.closest?e.target.closest('[data-action="scad-rimanda"]'):null;
+      if(t) scadRimanda(t.dataset.id,t.dataset.g);
+    });
   }
   /* 18 nov 2026 — collaudo dello Scadenzario: due tocchi veloci su «Crea»
      facevano DUE scadenze uguali (visto dal vivo). Stesso freno dei Promemoria. */

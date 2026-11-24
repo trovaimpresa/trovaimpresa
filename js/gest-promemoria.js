@@ -347,6 +347,9 @@
       toast("Non rimandato: " + ((q.error && q.error.message) || "nessuna riga scritta"));
       return;
     }
+    /* 24 nov 2026 — la finestra aperta aveva ancora il giorno vecchio:
+       premendo poi «Salva» il promemoria tornava indietro. Si chiude. */
+    try { closeSheet(); } catch (e) {}
     toast("Rimandato " + (g === 1 ? "a domani" : "al " + data.split("-").reverse().join("/")) + " ✔");
     promRidisegna();
   }

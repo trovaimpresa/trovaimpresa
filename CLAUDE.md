@@ -4191,7 +4191,10 @@ Sistemato (`?v=24nov-sp`):
 7. Assistente, scheda «Scadenze»: ora conta anche la carta e i crediti formativi come il pallino del menu e lo Scadenzario (`pScadPers` in js/gest-riepilogo.js).
 Banco `tools/banco-gestionale.js app`: ZERO difetti. Correzioni provate sulla pagina vera rimettendo le funzioni (`(0,eval)(String(fn).replace(…))`; ⚠️ incollare le funzioni nel javascript_tool NON le sostituisce: lì sono locali).
 
-Proposte con foto (in attesa del sì di Alex): «Rimanda ▾» nella scadenza (Di una settimana / Di un mese / Di 3 mesi, dalla SUA data, gli avvisi ripartono) e il tipo «Iscrizione all'albo» nella tendina dello studio.
+Funzioni nuove («Si e pubblica» di Alex, foto prima), `?v=24nov-sp2`, tutte le facce:
+- **«Rimanda ▾» nella scadenza** (`SCAD_RIMANDA`, `scadRimandaMetti`, `scadRimanda`, azione `scad-rimanda` con un ascoltatore suo in `js/gest-scadenze-pratiche.js`): Di una settimana / Di un mese / Di 3 mesi, contati dalla SUA data (`_giorniDopo` / `_mesiDopo`, fine mese giusto), `avvisi=null` (riprova senza se la colonna manca), chiude la finestra (se no «Salva» rimetteva la data vecchia), toast «Rimandata al …». Non c'è su una scadenza nuova né su una fatta. Stile `prom-rimanda` come nei Promemoria.
+- **Tipo «Iscrizione all'albo»** nella tendina dello studio (`tipiScadenza` in js/gest-richieste-chat.js), prima di «Altro».
+- ⛔ Trovato facendolo: anche il «Rimanda» dei Promemoria lasciava aperta la finestra col giorno vecchio, e «Salva» lo riportava indietro. Ora la chiude (`promRimanda`).
 ⬜ Non provati: l'email del mattino vera (parte una volta al giorno), «Parla» e Chat che scrivono un promemoria (crediti), un collaboratore vero dal telefono.
 ⬜ Visto, non toccato: la linguetta viola «F» copre la prima lettera della riga sotto le linguette sul telefono (vale per tutte le sezioni, già segnato il 18 nov).
 
@@ -4307,7 +4310,7 @@ Giro dello studio: 25 voci. Fatte: Pratiche, Computo metrico, Preventivi e parce
 - Scadenze e promemoria ↔ Calendario: ✔ scadenze e promemoria nel giorno; dal 24 nov niente mezzi allo studio.
 - Scadenze e promemoria ↔ Assistente: ✔ «N scadenze passate»; dal 24 nov la scheda conta carte e crediti come il pallino.
 - Scadenze e promemoria ↔ Tasse e fisco / Parla: ✔ «Ricordamelo» scrive un promemoria; dal 24 nov il numero della linguetta si aggiorna.
-- Scadenze e promemoria ↔ email del mattino: ✔ avvisi 30/7/1; dal 24 nov ripartono se cambi la data; parole dello studio.
+- Scadenze e promemoria ↔ email del mattino: ✔ avvisi 30/7/1; dal 24 nov ripartono se cambi la data o premi «Rimanda»; parole dello studio.
 - Scadenze e promemoria ↔ Cestino: ✔ scadenza e promemoria vanno e tornano («— scade il …»).
 - Scadenze e promemoria ↔ app del collaboratore: — non vede le scadenze dello studio (giusto; vede le sue pratiche).
 - Scadenze e promemoria ↔ Ricerca in alto: — le scadenze non si cercano (da guardare a fine giro).
