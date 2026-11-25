@@ -52,7 +52,7 @@
     const [rP, rA, rF, rS, rC, rR, rFF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_fatture").select("id,numero,anno,data,scadenza,stato,data_pagata,cli_nome,bollo").eq("user_id", sbUid)
+      sb.from("gest_fatture").select("id,numero,anno,data,scadenza,stato,data_pagata,cli_nome,bollo,cassa_tipo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       sb.from("gest_spese").select("importo,data").eq("user_id", sbUid).gte("data", da),
       sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at").eq("user_id", sbUid).gte("created_at", da),
@@ -62,7 +62,7 @@
     ]);
     const ff = rF.data || [];
     const ids = ff.map(f => f.id);
-    const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva,totale,segno,resto").in("fattura_id", ids) : { data: [] };
+    const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva,totale,segno,resto,cassa").in("fattura_id", ids) : { data: [] };
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
     rN.fatture.forEach(f => { ff.push(f); tot[f.id] = rN.tot[f.id]; });
     const errore = [rF, rS, rC, rR, rFF, rT].some(r => r && r.error) || rN.errore;
@@ -92,7 +92,7 @@
     const perMese = Array(12).fill(0);
     d.fatture.forEach(f => {
       if (f.stato === "pagata" && String(f.data_pagata || "").slice(0, 4) === String(Y)) {
-        const v = +(d.tot[f.id] || {}).imponibile || 0;
+        const v = (+(d.tot[f.id] || {}).imponibile || 0) - ((typeof ftCassaFuori==="function"&&ftCassaFuori(f)) ? (+(d.tot[f.id] || {}).cassa || 0) : 0);   /* 25 nov: senza cassa */
         incassi += v; perMese[+f.data_pagata.slice(5, 7) - 1] += v;
       }
     });

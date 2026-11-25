@@ -409,7 +409,7 @@
        un utile di −410,50: due numeri per lo stesso mese. */
     const incMese  = FT.length
       ? FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
-          .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0)
+          .reduce((s,f)=>s+(typeof fattIncassoReddito==="function"?fattIncassoReddito:fattImponibile)(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0)   /* 25 nov: senza cassa */
       : L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
     let oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);

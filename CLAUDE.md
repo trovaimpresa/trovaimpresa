@@ -4597,3 +4597,11 @@ Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.ym
 - Funzione del database `gest_strumenti_miei(_impresa)` (`sql/2026-11-25-strumenti-miei.sql`, migrazione `strumenti_miei_25nov2026` GIÀ ESEGUITA): chi sono io (gest_membri attivo → operatore_id), poi gest_mezzi con `operatore_id = io` (nome, categoria) e la prossima scadenza non fatta (gest_scadenze.mezzo_id). Niente costi/note. Solo `authenticated`.
 - `js/op-strumenti.js` (NUOVO, in gestionale-operatore.html dopo op-mezzi.js, stile `.op-stru*` nel primo <style>): riquadro `#op-stru` in cima a «Lavori di adesso». Titolo: studio «I tuoi strumenti», impresa «Le tue attrezzature» (o «Mezzi e attrezzature che hai tu»). Stato: rosso scaduta/oggi, arancione entro 30 gg, verde in regola, grigio senza scadenza. Ordinate per scadenza. Nessuno strumento → niente riquadro.
 - Provato sul sito vero (app aperta col conto di Alex che fa da «david»): 2 attrezzature di prova date a david con taratura 10/11 e 15/12 → «scaduta il 10/11» rosso, «fra 20 giorni» arancione. Cancellate (mezzi e scadenze di prova = 0).
+
+## 25 nov 2026 — IL CONTRIBUTO CASSA NON È UN INCASSO
+- Il contributo integrativo di una cassa privata (CIPAG geometri 5%, Inarcassa 4%…) il cliente lo paga e il professionista lo gira alla cassa: non è reddito, nel forfettario non conta per la soglia. La rivalsa INPS 4% (TC22, Gestione Separata) invece È compenso.
+- Nuove funzioni in js/gest-fatture.js: `fattCassaFuori(f)` (vero se cassa_tipo ≠ TC22) e `fattIncassoReddito(f,righe)` = imponibile − cassa (salvo TC22), col segno.
+- Usata per l'«Incassato» in: gest-report.js (impFatt, quindi anche margini per pratica), gest-riepilogo.js (Assistente, mese). In gest-fisco-tasse.js (`ftCassaFuori`, globale) e gest-fisco-vivere.js si sottrae la colonna `cassa` della vista gest_fatture_totali (aggiunti `cassa_tipo` e `cassa` alle select). Le fatture del Noleggio non hanno cassa_tipo: restano intere.
+- Nel Report, al professionista, la scritta dice «(senza IVA e senza cassa)».
+- L'Excel (gest-cestino) resta con l'imponibile vero della fattura: è un documento, non un incasso.
+- Prova: parcella 2.000 + cassa 5% → prima 2.100, ora 2.000; con TC22 4% resta 2.080.

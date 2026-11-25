@@ -448,6 +448,20 @@
        e nel foglio Excel deve comparire col meno, com'e' giusto che sia. */
     return fattBasi(f,righeDellaFattura||[]).imponibile*fattSegno(f);
   }
+  /* ===== 25 nov 2026 — IL CONTRIBUTO CASSA NON È UN INCASSO TUO =====
+     Il contributo integrativo di una cassa privata (CIPAG, Inarcassa…) il
+     cliente lo paga e tu lo giri alla cassa: non è reddito e nel forfettario
+     non conta per la soglia. La rivalsa INPS 4% (TC22, Gestione Separata)
+     invece è compenso. Quindi l'«Incassato» di Report, Assistente e Tasse
+     è l'imponibile MENO la cassa, salvo TC22. (Verificato con Alex il 25 nov,
+     fonti in CLAUDE.md.) */
+  function fattCassaFuori(f){ const t=String((f&&f.cassa_tipo)||"").trim().toUpperCase(); return t!=="TC22"; }
+  function fattIncassoReddito(f,righeDellaFattura){
+    const b=fattBasi(f,righeDellaFattura||[]);
+    let v=+b.imponibile||0;
+    if(fattCassaFuori(f))v-=(+b.cassa||0);
+    return v*fattSegno(f);
+  }
   function fattNumero(f){
     return fattNum(f);
   }
