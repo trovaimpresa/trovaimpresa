@@ -631,7 +631,7 @@
     const senzaPunto=(D&&D.righe||[]).filter(r=>!r.p&&r.l&&r.l.data_prevista===mpGiroData).length;
     let testa='<div class="mp-giro-t"><b>🚗 Il giro di</b><input type="date" id="mp-giro-d" value="'+esc(mpGiroData)+'">';
     if(!tappe.length){
-      box.innerHTML=testa+'<span class="mp-giro-n">Nessun '+cosa[0]+' con questa data'+(senzaPunto?' sulla carta ('+senzaPunto+' senza indirizzo)':'')+'</span></div>';
+      box.innerHTML=testa+'<span class="mp-giro-n">Nessun '+cosa[0]+' con questa data'+(senzaPunto?' sulla carta ('+senzaPunto+' con l\'indirizzo non trovato)':'')+'</span></div>';
       return;
     }
     /* in fila: dall'ufficio, ogni volta il più vicino */
@@ -663,7 +663,7 @@
       +'<ol class="mp-giro-l">'+li+'</ol>'
       +'<div class="mp-giro-b"><a class="btn-primary" href="'+esc(nav)+'" target="_blank" rel="noopener">Apri il giro nel navigatore</a>'
       +'<a class="btn" href="'+esc(wa)+'" target="_blank" rel="noopener">Manda il giro su WhatsApp</a></div>'
-      +'<p class="mp-giro-nota">In ordine dal più vicino. I km sono in linea d\'aria: il navigatore ti dà quelli di strada.'+(ord.length>9?' Il navigatore prende le prime 9 tappe.':'')+(senzaPunto?' '+senzaPunto+' senza indirizzo, non nel giro.':'')+'</p>';
+      +'<p class="mp-giro-nota">In ordine dal più vicino. I km sono in linea d\'aria: il navigatore ti dà quelli di strada.'+(ord.length>9?' Il navigatore prende le prime 9 tappe.':'')+(senzaPunto?' '+senzaPunto+(senzaPunto===1?' non trovato sulla carta: non è nel giro (guarda l\'indirizzo).':' non trovati sulla carta: non sono nel giro (guarda gli indirizzi).'):'')+'</p>';
   }
   document.addEventListener("change",function(e){
     if(e.target&&e.target.id==="mp-giro-d"){mpGiroData=e.target.value||_mpDomani();try{mpGiroDisegna();}catch(_){}}
