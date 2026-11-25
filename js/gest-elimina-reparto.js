@@ -763,7 +763,7 @@
     /* 25 nov 2026 (Tappa 3 n. 4) — se ci sono indirizzi senza km: un invito ad aprire la Mappa */
     try{
       const body=document.getElementById("ag-body"); let avv=document.getElementById("ag-km-avv");
-      const manca=typeof mpKmDi==="function"&&!(typeof tabNascosto==="function"&&tabNascosto("mappa"))&&L.some(l=>String(l.dove||"").trim()&&mpKmDi(l)==null);
+      const manca=typeof mpKmDi==="function"&&!(typeof tabNascosto==="function"&&tabNascosto("mappa"))&&L.some(l=>typeof mpKmDaCercare==="function"?mpKmDaCercare(l):(String(l.dove||"").trim()&&mpKmDi(l)==null));
       if(!manca){if(avv)avv.remove();}
       else if(body){
         if(!avv){avv=document.createElement("div");avv.id="ag-km-avv";avv.className="ag-km-avv";body.parentNode.insertBefore(avv,body);}

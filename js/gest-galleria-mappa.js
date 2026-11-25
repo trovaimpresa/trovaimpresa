@@ -443,6 +443,13 @@
     }catch(e){return null;}
   };
   window.mpKmTesto=function(km){return km==null?"":mpFormattaKm(km);};
+  /* true = ha l'indirizzo, niente km, e la Mappa non l'ha mai cercato */
+  window.mpKmDaCercare=function(l){
+    try{
+      if(!l||!String(l.dove||"").trim()||mpKmDi(l)!=null)return false;
+      const C=mpLeggiCache(); return !(C.provati&&C.provati[mpChiave(String(l.dove).trim())]);
+    }catch(e){return false;}
+  };
   const mpAspetta=ms=>new Promise(r=>setTimeout(r,ms));
 
   /* carica Leaflet solo la prima volta che apri la Mappa */
@@ -917,6 +924,10 @@
          FATTE: «La pratica più vicina 0,7 km» era una pratica gia' chiusa). */
       const C2=mpLeggiCache();if(!C2.km)C2.km={};
       righe.forEach(r=>{if(r.km!=null)C2.km[mpChiave(r.ind)]=r.km;});
+      /* 25 nov 2026 — gli indirizzi già cercati (trovati o no): l'Agenda non
+         invita più ad «Aprire la Mappa» per un indirizzo che non si trova */
+      if(!C2.provati)C2.provati={};
+      righe.forEach(r=>{if(r.ind)C2.provati[mpChiave(r.ind)]=1;});
       mpSalvaCache();
       /* 25 nov 2026 — «Il giro di» un giorno (Tappa 3 n. 3) */
       mpGiroDati={part:pPart, righe:righe.slice(), op:mpOp};

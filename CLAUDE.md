@@ -4591,3 +4591,4 @@ Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.ym
 - Agenda (`renderAgenda` in js/gest-elimina-reparto.js): se una pratica con indirizzo non ha km, riga `#ag-km-avv` «Per vedere quanti km ci sono dall'ufficio [Apri la Mappa]» (`ag-km-mappa`).
 - ⚠️ Impresa: la select dell'Agenda non legge `dove_km` (resta la cache della Mappa) — non toccata per non rompere se manca la colonna.
 - Banco locale (playwright + google-chrome) ZERO difetti. `?v=25nov-km`, stile `?v=41`.
+- Collaudo dopo il push (giardiniere): prima l'invito, «Apri la Mappa» → 3 pratiche su 4 con «0,6 km» in Agenda e Pratiche. «Via Torino 7, Rieti» non trovata: l'invito restava per sempre → ora la Mappa segna gli indirizzi già cercati (`C2.provati`) e `mpKmDaCercare(l)` invita solo per quelli mai cercati (`?v=25nov-km2`).
