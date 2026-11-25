@@ -4568,3 +4568,8 @@ Difetti trovati e sistemati (`?v=24nov-giro`):
 - CILA esclusa: la legge nazionale non le dà termini. Fonte: DPR 380 art. 15 e 23; regole nazionali, la Regione o il Comune possono cambiarle (lo dice la domanda).
 - Ogni data = riga di gest_scadenze (`tipo_pratica` «Termine di legge: …», `avvisa:true`, lavoro e cliente): email 30/7/1, Scadenzario, Calendario, Cestino con la pratica. Già presente (stesso tipo, non fatta) → non si rifà.
 - Provato sul sito vero iniettando la funzione: SCIA depositata 20/11 → 20/12/2026, 20/11/2027, 20/11/2029, 3 righe, nello Scadenzario; seconda volta niente domanda. Pulito (pratica e scadenze cancellate).
+
+# 25 NOVEMBRE 2026 — STUDIO, TAPPA 3 n. 2: LE SPESE DELLA PRATICA IN FATTURA (sì di Alex, foto approvata)
+`fattSpesePratica(lavIds,fattId)` in js/gest-fatture.js (`?v=25nov-spese`), chiamata accanto a `fattRiaddebito` quando si apre la fattura. Solo studio. Riquadro `#fa-sppr` (classi `.fa-ria` come il riaddebito) sotto «Spese anticipate»: le spese della pratica (gest_spese) con la spunta; spuntate da sole quelle tipiche art. 15 (regex diritti/bolli/visure/marche/oneri/segreteria/catasto/protocollo/tributi/tasse/sanzioni/registro). «Spese anticipate (somma)» → #fa-spese; «Nel rimborso spese» → #fa-spese-iva. Somma, non sostituisce. Avviso se un'altra fattura della stessa pratica ha già `spese`.
+Provato sul sito vero iniettando la funzione: pratica di prova con diritti 52,50 + visura 16 + fotocopie 16 → spuntate 68,50, «Spese anticipate» → casella 68,50, conto 1.000 + 68,50 + bollo = 1.070,50. Pulito (pratica e spese cancellate, nessuna fattura salvata).
+⬜ Da guardare (c'era già): nel «Conto» le spese anticipate stanno dentro «Totale imponibile» pur essendo «fuori IVA».

@@ -1148,6 +1148,65 @@
       box.innerHTML='<b>Messe nel rimborso spese: '+eur2(somma)+' ✔</b><p class="fa-ria-nota">Se cambi idea, correggi la cifra nella casella qui sopra.</p>';
     });
   }
+  /* ============================================================
+     25 nov 2026 — LE SPESE DELLA PRATICA IN FATTURA (studio, sì di Alex,
+     foto approvata). Diritti di segreteria, bolli, visure segnati fra le
+     spese della pratica: un riquadro sotto «Spese anticipate» le elenca con
+     la spunta. Spuntate da sole quelle tipiche dell'art. 15 (diritti, bolli,
+     visure, marche, oneri…). «Spese anticipate» somma in #fa-spese (niente
+     IVA, niente cassa); «Nel rimborso spese» in #fa-spese-iva. Somma, non
+     sostituisce. Se un'altra fattura della stessa pratica ha già spese
+     anticipate, lo dice: si fanno pagare una volta sola.
+     ============================================================ */
+  async function fattSpesePratica(lavIds,fattId){
+    if(typeof ruoloUtente==="undefined"||ruoloUtente!=="professionista")return;
+    const casA=$("#fa-spese"), casR=$("#fa-spese-iva");
+    const ids=[...new Set((lavIds||[]).filter(Boolean).map(String))];
+    if(!casA||!ids.length||!sb||!sbUid)return;
+    const [rsp,rlv,rfl]=await Promise.all([
+      sb.from("gest_spese").select("id,descrizione,importo,lavoro_id,created_at").eq("user_id",sbUid).in("lavoro_id",ids),
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).in("id",ids),
+      sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids)
+    ]);
+    if(rsp.error)return;
+    const sp=(rsp.data||[]).filter(x=>(+x.importo||0)>0).sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    if(!sp.length||!document.body.contains(casA))return;
+    let gia=[];
+    const altre=[...new Set(((rfl&&rfl.data)||[]).map(x=>String(x.fattura_id)).filter(x=>x!==String(fattId||"")))];
+    if(altre.length){
+      try{ const {data:fa}=await sb.from("gest_fatture").select("id,numero,anno,spese").eq("user_id",sbUid).in("id",altre); gia=(fa||[]).filter(x=>(+x.spese||0)>0); }catch(_){}
+    }
+    if(!document.body.contains(casA))return;
+    const lav=((rlv&&rlv.data)||[]);
+    const ART15=/diritt|boll|visur|marc|oner|segreteri|catast|protocoll|tribut|tassa|sanzion|registro/i;
+    const tot=_cent2(sp.reduce((a,x)=>a+(+x.importo||0),0));
+    const dove=lav.length===1?"Su «"+esc(lav[0].descrizione||"questa pratica")+"»":"Su queste pratiche";
+    const box=document.createElement("div");box.className="fa-ria";box.id="fa-sppr";
+    box.innerHTML='<b>'+dove+' hai '+sp.length+(sp.length===1?' spesa':' spese')+' della pratica: '+eur2(tot)+'</b>'
+      +'<div class="fa-ria-scegli">'+sp.map(x=>'<label class="fa-ria-r"><input type="checkbox"'+(ART15.test(String(x.descrizione||""))?' checked':'')+' data-imp="'+(+x.importo||0)+'"> '
+        +esc(x.descrizione||"Spesa")+' · '+eur2(+x.importo||0)+'</label>').join('')+'</div>'
+      +(gia.length?'<p class="fa-ria-nota" style="color:var(--attesa)">⚠️ La fattura '+gia.map(x=>x.numero?('n. '+esc(String(x.numero))+(x.anno?'/'+x.anno:'')):'in bozza').join(', ')+' di questa pratica ha già spese anticipate ('+gia.map(x=>eur2(+x.spese)).join(', ')+'): non farle pagare due volte.</p>':'')
+      +'<div class="fa-ria-acts"><button type="button" class="btn btn-primary btn-sm" data-sppr="ant">Spese anticipate</button>'
+      +(casR?'<button type="button" class="btn btn-sm" data-sppr="rim">Nel rimborso spese</button>':'')+'</div>'
+      +'<p class="fa-ria-nota">Nelle <b>spese anticipate</b> solo quelle pagate per il cliente con la ricevuta intestata a lui (diritti, bolli, visure): niente IVA, niente cassa. Le altre vanno nel <b>rimborso spese</b>.</p>';
+    const somma=()=>_cent2([...box.querySelectorAll(".fa-ria-scegli input:checked")].reduce((a,c)=>a+(+c.dataset.imp||0),0));
+    const etich=()=>{const b=box.querySelector('[data-sppr="ant"]');if(b){const n=somma();b.textContent="Spese anticipate"+(n>0?" ("+eur2(n)+")":"");}};
+    etich();
+    const fld=casA.closest(".field")||casA;
+    fld.parentNode.insertBefore(box,fld.nextSibling);
+    box.addEventListener("change",etich);
+    box.addEventListener("click",function(ev){
+      const b=ev.target.closest("[data-sppr]");if(!b)return;
+      ev.preventDefault();ev.stopPropagation();
+      const n=somma(); if(!(n>0)){toast("Spunta almeno una spesa");return;}
+      const cas=b.dataset.sppr==="ant"?casA:casR; if(!cas)return;
+      const prima=_numIt("#"+cas.id)||0;
+      cas.value=_cent2(prima+n).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true});
+      cas.dispatchEvent(new Event("input",{bubbles:true}));
+      cas.dispatchEvent(new Event("change",{bubbles:true}));
+      box.innerHTML='<b>Messe '+(b.dataset.sppr==="ant"?'nelle spese anticipate':'nel rimborso spese')+': '+eur2(n)+' ✔</b><p class="fa-ria-nota">Se cambi idea, correggi la cifra nella casella.</p>';
+    });
+  }
   async function fattForm(f,preset){
     const isNew=!f;
     f=f||preset||{};
@@ -1366,6 +1425,8 @@
        le fatture dei fornitori della pratica, da riaddebitare nel rimborso spese */
     if(ruoloUtente==="professionista"&&!(f.id&&f.numero)){
       try{ fattRiaddebito(isNew?(fattLavoriInCorso||[]):((typeof fattLavori!=="undefined"&&fattLavori[f.id])||[]), f.id||null); }catch(_){}
+      /* 25 nov 2026 — e le spese della pratica (diritti, bolli, visure) */
+      try{ fattSpesePratica(isNew?(fattLavoriInCorso||[]):((typeof fattLavori!=="undefined"&&fattLavori[f.id])||[]), f.id||null); }catch(_){}
     }
     /* 13 nov 2026 — il riquadro «Pagamento»: l'IBAN si vede solo se serve,
        e la scadenza segue la data finche' non la tocchi tu. */
