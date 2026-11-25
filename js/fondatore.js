@@ -293,6 +293,7 @@
     "2026-11-24-mezzi-tagliando-km.sql": "gest_mezzi.tagliando_ogni_km gest_mezzi.tagliando_ultimo_km",
     "2026-11-24-incarichi-preventivo.sql": "incarichi_richieste.preventivo_creato_id",
     "2026-11-25-carta-paga-fattura.sql": "gest_carte_movimenti.fattura_forn_id",
+    "2026-11-25-email-fattura.sql":     "gest_email_documenti.fattura_id",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
     "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo gest_lavori.pratica_protocollo gest_lavori.pratica_comune gest_lavori.pratica_data_dep gest_lavori.pratica_stato gest_lavori.catasto_foglio gest_lavori.catasto_particella gest_lavori.catasto_sub",

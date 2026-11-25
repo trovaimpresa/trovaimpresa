@@ -534,6 +534,37 @@
         .map((r,i)=>({descrizione:r.descrizione,qta:r.qta,prezzo:r.prezzo,iva:r.iva,ordine:i}))
     });
   }
+  /* ===== 25 nov 2026 — DUPLICA FATTURA =====
+     Lo stesso lavoro tutti i mesi (manutenzione, affitto di un mezzo, la
+     stessa parcella): prima si riscriveva tutto. Adesso si copia in una
+     BOZZA NUOVA, senza numero e con la data di oggi: cliente, voci, cassa,
+     spese, ritenuta, sconto, bollo, pagamento. NON si copiano: il numero,
+     lo stato, i lavori e l'acconto (SAL) collegati, e la riga «storna la
+     fattura…» delle note (una copia non storna niente). */
+  async function fattDuplica(id){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f){toast("Fattura non trovata");return;}
+    let R=fattRighe[f.id];
+    if(!R){
+      const {data,error}=await sb.from("gest_fattura_righe").select("*").eq("fattura_id",f.id).order("ordine");
+      if(error){toast("Non riesco a leggere le voci della fattura: riprova fra un attimo");return;}
+      R=data||[];
+    }
+    const note=String(f.note||"").split(/\n/).filter(r=>!/storna la fattura n\./i.test(r)).join("\n").trim();
+    closeSheet();
+    await fattForm(null,{
+      cliente_id:f.cliente_id||null, data:todayStr(), tipo:f.tipo||"fattura",
+      cassa_perc:+f.cassa_perc||0, cassa_tipo:f.cassa_tipo||null,
+      spese:+f.spese||0, spese_iva:+f.spese_iva||0,
+      ritenuta_perc:+f.ritenuta_perc||0, sconto:+f.sconto||0, bollo:+f.bollo||0,
+      modo_pagamento:f.modo_pagamento||null, iban:f.iban||null,
+      cig:f.cig||null, cup:f.cup||null, rif_pa:f.rif_pa||null,
+      note:note||null,
+      _dup:{numero:f.numero||null,anno:fattAnno(f),data:f.data,cli:f.cli_nome||""},
+      _righe:R.slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0))
+        .map((r,i)=>({descrizione:r.descrizione,qta:r.qta,prezzo:r.prezzo,iva:r.iva,ordine:i}))
+    });
+  }
   /* la fattura stornata, letta dalla riga delle note (vedi sopra) */
   function fattRifStornata(f){
     const m=/storna la fattura n\. ?(\d+)\/(\d{4}) del (\d{2})\/(\d{2})\/(\d{4})/i.exec(String((f&&f.note)||""));
@@ -658,6 +689,8 @@
     az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id},top:true});
     /* 17 nov 2026 — al cliente con WhatsApp o email (js/gest-fattura-manda.js) */
     az.push({lab:"📧 Manda al cliente",action:"fatt-manda",data:{id:f.id},top:true});
+    /* 25 nov 2026 — copia in una bozza nuova (stesso lavoro del mese dopo) */
+    az.push({lab:"⧉ Duplica",action:"fatt-dup",data:{id:f.id}});
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
@@ -1289,6 +1322,7 @@
       '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
+      +   ((preset&&preset._dup)?'<div class="sh-nota fatt-nc-rif"><b>Copia '+(preset._dup.numero?('della fattura n. '+esc(String(preset._dup.numero))+'/'+esc(String(preset._dup.anno))):'della bozza')+' del '+esc(fdate(preset._dup.data))+'</b>'+(preset._dup.cli?' ('+esc(preset._dup.cli)+')':'')+'. È una bozza nuova, con la data di oggi: controlla voci e importi, poi salva.</div>':'')
       +   ((preset&&preset._rif)?'<div class="sh-nota fatt-nc-rif"><b>Storna la fattura n. '+esc(String(preset._rif.numero))+'/'+esc(String(preset._rif.anno))+' del '+esc(fdate(preset._rif.data))+'</b>'+(preset._rif.cli?' ('+esc(preset._rif.cli)+')':'')+'. Ho copiato le voci: togli quelle che non vanno stornate o cambia gli importi.</div>':'')
       +   '<div class="field"><label>Cliente</label><select id="fa-cli">'+((_cliFuori&&!f.cliente_id)?'':'<option value="">— nessuno —</option>')+cliOpts+'</select>'
       +     ((fattCliCache.length||_cliFuori)?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Clienti</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
