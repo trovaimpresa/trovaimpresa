@@ -4672,3 +4672,16 @@ Il resto
 - Cestino ↔ tutte: ✔ (collaudo 19 nov).
 - Chat con AI ↔ tutte: ✔ legge e apre; non scrive.
 - Ricerca in alto: ✔ clienti, lavori, fornitori, fatture da pagare, scadenze, richieste; — computi e acconti.
+
+# 25 NOVEMBRE 2026 (sera) — IMPRESE E ARTIGIANI, TAPPA 1: DUE VOCI UNITE (sì di Alex, foto approvata)
+- `js/gest-studio-unite.js` (`?v=25nov-unite`) vale anche per `impresa` e `artigiano`: «Preventivi e richieste» (linguette Preventivi / Richieste dal sito, telefono «Dal sito») e «Computo e acconti» (linguette Computi / Acconti a lavoro fatto, telefono «Acconti»). Parole per ruolo in `nomi(c)`. Non si cancella niente: #sal e #dalsito restano, i pulsanti con `.st-dentro`.
+- ⛔ Difetto trovato (c'era dal 24 nov): `stUnisci` girava anche per impresa/artigiano (chiamato da `adattaMenuImpresa`) e rimetteva nel menu «Computo metrico» al posto di «Computo da prezzare». Ora il nome da solo viene da `_cm("nome")`.
+- MANUALE della chat (`chat-gestionale.mjs`): menu con le due voci unite; anche la chiave di `STUDIO_MANUALE` aggiornata (stesso testo, se no `STUDIO_PEZZI_PERSI`). `tools/banco-chat-studio.mjs`: 38 verdi.
+- NON unite: Giornate + Agenda, Fornitori + Carte (sono soldi diversi: prima farle parlare), Magazzino (non c'è: gli acquisti stanno in Fornitori).
+
+# 25 NOVEMBRE 2026 (sera) — IMPRESE E ARTIGIANI, TAPPA 2: IL GIRO INTERO DI UN CANTIERE, DAL VIVO
+Conto di Alex = artigiano (l'impresa ha lo stesso codice, cambiano solo «Lavori» e poche parole), reparto «ferramenta», «PROVA CONTROLLORE», poi tutto cancellato (conteggi uguali a prima: lavori 5, clienti 2, preventivi 4, fatture 3, computi 5, SAL 1, ore 1, rapportini 1, fornitori 2, mezzi 2, operatori 1, dalsito 3; richiesta 53 tolta).
+Giro: richiesta in `preventivi` (impresa 36) → «Apri» → «Crea il preventivo» (cliente nuovo, 6 mq × 120 + 1.500,50 a corpo = 2.220,50) → «Accettato → crea lavoro» (2.220,50, Via Roma 10) → computo collegato 2.220,50 + acconto n. 1 720 → Marco 25 €/h, 8 ore, giornata → spesa 45,30 → furgone usato + uscita → fornitore + fattura 610 con 2 righe di acquisti → «Crea fattura» dal lavoro in BOZZA (voci del preventivo + bollo = 2.222,50).
+Numeri uguali ✔: margine del lavoro 1.365,20 = Report «Guadagno»; Giornate «speso finora il 39%»; ore 8 h = Report; 610 da pagare in Fornitori = Scadenze (15/12); Da fatturare 860,50 uguale in Fatture e Assistente (il bagno in bozza esce dal conto); pallino delle richieste 1. App dell'operaio (conto = david): il lavoro c'è con indirizzo intero e «Portami lì».
+Da sapere (non difetti): «Margine totale» del Report = incassato − spese (−855,30 senza incassi), diverso dalla somma dei guadagni dei lavori: voluto. Nel forfettario preventivo e lavoro dicono «IVA esclusa» (frase in molti posti, non toccata). Un'uscita del mezzo scritta senza `chi_nome` dice «Fuori con —» (gestionale e app lo scrivono sempre).
+⬜ Non fatto dal vivo: la faccia «impresa» (il conto è artigiano), l'operaio vero dal suo telefono.

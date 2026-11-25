@@ -11,7 +11,7 @@
    Il pallino delle richieste da fare (#cnt-dalsito) passa sulla voce
    Preventivi: è lo stesso elemento, spostato, quindi il numero resta
    identico a quello dell'Assistente.
-   Solo per lo studio (ruoloUtente==='professionista').
+   Dal 25 nov anche impresa e artigiano (vedi nomi()).
    ============================================================ */
 (function(){
   var COPPIE=[
@@ -20,6 +20,15 @@
     {a:"preventivi",b:"dalsito",tutto:"Preventivi e richieste",
      la:"Preventivi",lb:"Richieste dal sito",lbC:"Dal sito",nomeA:"Preventivi",cnt:"#cnt-dalsito"}
   ];
+  /* 25 nov 2026 (sera, sì di Alex con foto) — anche impresa e artigiano:
+     «Computo e acconti» (Computi / Acconti a lavoro fatto, telefono «Acconti»)
+     e «Preventivi e richieste». Le parole del computo cambiano col ruolo. */
+  function nomi(c){
+    var pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
+    if(pro||c.a!=="computi")return c;
+    return {a:c.a,b:c.b,tutto:"Computo e acconti",la:"Computi",lb:"Acconti a lavoro fatto",lbC:"Acconti",
+      nomeA:(typeof _cm==="function"?_cm("nome"):"Computo da prezzare"),cnt:c.cnt};
+  }
   function nascosto(t){
     try{
       var b=document.querySelector('nav.tabs button[data-tab="'+t+'"]');
@@ -31,7 +40,7 @@
   }
   function stUnita(c){
     try{
-      if(typeof ruoloUtente==="undefined"||ruoloUtente!=="professionista")return false;
+      if(typeof ruoloUtente==="undefined"||["professionista","impresa","artigiano"].indexOf(ruoloUtente)<0)return false;
       return !nascosto(c.a)&&!(typeof tabNascosto==="function"&&tabNascosto(c.b));
     }catch(e){return false;}
   }
@@ -48,13 +57,17 @@
     return null;
   }
   function stUnisci(){
-    COPPIE.forEach(function(c){
+    COPPIE.forEach(function(c0){
+      var c=nomi(c0);
       var uni=stUnita(c);
       var bA=document.querySelector('nav.tabs button[data-tab="'+c.a+'"]'),
           bB=document.querySelector('nav.tabs button[data-tab="'+c.b+'"]');
       if(bB)bB.classList.toggle("st-dentro",uni);
       if(uni&&bA&&bB&&bB.classList.contains("active"))bA.classList.add("active");
-      if(bA){var s=bA.querySelector("span");var t=uni?c.tutto:c.nomeA;if(s&&s.textContent!==t)s.textContent=t;}
+      /* 25 nov 2026 — impresa e artigiano: il nome da solo della voce è quello di _cm()
+         («Computo da prezzare»). Prima qui si rimetteva «Computo metrico» anche a loro. */
+      var nomeA=c.nomeA;
+      if(bA){var s=bA.querySelector("span");var t=uni?c.tutto:nomeA;if(s&&s.textContent!==t)s.textContent=t;}
       /* il pallino della voce nascosta va sulla voce che si vede */
       if(c.cnt){
         var n=document.querySelector(c.cnt);
