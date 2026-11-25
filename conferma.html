@@ -242,6 +242,15 @@ function mostra(quale){
        il tuo profilo» a uno che nel profilo non poteva ancora entrare.
        Solo per l'iscrizione ('email'), mai per il recupero password. */
     if (type === 'email' || PROMEMORIA) mandaBenvenuto();
+    /* 25 nov 2026 — Alessio: anche chi si e' appena iscritto deve sentirsi chiedere
+       «vuoi entrare col volto?». Prima la domanda, poi «Profilo attivato». */
+    if (type === 'email' || PROMEMORIA) {
+      try {
+        document.getElementById('pk-titolo').textContent = 'Profilo attivato! Entri col volto?';
+        await offriPasskey(true);
+      } catch (e2) {}
+      mostra('fatto');
+    }
   } catch (e) {
     // link scaduto, già usato, o indirizzo storpiato dal programma di posta
     // 13 nov: dal promemoria niente «non vale piu'»: la casella per farselo mandare
@@ -254,11 +263,12 @@ function mostra(quale){
 /* 17 ott 2026 — dopo un accesso col link o col codice (non dopo quello col volto,
    dove c'e' gia') si propone di attivare volto/impronta. Si chiede una volta ogni 30
    giorni se dice «Non ora», mai piu' se l'ha attivata su questo dispositivo. */
-async function offriPasskey(){
-  if (!IN_ACCESSO || new URLSearchParams(location.search).get('pk') === '1') return;
+async function offriPasskey(dopoIscrizione){
+  if ((!IN_ACCESSO && !dopoIscrizione) || new URLSearchParams(location.search).get('pk') === '1') return;
   try {
     if (localStorage.getItem('pk_ok') === '1') return;
-    if (Date.now() - (Number(localStorage.getItem('pk_no')) || 0) < 30 * 86400000) return;
+    /* 25 nov 2026: «Non ora» vale 7 giorni (prima 30) */
+    if (Date.now() - (Number(localStorage.getItem('pk_no')) || 0) < 7 * 86400000) return;
   } catch (e) {}
   try {
     if (typeof sb.auth.registerPasskey !== 'function' || !window.PublicKeyCredential ||

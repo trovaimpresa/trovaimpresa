@@ -79,7 +79,10 @@
     .piano-card ul li::before { content: "✓ "; color: #0066ff; font-weight: 700; }
     .piano-card.selected-premium ul li::before { color: #7b1fa2; }
     .password-wrapper { position: relative; }
-    .password-wrapper input { padding-right: 44px; }
+    body .password-wrapper input { padding-right: 52px !important; }
+    /* 25 nov 2026: Edge aggiunge il suo occhio accanto al nostro (doppio) */
+    .password-wrapper input::-ms-reveal, .password-wrapper input::-ms-clear { display: none; }
+    body .password-wrapper .toggle-pw { color: #64748b; right: 14px; }
     .toggle-pw {
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer; color: #aaa;
