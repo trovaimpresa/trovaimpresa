@@ -4549,7 +4549,7 @@ Difetti trovati e sistemati (`?v=24nov-giro`):
 ⬜ Da decidere con Alex: il contributo cassa (4%) entra nell'«Incassato» del Report e di Tasse (imponibile della fattura) ma non nel guadagno della pratica (importo = compenso): sommando le pratiche non torna il totale per la cassa. Il codice cassa (TC03…) non si mette da solo alla prima fattura: lo chiede all'emissione (voluto, 12 ago).
 
 # 24 NOVEMBRE 2026 — STUDIO: LE COPPIE «—» DELLA MAPPA CHE ERANO DIFETTI (`?v=24nov-lega`)
-- Report → «Migliori clienti»: il nome apre la scheda del cliente (`edit-cli`; non se è nel Cestino).
+- Report → «Migliori clienti»: il nome apre la scheda del cliente (`apri-cli`, la scheda con «Fai qualcosa per lui»; non se è nel Cestino). Collaudato dopo il push del 25 nov: Report, Galleria «Apri la pratica», ricerca «Scadenze», «+ Nuovo computo» nella scheda ✔.
 - Galleria → «Apri la pratica ›» / «Apri il lavoro ›» in testa a ogni gruppo (`edit-job`).
 - Giornate → «Le pratiche del mese»: il nome apre la pratica.
 - «+ Nuovo computo» dalla scheda del cliente (studio) e «+ Nuovo computo per questa pratica» dentro la pratica: azione `new-computo-pre` (data-cli / data-lav; dalla pratica prende cliente, «Dove» e titolo, e chiede prima di lasciare la pratica).
