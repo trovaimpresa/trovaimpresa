@@ -4605,3 +4605,4 @@ Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.ym
 - Nel Report, al professionista, la scritta dice «(senza IVA e senza cassa)».
 - L'Excel (gest-cestino) resta con l'imponibile vero della fattura: è un documento, non un incasso.
 - Prova: parcella 2.000 + cassa 5% → prima 2.100, ora 2.000; con TC22 4% resta 2.080.
+- 25 nov (sera, sì di Alex con foto): in fattura, scegliendo la cassa la % si mette da sola (`_CASSA_PERC` in gest-fatture.js: TC01 4, TC02 4, TC03 5, TC04 4, TC06 4, TC17 5, TC21 2, TC22 4) con la nota verde `#fa-cassa-nota`; le altre casse non toccano il numero; «nessuna cassa» svuota la %. Si cambia sempre a mano. Banco locale zero difetti.

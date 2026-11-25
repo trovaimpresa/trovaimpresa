@@ -1429,6 +1429,25 @@
     });
     fattEnteMostra();
     if($("#fa-cli"))$("#fa-cli").addEventListener("change",function(){fattEnteMostra();fattTotaleLive();});
+    /* 25 nov 2026 (si' di Alex, foto approvata) — LA PERCENTUALE DELLA CASSA
+       SI METTE DA SOLA. Scegli la cassa e il contributo integrativo standard
+       entra nella casella; si puo' sempre cambiare a mano. Solo le casse di
+       cui siamo sicuri; per le altre il numero non si tocca. */
+    if($("#fa-cassa-tipo")&&$("#fa-cassa")){
+      const _CASSA_PERC={TC01:4,TC02:4,TC03:5,TC04:4,TC06:4,TC17:5,TC21:2,TC22:4};
+      $("#fa-cassa-tipo").addEventListener("change",function(){
+        const t=this.value, pc=_CASSA_PERC[t], inp=$("#fa-cassa");
+        let n=$("#fa-cassa-nota");
+        if(pc==null){ if(n)n.remove(); if(!t){ inp.value=""; fattTotaleLive(); } return; }   /* «nessuna cassa» = niente percentuale */
+        inp.value=_numTesto(pc);
+        if(!n){ n=document.createElement("div"); n.id="fa-cassa-nota";
+          n.style.cssText="font-size:15px;color:#0b6b3a;background:#e8f6ee;border-radius:8px;padding:8px 12px;margin:0 0 12px";
+          const r=inp.closest(".row2"); if(r)r.after(n); }
+        const nome=((FATT_CASSE_TIPI.find(x=>x[0]===t)||[])[1]||t).replace(/^TC\d+\s*—\s*/,"");
+        n.textContent="✓ "+nome+": "+pc+"% messo da solo. Se il tuo è diverso, cambialo.";
+        fattTotaleLive();
+      });
+    }
     ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese","#fa-spese-iva","#fa-scis"].forEach(id=>{
       const e=$(id);if(!e)return;
       e.addEventListener("input",fattTotaleLive);
