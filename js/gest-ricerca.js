@@ -52,7 +52,11 @@
     persone:["nome","mansione","telefono","email"],
     /* 24 nov 2026 (giro dello studio) — anche scadenze e richieste dal sito */
     scadenze:["titolo","tipo","tipo_pratica","note"],
-    richieste:["nome","descrizione","citta","categoria","prestazione","comune"]
+    richieste:["nome","descrizione","citta","categoria","prestazione","comune"],
+    /* 25 nov 2026 (sì di Alex) — computi e acconti/SAL. Il SAL non ha testo
+       suo: si cerca col numero, e col titolo/luogo/cliente del SUO computo */
+    computi:["titolo","numero","oggetto","luogo","note"],
+    sal:["note"]
   };
   const CT_ST_PREV={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
   const CT_ST_FATT={bozza:"Bozza",emessa:"Emessa",pagata:"Pagata",insoluta:"Insoluta",annullata:"Annullata"};
@@ -82,7 +86,7 @@
        «Crediti formativi» c'e' nel menu */
     const _tbCr=document.querySelector("#tab-crediti");
     const _conCr=!!(_tbCr&&_tbCr.style.display!=="none");
-    const [rc,rl,rp,rf,ro,rff,rcr,rop,rsc,rds]=await Promise.all([
+    const [rc,rl,rp,rf,ro,rff,rcr,rop,rsc,rds,rco,rsa]=await Promise.all([
       /* 24 nov 2026 — i clienti senza reparto (quelli di prima dei reparti) stanno
          nell'elenco Clienti di ogni reparto: la ricerca in alto non li trovava */
       sb.from("gest_clienti").select("*").eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null").limit(CT_TETTO),
@@ -92,7 +96,11 @@
       /* 20 nov 2026 — le persone del reparto (niente costi: si legge solo quello che si mostra) */
       sb.from("gest_operatori").select("id,nome,mansione,telefono,email").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO),
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO),
-      (typeof dsCarica==="function")?Promise.resolve(dsCarica()).then(d=>({data:d||[]}),()=>({data:[]})):Promise.resolve({data:[]})
+      (typeof dsCarica==="function")?Promise.resolve(dsCarica()).then(d=>({data:d||[]}),()=>({data:[]})):Promise.resolve({data:[]}),
+      /* 25 nov 2026 — i computi del reparto e i SAL (tenuti solo se il loro
+         computo è di questo reparto, come fa l'elenco degli acconti) */
+      leggi("gest_computi"),
+      sb.from("gest_sal").select("id,computo_id,numero,data,stato,note").eq("user_id",sbUid).limit(CT_TETTO)
     ]);
     /* ⚠️ UNA TABELLA CHE NON SI APRE NON DEVE SPEGNERE TUTTA LA RICERCA.
        Un collaboratore puo' avere il permesso sui lavori e non sulle fatture:
@@ -109,8 +117,13 @@
       crediti:(rcr&&!rcr.error&&rcr.data)||[],
       persone:(rop&&!rop.error&&rop.data)||[],
       scadenze:(rsc&&!rsc.error&&rsc.data)||[],
-      richieste:(rds&&rds.data)||[]
+      richieste:(rds&&rds.data)||[],
+      computi:(rco&&!rco.error&&rco.data)||[]
     };
+    {
+      const idComp={}; ctDati.computi.forEach(c=>{idComp[String(c.id)]=1;});
+      ctDati.sal=((rsa&&!rsa.error&&rsa.data)||[]).filter(x=>idComp[String(x.computo_id)]);
+    }
     /* «ds-apri» pesca dalla lista delle richieste: se non sei mai entrato lì è vuota */
     try{if(typeof dsCache!=="undefined"&&!dsCache.length&&ctDati.richieste.length)dsCache=ctDati.richieste;}catch(e){}
     ctTroncato=[rc,rl,rp,rf].some(r=>(r.data||[]).length>=CT_TETTO);
@@ -162,6 +175,8 @@
        pratiche assegnati a lei (gest_lavori.operatore_id), come per il cliente */
     const nomeOp={};
     (ctDati.persone||[]).forEach(o=>{nomeOp[String(o.id)]=o.nome||"";});
+    const compDi={};
+    (ctDati.computi||[]).forEach(c=>{compDi[String(c.id)]=c;});
     const suaPers=l=>(l.operatore_id!=null&&nomeOp[String(l.operatore_id)])?(" "+ctPiatto(nomeOp[String(l.operatore_id)])):"";
     return {
       clienti:ctDati.clienti.filter(c=>dentro(ctTesto(c,CT_CAMPI.clienti))),
@@ -178,6 +193,15 @@
       persone:(ctDati.persone||[]).filter(o=>dentro(ctTesto(o,CT_CAMPI.persone))),
       scadenze:(ctDati.scadenze||[]).filter(x=>dentro(ctTesto(x,CT_CAMPI.scadenze)+suo(x))),
       richieste:(ctDati.richieste||[]).filter(x=>dentro(ctTesto(x,CT_CAMPI.richieste))),
+      computi:(ctDati.computi||[]).filter(c=>dentro(ctTesto(c,CT_CAMPI.computi)+suo(c))),
+      /* il SAL esce col suo numero («acconto 2», «sal 2») e con tutto quello
+         del suo computo: «bagno» tira fuori anche gli acconti del bagno */
+      sal:(ctDati.sal||[]).filter(x=>{
+        const c=compDi[String(x.computo_id)]||{};
+        return dentro(" sal acconto stato avanzamento n."+(x.numero||"")+" "+(x.numero||"")+" "
+          +ctTesto(x,CT_CAMPI.sal)+ctTesto(c,CT_CAMPI.computi)+suo(c));
+      }),
+      compDi:compDi,
       nomeCli:nomeCli, nomeOp:nomeOp
     };
   }
@@ -195,7 +219,9 @@
      schermo, che e' vuota se in quella sezione non ci sei mai entrato. */
   function ctRiga(tipo,id,titolo,sotto){
     /* 19 nov 2026: «forn» apre la scheda del fornitore (forn-scheda la rilegge dal database) */
-    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda",cred:"edit-cred",pers:"sq-edit",scad:"edit-scad",ds:"ds-apri"};
+    /* 25 nov 2026 — «sal» porta nella sezione e apre quel SAL (fatt-vai-sal,
+       lo stesso dell'avviso nella fattura). Il computo lo apre ctApriComp. */
+    const AZ={cli:"apri-cli",lav:"edit-job",forn:"forn-scheda",cred:"edit-cred",pers:"sq-edit",scad:"edit-scad",ds:"ds-apri",sal:"fatt-vai-sal"};
     return '<button type="button" class="ct-riga" data-ct="'+esc(tipo)+'" data-id="'+esc(String(id))+'"'
       +(AZ[tipo]?' data-action="'+AZ[tipo]+'"':'')+'>'
       +'<span class="ct-t">'+esc(titolo)+'</span>'
@@ -254,6 +280,16 @@
     h+=ctBlocco("Richieste dal sito", r.richieste.map(x=>
         ctRiga("ds",x.id,x.nome||"Richiesta",
           ctMeta(typeof _dsCosa==="function"?_dsCosa(x):"",x.citta||"",x._stato==="nuova"?"da aprire":""))));
+    /* 25 nov 2026 — computi e acconti/SAL */
+    const _cmT=(typeof _cm==="function")?_cm("tanti"):"computi";
+    h+=ctBlocco(_cmT.charAt(0).toUpperCase()+_cmT.slice(1), r.computi.map(c=>
+        ctRiga("comp",c.id,(c.numero?("N. "+c.numero+" — "):"")+(c.titolo||"Computo"),
+          ctMeta(nome(c.cliente_id),c.luogo||"",c.data?fdate(c.data):""))));
+    h+=ctBlocco(pro?"Stati di avanzamento (SAL)":"Acconti (SAL)", r.sal.map(x=>{
+        const c=r.compDi[String(x.computo_id)]||{};
+        return ctRiga("sal",x.id,(pro?"SAL n. ":"Acconto n. ")+(x.numero||"—"),
+          ctMeta(c.titolo||"",nome(c.cliente_id),x.data?fdate(x.data):"",x.stato==="emesso"?"emesso":"bozza"));
+      }));
     h+=ctBlocco("Corsi (crediti formativi)", r.crediti.map(c=>
         ctRiga("cred",c.id,c.titolo||"Corso",
           ctMeta(c.ente||"",c.data?fdate(c.data):"",String(+c.crediti||0).replace(".",",")+" CFP",c.attestato_path?"📎 attestato":""))));
@@ -377,6 +413,7 @@
       const tipo=r.dataset.ct, id=r.dataset.id;
       if(tipo==="prev"){ ctApriPrev(id); return; }
       if(tipo==="fatt"){ ctApriFatt(id); return; }
+      if(tipo==="comp"){ ctApriComp(id); return; }
       /* cliente e lavoro: li apre il data-action che la riga porta con se',
          qui si chiude soltanto la tendina */
       ctChiudi();
