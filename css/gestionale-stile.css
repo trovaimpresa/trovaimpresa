@@ -359,3 +359,7 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #appview .mp-giro-b{display:flex;gap:10px;flex-wrap:wrap}
 #appview .mp-giro-b a{min-height:48px;font-size:17px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0 18px}
 #appview .mp-giro-nota{margin:10px 0 0;font-size:15px;color:var(--testo-2,#475569)}
+/* 25 nov 2026 — km dall'ufficio nelle schede (Agenda, Pratiche) e invito ad aprire la Mappa */
+#appview .km-uff{color:#0047b3;font-weight:700}
+#appview .ag-km-avv{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;font-size:16px;color:var(--testo-2,#475569)}
+#appview .ag-km-avv .btn{min-height:44px}

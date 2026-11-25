@@ -431,6 +431,18 @@
   }
   function mpSalvaCache(){try{localStorage.setItem(MP_CACHE_KEY,JSON.stringify(mpCache));}catch(e){}}
   function mpChiave(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim();}
+  /* 25 nov 2026 (Tappa 3 n. 4) — i km dall'ufficio di una pratica/lavoro, per
+     l'Agenda e le Pratiche: quelli salvati nella riga (dove_km) o, se mancano,
+     quelli che la Mappa ha già calcolato su questo telefono. null = non si sa. */
+  window.mpKmDi=function(l){
+    try{
+      if(!l||!String(l.dove||"").trim())return null;
+      if(l.dove_km!=null&&l.dove_km!=="")return +l.dove_km;
+      const C=mpLeggiCache(), k=C.km&&C.km[mpChiave(String(l.dove).trim())];
+      return (k!=null)?+k:null;
+    }catch(e){return null;}
+  };
+  window.mpKmTesto=function(km){return km==null?"":mpFormattaKm(km);};
   const mpAspetta=ms=>new Promise(r=>setTimeout(r,ms));
 
   /* carica Leaflet solo la prima volta che apri la Mappa */

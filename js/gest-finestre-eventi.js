@@ -139,6 +139,7 @@
     if(a==="new-computo")return computoForm(null);
     /* 25 nov 2026 — dal giorno del Calendario al giro sulla Mappa */
     if(a==="mp-giro"){closeSheet();if(typeof mpApriGiro==="function")mpApriGiro(t.dataset.d);return;}
+    if(a==="ag-km-mappa"){const mb=document.querySelector('nav.tabs button[data-tab="mappa"]');if(mb)mb.click();return;}
     /* 24 nov 2026 (giro dello studio) — computo nuovo già legato a cliente e/o pratica
        (dalla scheda del cliente e dalla pratica) */
     if(a==="new-computo-pre"){

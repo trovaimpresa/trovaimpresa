@@ -438,7 +438,7 @@
       <div class="job-meta">
         ${cliNome?`<span>👤 ${esc(cliNome)}</span>`:""}
         ${opNome?`<span>👷 ${esc(opNome)}</span>`:""}
-        ${dove?`<span>📍 ${esc(dove)}</span>`:""}
+        ${dove?`<span>📍 ${esc(dove)}${(()=>{try{const k=typeof mpKmDi==="function"?mpKmDi(l):null;return k!=null?` · <b class="km-uff" title="Distanza dall'ufficio, in linea d'aria">${esc(mpKmTesto(k))}</b>`:"";}catch(e){return "";}})()}</span>`:""}
         <span>📅 ${fdate(l.data_prevista)}</span>
         ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}

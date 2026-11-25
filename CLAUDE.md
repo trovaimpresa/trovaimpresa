@@ -4584,3 +4584,10 @@ Provato sul sito vero iniettando la funzione: pratica di prova con diritti 52,50
 
 # 25 NOVEMBRE 2026 — EMAIL «Run failed: Banco del gestionale»
 Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.yml) trovava 2 difetti: il nome del cliente nel Report («Migliori clienti», `.rep-cli`) alto 27 px sul telefono (375 e 360), sotto i 44. Ora `min-height:44px;display:inline-flex` (anche il nome della pratica in Giornate, `?v=25nov-44`). Banco rifatto in locale (playwright + /usr/bin/google-chrome al posto del chromium che non si scarica): ZERO difetti.
+
+# 25 NOVEMBRE 2026 — TAPPA 3 n. 4: I KM DALL'UFFICIO NELL'AGENDA (sì di Alex, foto approvata)
+- `window.mpKmDi(l)` / `mpKmTesto(km)` in js/gest-galleria-mappa.js: km della riga (`dove_km`, li salva la Mappa) o, se mancano, quelli della cache della Mappa su questo telefono (`ti_mappa_cache_v3`, `km[mpChiave(dove)]`). Solo se c'è «Dove». null = non si scrive niente.
+- `jobCardSupa` (js/gest-riepilogo-schede.js): «📍 indirizzo · 2,1 km» in blu (`.km-uff`), quindi in Agenda E nelle schede delle Pratiche, tutte le facce.
+- Agenda (`renderAgenda` in js/gest-elimina-reparto.js): se una pratica con indirizzo non ha km, riga `#ag-km-avv` «Per vedere quanti km ci sono dall'ufficio [Apri la Mappa]» (`ag-km-mappa`).
+- ⚠️ Impresa: la select dell'Agenda non legge `dove_km` (resta la cache della Mappa) — non toccata per non rompere se manca la colonna.
+- Banco locale (playwright + google-chrome) ZERO difetti. `?v=25nov-km`, stile `?v=41`.
