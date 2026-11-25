@@ -4671,7 +4671,7 @@ Soldi
 Il resto
 - Cestino ↔ tutte: ✔ (collaudo 19 nov).
 - Chat con AI ↔ tutte: ✔ legge e apre; non scrive.
-- Ricerca in alto: ✔ clienti, lavori, fornitori, fatture da pagare, scadenze, richieste; — computi e acconti.
+- Ricerca in alto: ✔ clienti, lavori, fornitori, fatture da pagare, scadenze, richieste, computi e acconti (25 nov).
 
 # 25 NOVEMBRE 2026 (sera) — IMPRESE E ARTIGIANI, TAPPA 1: DUE VOCI UNITE (sì di Alex, foto approvata)
 - `js/gest-studio-unite.js` (`?v=25nov-unite`) vale anche per `impresa` e `artigiano`: «Preventivi e richieste» (linguette Preventivi / Richieste dal sito, telefono «Dal sito») e «Computo e acconti» (linguette Computi / Acconti a lavoro fatto, telefono «Acconti»). Parole per ruolo in `nomi(c)`. Non si cancella niente: #sal e #dalsito restano, i pulsanti con `.st-dentro`.
@@ -4693,3 +4693,9 @@ Da sapere (non difetti): «Margine totale» del Report = incassato − spese (�
 4. **Fattura del fornitore pagata con la carta**: colonna `gest_carte_movimenti.fattura_forn_id` (`sql/2026-11-25-carta-paga-fattura.sql`, migrazione `carta_paga_fattura_25nov2026` GIÀ ESEGUITA, riga in PROVE). «✔ Pagata» chiede «Come l'hai pagata?» (`ffComeHaiPagato`, solo se il reparto ha carte); con la carta `ffCartaPaga` scrive il movimento (saldo giù), «↩ Riapri» lo toglie, modificando la fattura `ffCartaAllinea` lo allinea. ⛔ Report, Riepilogo, Tasse (fisco-vivere) e margine NON contano i movimenti con `fattura_forn_id` (la fattura c'è già): si conta una volta sola. ⚠️ Una fattura messa nel Cestino lascia il movimento (saldo giusto, spesa non contata finché la fattura è nel Cestino).
 Provato dal vivo (reparto ferramenta, codice iniettato prima del push): lavoro 2.000 − carta 45 − fattura 300 pagata con la carta = 1.655 (non 1.355); saldo carta 500 → 200 → 155, riaperta → 455; 375 px niente fuori, niente sotto 13 px. Banco app: ZERO difetti. Pulito: 0 righe di prova.
 ✔ App dell'operaio: «+ Spesa con la carta» ha la tendina «Per quale lavoro?» (facoltativa, i suoi lavori non fatti, già scelto quello aperto): scrive `lavoro_id` (`opCartaLavori` in js/op-spese-foto.js). Provato dal vivo come david: 12,50 € col lavoro giusto.
+
+# 25 NOVEMBRE 2026 (notte) — RICERCA IN ALTO: COMPUTI E ACCONTI/SAL (online 85261b4)
+- `js/gest-ricerca.js` (`?v=25nov-ric`): gruppi nuovi «Computi da prezzare» / «Computi metrici» (`_cm("tanti")`) e «Acconti (SAL)» / «Stati di avanzamento (SAL)». Computo: titolo, numero, oggetto, luogo, note + cliente. SAL: numero («acconto 2», «sal 2») + tutto il suo computo; solo i SAL dei computi del reparto (come l'elenco).
+- Clic: computo → `ctApriComp` (c'era già); SAL → `data-action="fatt-vai-sal"` (porta nella sezione e apre quel SAL, stesso dell'avviso della fattura).
+- Collaudato sul sito vero (progetto casa, giardiniere; 1440 e 375, studio): «ristrutturazione appartamento» → 3 computi + 1 acconto, «acconto 10» → solo l'acconto, i due clic aprono ✔. Banco app ZERO difetti.
+- ⛔ La riga «Ricerca in alto: — computi e acconti» della mappa delle imprese è chiusa.
