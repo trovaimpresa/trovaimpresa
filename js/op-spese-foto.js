@@ -205,7 +205,20 @@ async function caricaCartaMia(){
     <span style="font-weight:700">${eur(m.importo)}</span></div>`).join("");
 }
 $("#btn-carta-spesa").onclick=()=>{ if(!chiedoPermesso("pagamenti","di usare la carta aziendale"))return;
-  $("#carta-form").classList.remove("hidden");$("#btn-carta-spesa").style.display="none";};
+  $("#carta-form").classList.remove("hidden");$("#btn-carta-spesa").style.display="none";opCartaLavori();};
+/* 25 nov 2026 (sì di Alex) — «Per quale lavoro»: i lavori di adesso
+   dell'operaio (LAVORI, gli stessi della sua agenda). La spesa entra nel
+   guadagno di quel lavoro, come nel gestionale (gest_carte_movimenti.lavoro_id). */
+function opCartaLavori(){
+  const sel=$("#carta-lav");if(!sel)return;
+  const L=(typeof LAVORI!=="undefined"?LAVORI:[]).filter(l=>l.stato!=="fatto");
+  const v=sel.value;
+  sel.innerHTML='<option value="">'+(MIO.tipoStudio==='professionista'?'Per quale pratica? (facoltativo)':'Per quale lavoro? (facoltativo)')+'</option>'
+    +L.map(l=>'<option value="'+esc(String(l.id))+'">'+esc(l.descrizione||"Senza nome")+'</option>').join("");
+  if(v&&L.some(l=>String(l.id)===v))sel.value=v;
+  else if(curLavoro&&L.some(l=>String(l.id)===String(curLavoro.id||curLavoro)))sel.value=String(curLavoro.id||curLavoro);
+  sel.style.display=L.length?"":"none";
+}
 $("#btn-carta-annulla").onclick=()=>{
   $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
   $("#carta-imp").value="";$("#carta-causale").value="";
@@ -221,12 +234,13 @@ $("#btn-carta-salva").onclick=async()=>{
   const causale=$("#carta-causale").value.trim()||null;
   $("#btn-carta-salva").disabled=true;
   const {error}=await sb.from("gest_carte_movimenti").insert({
-    user_id:MIO.impresaId,carta_id:MIA_CARTA.carta_id,tipo:"spesa",importo,causale,inserito_da:MIO.nome
+    user_id:MIO.impresaId,carta_id:MIA_CARTA.carta_id,tipo:"spesa",importo,causale,inserito_da:MIO.nome,
+    lavoro_id:(($("#carta-lav")||{}).value)||null
   });
   $("#btn-carta-salva").disabled=false;
   if(error){toast("Errore: "+error.message);return;}
   toast("Spesa registrata ✔");
-  $("#carta-imp").value="";$("#carta-causale").value="";
+  $("#carta-imp").value="";$("#carta-causale").value="";{const _l=$("#carta-lav");if(_l)_l.value="";}
   $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
   caricaCartaMia();
 };
