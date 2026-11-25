@@ -1132,6 +1132,68 @@
     }catch(_){}
   }
 
+  /* ===== 25 novembre 2026 — LE SCADENZE DI LEGGE DELLA PRATICA (sì di Alex, foto approvata) =====
+     Regole NAZIONALI (DPR 380/2001, art. 15 e 23; L. 241/1990 art. 19):
+     - SCIA «Depositata»: il Comune può bloccarla entro 30 giorni; lavori da
+       iniziare entro 1 anno e finire entro 3 anni.
+     - SCIA alternativa al PdC «Depositata»: si inizia dopo 30 giorni; poi
+       1 anno per iniziare e 3 per finire, contati da quel giorno.
+     - Permesso di Costruire «Approvata»: inizio entro 1 anno dal rilascio,
+       fine entro 3 anni (dal rilascio: data prudente, si sposta se si inizia dopo).
+     La CILA no: la legge nazionale non le dà termini (alcune Regioni sì).
+     Base = «Data di deposito» (se manca, oggi); per il PdC il giorno in cui lo
+     segni «Approvata». Una scadenza già presente (stesso tipo) non si rifà. */
+  function _dataPiu(base,giorni,anni){
+    const d=new Date(base+"T12:00:00");
+    if(anni)d.setFullYear(d.getFullYear()+anni);
+    if(giorni)d.setDate(d.getDate()+giorni);
+    return d.toISOString().slice(0,10);
+  }
+  async function proponiScadenzeLegge(lavId,dati){
+    try{
+      if(!sb||!sbUid||!lavId||ruoloUtente!=='professionista'||!dati)return;
+      const tipo=String(dati.pratica_tipo||"").trim(), st=dati.pratica_stato;
+      const oggi=todayStr();
+      let base, R, intro;
+      if((tipo==="SCIA"||tipo==="SCIA alternativa al PdC")&&st==="depositata"){
+        base=dati.pratica_data_dep||oggi;
+        intro="Hai depositato la "+tipo+(base===oggi?" oggi":" il "+fdate(base))+".";
+        if(tipo==="SCIA") R=[
+          [_dataPiu(base,30,0),"Termine di legge: controllo del Comune sulla SCIA","il Comune può bloccarla fino a questo giorno (30 giorni)"],
+          [_dataPiu(base,0,1),"Termine di legge: inizio lavori della SCIA","i lavori vanno iniziati entro questo giorno (1 anno)"],
+          [_dataPiu(base,0,3),"Termine di legge: fine lavori della SCIA","i lavori vanno finiti entro questo giorno (3 anni)"]];
+        else{ const ef=_dataPiu(base,30,0); R=[
+          [ef,"Termine di legge: da qui si possono iniziare i lavori","da questo giorno puoi iniziare i lavori (30 giorni)"],
+          [_dataPiu(ef,0,1),"Termine di legge: inizio lavori della SCIA alternativa","i lavori vanno iniziati entro questo giorno (1 anno)"],
+          [_dataPiu(ef,0,3),"Termine di legge: fine lavori della SCIA alternativa","i lavori vanno finiti entro questo giorno (3 anni)"]]; }
+      }else if(tipo==="Permesso di Costruire"&&st==="approvata"){
+        base=oggi;
+        intro="Hai segnato approvato il Permesso di Costruire oggi.";
+        R=[[_dataPiu(base,0,1),"Termine di legge: inizio lavori del Permesso di Costruire","i lavori vanno iniziati entro questo giorno (1 anno)"],
+           [_dataPiu(base,0,3),"Termine di legge: fine lavori del Permesso di Costruire","i lavori vanno finiti entro questo giorno (3 anni dall'inizio: se inizi dopo, spostala)"]];
+      }else return;
+      const {data:gia,error}=await sb.from("gest_scadenze").select("tipo_pratica,stato").eq("user_id",sbUid).eq("lavoro_id",lavId);
+      if(error)return;
+      const ci=new Set((gia||[]).filter(x=>x.stato!=="fatta").map(x=>x.tipo_pratica));
+      R=R.filter(x=>!ci.has(x[1]));
+      if(!R.length)return;
+      if(!(await gconfirm(intro+"\n\nTi segno "+(R.length===1?"la scadenza":"le scadenze")+" di legge?\n\n"
+        +R.map(x=>"• "+fdate(x[0])+" — "+x[2]).join("\n")
+        +"\n\nTe le ricordo per email 30, 7 e 1 giorno prima. Sono le regole nazionali (DPR 380): se la Regione o il Comune ti hanno dato altre date, le cambi da «Scadenze e promemoria».")))return;
+      const desc=String(dati.descrizione||"").trim();
+      let fatte=0, err="";
+      for(const x of R){
+        const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:(((t=>t.charAt(0).toUpperCase()+t.slice(1))(x[1].replace("Termine di legge: ","")))+(desc?" — "+desc:"")).slice(0,120),
+          tipo_pratica:x[1],lavoro_id:lavId,cliente_id:dati.cliente_id||null,data_scadenza:x[0],stato:"aperta",avvisa:true};
+        let {error:e2}=await sb.from("gest_scadenze").insert(row);
+        if(e2&&(e2.message||"").indexOf("avvisa")>=0){ delete row.avvisa; ({error:e2}=await sb.from("gest_scadenze").insert(row)); }
+        if(e2)err=e2.message; else fatte++;
+      }
+      rinfresca("scadenzario","riepilogo","calendario");
+      toast(err?("Create "+fatte+" su "+R.length+": "+err):(fatte===1?"Scadenza di legge creata ✔":fatte+" scadenze di legge create ✔")+" Te le ricordo per email");
+    }catch(_){}
+  }
+
   /* ===== 9 agosto 2026 — Scadenze dentro la scheda della pratica =====
      Per un tecnico la pratica NON è una riga di lavoro: è un fascicolo con
      delle date che non si possono bucare. Qui, dentro la scheda, si vedono le
@@ -1359,6 +1421,7 @@
       toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));
       if(!editing.fattura)await proponiScadenzaPratica(realId,obj);
       if(obj.pratica_stato==="integrazioni")await proponiScadenzaIntegrazioni(realId,obj);
+      if(obj.pratica_stato==="depositata"||obj.pratica_stato==="approvata")await proponiScadenzeLegge(realId,obj);
       return;
     }
     if(editing && editing.realId){
@@ -1399,7 +1462,7 @@
       /* 7 nov 2026 — lo stato della pratica PRIMA di salvare: la scadenza
          delle integrazioni si propone solo quando ci si ARRIVA adesso */
       let _statoPraticaPrima=null;
-      if(mod.pratica_stato==="integrazioni"){
+      if(mod.pratica_stato==="integrazioni"||mod.pratica_stato==="depositata"||mod.pratica_stato==="approvata"){
         try{
           const {data:_s}=await sb.from("gest_lavori").select("pratica_stato")
             .eq("id",editing.realId).eq("user_id",sbUid).maybeSingle();
@@ -1460,6 +1523,9 @@
         : (avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔"));
       if(mod.pratica_stato==="integrazioni"&&_statoPraticaPrima!=="integrazioni"&&!avvisoPratica2)
         await proponiScadenzaIntegrazioni(_idPratica,mod);
+      /* 25 nov 2026 — scadenze di legge quando la pratica ARRIVA a Depositata/Approvata */
+      if((mod.pratica_stato==="depositata"||mod.pratica_stato==="approvata")&&_statoPraticaPrima!==mod.pratica_stato&&!avvisoPratica2)
+        await proponiScadenzeLegge(_idPratica,mod);
       /* NIENTE proposta di scadenza qui: si chiede solo alla CREAZIONE.
          Prima si ripresentava a OGNI modifica, e rispondendo No tornava
          identica al salvataggio dopo, all'infinito. (9/8/2026) */

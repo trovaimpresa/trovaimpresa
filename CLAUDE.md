@@ -4559,3 +4559,12 @@ Difetti trovati e sistemati (`?v=24nov-giro`):
 - Collaboratori: sulla scheda «🔧 Ha: …» (gest_mezzi.operatore_id). Allo studio «· N pratiche» invece di «cantieri».
 - Richieste dal sito: WhatsApp/Email della «Risposta pronta» segnano l'incarico come risposto: `stato='risposta_inviata'` + `risposta_at` (SENZA testo: nessuna email al cliente). Pannello professionisti: «✅ Risposto dal gestionale» e numerino senza quelle.
 ⬜ Provare dal vivo dopo il push (non iniettati nella pagina).
+
+# 25 NOVEMBRE 2026 — STUDIO, TAPPA 3 n. 1: LE SCADENZE DI LEGGE DELLA PRATICA (sì di Alex, foto approvata)
+`proponiScadenzeLegge(lavId,dati)` in js/gest-scadenze-pratiche.js (`?v=25nov-legge`), accanto a `proponiScadenzaIntegrazioni`. Si propone (gconfirm con le date) quando la pratica ARRIVA a «Depositata» (SCIA, SCIA alternativa al PdC) o «Approvata» (Permesso di Costruire), sia alla creazione sia alla modifica (`_statoPraticaPrima` letto anche per depositata/approvata).
+- SCIA: +30 gg «controllo del Comune», +1 anno inizio, +3 anni fine (dalla data di deposito, se manca oggi).
+- SCIA alternativa: +30 gg «da qui si possono iniziare i lavori», poi +1 anno e +3 anni da quel giorno.
+- PdC: dal giorno in cui la segni Approvata, +1 anno inizio, +3 anni fine (prudente: si sposta se si inizia dopo).
+- CILA esclusa: la legge nazionale non le dà termini. Fonte: DPR 380 art. 15 e 23; regole nazionali, la Regione o il Comune possono cambiarle (lo dice la domanda).
+- Ogni data = riga di gest_scadenze (`tipo_pratica` «Termine di legge: …», `avvisa:true`, lavoro e cliente): email 30/7/1, Scadenzario, Calendario, Cestino con la pratica. Già presente (stesso tipo, non fatta) → non si rifà.
+- Provato sul sito vero iniettando la funzione: SCIA depositata 20/11 → 20/12/2026, 20/11/2027, 20/11/2029, 3 righe, nello Scadenzario; seconda volta niente domanda. Pulito (pratica e scadenze cancellate).
