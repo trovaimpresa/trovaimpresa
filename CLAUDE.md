@@ -4606,3 +4606,69 @@ Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.ym
 - L'Excel (gest-cestino) resta con l'imponibile vero della fattura: è un documento, non un incasso.
 - Prova: parcella 2.000 + cassa 5% → prima 2.100, ora 2.000; con TC22 4% resta 2.080.
 - 25 nov (sera, sì di Alex con foto): in fattura, scegliendo la cassa la % si mette da sola (`_CASSA_PERC` in gest-fatture.js: TC01 4, TC02 4, TC03 5, TC04 4, TC06 4, TC17 5, TC21 2, TC22 4) con la nota verde `#fa-cassa-nota`; le altre casse non toccano il numero; «nessuna cassa» svuota la %. Si cambia sempre a mano. Banco locale zero difetti.
+
+# IMPRESE E ARTIGIANI — MAPPA DI CHI PARLA CON CHI
+Fatta il 25 nov 2026 (sera) leggendo tutti i js; le righe «provato» sono state rifatte dal vivo nel giro della Tappa 2. (✔ parlano · ✗ parlano male · — non parlano)
+Menu (impresa = artigiano, salvo le parole): Assistente · Chat con AI · Richieste dal sito · Lavori (artigiano «Lavori e interventi») · Preventivi · Fatture · Calendario · Squadra e agenda (unite 18 nov) · Mezzi e attrezzature (unite 18 nov) · Computo da prezzare · Acconti a lavoro fatto (SAL) · Prezzario · Scadenze e promemoria (unite 18 nov) · Giornate · Tasse e fisco · Carte · Clienti · Fornitori · Report · Galleria · Mappa · Cestino. L'artigiano NON ha solo «Crediti formativi» (come l'impresa): il menu è lo stesso (`TAB_NASCOSTI_ART=[]`, `TAB_APPALTI_ART=['crediti']`).
+
+Funzioni fatte per lo studio, per impresa e artigiano:
+- ✔ già anche qui: il giro sulla Mappa (`mpGiroDisegna`, «cantieri»), i km sulle schede dei lavori (`jobCardSupa`) e l'invito «Apri la Mappa» in Agenda, «Le tue attrezzature» nell'app dell'operaio (`op-strumenti.js`), Report → cliente, Galleria «Apri il lavoro ›», Giornate «I cantieri del mese», ricerca di scadenze e richieste, fornitore scaduto in «Parti da qui», taratura/revisione scaduta nel lavoro, «Ha: …» sulla scheda della persona, rimborso spese nel margine, nuovo fornitore che torna alla fattura.
+- — solo studio: spese della pratica in fattura (`fattSpesePratica`), scadenze di legge (SCIA/PdC: all'impresa non servono), cassa in fattura (l'impresa non ha cassa), «+ Nuovo computo» dalla scheda cliente, riquadro «Computo e stati di avanzamento» dentro la pratica (`renderLavComputi`, `pro?`), «Risposto dal gestionale» delle richieste.
+
+Lavori
+- Lavori ↔ Clienti: ✔ cliente nel lavoro, «+ Nuovo lavoro» dalla scheda, la scheda elenca i lavori.
+- Lavori ↔ Preventivi: ✔ «Accettato → crea lavoro», voci del preventivo visibili nel lavoro.
+- Lavori ↔ Fatture: ✔ «Crea fattura» dal lavoro con le voci del preventivo e gli acconti già fatturati a dedurre (19 nov).
+- Lavori ↔ Computo / Acconti: — dal lavoro non si vedono il computo e gli acconti collegati (allo studio sì, `renderLavComputi`). Il dato c'è (`gest_computi.lavoro_id`).
+- Lavori ↔ Giornate / ore / spese: ✔ margine del lavoro, «Giornate di questo lavoro».
+- Lavori ↔ Fornitori: ✔ fatture del fornitore nel lavoro, «+ Fattura di un fornitore per questo lavoro».
+- Lavori ↔ Mezzi e attrezzature: ✔ «Mezzi usati in questo lavoro», la scheda del mezzo dice in quanti lavori; ✔ revisione scaduta accanto al mezzo.
+- Lavori ↔ Carte: — una spesa pagata con la carta non dice per quale lavoro (`gest_carte_movimenti.lavoro_id` c'è, nessuno la scrive).
+- Lavori ↔ Galleria / Mappa / Calendario / Agenda: ✔.
+- Lavori ↔ Acquisti (materiali comprati): — le righe hanno `lavoro_id` ma il lavoro non dice «materiali comprati per questo lavoro».
+
+Preventivi e Richieste dal sito
+- Richieste dal sito ↔ Preventivi: ✔ «Crea il preventivo» col cliente e il lavoro; «Apri il preventivo».
+- Richieste dal sito ↔ Clienti: ✔ cliente nuovo in rubrica, niente doppioni.
+- Richieste dal sito ↔ Assistente: ✔ «N richieste da aprire» = pallino.
+- Preventivi ↔ Computo: ✔ «Fai il preventivo» dal computo prezzato.
+- Preventivi ↔ Prezzario: ✔ «€ Prendi dal prezzario».
+- Preventivi ↔ Fatture: ✔ fattura da preventivo.
+- Si può unire: Richieste dal sito dentro Preventivi (come allo studio) — da proporre.
+
+Computo e Acconti
+- Computo ↔ Acconti (SAL): ✔ l'acconto vive dentro il computo.
+- Acconti ↔ Fatture: ✔ «Fattura dell'acconto»; a fine lavoro gli acconti a dedurre.
+- Acconti ↔ Assistente: ✔ stessi conti (`salConti`).
+- Computo ↔ Lavori: ✗ il computo si collega al lavoro, ma dal lavoro non si vede (vedi sopra).
+- Si può unire: Acconti dentro Computo (come «Computo e SAL» dello studio) — da proporre.
+
+Squadra e agenda, Giornate, app dell'operaio
+- Squadra ↔ Agenda: unite (18 nov).
+- Giornate ↔ Agenda (ore): ✔ stesse righe di gest_ore.
+- Giornate ↔ Report: ✔ manodopera e spese uguali.
+- Squadra ↔ Mezzi: ✔ «Ce l'ha …» e «Ha: …».
+- Squadra ↔ Scadenze: ✔ documenti della persona (attestati, visite).
+- App dell'operaio ↔ Lavori / Mappa: ✔ indirizzo intero, «Portami lì», km.
+- App dell'operaio ↔ Giornate: ✔ «Manda al titolare» → «Da approvare».
+- App dell'operaio ↔ Mezzi: ✔ uscite e rientri, «Le tue attrezzature».
+- Si può unire: Giornate + Agenda NO (Giornate scrive, Agenda legge; numeri già uguali).
+
+Mezzi, Carte, Fornitori
+- Mezzi ↔ Carte: ✔ il pieno si paga con la carta, la spesa della carta nel Report.
+- Mezzi ↔ Scadenze / Calendario / email del mattino: ✔ assicurazione, revisione, tagliando.
+- Fornitori ↔ Scadenze / Calendario: ✔ fatture da pagare.
+- Fornitori ↔ Acquisti e bolle: ✔ dentro Fornitori («Acquisti del mese», bolle contro fatture).
+- Fornitori ↔ Report / Tasse: ✔ spese.
+- Carte ↔ Fornitori: — una fattura da pagare pagata con la carta non diventa movimento della carta (due posti diversi per gli stessi soldi).
+- Si può unire: Fornitori + Carte? da valutare; Magazzino non c'è (gli acquisti stanno dentro Fornitori).
+
+Soldi
+- Fatture ↔ Report ↔ Tasse ↔ Assistente: ✔ (Tasse conta solo le pagate di tutti i reparti: voluto).
+- Fatture ↔ Scadenze / Calendario: ✔ «Da incassare».
+- Report ↔ Lavori / Clienti: ✔ «Apri il lavoro», «Migliori clienti».
+
+Il resto
+- Cestino ↔ tutte: ✔ (collaudo 19 nov).
+- Chat con AI ↔ tutte: ✔ legge e apre; non scrive.
+- Ricerca in alto: ✔ clienti, lavori, fornitori, fatture da pagare, scadenze, richieste; — computi e acconti.

@@ -682,7 +682,9 @@
     /* lavori del reparto (Supabase) */
     /* "*" per i professionisti: le schede mostrano tipo pratica, stato e
        protocollo, e con l'elenco fisso quei campi non arrivavano mai (9/8/2026) */
-    const {data,error:_eAg}=await sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,importo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data,error:_eAg}=await sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,importo,dove_km").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    /* 25 nov 2026 (giro imprese) — anche `dove_km`: i km salvati dalla Mappa
+       si vedono in Agenda anche su un altro telefono (prima solo la cache locale). */
     /* 12 nov 2026 — regola 20: senza rete non si dice «Niente da fare qui» */
     if(_eAg){if(sel&&!sel.options.length)sel.innerHTML=`<option value="">Tutti</option>`;listaNonLetta(body,ruoloUtente==='professionista'?"le pratiche":"i lavori","agenda");return;}
     let L=data||[];
