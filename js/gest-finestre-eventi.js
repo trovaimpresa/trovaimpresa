@@ -137,6 +137,8 @@
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
+    /* 25 nov 2026 — dal giorno del Calendario al giro sulla Mappa */
+    if(a==="mp-giro"){closeSheet();if(typeof mpApriGiro==="function")mpApriGiro(t.dataset.d);return;}
     /* 24 nov 2026 (giro dello studio) — computo nuovo già legato a cliente e/o pratica
        (dalla scheda del cliente e dalla pratica) */
     if(a==="new-computo-pre"){

@@ -1030,6 +1030,7 @@
         <textarea id="day-note" placeholder="Scrivi qui cosa ti serve ricordare quel giorno">${esc(noteCache[ds]||"")}</textarea></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>
         <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
+        ${list&&typeof mpApriGiro==="function"&&!(typeof tabNascosto==="function"&&tabNascosto("mappa"))?`<button class="btn b-cancel" data-action="mp-giro" data-d="${ds}">🗺 Il giro di questo giorno</button>`:""}
         <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button>`);
   }
 

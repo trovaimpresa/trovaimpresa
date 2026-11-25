@@ -348,3 +348,14 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
   #cest-riass .cest-tipi::-webkit-scrollbar{display:none}
   #cest-riass .cest-tipi button{flex:0 0 auto;white-space:nowrap;min-height:44px}
 }
+/* 25 nov 2026 — Mappa: «Il giro di» (js/gest-galleria-mappa.js, mpGiroDisegna) */
+#appview .mp-giro{margin:0 0 16px;padding:16px;border:2px solid var(--blu,#0066ff);border-radius:12px;background:#f5f9ff}
+#appview .mp-giro-t{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+#appview .mp-giro-t b{font-size:20px}
+#appview .mp-giro-t input{font-size:17px;padding:6px 10px;border-radius:8px;border:1px solid #cfd6df;min-height:44px}
+#appview .mp-giro-n{font-size:17px;color:var(--testo-2,#475569)}
+#appview .mp-giro-l{margin:0 0 12px;padding-left:22px;font-size:17px;line-height:1.7}
+#appview .mp-giro-km{color:var(--testo-2,#475569)}
+#appview .mp-giro-b{display:flex;gap:10px;flex-wrap:wrap}
+#appview .mp-giro-b a{min-height:48px;font-size:17px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0 18px}
+#appview .mp-giro-nota{margin:10px 0 0;font-size:15px;color:var(--testo-2,#475569)}

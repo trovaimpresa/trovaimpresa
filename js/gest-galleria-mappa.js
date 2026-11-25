@@ -608,6 +608,68 @@
   }
 
 
+  /* ===== 25 novembre 2026 — IL GIRO DEI SOPRALLUOGHI (sì di Alex, foto approvata) =====
+     In cima alla Mappa: «🚗 Il giro di [giorno]». Le pratiche/i lavori con
+     quella data (fra quelli che la Mappa sta mostrando: vista e «Chi ci va»
+     valgono anche qui), messi in fila partendo dall'ufficio e andando ogni
+     volta al più vicino; km di ogni tratto (linea d'aria, mpDistanzaKm) e
+     ritorno in ufficio. «Apri il giro nel navigatore» = Google Maps con le
+     tappe; «Manda il giro su WhatsApp» = alla persona scelta in «Chi ci va»
+     (se ha il telefono), se no WhatsApp senza numero. Dal Calendario: «🗺 Il
+     giro di questo giorno» (azione mp-giro) apre la Mappa su quel giorno. */
+  let mpGiroDati=null, mpGiroData=null;
+  function _mpDomani(){const d=new Date(todayStr()+"T12:00:00");d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+  function mpGiroDisegna(){
+    const m=document.getElementById("mappa"); if(!m)return;
+    let box=document.getElementById("mp-giro");
+    const filtri=m.querySelector(".filtri");
+    if(!box){box=document.createElement("div");box.id="mp-giro";box.className="mp-giro";if(filtri)filtri.parentNode.insertBefore(box,filtri);else m.appendChild(box);}
+    if(!mpGiroData)mpGiroData=_mpDomani();
+    const D=mpGiroDati, pro=_mpPro();
+    const cosa=pro?["sopralluogo","sopralluoghi"]:["cantiere","cantieri"];
+    const tappe=(D&&D.righe||[]).filter(r=>r.p&&r.l&&r.l.data_prevista===mpGiroData);
+    const senzaPunto=(D&&D.righe||[]).filter(r=>!r.p&&r.l&&r.l.data_prevista===mpGiroData).length;
+    let testa='<div class="mp-giro-t"><b>🚗 Il giro di</b><input type="date" id="mp-giro-d" value="'+esc(mpGiroData)+'">';
+    if(!tappe.length){
+      box.innerHTML=testa+'<span class="mp-giro-n">Nessun '+cosa[0]+' con questa data'+(senzaPunto?' sulla carta ('+senzaPunto+' senza indirizzo)':'')+'</span></div>';
+      return;
+    }
+    /* in fila: dall'ufficio, ogni volta il più vicino */
+    const part=D.part||null;
+    let resto=tappe.slice(), ord=[], qui=part, tot=0;
+    if(!qui){ord=resto.sort((a,b)=>(a.km==null?1e9:a.km)-(b.km==null?1e9:b.km));}
+    else while(resto.length){
+      let iMin=0,dMin=1e9; resto.forEach((r,i)=>{const d=mpDistanzaKm(qui,r.p);if(d!=null&&d<dMin){dMin=d;iMin=i;}});
+      const r=resto.splice(iMin,1)[0]; r._tratto=dMin<1e9?dMin:null; if(r._tratto)tot+=r._tratto; ord.push(r); qui=r.p;
+    }
+    const ritorno=part&&ord.length?mpDistanzaKm(ord[ord.length-1].p,part):null; if(ritorno)tot+=ritorno;
+    const nomeT=r=>esc(r.l.descrizione||(pro?"Pratica":"Lavoro"));
+    const li=ord.map((r,i)=>'<li>'+(i===0&&part?'<b>Ufficio</b> → ':'→ ')+'<b>'+nomeT(r)+'</b> · '+esc(r.strada||r.ind||"")
+      +(r._tratto!=null?' · <span class="mp-giro-km">'+mpFormattaKm(r._tratto)+'</span>':'')+'</li>').join("")
+      +(ritorno!=null?'<li>→ <b>Ufficio</b> · <span class="mp-giro-km">'+mpFormattaKm(ritorno)+'</span></li>':'');
+    /* navigatore: dall'ufficio (o dalla prima tappa) all'ufficio, le tappe in mezzo */
+    const c=p=>p.lat+","+p.lon;
+    const orig=part?c(part):c(ord[0].p), dest=part?c(part):c(ord[ord.length-1].p);
+    const mezzo=(part?ord:ord.slice(1,-1)).slice(0,9).map(r=>c(r.p)).join("|");
+    const nav="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(orig)+"&destination="+encodeURIComponent(dest)+(mezzo?"&waypoints="+encodeURIComponent(mezzo):"")+"&travelmode=driving";
+    /* WhatsApp: alla persona di «Chi ci va», se ha il telefono */
+    let num="";
+    try{const o=(mpChi&&mpChi!=="_nessuno")?D.op[mpChi]:null;num=String((o&&o.telefono)||"").replace(/\D/g,"");if(num&&num.length<=10&&!/^39/.test(num))num="39"+num;}catch(e){}
+    const dd=new Date(mpGiroData+"T12:00:00");
+    const testo="Il giro di "+["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"][dd.getDay()]+" "+fdate(mpGiroData)+":\n"
+      +ord.map((r,i)=>(i+1)+". "+(r.l.descrizione||"")+" — "+(r.strada||r.ind||"")).join("\n")+"\n\nNavigatore: "+nav;
+    const wa="https://wa.me/"+num+"?text="+encodeURIComponent(testo);
+    box.innerHTML=testa+'<span class="mp-giro-n">'+ord.length+' '+(ord.length===1?cosa[0]:cosa[1])+(tot?' · '+mpFormattaKm(tot)+' in tutto':'')+'</span></div>'
+      +'<ol class="mp-giro-l">'+li+'</ol>'
+      +'<div class="mp-giro-b"><a class="btn-primary" href="'+esc(nav)+'" target="_blank" rel="noopener">Apri il giro nel navigatore</a>'
+      +'<a class="btn" href="'+esc(wa)+'" target="_blank" rel="noopener">Manda il giro su WhatsApp</a></div>'
+      +'<p class="mp-giro-nota">In ordine dal più vicino. I km sono in linea d\'aria: il navigatore ti dà quelli di strada.'+(ord.length>9?' Il navigatore prende le prime 9 tappe.':'')+(senzaPunto?' '+senzaPunto+' senza indirizzo, non nel giro.':'')+'</p>';
+  }
+  document.addEventListener("change",function(e){
+    if(e.target&&e.target.id==="mp-giro-d"){mpGiroData=e.target.value||_mpDomani();try{mpGiroDisegna();}catch(_){}}
+  });
+  window.mpApriGiro=function(d){mpGiroData=d||_mpDomani();const b=document.querySelector('nav.tabs button[data-tab="mappa"]');if(b)b.click();try{mpGiroDisegna();}catch(_){}};
+
   async function renderMappa(forza){
     const box=$("#mp-lista"), avviso=$("#mp-avviso");
     if(!box)return;
@@ -844,6 +906,9 @@
       const C2=mpLeggiCache();if(!C2.km)C2.km={};
       righe.forEach(r=>{if(r.km!=null)C2.km[mpChiave(r.ind)]=r.km;});
       mpSalvaCache();
+      /* 25 nov 2026 — «Il giro di» un giorno (Tappa 3 n. 3) */
+      mpGiroDati={part:pPart, righe:righe.slice(), op:mpOp};
+      try{mpGiroDisegna();}catch(e){}
 
       /* 6) la lista sotto la carta */
       const senzaHtml=mpSenzaHtml(senzaInd);
