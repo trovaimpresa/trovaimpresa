@@ -4592,3 +4592,8 @@ Le email di GitHub dopo i push = il Banco (.github/workflows/banco-gestionale.ym
 - ⚠️ Impresa: la select dell'Agenda non legge `dove_km` (resta la cache della Mappa) — non toccata per non rompere se manca la colonna.
 - Banco locale (playwright + google-chrome) ZERO difetti. `?v=25nov-km`, stile `?v=41`.
 - Collaudo dopo il push (giardiniere): prima l'invito, «Apri la Mappa» → 3 pratiche su 4 con «0,6 km» in Agenda e Pratiche. «Via Torino 7, Rieti» non trovata: l'invito restava per sempre → ora la Mappa segna gli indirizzi già cercati (`C2.provati`) e `mpKmDaCercare(l)` invita solo per quelli mai cercati (`?v=25nov-km2`).
+
+# 25 NOVEMBRE 2026 — TAPPA 3 n. 5: «I TUOI STRUMENTI» NELL'APP DEL COLLABORATORE (sì di Alex, foto approvata)
+- Funzione del database `gest_strumenti_miei(_impresa)` (`sql/2026-11-25-strumenti-miei.sql`, migrazione `strumenti_miei_25nov2026` GIÀ ESEGUITA): chi sono io (gest_membri attivo → operatore_id), poi gest_mezzi con `operatore_id = io` (nome, categoria) e la prossima scadenza non fatta (gest_scadenze.mezzo_id). Niente costi/note. Solo `authenticated`.
+- `js/op-strumenti.js` (NUOVO, in gestionale-operatore.html dopo op-mezzi.js, stile `.op-stru*` nel primo <style>): riquadro `#op-stru` in cima a «Lavori di adesso». Titolo: studio «I tuoi strumenti», impresa «Le tue attrezzature» (o «Mezzi e attrezzature che hai tu»). Stato: rosso scaduta/oggi, arancione entro 30 gg, verde in regola, grigio senza scadenza. Ordinate per scadenza. Nessuno strumento → niente riquadro.
+- Provato sul sito vero (app aperta col conto di Alex che fa da «david»): 2 attrezzature di prova date a david con taratura 10/11 e 15/12 → «scaduta il 10/11» rosso, «fra 20 giorni» arancione. Cancellate (mezzi e scadenze di prova = 0).
