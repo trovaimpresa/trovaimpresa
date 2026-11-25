@@ -4619,13 +4619,13 @@ Lavori
 - Lavori ↔ Clienti: ✔ cliente nel lavoro, «+ Nuovo lavoro» dalla scheda, la scheda elenca i lavori.
 - Lavori ↔ Preventivi: ✔ «Accettato → crea lavoro», voci del preventivo visibili nel lavoro.
 - Lavori ↔ Fatture: ✔ «Crea fattura» dal lavoro con le voci del preventivo e gli acconti già fatturati a dedurre (19 nov).
-- Lavori ↔ Computo / Acconti: — dal lavoro non si vedono il computo e gli acconti collegati (allo studio sì, `renderLavComputi`). Il dato c'è (`gest_computi.lavoro_id`).
+- Lavori ↔ Computo / Acconti: ✔ dal 25 nov riquadro «Computo e acconti» nel lavoro (come allo studio).
 - Lavori ↔ Giornate / ore / spese: ✔ margine del lavoro, «Giornate di questo lavoro».
 - Lavori ↔ Fornitori: ✔ fatture del fornitore nel lavoro, «+ Fattura di un fornitore per questo lavoro».
 - Lavori ↔ Mezzi e attrezzature: ✔ «Mezzi usati in questo lavoro», la scheda del mezzo dice in quanti lavori; ✔ revisione scaduta accanto al mezzo.
-- Lavori ↔ Carte: — una spesa pagata con la carta non dice per quale lavoro (`gest_carte_movimenti.lavoro_id` c'è, nessuno la scrive).
+- Lavori ↔ Carte: ✔ dal 25 nov «Per quale lavoro» nella spesa della carta; entra nel guadagno del lavoro.
 - Lavori ↔ Galleria / Mappa / Calendario / Agenda: ✔.
-- Lavori ↔ Acquisti (materiali comprati): — le righe hanno `lavoro_id` ma il lavoro non dice «materiali comprati per questo lavoro».
+- Lavori ↔ Acquisti (materiali comprati): ✔ dal 25 nov «Materiali comprati per questo lavoro» nel lavoro (solo lettura).
 
 Preventivi e Richieste dal sito
 - Richieste dal sito ↔ Preventivi: ✔ «Crea il preventivo» col cliente e il lavoro; «Apri il preventivo».
@@ -4660,7 +4660,7 @@ Mezzi, Carte, Fornitori
 - Fornitori ↔ Scadenze / Calendario: ✔ fatture da pagare.
 - Fornitori ↔ Acquisti e bolle: ✔ dentro Fornitori («Acquisti del mese», bolle contro fatture).
 - Fornitori ↔ Report / Tasse: ✔ spese.
-- Carte ↔ Fornitori: — una fattura da pagare pagata con la carta non diventa movimento della carta (due posti diversi per gli stessi soldi).
+- Carte ↔ Fornitori: ✔ dal 25 nov «✔ Pagata» chiede «Come l'hai pagata?»: con la carta nasce il movimento (conta una volta sola).
 - Si può unire: Fornitori + Carte? da valutare; Magazzino non c'è (gli acquisti stanno dentro Fornitori).
 
 Soldi
@@ -4685,3 +4685,11 @@ Giro: richiesta in `preventivi` (impresa 36) → «Apri» → «Crea il preventi
 Numeri uguali ✔: margine del lavoro 1.365,20 = Report «Guadagno»; Giornate «speso finora il 39%»; ore 8 h = Report; 610 da pagare in Fornitori = Scadenze (15/12); Da fatturare 860,50 uguale in Fatture e Assistente (il bagno in bozza esce dal conto); pallino delle richieste 1. App dell'operaio (conto = david): il lavoro c'è con indirizzo intero e «Portami lì».
 Da sapere (non difetti): «Margine totale» del Report = incassato − spese (−855,30 senza incassi), diverso dalla somma dei guadagni dei lavori: voluto. Nel forfettario preventivo e lavoro dicono «IVA esclusa» (frase in molti posti, non toccata). Un'uscita del mezzo scritta senza `chi_nome` dice «Fuori con —» (gestionale e app lo scrivono sempre).
 ⬜ Non fatto dal vivo: la faccia «impresa» (il conto è artigiano), l'operaio vero dal suo telefono.
+
+# 25 NOVEMBRE 2026 (notte) — IMPRESE E ARTIGIANI, TAPPA 3: I 4 COLLEGAMENTI («facciamoli tutti», design deciso da Claude)
+1. **Computo e acconti nel lavoro**: `bloccoScadenzePratica` e `renderLavComputi` (js/gest-scadenze-pratiche.js) valgono per tutti; parole per ruolo nell'oggetto `P` (Acconto n., fatto finora, sconto, + Nuovo acconto). Le domande «Apro il computo al posto di…» dicono «questo lavoro».
+2. **Materiali comprati per questo lavoro**: in `lavFattForn` (js/gest-fornitori.js), da `gest_acquisti.lavoro_id`, solo se ci sono fatture del lavoro e non allo studio. Solo lettura: i soldi sono già nelle fatture.
+3. **Carta → lavoro**: «Per quale lavoro» nel movimento della carta (`mvLavoriRiempi`, nascosto sulle ricariche), scrive `gest_carte_movimenti.lavoro_id`. `cartePerLavoro()` / `cartePerLavoroTot()` in js/gest-ore-spese.js: le spese con la carta entrano nel guadagno del lavoro (scheda del lavoro con 💳 che apre la carta, Report, Assistente, Giornate). Nei TOTALI non cambia niente: erano già contate come «spese con le carte».
+4. **Fattura del fornitore pagata con la carta**: colonna `gest_carte_movimenti.fattura_forn_id` (`sql/2026-11-25-carta-paga-fattura.sql`, migrazione `carta_paga_fattura_25nov2026` GIÀ ESEGUITA, riga in PROVE). «✔ Pagata» chiede «Come l'hai pagata?» (`ffComeHaiPagato`, solo se il reparto ha carte); con la carta `ffCartaPaga` scrive il movimento (saldo giù), «↩ Riapri» lo toglie, modificando la fattura `ffCartaAllinea` lo allinea. ⛔ Report, Riepilogo, Tasse (fisco-vivere) e margine NON contano i movimenti con `fattura_forn_id` (la fattura c'è già): si conta una volta sola. ⚠️ Una fattura messa nel Cestino lascia il movimento (saldo giusto, spesa non contata finché la fattura è nel Cestino).
+Provato dal vivo (reparto ferramenta, codice iniettato prima del push): lavoro 2.000 − carta 45 − fattura 300 pagata con la carta = 1.655 (non 1.355); saldo carta 500 → 200 → 155, riaperta → 455; 375 px niente fuori, niente sotto 13 px. Banco app: ZERO difetti. Pulito: 0 righe di prova.
+⬜ L'app dell'operaio («+ Spesa con la carta») non chiede ancora il lavoro.

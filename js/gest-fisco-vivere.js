@@ -40,7 +40,7 @@
     const Y = String(ftAnno());
     const nel = x => String(x || "").slice(0, 4) === Y;
     const lav = (d.spese || []).filter(x => nel(x.data)).reduce((s, x) => s + (+x.importo || 0), 0);
-    const carte = (d.carte || []).filter(m => m.tipo === "spesa" && nel(m.data || String(m.created_at || "").slice(0, 10))).reduce((s, m) => s + (+m.importo || 0), 0);
+    const carte = (d.carte || []).filter(m => m.tipo === "spesa" && !m.fattura_forn_id && nel(m.data || String(m.created_at || "").slice(0, 10))).reduce((s, m) => s + (+m.importo || 0), 0);
     const rif = (d.rif || []).filter(r => !r.movimento_id && nel(r.data)).reduce((s, r) => s + (+r.importo || 0), 0);
     const forn = (d.fornF || []).filter(f => nel(f.data)).reduce((s, f) => s + (+f.importo || 0), 0);
     return { lav, carte, rif, forn, tot: lav + carte + rif + forn };
@@ -55,7 +55,7 @@
       sb.from("gest_fatture").select("id,numero,anno,data,scadenza,stato,data_pagata,cli_nome,bollo,cassa_tipo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       sb.from("gest_spese").select("importo,data").eq("user_id", sbUid).gte("data", da),
-      sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at").eq("user_id", sbUid).gte("created_at", da),
+      sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,fattura_forn_id").eq("user_id", sbUid).gte("created_at", da),
       sb.from("gest_rifornimenti").select("importo,data,movimento_id").eq("user_id", sbUid).gte("data", da),
       sb.from("gest_fatture_fornitori").select("importo,data,scadenza,stato,numero").eq("user_id", sbUid).gte("data", (Y - 1) + "-01-01"),
       ftNolFatture(Y)   /* 29/09/2026 — anche le fatture del Noleggio */

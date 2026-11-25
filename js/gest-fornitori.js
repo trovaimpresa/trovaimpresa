@@ -455,6 +455,28 @@
     const nomi={};((rfo&&rfo.data)||[]).forEach(x=>{nomi[String(x.id)]=x.nome;});
     const oggi=todayStr(), tot=ff.reduce((a,x)=>a+(+x.importo||0),0);
     const nuova='<button type="button" class="btn btn-sm" data-action="lav-ff-nuova" data-id="'+esc(String(lavoroId))+'">+ Fattura di un fornitore per '+(pro?'questa pratica':'questo lavoro')+'</button>';
+    /* 25 nov 2026 (sì di Alex, «facciamoli tutti») — i MATERIALI comprati per
+       questo lavoro: le righe «Cosa hai comprato» delle fatture qui sopra
+       (gest_acquisti.lavoro_id). Si leggono e basta: i soldi sono gia' nelle
+       fatture, quindi nel margine non entrano una seconda volta.
+       Allo studio niente: la merce non la segna. */
+    let mat="";
+    if(!pro&&ff.length){
+      try{
+        const ra=await sb.from("gest_acquisti").select("id,descrizione,quantita,unita,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId);
+        if(String(speseLavoroId||"")!==String(lavoroId))return;
+        const A=(!ra.error&&ra.data)||[];
+        if(A.length){
+          A.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||""))||String(b.created_at||"").localeCompare(String(a.created_at||"")));
+          const tA=A.reduce((a,x)=>a+(+x.importo||0),0);
+          const q=x=>{const n=+x.quantita;if(!n)return "";return String(Math.round(n*1000)/1000).replace(".",",")+(x.unita?" "+x.unita:"");};
+          mat='<div class="lav-ff-tit lav-mat-tit">Materiali comprati per questo lavoro — '+eur2(tA)+'</div>'
+            +A.map(x=>'<div class="ff-r lav-mat"><div class="ff-info"><b>'+esc(x.descrizione||"Materiale")+'</b>'+(q(x)?' · '+esc(q(x)):'')+'</div>'
+              +'<span class="ff-q">'+esc(x.data?fdate(x.data):"")+'</span><span class="ff-imp">'+eur2(+x.importo||0)+'</span></div>').join("")
+            +'<p class="lav-ff-vuoto">Sono le righe delle fatture qui sopra: nel guadagno contano una volta sola.</p>';
+        }
+      }catch(_){}
+    }
     if(!ff.length){box.innerHTML='<div class="lav-ff-tit">Fatture dei fornitori</div><p class="lav-ff-vuoto">Nessuna fattura di fornitore collegata.</p>'+nuova;return;}
     box.innerHTML='<div class="lav-ff-tit">Fatture dei fornitori di '+(pro?'questa pratica':'questo lavoro')+' — '+eur2(tot)+'</div>'
       +ff.map(x=>{
@@ -466,7 +488,85 @@
           +'<div class="ff-acts"><button type="button" class="btn btn-sm" data-action="lav-ff-apri" data-id="'+esc(String(x.id))+'" data-lav="'+esc(String(lavoroId))+'">Apri</button></div>'
           +'</div>';
       }).join("")
-      +nuova;
+      +nuova+mat;
+  }
+  /* ============================================================
+     25 nov 2026 (sì di Alex) — LA FATTURA PAGATA CON LA CARTA AZIENDALE.
+     Segnando «Pagata» si sceglie come: bonifico/contanti oppure una carta.
+     Con la carta nasce un movimento di spesa sulla carta (il saldo scende)
+     che porta fattura_forn_id: Report, Riepilogo e Tasse NON lo contano
+     fra le spese, perche' la fattura c'e' gia'. Riaprendo la fattura il
+     movimento si toglie; cambiando l'importo della fattura si aggiorna.
+     ============================================================ */
+  async function ffCarteReparto(){
+    try{
+      const {data}=await sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+      return (data||[]);
+    }catch(e){return [];}
+  }
+  /* "" = bonifico/contanti · id = quella carta · null = annullato */
+  async function ffComeHaiPagato(){
+    if(!sb||!sbUid)return "";
+    const C=await ffCarteReparto();
+    if(!C.length)return "";
+    return await new Promise(function(fine){
+      const ov=document.createElement("div");ov.id="ffc-ov";
+      ov.innerHTML='<div id="ffc-box" role="dialog" aria-modal="true" aria-labelledby="ffc-t">'
+        +'<h3 id="ffc-t">Come l\'hai pagata?</h3>'
+        +'<p>Se l\'hai pagata con una carta aziendale, la spesa esce anche dal saldo della carta.</p>'
+        +'<div id="ffc-az">'
+        +C.map(c=>'<button type="button" class="ffc-carta" data-c="'+esc(String(c.id))+'">💳 '+esc(c.nome||"Carta")+(c.stato==="bloccata"?" (bloccata)":"")+'</button>').join("")
+        +'<button type="button" class="ffc-altro" data-c="">Bonifico, contanti o altro</button>'
+        +'<button type="button" class="ffc-no">Annulla</button>'
+        +'</div></div>';
+      function chiudi(v){document.removeEventListener("keydown",tasto,true);ov.remove();fine(v);}
+      function tasto(e){if(e.key==="Escape"){e.preventDefault();chiudi(null);}}
+      ov.addEventListener("click",function(e){
+        const b=e.target.closest("button");
+        if(b){if(b.classList.contains("ffc-no"))return chiudi(null);return chiudi(b.dataset.c||"");}
+        if(e.target===ov)chiudi(null);
+      });
+      document.addEventListener("keydown",tasto,true);
+      document.body.appendChild(ov);
+      const p=ov.querySelector(".ffc-carta");if(p)p.focus();
+    });
+  }
+  /* scrive/aggiorna/toglie il movimento della carta legato alla fattura.
+     cartaId "" = nessuna carta (si toglie quello che c'era). Torna una frase. */
+  async function ffCartaPaga(fattId,cartaId){
+    try{
+      const r=await sb.from("gest_fatture_fornitori").select("id,numero,importo,lavoro_id,fornitore_id,data_pagata").eq("id",fattId).eq("user_id",sbUid).maybeSingle();
+      const f=r&&r.data; if(!f)return "";
+      const ex=await sb.from("gest_carte_movimenti").select("id,carta_id").eq("user_id",sbUid).eq("fattura_forn_id",fattId);
+      const vecchi=(ex&&ex.data)||[];
+      if(!cartaId){
+        if(!vecchi.length)return "";
+        const d=await sb.from("gest_carte_movimenti").delete().eq("user_id",sbUid).eq("fattura_forn_id",fattId).select("id");
+        if(d.error||!(d.data||[]).length)return "attenzione: la spesa sulla carta non si è tolta, toglila dalla carta";
+        return "tolta anche la spesa dalla carta";
+      }
+      let nomeF=((fornCache||[]).find(x=>String(x.id)===String(f.fornitore_id))||{}).nome;
+      if(!nomeF&&f.fornitore_id){try{const rn=await (sb.raw||sb.from.bind(sb))("gest_fornitori").select("nome").eq("id",f.fornitore_id).maybeSingle();nomeF=rn&&rn.data&&rn.data.nome;}catch(_){}}
+      const riga={carta_id:cartaId,tipo:"spesa",importo:+f.importo||0,lavoro_id:f.lavoro_id||null,
+        causale:"Fattura"+(f.numero?" n. "+f.numero:"")+(nomeF?" — "+nomeF:""),data:f.data_pagata||todayStr()};
+      if(vecchi.length){
+        const u=await sb.from("gest_carte_movimenti").update(riga).eq("user_id",sbUid).eq("fattura_forn_id",fattId).select("id");
+        if(u.error||!(u.data||[]).length)return "attenzione: la spesa sulla carta non si è aggiornata";
+        return "spesa aggiornata sulla carta";
+      }
+      const i=await sb.from("gest_carte_movimenti").insert(Object.assign({user_id:sbUid,inserito_da:"Capo",fattura_forn_id:fattId},riga)).select("id");
+      if(i.error||!(i.data||[]).length)return "attenzione: la spesa sulla carta NON è stata scritta, scrivila dalla carta";
+      return "spesa tolta anche dal saldo della carta";
+    }catch(e){return "attenzione: la spesa sulla carta non si è scritta";}
+  }
+  /* la fattura gia' pagata con la carta e poi modificata (importo, lavoro):
+     il movimento si allinea. Se non c'e' movimento non si fa niente. */
+  async function ffCartaAllinea(fattId){
+    try{
+      const ex=await sb.from("gest_carte_movimenti").select("carta_id").eq("user_id",sbUid).eq("fattura_forn_id",fattId).limit(1);
+      const m=(ex&&ex.data||[])[0]; if(!m)return "";
+      return await ffCartaPaga(fattId,m.carta_id);
+    }catch(e){return "";}
   }
   async function lavFfApri(fattId,lavoroId){
     let row={lavoro_id:lavoroId};

@@ -148,7 +148,7 @@
       if(d.lav&&!d.cli){const s=document.querySelector("#j-cli,#j-cliente");if(s&&s.value)c.cliente_id=s.value;}
       if(d.lav){const dv=document.querySelector("#j-dove");if(dv&&dv.value.trim())c.luogo=dv.value.trim();
         const ds=document.querySelector("#j-desc");if(ds&&ds.value.trim())c.titolo=ds.value.trim();}
-      if(d.lav&&typeof gconfirm==="function"&&!(await gconfirm("Apro il computo nuovo al posto di questa pratica.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      if(d.lav&&typeof gconfirm==="function"&&!(await gconfirm("Apro il computo nuovo al posto di "+(ruoloUtente==='professionista'?"questa pratica":"questo lavoro")+".\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       return computoForm(c);
     }
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
@@ -887,6 +887,15 @@
     if(a==="save-carta")return saveCarta(id||null);
     if(a==="del-carta")return delCarta(id);
     if(a==="carta-dettaglio")return apriDettaglioCarta(id);
+    /* 25 nov 2026 — dal lavoro alla carta che ha pagato la spesa */
+    if(a==="sp-carta-apri"){
+      let _camb=true;try{_camb=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
+      if(_camb&&!(await gconfirm("Apro la carta al posto di "+(ruoloUtente==='professionista'?"questa pratica":"questo lavoro")+".\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      if(!(carteCache||[]).some(c=>String(c.id)===String(id))){
+        try{const {data}=await (sb.raw||sb.from.bind(sb))("gest_carte").select("*").eq("user_id",sbUid);if(data)carteCache=data;}catch(_){}
+      }
+      return apriDettaglioCarta(id);
+    }
     if(a==="save-movimento")return salvaMovimentoCarta();
     if(a==="del-movimento")return eliminaMovimentoCarta(id);
     if(a==="mezzo-rifornimenti")return apriRifornimenti(id);
@@ -941,7 +950,7 @@
     if(a==="lav-comp-apri"||a==="lav-sal-apri"||a==="lav-sal-nuovo"){
       let _cambiato=true;
       try{_cambiato=(_lavFoto==null)||(_lavValori()!==_lavFoto);}catch(_){}
-      if(_cambiato&&!(await gconfirm("Apro il computo al posto di questa pratica.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
+      if(_cambiato&&!(await gconfirm("Apro il computo al posto di "+(ruoloUtente==='professionista'?"questa pratica":"questo lavoro")+".\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       const compId=(a==="lav-comp-apri")?id:t.dataset.comp;
       return salDaPratica(compId,(a==="lav-comp-apri")?undefined:(a==="lav-sal-apri"?id:null),t.dataset.lav);
     }
@@ -1163,13 +1172,20 @@
     if(a==="fattf-stato"){
       if(!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
+      /* 25 nov 2026 (sì di Alex) — pagata con la carta aziendale? Se si',
+         la spesa esce anche dal saldo della carta (ffCartaPaga in gest-fornitori.js) */
+      let _carta="";
+      if(v==="pagata"&&typeof ffComeHaiPagato==="function"){_carta=await ffComeHaiPagato();if(_carta===null)return;}
       const patch={stato:v,data_pagata:v==="pagata"?todayStr():null};
       const {data:okFs,error}=await sb.from("gest_fatture_fornitori").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okFs||!okFs.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      renderFornitori();rinfresca("riepilogo");
+      let _msgCarta="";
+      if(typeof ffCartaPaga==="function")_msgCarta=await ffCartaPaga(id,v==="pagata"?_carta:"");
+      renderFornitori();rinfresca("riepilogo","report");
       if(t.dataset.forn)fornScheda(t.dataset.forn);   /* dalla scheda: si riapre aggiornata */
-      toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
+      if(t.dataset.lav&&typeof lavFattForn==="function")lavFattForn(t.dataset.lav);
+      toast((v==="pagata"?"Segnata pagata ✔":"Riaperta")+(_msgCarta?" — "+_msgCarta:""));return;
     }
     if(a==="quick-cli"){
       /* stesso motivo di scad-da-pratica: la finestra è una sola e questa

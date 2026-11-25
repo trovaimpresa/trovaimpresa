@@ -1213,25 +1213,34 @@
       /* 20 nov 2026 (sì di Alex, foto prima) — SOLO STUDIO: computo e stati
          di avanzamento di questa pratica (la direzione lavori). Prima il
          computo si collegava alla pratica ma dalla pratica non si vedeva. */
-      +(pro?'<div class="sh-b"><div class="field campo-titolo"><label>\uD83D\uDCD0 Computo e stati di avanzamento</label>'
-        +'<div class="lav-media" id="lav-comp">Sto controllando…</div></div></div>':'');
+      /* 25 nov 2026 (sì di Alex, «facciamoli tutti») — anche impresa e
+         artigiano: «Computo e acconti» di questo lavoro */
+      +'<div class="sh-b"><div class="field campo-titolo"><label>\uD83D\uDCD0 '+(pro?'Computo e stati di avanzamento':'Computo e acconti')+'</label>'
+        +'<div class="lav-media" id="lav-comp">Sto controllando…</div></div></div>';
   }
   /* il riquadro qui sopra: computi collegati a questa pratica e i loro SAL.
      I conti passano da compRiepilogo / salConti, come nel resto: nessuna copia. */
   async function renderLavComputi(){
     const box=$("#lav-comp");if(!box)return;
     const lav=editing&&editing.realId;
-    if(!lav){box.innerHTML='<div class="lm-vuoto">Salva prima la pratica: poi qui vedi il suo computo e i SAL.</div>';return;}
+    const pro=ruoloUtente==='professionista';
+    const P=pro?{q:'questa pratica',sal:'SAL',salN:'SAL n. ',fatto:'eseguito finora ',rib:'ribasso ',senza:'senza ribasso',nuovoSal:'+ Nuovo stato di avanzamento',
+        prima:'Salva prima la pratica: poi qui vedi il suo computo e i SAL.',scegli:'Nel computo, alla pagina «La scheda», scegli questa pratica: il computo e i suoi SAL compaiono qui.',
+        err:'Non riesco a leggere computo e SAL: controlla la connessione e riapri la pratica.'}
+      :{q:'questo lavoro',sal:'acconti',salN:'Acconto n. ',fatto:'fatto finora ',rib:'sconto ',senza:'senza sconto',nuovoSal:'+ Nuovo acconto',
+        prima:'Salva prima il lavoro: poi qui vedi il suo computo e gli acconti.',scegli:'Nel computo, alla pagina «La scheda», scegli questo lavoro: il computo e i suoi acconti compaiono qui.',
+        err:'Non riesco a leggere computo e acconti: controlla la connessione e riapri il lavoro.'};
+    if(!lav){box.innerHTML='<div class="lm-vuoto">'+P.prima+'</div>';return;}
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
     try{
       const rc=await sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("lavoro_id",lav).order("data",{ascending:false});
       if(rc.error)throw rc.error;
       const C=rc.data||[];
       if(!C.length){
-        box.innerHTML='<div class="lm-conta">Nessun computo collegato a questa pratica</div>'
-          +'<div class="lm-vuoto">Nel computo, alla pagina «La scheda», scegli questa pratica: il computo e i suoi SAL compaiono qui.</div>'
+        box.innerHTML='<div class="lm-conta">Nessun computo collegato a '+P.q+'</div>'
+          +'<div class="lm-vuoto">'+P.scegli+'</div>'
           /* 24 nov 2026 (giro dello studio) — il computo si fa anche da qui */
-          +'<button type="button" class="btn btn-sm" data-action="new-computo-pre" data-lav="'+esc(String(lav))+'">+ Nuovo computo per questa pratica</button>';
+          +'<button type="button" class="btn btn-sm" data-action="new-computo-pre" data-lav="'+esc(String(lav))+'">+ Nuovo computo per '+P.q+'</button>';
         return;
       }
       const ids=C.map(c=>c.id);
@@ -1254,25 +1263,25 @@
           }
         }catch(_){imp=null;}
         h+='<div class="lsc-r"><div class="lsc-info"><b>Computo — '+esc(c.titolo||"senza titolo")+'</b>'
-          +'<small>'+(c.ribasso_perc?('ribasso '+String(c.ribasso_perc).replace(".",",")+'%'):'senza ribasso')+'</small></div>'
+          +'<small>'+(c.ribasso_perc?(P.rib+String(c.ribasso_perc).replace(".",",")+'%'):P.senza)+'</small></div>'
           +'<span class="lsc-q">'+(imp!=null?eur2(imp):'')+'</span>'
           +'<button type="button" class="btn lsc-apri" data-action="lav-comp-apri" data-id="'+esc(String(c.id))+'" data-lav="'+esc(String(lav))+'">Apri</button></div>';
         (rs.data||[]).filter(x=>String(x.computo_id)===String(c.id)).forEach(function(s){
           const k=salConti(tot[String(s.id)],c);
-          h+='<div class="lsc-r"><div class="lsc-info"><b>SAL n. '+esc(String(s.numero||""))+' · '+((s.stato||"bozza")==="emesso"?'emesso':'bozza')+'</b>'
-            +'<small>'+esc(fdate(s.data))+' · eseguito finora '+eur2(k.maturato)+'</small></div>'
+          h+='<div class="lsc-r"><div class="lsc-info"><b>'+P.salN+esc(String(s.numero||""))+' · '+((s.stato||"bozza")==="emesso"?'emesso':'bozza')+'</b>'
+            +'<small>'+esc(fdate(s.data))+' · '+P.fatto+eur2(k.maturato)+'</small></div>'
             +'<span class="lsc-q">'+eur2(k.netto)+'</span>'
             +'<button type="button" class="btn lsc-apri" data-action="lav-sal-apri" data-id="'+esc(String(s.id))+'" data-comp="'+esc(String(c.id))+'" data-lav="'+esc(String(lav))+'">Apri</button></div>';
         });
       });
-      h+='<button type="button" class="btn-ghost quick-add" data-action="lav-sal-nuovo" data-comp="'+esc(String(C[0].id))+'" data-lav="'+esc(String(lav))+'">+ Nuovo stato di avanzamento</button>';
+      h+='<button type="button" class="btn-ghost quick-add" data-action="lav-sal-nuovo" data-comp="'+esc(String(C[0].id))+'" data-lav="'+esc(String(lav))+'">'+P.nuovoSal+'</button>';
       box.innerHTML=h;
     }catch(e){
-      box.innerHTML='<div class="lm-vuoto">Non riesco a leggere computo e SAL: controlla la connessione e riapri la pratica.</div>';
+      box.innerHTML='<div class="lm-vuoto">'+P.err+'</div>';
     }
   }
   async function renderLavScadenze(){
-    try{ if(ruoloUtente==='professionista')renderLavComputi(); }catch(_){}
+    try{ renderLavComputi(); }catch(_){}
     const box=$("#lav-scad");if(!box)return;
     const lav=editing&&editing.realId;
     const pro=ruoloUtente==='professionista';

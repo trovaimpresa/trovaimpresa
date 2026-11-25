@@ -181,17 +181,34 @@
         <div class="field"><label style="font-size:1rem">Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..." style="font-size:1.05rem;padding:10px"></div>
         <div class="field"><label style="font-size:1rem">Quando</label><input type="date" id="mv-data" value="${todayStr()}" max="${todayStr()}" style="font-size:1.05rem;padding:10px">
           <small style="color:var(--testo-2);font-size:14px">Di solito \u00e8 oggi: cambiala se la spesa \u00e8 di un altro giorno.</small></div>
+        <div class="field" id="mv-lav-box"><label style="font-size:1rem">${ruoloUtente==='professionista'?'Per quale pratica':'Per quale lavoro'}</label><select id="mv-lav" style="font-size:1.05rem;padding:10px"><option value="">— nessuno —</option></select>
+          <small style="color:var(--testo-2);font-size:14px">${ruoloUtente==='professionista'?'Se la scegli, la spesa entra nei costi di quella pratica.':'Se lo scegli, la spesa entra nel guadagno di quel lavoro.'}</small></div>
         <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
       </div>
       <div id="ct-mov-lista" style="font-size:1.05rem"></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`);
-    renderMovimentiCarta();
+    mvLavoriRiempi().then(renderMovimentiCarta,renderMovimentiCarta);
+  }
+  /* 25 nov 2026 (sì di Alex) — «Per quale lavoro»: i lavori del reparto,
+     gli ultimi in cima. Il nome serve anche per scriverlo sotto il movimento. */
+  let mvLavNomi={};
+  async function mvLavoriRiempi(){
+    const sel=$("#mv-lav");if(!sel||!sb||!sbUid)return;
+    try{
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,created_at").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}).limit(150);
+      const L=(data||[]).sort((a,b)=>((a.stato==="fatto")-(b.stato==="fatto")));
+      L.forEach(l=>{mvLavNomi[String(l.id)]=l.descrizione||"";});
+      sel.innerHTML='<option value="">— nessuno —</option>'+L.map(l=>'<option value="'+esc(String(l.id))+'">'+esc(l.descrizione||"Senza nome")+(l.stato==="fatto"?" (finito)":"")+'</option>').join("");
+      const box=$("#mv-lav-box"),tp=$("#mv-tipo");
+      const mostra=()=>{if(box)box.style.display=(L.length&&(!tp||tp.value==="spesa"))?"":"none";};
+      mostra();if(tp)tp.addEventListener("change",mostra);
+    }catch(_){}
   }
   async function renderMovimentiCarta(){
     const lista=$("#ct-mov-lista"), saldoBox=$("#ct-saldo-box");
     if(!lista||!cartaAttivaId)return;
     const [rmv,rsd]=await Promise.all([
-      sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,inserito_da").eq("carta_id",cartaAttivaId).order("data",{ascending:false}).order("created_at",{ascending:false}),
+      sb.from("gest_carte_movimenti").select("*").eq("carta_id",cartaAttivaId).order("data",{ascending:false}).order("created_at",{ascending:false}),
       sb.from("gest_carte_saldo").select("saldo").eq("carta_id",cartaAttivaId).maybeSingle()
     ]);
     /* 19 nov 2026 — senza rete diceva «0,00 € SENZA SOLDI» e «Nessun movimento» */
@@ -214,6 +231,7 @@
         <div>
           <div style="font-weight:600;color:#0a2a4d">${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</div>
           <div style="font-size:15px;color:#64748b">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
+          ${m.fattura_forn_id?'<div style="font-size:15px;color:#64748b">Pagata una fattura di un fornitore: la spesa conta lì</div>':(m.lavoro_id?'<div style="font-size:15px;color:#64748b">'+(ruoloUtente==='professionista'?'per la pratica':'per il lavoro')+(mvLavNomi[String(m.lavoro_id)]?' «'+esc(mvLavNomi[String(m.lavoro_id)])+'»':'')+'</div>':'')}
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="font-weight:700;color:${colore}">${segno} ${eur(m.importo)}</div>
@@ -243,13 +261,14 @@
       const _c=(carteCache||[]).find(x=>String(x.id)===String(cartaAttivaId));
       if(tipo==="spesa"&&_c&&_c.stato==="bloccata"&&typeof window.tiChiedi==="function"
         &&!(await window.tiChiedi("Questa carta è segnata come bloccata.",{titolo:"Registro lo stesso la spesa?",si:"Sì, registra",no:"No"})))return;
+      const _lavSel=$("#mv-lav"), lavoro_id=(tipo==="spesa"&&_lavSel&&_lavSel.value)||null;
       const {data:_ins,error}=await sb.from("gest_carte_movimenti").insert({
-        user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,data,inserito_da:"Capo"
+        user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,data,inserito_da:"Capo",lavoro_id
       }).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!_ins||!_ins.length){toast("Non salvato: nessuna riga scritta");return;}
     }finally{_movSalvo=false;}
-    $("#mv-importo").value="";$("#mv-causale").value="";if(_dEl)_dEl.value=todayStr();
+    $("#mv-importo").value="";$("#mv-causale").value="";if(_dEl)_dEl.value=todayStr();{const _ls=$("#mv-lav");if(_ls)_ls.value="";}
     toast("Movimento registrato ✔");renderMovimentiCarta();renderCarte();_carteRinfresca();
   }
   async function eliminaMovimentoCarta(id){
@@ -628,6 +647,8 @@
       :await sb.from("gest_fatture_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere(),stato:"da_pagare"})).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    /* 25 nov 2026 — pagata con la carta: il movimento segue importo e lavoro */
+    if(id&&typeof ffCartaAllinea==="function")await ffCartaAllinea(id);
     /* la foto letta dall'AI resta fra i documenti del fornitore */
     if(!id&&typeof ffFotoAllega==="function")ffFotoAllega(fornitore_id);
     /* la merce comprata: si salva con la fattura (prima di chiudere, perche'

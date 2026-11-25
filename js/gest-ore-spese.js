@@ -412,8 +412,17 @@
       fMap=Object.fromEntries(fornCache.map(x=>[String(x.id),x.nome]));
       if(selF){const curV=selF.value;selF.style.display=fornCache.length?"":"none";selF.innerHTML='<option value="">— fornitore —</option>'+fornCache.map(x=>'<option value="'+x.id+'">'+esc(x.nome)+'</option>').join("");if(curV)selF.value=curV;}
     }else if(selF){selF.style.display="none";}
-    const tot=sp.reduce((s,x)=>s+(+x.importo||0),0);
-    $("#spese-list").innerHTML=sp.length?sp.map(x=>{
+    /* 25 nov 2026 — le spese fatte con la carta aziendale per questo lavoro:
+       stanno nella carta (si tolgono da lì), qui si vedono e contano */
+    let cm=[];
+    try{cm=(await cartePerLavoro([lavoroId]))[String(lavoroId)]||[];}catch(e){}
+    if(String(speseLavoroId||"")!==String(lavoroId))return;
+    let cNomi={};
+    if(cm.length){try{const _sbC=(sb.raw||sb.from.bind(sb));const {data:cc}=await _sbC("gest_carte").select("id,nome").eq("user_id",sbUid);(cc||[]).forEach(c=>{cNomi[String(c.id)]=c.nome;});}catch(e){}}
+    cm.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||""))||String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    const tot=sp.reduce((s,x)=>s+(+x.importo||0),0)+cm.reduce((s,x)=>s+(+x.importo||0),0);
+    const righeCarta=cm.map(x=>`<div class="spesa-row sp-carta"><span>${esc(x.causale||"Spesa con la carta")}<small class="sp-forn">con la carta ${esc(cNomi[String(x.carta_id)]||"aziendale")}${x.data?" · "+esc(fdate(x.data)):""}</small></span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="sp-carta-apri" data-id="${x.carta_id}" title="Si cambia dalla carta">💳</button></div>`).join("");
+    $("#spese-list").innerHTML=(sp.length||cm.length)?righeCarta+sp.map(x=>{
       const nf=x.fornitore_id&&fMap[String(x.fornitore_id)];
       return `<div class="spesa-row"><span>${esc(x.descrizione)}${nf?`<small class="sp-forn">da ${esc(nf)}</small>`:""}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`;
     }).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
@@ -564,6 +573,23 @@
      rimborso delle fatture collegate alla pratica (gest_fattura_lavori) entra
      nel margine. Una fattura con più pratiche: diviso in parti uguali.
      Contano bozze, emesse e pagate; no annullate, no note di credito. */
+  /* 25 nov 2026 (sì di Alex) — LE SPESE FATTE CON LA CARTA PER UN LAVORO.
+     Il movimento della carta che dice «per quale lavoro» entra nel guadagno
+     di quel lavoro. Quelli che pagano una fattura di un fornitore no: la
+     fattura c'e' gia' (contano una volta sola). Torna {lavoro: [righe]}. */
+  async function cartePerLavoro(lavoroIds){
+    const per={};
+    try{
+      const ids=(lavoroIds||[]).map(String).filter(Boolean);
+      if(!ids.length||!sb||!sbUid)return per;
+      const {data,error}=await sb.from("gest_carte_movimenti").select("id,carta_id,importo,causale,data,created_at,lavoro_id,fattura_forn_id,tipo")
+        .eq("user_id",sbUid).eq("tipo","spesa").in("lavoro_id",ids);
+      if(error)return per;
+      (data||[]).forEach(function(m){ if(m.fattura_forn_id)return; const k=String(m.lavoro_id);(per[k]=per[k]||[]).push(m); });
+    }catch(e){}
+    return per;
+  }
+  function cartePerLavoroTot(per){const t={};Object.keys(per||{}).forEach(k=>{t[k]=per[k].reduce((a,m)=>a+(+m.importo||0),0);});return t;}
   async function rimborsiInFattura(lavoroIds){
     const per={};
     try{

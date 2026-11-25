@@ -178,9 +178,11 @@
       const {data:ca}=await _sbCarte("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid);
       CARTE=ca||[];
       if(CARTE.length){
-        const {data:mv}=await sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,created_at,carta_id")
+        const {data:mv}=await sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,created_at,carta_id,lavoro_id,fattura_forn_id")
           .eq("user_id",sbUid).in("carta_id",CARTE.map(c=>c.id));
-        CM=(mv||[]).filter(m=>m.tipo==="spesa");
+        /* 25 nov 2026 — una carta che paga la fattura di un fornitore: la spesa
+           c'e' gia' (la fattura). Il movimento si conta una volta sola. */
+        CM=(mv||[]).filter(m=>m.tipo==="spesa"&&!m.fattura_forn_id);
       }
     }catch(e){}
     const carteNome=Object.fromEntries(CARTE.map(c=>[c.id,c.nome||"Carta"]));
@@ -233,6 +235,8 @@
     const incAnno=_incassoIn(anno,4);
     /* guadagno/perdita per singolo lavoro (importo − spese) */
     const spPer={};SP.forEach(x=>{spPer[x.lavoro_id]=(spPer[x.lavoro_id]||0)+(+x.importo||0);});
+    /* 25 nov 2026 — le spese fatte con la carta per un lavoro entrano nel suo guadagno */
+    CM.forEach(m=>{if(m.lavoro_id)spPer[m.lavoro_id]=(spPer[m.lavoro_id]||0)+(+m.importo||0);});
     /* 12 agosto 2026 — le fatture dei fornitori e la manodopera entrano anche
        QUI. Prima il Report diceva "guadagno 9.000" su un lavoro che nella sua
        scheda diceva 4.000: leggeva il lavoro_id delle fatture fornitori

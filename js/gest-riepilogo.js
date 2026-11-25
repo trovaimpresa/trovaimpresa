@@ -343,11 +343,11 @@
         ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids).not("tipo","in",_nonFotoSql):Promise.resolve({count:0}),
         ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
         attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]}),
-        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]}),
+        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id,lavoro_id,fattura_forn_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]}),
         FT.length?sb.from("gest_fattura_righe").select("fattura_id,qta,prezzo,iva").eq("user_id",sbUid).in("fattura_id",FT.map(f=>f.id)):Promise.resolve({data:[]})
       ]);
       SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
-      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");FR=q[5].data||[];
+      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa"&&!m.fattura_forn_id);   /* 25 nov: la fattura del fornitore pagata con la carta conta una volta */FR=q[5].data||[];
       if(q.find(x=>x&&x.error))erroreLettura2=true;
     }catch(e){erroreLettura2=true;}
 
@@ -467,6 +467,7 @@
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
        (ora è una riga dentro "Da sistemare oggi", più in basso) */
     const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
+    CM.forEach(m=>{if(m.lavoro_id)spPerL[m.lavoro_id]=(spPerL[m.lavoro_id]||0)+(+m.importo||0);});   /* 25 nov: carta → lavoro */
     /* 12 agosto 2026 — lo stesso conto della scheda del lavoro e del Report:
        importo − spese − fatture dei fornitori − manodopera. Prima qui si
        guardavano solo le spese, quindi un lavoro che nella sua scheda era in

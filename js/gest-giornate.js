@@ -394,6 +394,8 @@ async function giorCarica(){
         const sp={},ff={};
         (rs.data||[]).forEach(x=>{sp[x.lavoro_id]=(sp[x.lavoro_id]||0)+(+x.importo||0);});
         (rf.data||[]).forEach(x=>{ff[x.lavoro_id]=(ff[x.lavoro_id]||0)+(+x.importo||0);});
+        /* 25 nov 2026 — anche le spese fatte con la carta per quel lavoro */
+        try{if(typeof cartePerLavoro==="function"){const ct=cartePerLavoroTot(await cartePerLavoro(ids));Object.keys(ct).forEach(k=>{sp[k]=(sp[k]||0)+ct[k];});}}catch(_){}
         const md=giorManodopera(rh2.data||[]).per;
         (rl2.data||[]).forEach(l=>{
           const imp=+l.importo||0; if(imp<=0) return;
