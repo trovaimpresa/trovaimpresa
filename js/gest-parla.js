@@ -125,11 +125,14 @@
     return x || maiu(n);
   }
 
+  /* 26 nov 2026 — «mezza giornata» detta a voce vale al massimo 4 ore
+     (come la casella «Mezza giornata» di Giornate). Prima restava 8. */
+  var MEZZA = /mezz[ao]\s+giornat/i;
   function pulisci(c) {
     var t = String(c && c.tipo || '');
     if (t === 'giornata') {
       var chi = []; (Array.isArray(c.chi) ? c.chi : []).forEach(function (n) { var x = nomeVero(n); if (x && chi.indexOf(x) < 0) chi.push(x); });
-      return { tipo: t, data: DATA.test(c.data || '') ? c.data : oggi(), chi: chi, dove: cantiere(c.dove), cosa: maiu(String(c.cosa || '').slice(0, 2000)) };
+      return { tipo: t, data: DATA.test(c.data || '') ? c.data : oggi(), chi: chi, dove: cantiere(c.dove), cosa: maiu(String(c.cosa || '').slice(0, 2000)), mezza: !!c.mezza || MEZZA.test(String(c.cosa || '')) };
     }
     if (t === 'spesa') {
       var imp = typeof c.importo === 'number' ? c.importo : numero(c.importo);
@@ -199,7 +202,8 @@
       var chi = c.chi.map(nomeChi).filter(Boolean);
       h += '<div class="gp-tit">' + e(maiu(giorno(c.data))) + ' · ' + e(c.dove || 'cantiere da scegliere') + '</div>'
         + '<div class="gp-r"><span>Chi c\'era</span>' + (chi.length ? e(chi.join(', ')) : '<i>nessuno</i>') + '</div>'
-        + (c.cosa ? '<div class="gp-r"><span>Cosa avete fatto</span>' + e(c.cosa) + '</div>' : '');
+        + (c.cosa ? '<div class="gp-r"><span>Cosa avete fatto</span>' + e(c.cosa) + '</div>' : '')
+        + '<div class="gp-r"><span>Quanto</span>' + (c.mezza ? 'Mezza giornata (4 ore)' : 'Giornata intera') + ' <button type="button" class="gp-b" data-gp="mezza" data-i="' + i + '">' + (c.mezza ? 'Cambia in giornata intera' : 'Cambia in mezza giornata') + '</button></div>';
       var nuovi = c.chi.filter(function (n) { return n !== 'IO' && !ops().some(function (o) { return o.nome === n; }); });
       if (nuovi.length) h += '<div class="gp-nota">' + e(nuovi.join(', ')) + (nuovi.length === 1 ? ' non è' : ' non sono') + ' ancora in Squadra: lo aggiungo io.</div>';
     }
@@ -282,6 +286,7 @@
     if (a === 'chiudi') { chiudi(); return; }
     if (a === 'cambia') { P.cose.forEach(function (c, k) { if (c.mod) leggi(k); }); P.cose[i].mod = true; disegna(); var f = ov.querySelector('.gp-c[data-i="' + i + '"] input,.gp-c[data-i="' + i + '"] textarea'); if (f) f.focus(); return; }
     if (a === 'ok') { leggi(i); disegna(); return; }
+    if (a === 'mezza') { if (P.cose[i]) P.cose[i].mezza = !P.cose[i].mezza; disegna(); return; }
     if (a === 'togli') { P.cose.splice(i, 1); P.msg = null; if (!P.cose.length) { chiudi(); return; } disegna(); return; }
     if (a === 'apri') { var t = P.cose[i].testo, vec = P.vecchio; chiudi(); if (vec) vec(t); return; }
     if (a === 'salva') { b.disabled = true; await salva(); }
@@ -322,7 +327,7 @@
       if (gg.length) {
         var schede = gg.map(function (c) {
           var nomi = c.chi.map(function (n) { if (n !== 'IO') return n; var o = ops().find(function (x) { return String(x.id) === String(io()); }); return o ? o.nome : null; }).filter(Boolean);
-          return { data: c.data, nomi: nomi.filter(function (v, k, a) { return a.indexOf(v) === k; }), dove: c.dove, cosa: c.cosa || '' };
+          var un = nomi.filter(function (v, k, a) { return a.indexOf(v) === k; }); return { data: c.data, nomi: un, dove: c.dove, cosa: c.cosa || '', mezze: c.mezza ? un.slice() : [] };
         });
         await giorScrivi(schede);
         gg.forEach(togli); conto.giornata = gg.length;
@@ -510,6 +515,7 @@
     if (!cose || !cose.length) return 'vecchio';
     cose = cose.slice(0, 20).map(pulisci);
     cose = giornoGiusto(t, cose);
+    (function () { var gg = cose.filter(function (c) { return c.tipo === 'giornata'; }); if (gg.length === 1 && MEZZA.test(String(t || ''))) gg[0].mezza = true; })();
     /* 10 nov 2026 — da soli: «io» si capisce senza chiederlo (gest-giornate.js) */
     if (typeof window.giorIoAuto === 'function' && cose.some(function (c) { return c.tipo === 'giornata' && c.chi.indexOf('IO') >= 0; })) {
       try { await window.giorIoAuto(true); } catch (x) {}
