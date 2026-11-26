@@ -69,6 +69,7 @@
     if(a==="save-prom")     return salvaPromemoria(id||null);
     if(a==="prom-stato")    return promStato(id,t.dataset.v);
     if(a==="del-prom")      return promButta(id);
+    if(a==="prom-rimanda"){ const d=t.closest("details"); if(d) d.open=false; return promRimanda(id,t.dataset.g); }
     if(a==="prom-vista"){promVista=t.dataset.v;return renderPromemoria();}
     if(a==="new-mezzo")     return schedaMezzo(null);
     if(a==="new-clinol")    return schedaClienteNol(null);

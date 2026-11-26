@@ -295,7 +295,7 @@
       +(p.note?`<br>📝 ${esc(p.note)}`:"")+`</p></div>
       <div class="card-acts">
         ${fatto?`<button data-action="prom-stato" data-id="${p.id}" data-v="aperto">↩ Riapri</button>`
-               :`<button data-action="prom-stato" data-id="${p.id}" data-v="fatto">✔ Segna fatto</button>`}
+               :`<button data-action="prom-stato" data-id="${p.id}" data-v="fatto">✔ Segna fatto</button>`+promRimandaHTML(p.id)}
         <button data-action="edit-prom" data-id="${p.id}">Modifica</button>
         <button class="del" data-action="del-prom" data-id="${p.id}">Elimina</button></div></div>`;
   }
@@ -362,6 +362,28 @@
       toast("Non salvato: "+((q.error&&q.error.message)||"nessuna riga scritta"));return;}
     toast(stato==="fatto"&&p.ripeti_mesi ? "Fatto ✔ Torna il "+fdate(row.data)
          : (stato==="fatto"?"Segnato fatto ✔":"Riaperto"));
+    renderPromemoria();
+  }
+
+  /* 26 nov 2026 — «Rimanda ▾» come nel gestionale principale (js/gest-promemoria.js):
+     si conta da OGGI, l'avviso riparte (inviato=false). Qui sta sulla scheda. */
+  const PROM_RIMANDA=[[1,"A domani"],[3,"Fra 3 giorni"],[7,"Fra una settimana"]];
+  function promRimandaHTML(id){
+    return `<details class="nol-rim"><summary>Rimanda ▾</summary><div class="nol-rim-pop">`
+      +PROM_RIMANDA.map(x=>`<button data-action="prom-rimanda" data-id="${id}" data-g="${x[0]}">${x[1]}</button>`).join("")
+      +`</div></details>`;
+  }
+  function promFraGiorni(n){
+    const [y,m,d]=todayStr().split("-").map(Number);
+    const dt=new Date(y,m-1,d+(+n||0));
+    return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+  }
+  async function promRimanda(id,giorni){
+    const g=+giorni||1, data=promFraGiorni(g);
+    const q=await sb.from("promemoria").update({data:data,inviato:false}).eq("id",id).eq("user_id",sbUid).select("id");
+    if(q.error||!q.data||!q.data.length){
+      toast("Non rimandato: "+((q.error&&q.error.message)||"nessuna riga scritta"));return;}
+    toast("Rimandato "+(g===1?"a domani":"al "+fdate(data))+" ✔");
     renderPromemoria();
   }
 

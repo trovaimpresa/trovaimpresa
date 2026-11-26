@@ -1043,6 +1043,15 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 /* 7 nov 2026 — niente scritte sotto i 14 px nel Noleggio (pulsanti dei promemoria a 13, scritte del Rendimento a 13) */
 #app-root .card-acts button{font-size:16px!important;min-height:44px;padding:0 14px!important}
 #app-root .doc-bollino{font-size:14px!important}
+/* 26 nov 2026 — «Rimanda ▾» sulla scheda del promemoria */
+#app-root .nol-rim{position:relative}
+#app-root .nol-rim summary{list-style:none;font-size:16px;font-weight:600;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#3a463f;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#app-root .nol-rim summary::-webkit-details-marker{display:none}
+#app-root .nol-rim[open] summary{border-color:#0a2a4d;color:#0a2a4d}
+#app-root .nol-rim-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:#fff;border:1px solid #e3e8ef;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.16);padding:6px;display:flex;flex-direction:column;gap:4px;min-width:200px}
+#app-root .nol-rim-pop button{border:0!important;text-align:left;width:100%}
+#app-root .nol-rim-pop button:hover{background:#eef3fa}
+@media(max-width:760px){#app-root .nol-rim-pop{left:0;right:auto;width:100%}}
 /* 7 nov 2026 — DOPO IL GIRO DEL COLLAUDATORE */
 #sheet p,#sheet label,#sheet .firma-nota,#sheet td .det{font-size:15px!important}
 #sheet .nol-az{font-size:16px!important;min-height:44px}
@@ -1147,9 +1156,9 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 <script src="/js/nol-cestino.js?v=13nov7"></script>
 <script src="/js/nol-media-documenti.js?v=12nov20"></script>
 <script src="/js/nol-registratore-calendario.js?v=24nov-cal-rete"></script>
-<script src="/js/nol-giornata-squadra-promemoria.js?v=18nov-prom1"></script>
+<script src="/js/nol-giornata-squadra-promemoria.js?v=26nov-rim"></script>
 <script src="/js/nol-moduli-azienda-agenda.js?v=15nov8"></script>
-<script src="/js/nol-pannello-azioni.js?v=12nov4"></script>
+<script src="/js/nol-pannello-azioni.js?v=26nov-rim"></script>
 <script src="/js/nol-supporto.js?v=19nov-rq"></script>
 <script src="/js/nol-listini-barre.js?v=12nov20"></script>
 <script src="/js/nol-avvio.js"></script>
