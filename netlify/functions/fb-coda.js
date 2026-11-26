@@ -79,7 +79,14 @@ exports.handler = async (event) => {
     const fatti = new Set(gia.map(x => x.chiave));
     const nuovi = post.filter(p => !fatti.has(p.chiave)).map(p => ({
       chiave: p.chiave, titolo: p.titolo, testo: p.testo, link: p.link,
-      con_foto: !!(p.foto && p.foto.length), foto: (p.foto || []).map(url => ({ type: 'url', url })) // 23 nov: Make vuole anche «type» per ogni foto
+      con_foto: !!(p.foto && p.foto.length),
+      // 23 nov: Make vuole anche «type» per ogni foto.
+      // 26 nov: «caption» = il link sotto OGNI foto. In un post con piu' foto,
+      // chi apre una foto sola su Facebook NON vede il testo del post (Roberta,
+      // 25 nov: «non trovo il sito»). La didascalia la mettiamo qui e non nel
+      // modulo di Make: salvare quel modulo dall'editor riscrive gli indirizzi
+      // delle foto e Facebook li rifiuta (vetrine perse il 25-26 nov).
+      foto: (p.foto || []).map(url => ({ type: 'url', url, caption: p.link ? `👉 Scheda e preventivo gratis: ${p.link}` : '' }))
     }));
     if (!prova && nuovi.length) {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/fb_pubblicati`, {
