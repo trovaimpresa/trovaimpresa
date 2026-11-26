@@ -205,6 +205,75 @@
       nomeCli:nomeCli, nomeOp:nomeOp
     };
   }
+  /* ============================================================
+     26 nov 2026 (giro nuovo, sessione 2) — «FORSE CERCAVI»
+     Scrivendo «bianki» non usciva niente: un artigiano scrive come
+     sente. Se non esce NIENTE, si cerca la parola piu' vicina fra i
+     nomi che ci sono davvero (clienti, fornitori, squadra, citta',
+     lavori, preventivi, computi): una o due lettere sbagliate, e
+     k/ch, j/i, y/i, doppie. Si dice «Forse cercavi: Bianchi» e sotto
+     escono gia' i risultati di Bianchi. Non si inventa niente: se
+     anche la parola corretta non trova niente, non si propone.
+     ============================================================ */
+  function ctSuono(w){
+    return w.replace(/ch/g,"c").replace(/gh/g,"g").replace(/k/g,"c").replace(/[jy]/g,"i")
+      .replace(/w/g,"v").replace(/x/g,"cs").replace(/h/g,"").replace(/(.)\1+/g,"$1");
+  }
+  function ctDistanza(a,b,max){
+    if(Math.abs(a.length-b.length)>max)return max+1;
+    let p2=null,p=[];for(let j=0;j<=b.length;j++)p[j]=j;
+    for(let i=1;i<=a.length;i++){
+      const c=[i];let min=i;
+      for(let j=1;j<=b.length;j++){
+        let v=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));
+        if(p2&&i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])v=Math.min(v,p2[j-2]+1);
+        c[j]=v;if(v<min)min=v;
+      }
+      if(min>max)return max+1;
+      p2=p;p=c;
+    }
+    return p[b.length];
+  }
+  function ctParole(){
+    const v={};
+    const metti=t=>{String(t||"").split(/[^A-Za-zÀ-ÿ0-9']+/).forEach(w=>{
+      w=w.replace(/'/g,"");if(w.length<3||/^\d+$/.test(w))return;
+      const k=ctPiatto(w);if(!v[k])v[k]=w;
+    });};
+    (ctDati.clienti||[]).forEach(c=>{metti(c.nome);metti(c.referente);metti(c.citta);});
+    (ctDati.fornitori||[]).forEach(o=>metti(o.nome));
+    (ctDati.persone||[]).forEach(o=>metti(o.nome));
+    (ctDati.lavori||[]).forEach(l=>{metti(l.descrizione);metti(l.dove);});
+    (ctDati.preventivi||[]).forEach(x=>metti(x.titolo));
+    (ctDati.computi||[]).forEach(x=>metti(x.titolo));
+    (ctDati.richieste||[]).forEach(x=>{metti(x.nome);metti(x.citta);});
+    return v;
+  }
+  function ctForse(q){
+    if(!ctDati)return null;
+    const parole=ctPiatto(q).split(/\s+/).filter(Boolean);
+    if(!parole.length)return null;
+    const voc=ctParole(), chiavi=Object.keys(voc);
+    let cambiata=false;
+    const nuove=parole.map(w=>{
+      if(w.length<4||/\d/.test(w)||voc[w])return {w:w,vis:voc[w]||w};
+      const max=w.length<=5?1:2, sw=ctSuono(w);
+      let meglio=null,dm=max+1;
+      for(const k of chiavi){
+        if(k.length<3)continue;
+        let d=ctDistanza(w,k,max);
+        const ds=ctDistanza(sw,ctSuono(k),max);
+        if(ds<d)d=ds;
+        if(d<dm||(d===dm&&meglio&&k.length<meglio.length)){dm=d;meglio=k;}
+        if(dm===0)break;
+      }
+      if(meglio&&dm<=max&&meglio!==w){cambiata=true;return {w:meglio,vis:voc[meglio]};}
+      return {w:w,vis:w};
+    });
+    if(!cambiata)return null;
+    const q2=nuove.map(x=>x.vis).join(" ");
+    return {q:q2,vis:q2};
+  }
   function ctMeta(){
     const v=[];
     for(let i=0;i<arguments.length;i++){ const x=arguments[i]; if(x)v.push('<span>'+esc(x)+'</span>'); }
@@ -236,8 +305,30 @@
   }
   function ctDisegna(q){
     const box=$("#ct-pop"); if(!box)return;
+    const h=ctRisultati(q);
+    if(h===null){box.innerHTML="";return;}
+    if(h){box.innerHTML=h+ctNote();return;}
+    /* niente: si prova la parola vicina */
+    const f=ctForse(q), h2=f?ctRisultati(f.q):"";
+    if(f&&h2){
+      box.innerHTML='<div class="ct-forse">Non trovo «'+esc(q)+'». Forse cercavi: '
+        +'<button type="button" class="ct-forse-b" data-ct-forse="'+esc(f.q)+'">'+esc(f.vis)+'</button></div>'+h2+ctNote();
+      return;
+    }
+    box.innerHTML='<div class="ct-vuoto">Nessun risultato per «'+esc(q)+'».</div>'+ctNote();
+  }
+  function ctNote(){
+    let h="";
+    /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
+    if(ctTroncato)h+='<div class="ct-piu">Hai più di '+CT_TETTO+' righe in una sezione: cerco dentro le prime '+CT_TETTO+'.</div>';
+    /* e se una sezione non si è aperta, si dice pure: se no la ricerca
+       direbbe «non c'è niente» di una cosa che non ha nemmeno guardato */
+    if(ctMancanti.length)h+='<div class="ct-piu">Non riesco a leggere: '+esc(ctMancanti.join(", "))+'. Quello che c\'è lì dentro non esce.</div>';
+    return h;
+  }
+  function ctRisultati(q){
     const r=ctTrova(q);
-    if(!r){box.innerHTML="";return;}
+    if(!r)return null;
     const pro=(ruoloUtente==='professionista');
     const nome=id=>(id!=null&&r.nomeCli[String(id)])?r.nomeCli[String(id)]:"";
     let h="";
@@ -293,13 +384,7 @@
     h+=ctBlocco("Corsi (crediti formativi)", r.crediti.map(c=>
         ctRiga("cred",c.id,c.titolo||"Corso",
           ctMeta(c.ente||"",c.data?fdate(c.data):"",String(+c.crediti||0).replace(".",",")+" CFP",c.attestato_path?"📎 attestato":""))));
-    if(!h)h='<div class="ct-vuoto">Nessun risultato per «'+esc(q)+'».</div>';
-    /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
-    if(ctTroncato)h+='<div class="ct-piu">Hai più di '+CT_TETTO+' righe in una sezione: cerco dentro le prime '+CT_TETTO+'.</div>';
-    /* e se una sezione non si è aperta, si dice pure: se no la ricerca
-       direbbe «non c'è niente» di una cosa che non ha nemmeno guardato */
-    if(ctMancanti.length)h+='<div class="ct-piu">Non riesco a leggere: '+esc(ctMancanti.join(", "))+'. Quello che c\'è lì dentro non esce.</div>';
-    box.innerHTML=h;
+    return h;
   }
   /* ============================================================
      ⛔ 29 agosto 2026 — APRIRE UNA COSA DA FUORI (gradino 2 della chat)
@@ -407,6 +492,11 @@
        lo chiuderebbe prima di arrivarci */
     document.addEventListener("click",function(e){
       if(!e.target.closest("#ct-barra"))ctChiudi();
+    });
+    /* 26 nov 2026 — «Forse cercavi: Bianchi»: il clic mette la parola giusta nella casella */
+    document.addEventListener("click",function(e){
+      const f=e.target.closest(".ct-forse-b"); if(!f)return;
+      inp.value=f.dataset.ctForse||""; ctDisegna(inp.value.trim()); ctApri();
     });
     document.addEventListener("click",function(e){
       const r=e.target.closest(".ct-riga"); if(!r)return;

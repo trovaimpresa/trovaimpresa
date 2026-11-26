@@ -122,12 +122,14 @@ function aiMicrofono(btn,ta,st){
       ta.dispatchEvent(new Event("input",{bubbles:true}));
     };
     rec.onerror=function(ev){
-      const m={"not-allowed":"Il browser non ha il permesso di usare il microfono. Premi il lucchetto accanto all'indirizzo e consenti il microfono.",
-               "service-not-allowed":"Il browser non ha il permesso di usare il microfono.",
+      /* 26 nov 2026 — niente «lucchetto» (nell'app installata non c'e'): la casella e' qui sotto */
+      const m={"not-allowed":"Il microfono è bloccato. Puoi scriverlo qui sotto.",
+               "service-not-allowed":"Il microfono è bloccato. Puoi scriverlo qui sotto.",
                "no-speech":"Non ho sentito niente. Riprova parlando un po' più vicino al telefono.",
                "audio-capture":"Non trovo il microfono su questo dispositivo.",
                "network":"Per capire la voce serve internet: controlla la connessione."};
       _aicSt(st,m[ev.error]||"Il microfono si è fermato. Riprova.","err");
+      if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){try{ta.focus();}catch(_){}}
     };
     rec.onend=function(){attivo=false;rec=null;etichetta();
       if(st&&st.textContent.indexOf("Ti ascolto")===0)_aicSt(st,ta.value.trim()?"Fatto. Controlla il testo e vai avanti.":"",ta.value.trim()?"ok":"");

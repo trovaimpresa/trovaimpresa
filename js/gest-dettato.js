@@ -40,6 +40,7 @@
     + '.dt-mic--on svg{animation:dtPulsa 1s ease-in-out infinite}'
     + '@keyframes dtPulsa{50%{opacity:.4}}'
     + '.dt-avviso{font-size:14px;line-height:1.4;color:var(--err,#DC2626);margin-top:6px}'
+    + '.dt-scrivi{font:inherit;font-size:16px;font-weight:700;color:#fff;background:var(--blu,#0066FF);border:0;border-radius:10px;padding:10px 14px;min-height:44px;margin-top:6px;cursor:pointer}'
     + '@media (max-width:880px){.dt-mic{width:44px;height:44px}.dt-box>textarea{padding-right:58px!important}}';
   var st = document.createElement('style');
   st.textContent = css;
@@ -68,6 +69,15 @@
     if (!testo) a.remove();
   }
 
+  function scriviInvece(ta) {
+    var a = ta.parentNode.nextElementSibling;
+    if (!a || !a.classList.contains('dt-avviso')) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'dt-scrivi'; b.textContent = '✍ Scrivilo invece';
+    b.addEventListener('click', function (e) { e.preventDefault(); a.remove(); ta.focus(); });
+    a.appendChild(document.createTextNode(' ')); a.appendChild(b);
+  }
+
   function accendi(ta, btn) {
     if (attivo && attivo.btn === btn) { ferma(); return; }
     ferma();
@@ -89,13 +99,16 @@
     };
     rec.onerror = function (ev) {
       var m = {
-        'not-allowed': 'Il browser non ha il permesso del microfono: premi il lucchetto accanto all\'indirizzo e consenti il microfono.',
-        'service-not-allowed': 'Il browser non ha il permesso del microfono.',
+        'not-allowed': 'Il microfono è bloccato.',
+        'service-not-allowed': 'Il microfono è bloccato.',
         'no-speech': 'Non ho sentito niente. Riprova parlando più vicino.',
         'audio-capture': 'Non trovo il microfono su questo dispositivo.',
         'network': 'Per capire la voce serve internet.'
       };
       avviso(ta, m[ev.error] || 'Il microfono si è fermato. Riprova.');
+      /* 26 nov 2026 — microfono bloccato: niente «lucchetto» (nell'app installata
+         non c'e'), si offre di scrivere nella casella che sta proprio li'. */
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') scriviInvece(ta);
     };
     rec.onend = function () {
       btn.classList.remove('dt-mic--on'); btn.innerHTML = MIC;

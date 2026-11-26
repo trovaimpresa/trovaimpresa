@@ -3946,6 +3946,9 @@ body:has(#ti-fondatore) .sheet--grande{
 
 .ct-vuoto,.ct-piu{ padding:14px 18px; font-size:16px; color:var(--testo-2); line-height:1.5; }
 .ct-piu{ padding-top:4px; }
+/* 26 nov 2026 — «Non trovo «bianki». Forse cercavi: Bianchi» */
+.ct-forse{ padding:14px 18px 6px; font-size:17px; color:var(--testo-2); line-height:1.5; }
+.ct-forse-b{ font:inherit; font-size:17px; font-weight:700; color:var(--blu,#0066FF); background:none; border:0; padding:4px 2px; min-height:44px; cursor:pointer; text-decoration:underline; }
 
 /* sul telefono la barra del reparto non e' piu' appiccicata in alto,
    quindi non lo e' nemmeno la ricerca: se no resterebbe sospesa */

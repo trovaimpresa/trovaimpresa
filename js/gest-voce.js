@@ -75,6 +75,9 @@
     + '.gv-az button{font:inherit;font-size:18px;font-weight:700;border-radius:12px;padding:12px 18px;cursor:pointer;min-height:48px}'
     + '.gv-si{background:var(--blu,#0066FF);color:#fff;border:0}'
     + '.gv-no{background:var(--card,#fff);color:var(--testo,#0F172A);border:1.5px solid var(--bordo,#E2E8F0)}'
+    + '.gv-aiuto{font-size:15px;line-height:1.4;color:var(--testo-2,#475569);margin-top:6px}'
+    + '.gv-scrivi{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:19px;line-height:1.4;min-height:84px;'
+    +   'padding:10px 12px;border:1.5px solid var(--bordo,#E2E8F0);border-radius:12px;resize:vertical;color:inherit;background:var(--card,#fff)}'
     + '.gv-costo{margin-left:auto;font-size:15px;color:var(--testo-2,#475569)}'
     + '.gv-gira{display:inline-block;width:20px;height:20px;border:3px solid var(--bordo,#E2E8F0);border-top-color:var(--blu,#0066FF);'
     +   'border-radius:50%;animation:gvGira .8s linear infinite;vertical-align:-4px;margin-right:8px}'
@@ -287,6 +290,24 @@
       + '<button type="button" class="gv-no" data-gv="chiudi">Chiudi</button></div>';
     posiziona();
   }
+  function disegnaBloccato() {
+    detto = '';
+    bolla.hidden = false;
+    bolla.innerHTML = '<div class="gv-msg gv-msg--err">Il microfono è bloccato.</div>'
+      + '<div class="gv-aiuto">Per sbloccarlo: impostazioni del telefono (o del browser) › permessi › microfono.</div>'
+      + '<div class="gv-az"><button type="button" class="gv-si" data-gv="scrivi">✍ Scrivilo invece</button>'
+      + '<button type="button" class="gv-no" data-gv="chiudi">Chiudi</button></div>';
+    posiziona();
+  }
+  function disegnaScrivi() {
+    bolla.hidden = false;
+    bolla.innerHTML = '<div class="gv-tit">Scrivi cosa vuoi fare</div>'
+      + '<textarea class="gv-scrivi" data-no-dettato rows="3" placeholder="Es.: ricordami domani alle 9 di chiamare Rossi"></textarea>'
+      + '<div class="gv-az"><button type="button" class="gv-si" data-gv="manda">Fatto</button>'
+      + '<button type="button" class="gv-no" data-gv="chiudi">Annulla</button></div>';
+    posiziona();
+    var ta = bolla.querySelector('.gv-scrivi'); if (ta) ta.focus();
+  }
   bolla.addEventListener('click', function (e) {
     var b = e.target.closest('[data-gv]'); if (!b) return;
     var a = b.getAttribute('data-gv');
@@ -294,6 +315,12 @@
     else if (a === 'annulla') ferma(true);
     else if (a === 'chiudi') chiudiBolla();
     else if (a === 'ancora') parti();
+    else if (a === 'scrivi') disegnaScrivi();
+    else if (a === 'manda') {
+      var ta = bolla.querySelector('.gv-scrivi'), t = ta ? ta.value.trim() : '';
+      if (t.length < 3) { if (ta) ta.focus(); return; }
+      detto = t; esegui(t);
+    }
   });
 
   function etichetta() {
@@ -328,6 +355,11 @@
       };
       if (ev.error === 'aborted') return;
       annullato = true;
+      /* 26 nov 2026 (giro nuovo, sessione 2) — MICROFONO BLOCCATO.
+         Il messaggio diceva «premi il lucchetto accanto all'indirizzo»: nell'app
+         installata l'indirizzo non c'e'. Adesso si offre la strada che c'e'
+         sempre: scriverlo. «Scrivilo invece» apre la casella qui nella bolla. */
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { disegnaBloccato(); return; }
       disegnaMsg(m[ev.error] || 'Il microfono si è fermato. Riprova.', true);
     };
     rec.onend = function () {
