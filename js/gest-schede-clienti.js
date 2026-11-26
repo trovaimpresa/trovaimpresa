@@ -178,7 +178,9 @@
          griglia, larga quanto la pagina, e cambia con i filtri: se guardi "In
          ritardo", il totale e' di quelli in ritardo. */
       const _t=cfg.totale
-        ? '<div class="tab-tot"><span>'+cfg.totale.testo+'</span>'
+        /* 26 nov 2026 — solo il conto (niente euro): una riga semplice, non la
+           barra blu, che sembrava un pulsante */
+        ? '<div class="tab-tot'+(cfg.totale.valore?'':' tab-tot-conta')+'"><span>'+cfg.totale.testo+'</span>'
           +(cfg.totale.valore?('<b>'+cfg.totale.valore+'</b>'):'')+'</div>'
         : '';
       /* le card con i numeri stanno SOPRA la fascia dei totali: prima le

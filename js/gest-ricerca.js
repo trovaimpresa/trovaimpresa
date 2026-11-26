@@ -64,7 +64,10 @@
   function ctPiatto(t){
     return String(t==null?"":t).toLowerCase()
       .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
-      .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u");
+      .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u")
+      /* 26 nov 2026 — «3337654321» deve trovare «333 7654321» (e il contrario):
+         fra due cifre spazi, punti, trattini e barre non contano */
+      .replace(/(\d)[\s.\-\/]+(?=\d)/g,"$1");
   }
   /* si mettono insieme solo i campi che la riga ha davvero: pratica_tipo
      esiste per gli studi tecnici e non per l'impresa edile, e chiedere un

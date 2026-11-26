@@ -1153,6 +1153,13 @@
        per lo SdI di un cliente estero il gestionale non lo fa (paeseEsteroSdi). */
     const estero=!!(window.paeseEstero&&window.paeseEstero(L.get("c-paese")));
 
+    /* 26 nov 2026 (giro nuovo, sessione 2) — «Edilizia Bianchi srl» segnata
+       «Privato»: la scheda chiedeva il codice fiscale da persona. Se il nome
+       dice srl/snc/spa… e il tipo è privato, si dice prima questo. */
+    const _soc=(tipo==='privato')&&String(L.get("c-nome")||"").match(/\b(s\.?\s?r\.?\s?l\.?s?|s\.?\s?n\.?\s?c|s\.?\s?a\.?\s?s|s\.?\s?p\.?\s?a|coop(erativa)?|societ[aà])\b/i);
+    if(_soc) out.push({campo:"c-nome",grave:"arancio",
+      dice:"Il nome dice «"+_soc[0]+"»: sembra un'azienda, non un privato. Se è così, in «Che tipo di cliente è» scegli «Azienda» e scrivi la partita IVA."});
+
     /* --- di che cosa ha bisogno, secondo quello che è --- */
     const nPiva=ctrCifre(L.get("c-piva")), nCf=L.get("c-cf");
     if(!estero){
@@ -1163,12 +1170,12 @@
       else if(nPiva.length!==11) out.push({campo:"c-piva",grave:"rosso",
         dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+". Lo SDI la rifiuta."});
     }else{
-      if(!nCf) out.push({campo:"c-cf",grave:"arancio",
+      if(!nCf){ if(!_soc) out.push({campo:"c-cf",grave:"arancio",
         dice:(tipo==='condominio'
               ? "Un condominio ha il codice fiscale: senza, quando gli fatturi ti tocca cercarlo di corsa."
               : tipo==='ente'
               ? "Un ente pubblico ha il codice fiscale di 11 cifre: senza, la fattura elettronica non si può fare."
-              : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")});
+              : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")}); }
       else if(nCf.length!==16&&nCf.length!==11) out.push({campo:"c-cf",grave:"arancio",
         dice:"Il codice fiscale di una persona ha 16 caratteri (11 se è un condominio o un ente): questo ne ha "+nCf.length+"."});
       else if(String(nCf).replace(/\s/g,"").length===16&&!ctrCfOk(nCf)) out.push({campo:"c-cf",grave:"rosso",

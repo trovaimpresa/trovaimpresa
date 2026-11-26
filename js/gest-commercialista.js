@@ -174,7 +174,7 @@
       +     (ruoloUtente==='professionista'?'<button type="button" class="btn" style="font-size:17px;min-height:50px;padding:0 22px" data-action="new-computo-pre" data-cli="'+esc(c.id)+'">+ Nuovo computo</button>':'')
       +   '</div></div>'
       + '<div class="sh-b" id="cli-storia"><div class="sh-tit">'+(ruoloUtente==='professionista'?'Le sue pratiche, preventivi, computi e fatture':'I suoi lavori, preventivi, computi e fatture')+'</div><div class="campo-aiuto">Sto guardando…</div></div>',
-      '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+      '<button class="btn b-cancel cli-chiudi" data-action="close">Chiudi</button>'
       + '<button class="btn" data-action="doc-cli" data-id="'+esc(c.id)+'">&#128206; Documenti</button>'
       + '<button class="btn-primary" data-action="edit-cli" data-id="'+esc(c.id)+'">&#9998; Modifica</button>');
     cliStoria(c.id);

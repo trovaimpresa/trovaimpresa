@@ -363,3 +363,17 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #appview .km-uff{color:#0047b3;font-weight:700}
 #appview .ag-km-avv{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;font-size:16px;color:var(--testo-2,#475569)}
 #appview .ag-km-avv .btn{min-height:44px}
+
+/* 26 nov 2026 (giro nuovo, sessione 2 — Clienti) */
+/* solo il conto, senza euro: riga semplice, non la barra blu che sembrava un pulsante */
+body .wrap section .tab-tot.tab-tot-conta{background:transparent !important;background-image:none !important;border:0 !important;padding:4px 2px !important;box-shadow:none !important;min-height:0 !important}
+body .wrap section .tab-tot.tab-tot-conta span{color:#334155 !important;font-size:17px !important;font-weight:700 !important}
+@media(max-width:600px){
+  /* sul telefono il pulsante principale («+ Nuovo…») viene per primo */
+  #appview .sec-head .btn.add{order:-1}
+  /* scheda del cliente: «Indietro» c'è già in alto; in basso Documenti e Modifica affiancati */
+  .sheet--grande .sh-foot .cli-chiudi{display:none !important}
+  .sheet--grande .sh-foot:has(.cli-chiudi){display:grid !important;grid-template-columns:1fr 1fr;gap:10px}
+  .sheet--grande .sh-foot:has(.cli-chiudi)>*{width:100% !important;margin:0 !important}
+  .sheet--grande:has(.cli-chiudi) .sh-head h3{font-size:22px !important;white-space:normal !important}
+}
