@@ -660,7 +660,7 @@
     const delMese=calJobs.filter(j=>String(j.data_prevista||"").slice(0,7)===mese);
     const nomi=ids.map(id=>({id,nome:String(calOp[id].nome||"").trim()||"Senza nome",n:delMese.filter(j=>String(j.operatore_id)===String(id)).length}))
       .sort((a,b)=>a.nome.localeCompare(b.nome,"it"));
-    sel.innerHTML='<option value="">Tutti ('+delMese.length+')</option>'
+    sel.innerHTML='<option value="">Tutti ('+delMese.length+' a '+mesi[m].toLowerCase()+')</option>'
       +nomi.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nome)+' ('+x.n+')</option>').join("")
       +'<option value="_nessuno">Nessuno ('+delMese.filter(j=>!(j.operatore_id&&calOp[j.operatore_id])).length+')</option>';
     sel.value=calChi; box.hidden=false;
