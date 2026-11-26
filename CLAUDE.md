@@ -4713,3 +4713,20 @@ Provato dal vivo (reparto ferramenta, codice iniettato prima del push): lavoro 2
 - 26 nov: Noleggio, «Rimanda ▾» sulla scheda del promemoria (online 5a3dfae): `promRimandaHTML`, `promRimanda` in js/nol-giornata-squadra-promemoria.js, azione `prom-rimanda` in js/nol-pannello-azioni.js, stile `.nol-rim` in gestionale-noleggio.html. Si conta da oggi, `inviato=false`. Provato dal vivo (+3 giorni ✔, pulito). La casella «Cosa facciamo?» c'era già (js/nol-assistente.js, 6 nov).
 - 26 nov: le SPESE ANTICIPATE art. 15 escono dall'«Incassato» (online 0e91f02, scelta 1 di Alex): `fattIncassoReddito` toglie `b.spese` se `art15`; in Tasse (`ftArt15` in gest-fisco-tasse.js) e in gest-fisco-vivere.js si tolgono come la cassa (select con `spese,spese_regime`). Report dello studio: «(senza IVA, cassa e spese anticipate)». Provato sul sito vero: 1.000 + cassa 50 + diritti 52,50 → incassato 1.000.
 - 26 nov: Calendario, «Chi ci va»: «Tutti (N a novembre)» (conta solo il mese guardato; prima «Tutti (0)» accanto a «4 in ritardo» sembrava un errore). `calChiTendina` in js/gest-schede-clienti.js, `?v=26nov-chi`.
+
+# 26 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 1: IL PRIMO INGRESSO (impresa e artigiano, online 5082f4e)
+Giro da utente vero (artigiano di 55 anni), reparto «ferramenta», 1440 e 375. Visti: schermata reparti, Assistente, Chat con AI, «Parla», ricerca in alto.
+Difetti sistemati:
+- ⛔ Chat: «ricordami domani alle 9…» apriva una SCADENZA (niente ora) e diceva «alle 9». Ora modulo `promemoria` (MODULI + attrezzo `compila_promemoria` in chat-gestionale.mjs, ora HH:MM, pulsante «Salva»; `AI.compilaPromemoriaDaChat` in js/ai-integrazione.js preme `new-prom` e riempie p-testo/p-data/p-ora/p-note; riga in MODULI_APRIBILI di js/gest-chat.js). Provato dal vivo: 27/11, 09:00.
+- ⛔ Chat: diceva «Crea fattura da qui» (non esiste). Manuale LAVORI E INTERVENTI (e la sua chiave in STUDIO_MANUALE): «🧾 Crea fattura» dentro il lavoro fatto. Provato dal vivo.
+- Telefono: sotto il nome del reparto «Reparto attivo» (era «REPARTO <nome>», con «reparto di prova» → «REPARTO REPARTO…»; js/gest-ingresso.js).
+- Telefono: «Il tuo mese» scriveva «3.000,00» senza € (tagliato): sotto 700 px euro intero «3.000 €» (`assMese`).
+- «Vedi le altre 1» → «Vedi l'altra» (js/gest-riepilogo.js).
+Fatti col sì di Alex (foto prima):
+- Schermata reparti: «Scegli il reparto e premi «Apri»…» e «li scarichi quando vuoi con «Salva una copia», in alto» (era «dal pulsante in alto», nascosto in Altro).
+- Telefono, Assistente: suggerimenti due per riga; «Parla» scritto dentro il microfono della barra (`.bb-mic-t`).
+- Lavori: frase «Il preventivo accettato diventa un lavoro, il lavoro finito diventa la fattura» (js/aiuti.js).
+- Lavoro FINITO e non in fattura: «🧾 Crea fattura» sulla scheda accanto ad «Apri» (`schedaAzioniLavoro`, azione `fatt` del menu). Provato dal vivo: apre la fattura col lavoro, 860,50.
+Non fatti (proposti, dopo): «Scrivilo invece» quando manca il permesso del microfono (il messaggio parla del lucchetto, che nell'app installata non c'è); ricerca che perdona gli errori («bianki» → Bianchi).
+Da sapere: nel browser dell'app la foto a 1440 mostra solo un pezzo: le foto si fanno col banco (`tools/banco-gestionale.js` + playwright) e il controllo dal vivo si fa leggendo la pagina.
+⚠️ Rimasti 4 messaggi di prova della chat (conversazione b47c1e0e…, reparto ferramenta): il database chiede l'ok di Alex per cancellarli; dal browser RLS non lascia.
