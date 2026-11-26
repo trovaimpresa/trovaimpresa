@@ -105,7 +105,12 @@
       + '#ti-riapri{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483000;'
       + 'background:#7b1fa2;color:#fff;border:none;border-radius:0 10px 10px 0;padding:14px 9px;'
       + 'font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;font-weight:800;'
-      + 'cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}';
+      + 'cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}'
+      /* 26 nov 2026 — la «F» copriva la prima lettera delle righe (sul telefono
+         «promemoria»). Adesso e' una striscetta di 10 px dentro il margine della
+         pagina: non copre niente, si tocca uguale. Col mouse sopra torna la «F». */
+      + '#ti-riapri{padding:0;width:10px;height:64px;color:transparent;overflow:hidden;border-radius:0 8px 8px 0;transition:width .15s}'
+      + '#ti-riapri:hover,#ti-riapri:focus-visible{width:28px;color:#fff}';
     document.head.appendChild(css);
 
     /* Se l'ultima volta hai premuto la X, la barra resta chiusa: compare solo
