@@ -811,7 +811,7 @@
             + '</div>';}).join("")
           + (_RS.length>5
               ? '<div class="ro-riga attesa" id="ro-piu-tasto" data-action="rie-piu">'
-                + '<span class="ro-testo">Vedi le altre '+(_RS.length-5)+'</span>'
+                + '<span class="ro-testo">'+((_RS.length-5)===1?"Vedi l'altra":'Vedi le altre '+(_RS.length-5))+'</span>'
                 + '<span class="ro-freccia">›</span></div>'
               : '')
           + '</div>');

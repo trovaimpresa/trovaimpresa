@@ -416,7 +416,16 @@
       if(v.action==="edit-job"||v.action==="stato-supa")return;
       az.push(v);
     });
-    return schedaUnPulsante(az)||schedaAzioni(az);
+    const uno=schedaUnPulsante(az);
+    /* 26 nov 2026 (giro nuovo, sessione 1, sì di Alex) — sul lavoro FINITO e
+       non ancora in fattura, «Crea fattura» sta in vista accanto ad «Apri»:
+       è la cosa da fare, e prima era nascosta dentro. Stessa azione «fatt»
+       del menu (fattDaUnLavoro), nessuna strada nuova. */
+    if(uno&&fatto){
+      const f=az.find(v=>v&&v.action==="fatt"&&/Crea fattura/.test(String(v.lab||"")));
+      if(f)return `<button class="btn btn-sm ja ja-fatt" data-action="fatt"${tabAttr(f.data)}>🧾 Crea fattura</button>`+uno;
+    }
+    return uno||schedaAzioni(az);
   }
   function jobCardSupa(l,withFoto,opTel,conImp,menuTab,opNome,cliNome){
     const fatto=l.stato==="fatto", dove=l.dove||"";

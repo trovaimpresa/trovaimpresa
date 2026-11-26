@@ -467,6 +467,7 @@
     /* ⛔ 30 agosto 2026 — i due nuovi. Stanno in js/ai-integrazione.js
        insieme agli altri: qui si preme il campanello, non si apre la porta. */
     scadenza:  'compilaScadenzaDaChat',
+    promemoria: 'compilaPromemoriaDaChat',   /* 26 nov 2026: col giorno E l'ora */
     fornitore: 'compilaFornitoreDaChat',
     preventivo: 'compilaPreventivoDaChat',
     /* 10 nov 2026 — lavorazioni o prezzi per un computo: si apre la

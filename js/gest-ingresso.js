@@ -524,7 +524,7 @@
     /* colore primario fisso (blu professionale): il colore del reparto resta solo come pallino accanto al nome */
     const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
     const tdot=$("#tb-rep-dot");if(tdot)tdot.style.background=p.a;
-    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto "+p.nome;
+    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto attivo"; /* 26 nov 2026: era «Reparto <nome>», ripeteva il nome (e «REPARTO REPARTO DI PROVA») */
     if($("#tb-panel-name"))$("#tb-panel-name").textContent=p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";

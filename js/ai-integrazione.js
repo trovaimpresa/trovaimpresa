@@ -1082,6 +1082,40 @@
     return true;
   };
 
+  /* ⛔ 26 nov 2026 (giro nuovo, sessione 1) — IL PROMEMORIA DALLA CHAT.
+     «Ricordami domani alle 9…» apriva una scadenza, che l'ora non ce l'ha.
+     Il modulo e' quello vero di js/gest-promemoria.js (azione «new-prom»):
+     si preme il suo pulsante, come fa «Modifica» per il lavoro. Non si salva
+     niente: a premere «Salva» e' lui. */
+  function riempiPromemoria(d) {
+    if (!d) return false;
+    const primo = { el: null };
+    riempiCampo('p-testo', d.testo, primo);
+    riempiCampo('p-data', d.data, primo);
+    riempiCampo('p-ora', d.ora, primo);
+    riempiCampo('p-note', d.note, primo);
+    avviso('Modulo compilato: controlla i dati e premi ' + nomeSalva());
+    if (primo.el) primo.el.focus();
+    return true;
+  }
+  AI.compilaPromemoriaDaChat = function (d) {
+    chiudiTutto();
+    const vecchia = document.getElementById('p-testo');
+    const b = document.createElement('button');
+    b.type = 'button'; b.hidden = true;
+    b.setAttribute('data-action', 'new-prom');
+    document.body.appendChild(b);
+    b.click();
+    setTimeout(function () { b.remove(); }, 0);
+    let giri = 60;
+    (function aspetta() {
+      const el = document.getElementById('p-testo');
+      if (!el || el === vecchia || el.offsetParent === null) { if (giri-- > 0) setTimeout(aspetta, 60); return; }
+      riempiPromemoria(d);
+    })();
+    return true;
+  };
+
   AI.compilaFornitoreDaChat = function (d) {
     chiudiTutto();
     if (typeof window.gestApriModuloAI === 'function') {

@@ -87,11 +87,18 @@
     +   '#ass-box .ass-parla{display:none}'
     +   '#ass-box textarea{min-height:96px;font-size:19px}'
     +   '#ass-box .ass-chip{font-size:17px;padding:9px 14px}'
+    /* 26 nov 2026 (giro nuovo, sessione 1) — due per riga: uno sotto l'altro
+       spingevano «Parti da qui» fuori dallo schermo */
+    +   '#ass-box .ass-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
+    +   '#ass-box .ass-chip{font-size:16px;padding:10px 8px;line-height:1.2;text-align:center}'
     /* la barra in basso: 5 posti, il microfono grande al centro */
     +   '#barra-basso{grid-template-columns:repeat(5,1fr)!important;padding-right:6px!important;align-items:end}'
     +   '#barra-basso .bb-mic{display:flex;align-items:center;justify-content:center;width:64px;height:64px;min-height:64px;margin:-26px auto 0;padding:0;border-radius:50%;'
     +     'background:#ff8800!important;color:#fff!important;box-shadow:0 4px 14px rgba(255,136,0,.45)}'
-    +   '#barra-basso .bb-mic svg{width:30px;height:30px;color:#fff}'
+    +   '#barra-basso .bb-mic{flex-direction:column;gap:0}'
+    +   '#barra-basso .bb-mic svg{width:24px;height:24px;color:#fff}'
+    /* 26 nov 2026 — la scritta «Parla» dentro il tondo, come gli altri pulsanti della barra */
+    +   '#barra-basso .bb-mic .bb-mic-t{font-size:14px;font-weight:700;color:#fff;line-height:1}'
     +   '#barra-basso .bb-mic.on{background:#dc2626!important}'
     +   'body.ass-fuori #barra-basso{display:none!important}'
     + '}'
@@ -199,7 +206,11 @@
     var el = $('ass-mese'), d = window._tiMese;
     if (!el) return;
     if (!d || (!(d.inc > 0) && !(d.acc > 0) && !(d.gg > 0))) { el.hidden = true; el.innerHTML = ''; return; }
-    var euro = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true }).format(+d.inc || 0);
+    /* 26 nov 2026 — sul telefono il riquadro è stretto: «3.000,00 €» perdeva il
+       simbolo €. Lì si scrive l'euro intero («3.000 €»); la cifra esatta resta nel
+       Report e nelle Fatture. */
+    var tel = false; try { tel = window.matchMedia && window.matchMedia('(max-width:700px)').matches; } catch (e) {}
+    var euro = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: tel ? 0 : 2, maximumFractionDigits: tel ? 0 : 2, useGrouping: true }).format(+d.inc || 0);
     var pz = [];
     pz.push('<button type="button" data-ass-vai="fatture" title="Incassato questo mese, senza IVA: lo stesso numero del Report"><b>' + euro + '</b> incassati</button>');
     if (d.gg != null) pz.push('<button type="button" data-ass-vai="giornate"><b>' + d.gg + '</b> ' + (d.gg === 1 ? 'giornata' : 'giornate') + '</button>');
@@ -273,7 +284,7 @@
     if (!($('gv-btn') || window.SpeechRecognition || window.webkitSpeechRecognition)) return;
     var m = document.createElement('button');
     m.type = 'button'; m.className = 'bb-mic'; m.setAttribute('aria-label', 'Parla');
-    m.innerHTML = MIC;
+    m.innerHTML = MIC + '<span class="bb-mic-t">Parla</span>';
     m.addEventListener('click', parla);
     var lav = bb.querySelector('[data-vai="lavori"]');
     if (lav) lav.after(m); else bb.appendChild(m);

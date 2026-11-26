@@ -27,7 +27,7 @@
   /* menu di sinistra: la chiave è il data-tab del pulsante */
   var AIUTI_TAB = {
     riepilogo:    'Il colpo d’occhio: cosa c’è da fare oggi, cosa è in ritardo e come vanno gli incassi.',
-    lavori:       'Tutti i cantieri: da fare, in corso e finiti. Da un lavoro nasce il preventivo e poi la fattura.',
+    lavori:       'Tutti i cantieri: da fare, in corso e finiti. Il preventivo accettato diventa un lavoro, il lavoro finito diventa la fattura.',
     preventivi:   'I preventivi mandati e quelli ancora da mandare. Quando il cliente accetta, diventa un lavoro.',
     fatture:      'Le fatture emesse, quelle da incassare e quelle pagate. Da qui esce il PDF e il file per lo SdI.',
     calendario:   'Il mese a colpo d’occhio: quando è previsto ogni lavoro.',

@@ -399,6 +399,12 @@ const MODULI = {
      un id inventato attaccherebbe la scadenza al mezzo sbagliato. */
   scadenza:  { caselle: ['titolo', 'tipo', 'data', 'note'],
                serve: 'titolo', manca: 'manca cosa scade' },
+  /* ⛔ 26 nov 2026 (giro nuovo, sessione 1) — IL PROMEMORIA, CON L'ORA.
+     Dal vivo: «ricordami domani alle 9 di chiamare…» apriva una SCADENZA,
+     che l'ora non ce l'ha: l'ora si perdeva e la chat diceva «alle 9».
+     Il promemoria (js/gest-promemoria.js) ha giorno E ora. */
+  promemoria: { caselle: ['testo', 'data', 'ora', 'note'],
+                serve: 'testo', manca: 'manca cosa ricordare' },
   fornitore: { caselle: ['nome', 'categoria', 'telefono', 'email', 'indirizzo', 'piva'],
                serve: 'nome',   manca: 'manca il nome del fornitore' },
   /* 8 ott 2026 — IL PREVENTIVO. Titolo + voci (descrizione, unita', quantita',
@@ -431,6 +437,7 @@ function bottoneDi(quale, ruolo, modifica) {
   if (quale === 'lavoro') return ruolo === 'professionista' ? 'Crea pratica' : 'Crea lavoro';
   if (quale === 'preventivo') return 'Crea preventivo';
   if (quale === 'fornitore') return 'Aggiungi';
+  if (quale === 'promemoria') return 'Salva';   /* js/gest-promemoria.js: «Salva» anche da nuovo */
   return 'Crea';
 }
 
@@ -501,6 +508,7 @@ function costruisciModulo(tipo, dati, opzioni) {
     const v = String(d[k]).trim().slice(0, LUNGHEZZA_MAX);
     if (!v) return;
     if (k === 'data' && !FORMA_DATA.test(v)) return;   // vedi la nota sopra
+    if (k === 'ora' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) return;   // <input type="time"> vuole HH:MM
     if (tipo === 'fornitore' && k === 'categoria' && FORN_CATS_OK.indexOf(v) < 0) return;
     campi[k] = v;
   });
@@ -1289,7 +1297,7 @@ const STRUMENTI = [
   {
     // ⛔ come compila_lavoro: non legge e non scrive niente
     name: 'compila_scadenza',
-    description: 'Apre nel gestionale il modulo della scadenza GIA\' COMPILATO. Usalo quando ti chiede di segnare qualcosa che scade: una revisione, un\'assicurazione, una pratica, un pagamento. NON salva niente: l\'utente guarda e preme Salva lui. Il tipo, il mezzo e il cliente li sceglie lui dalle tendine.',
+    description: 'Apre nel gestionale il modulo della scadenza GIA\' COMPILATO. Usalo quando ti chiede di segnare qualcosa che scade: una revisione, un\'assicurazione, una pratica, un pagamento. La scadenza NON ha l\'ora: per «ricordami di…», «chiama…», «passa da…», o quando dice un\'ora, usa `compila_promemoria`. NON salva niente: l\'utente guarda e preme Salva lui. Il tipo, il mezzo e il cliente li sceglie lui dalle tendine.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1299,6 +1307,21 @@ const STRUMENTI = [
         note:   { type:'string', description:'due parole in piu\', se te le ha dette' }
       },
       required: ['titolo']
+    }
+  },
+  {
+    // ⛔ 26 nov 2026 — come compila_lavoro: non legge e non scrive niente
+    name: 'compila_promemoria',
+    description: 'Apre nel gestionale il modulo del PROMEMORIA GIA\' COMPILATO. Usalo per le cose da ricordare: «ricordami di…», «domani devo chiamare…», «passa dal Comune…», e ogni volta che dice un\'ORA. Il promemoria ha giorno e ora, la scadenza no. NON salva niente: l\'utente guarda e preme «Salva» lui.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        testo: { type:'string', description:'cosa ricordare, corto: «Chiamare il signor Rossi per il sopralluogo»' },
+        data:  { type:'string', description:'il giorno, SOLO nella forma AAAA-MM-GG. Se non la sai con certezza, non metterla.' },
+        ora:   { type:'string', description:'l\'ora, SOLO nella forma HH:MM (24 ore: «alle 3 del pomeriggio» = 15:00). Se non l\'ha detta, non metterla.' },
+        note:  { type:'string', description:'due parole in piu\', se te le ha dette' }
+      },
+      required: ['testo']
     }
   },
   {
@@ -1564,7 +1587,7 @@ FATTURA DA UN PREVENTIVO: Preventivi → «Apri» sul preventivo (o il suo menu 
 
 FATTURE. «+ Nuova fattura» e «Fatture ricevute» (le fatture dei fornitori che arrivano dallo SDI). Schede: Tutte, Bozze, Da incassare, Scadute, Pagate. Nel menu di ogni fattura: «Emetti» (da bozza diventa vera e prende il numero), «Segna pagata», «Non pagata», «Apri», «Crea il PDF», «File per lo SDI (XML)», «Allega un PDF tuo», «Elimina». Una bozza non ha ancora il numero e non conta fra i soldi da incassare.
 
-LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».
+LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. FATTURA DI UN LAVORO FINITO: apri il lavoro fatto con «Apri» e in alto c'e' «🧾 Crea fattura» (c'e' anche nel menu «⋯»): si apre la fattura col cliente e le voci del lavoro, controlli e premi «Crea fattura» (resta in bozza finché non premi «Emetti»). Il pulsante si chiama SOLO «Crea fattura»: non inventare altri nomi. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».
 
 COMPUTO. «+ Nuovo computo», oppure si carica il computo del geometra (Excel, CSV o PDF) e lo si prezza col proprio prezzario. Dentro il computo le righe si chiamano LAVORAZIONI: «+ Aggiungi lavorazione» (non «Aggiungi voce»), «Carica qui il computo del geometra», «+ Aggiungi capitolo», «€ Prendi i prezzi dal prezzario» (riempie solo le righe a zero, cercando il codice di tariffa), e «Aggiungi con l'AI» (ti porta in questa chat). Dal menu del computo: «Apri il computo», «Scarica il PDF», «Scarica l'analisi dei prezzi», «Crea il preventivo», «Duplica», «Crea la variante», «Elimina». Gli «Stati di avanzamento» (SAL) nascono dentro un computo.
 
@@ -1601,7 +1624,7 @@ const STUDIO_MANUALE = [
   ['«Genera con AI» (descrivi il lavoro e l\'AI prepara le voci, 1 credito)', '«Genera con AI» (descrivi l\'incarico e l\'AI prepara le prestazioni della parcella, 1 credito)'],
   ['«Lettera d\'incarico», «Conferma d\'ordine», «Capitolato», «Segna inviato», «Accettato, crea lavoro», «Rifiutato»',
    '«Lettera d\'incarico», «Capitolato», «Segna inviato», «Accettato → crea pratica», «Rifiutato»'],
-  ['LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l\'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».',
+  ['LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l\'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. FATTURA DI UN LAVORO FINITO: apri il lavoro fatto con «Apri» e in alto c\'e\' «🧾 Crea fattura» (c\'e\' anche nel menu «⋯»): si apre la fattura col cliente e le voci del lavoro, controlli e premi «Crea fattura» (resta in bozza finché non premi «Emetti»). Il pulsante si chiama SOLO «Crea fattura»: non inventare altri nomi. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».',
    'PRATICHE. «+ Nuova pratica» o «Compila con AI» (la descrivi e l\'AI riempie il modulo). Schede: Tutte, In ritardo, Oggi, Prossime, Da incassare, Archivio. Ogni pratica ha «Apri»: dentro ci sono i «Dati della pratica», i documenti, le scadenze, il computo, le foto, le spese e le ore; il menu «⋯» ha mappa, WhatsApp, PDF, elimina. FATTURA DI UNA PRATICA FINITA: sulla pratica fatta c\'e\' «🧾 Crea fattura» (sulla scheda o nel menu «⋯»): si apre la fattura col cliente e l\'importo della pratica, controlli e premi «Crea fattura» (resta in bozza finché non premi «Emetti»). Una parcella accettata diventa pratica con «Accettato → crea pratica» (nel menu del preventivo).'],
   ['CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI». Ogni cliente ha la sua scheda con lavori, preventivi, fatture e cosa deve ancora pagare.',
    'CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI» (c\'è anche il tipo «Ente pubblico»: Comune, scuola, ASL). Ogni cliente ha la sua scheda con pratiche, preventivi, computi, fatture e cosa deve ancora pagare.'],
@@ -1694,7 +1717,7 @@ function istruzioniFisse(ruolo) {
     'La data va scritta AAAA-MM-GG, se no la casella la rifiuta senza dire niente. Se non sei sicuro di che giorno intende, lascia fuori la data e chiediglielo.',
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
-    'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
+    'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per una cosa da RICORDARE («ricordami…», «domani devo…», o con un\'ora) `compila_promemoria`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo` (se il prezzo viene da una sua voce passa anche il suo `codice`; se ti dice il capitolo passalo in `capitolo`, mai dentro la descrizione). ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
     'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (20 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
@@ -1703,7 +1726,7 @@ function istruzioniFisse(ruolo) {
     'QUANTO VALE UN COMPUTO: non sommare tu le righe. Guarda dentro con `dentro_al_documento` (voci_del_computo) e ripeti `conto_del_computo`: se c\'è un ribasso di\' «totale dei lavori X €, ribasso N% (− Y €), totale del computo Z €»; senza ribasso una cifra sola. ⛔ Un computo NON ha IVA: qui la regola delle due cifre non vale, la parola «imponibile» non si usa. Negli elenchi dei computi `ribasso_perc` è lo sconto e `tipo` dice privato o pubblico.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
     '⛔ NON RACCONTARE COSA STAI FACENDO: niente «Cerco prima i tuoi prezzi…», «Ora guardo il computo…». Usa gli attrezzi in silenzio e scrivi solo la risposta finale.',
-    'Sai aprire questi moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo, e la schermata di controllo del computo.',
+    'Sai aprire questi moduli e basta: lavoro, cliente, scadenza, promemoria, fornitore, preventivo, e la schermata di controllo del computo. Una cosa da ricordare con un\'ora («domani alle 9 chiama…») va nel PROMEMORIA, non nella scadenza: la scadenza l\'ora non ce l\'ha.',
     'SE TI CHIEDE DI CAMBIARE UN LAVORO CHE C\'È GIÀ («spostalo a giovedì», «metti l\'importo a 800», «è finito», «segna il protocollo»): trovalo con `cerca_per_nome` (o `elenco_cose`), poi `modifica_lavoro` col suo id e SOLO le caselle che cambiano. Non aprire un lavoro nuovo al posto di uno che esiste. Se ne trovi più di uno che può essere quello, chiedi quale.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
@@ -2552,7 +2575,8 @@ export default async function (req) {
             if (gg.corretta) m.campi.data = gg.data;
             modulo = m;
             daSistemare = avvisi.length > 0;
-            const salvaCon = ' Il pulsante per salvarlo si chiama «' + bottoneDi(quale, ruolo, false) + '» (NON «Salva»): se lo nomini, chiamalo cosi\'.';
+            const bott = bottoneDi(quale, ruolo, false);
+            const salvaCon = ' Il pulsante per salvarlo si chiama «' + bott + '»' + (bott === 'Salva' ? '' : ' (NON «Salva»)') + ': se lo nomini, chiamalo cosi\'.';
             esito = avvisi.length
               ? { ok: true, aperto: 'modulo del ' + quale + ' aperto.' + salvaCon, da_sistemare: avvisi }
               : { ok: true, aperto: 'gli ho aperto il modulo del ' + quale + ', gia\' compilato.' + salvaCon };
