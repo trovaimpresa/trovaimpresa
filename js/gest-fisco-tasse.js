@@ -1,4 +1,6 @@
 /* 25 nov 2026 — la cassa (contributo integrativo) non è un incasso tuo; la rivalsa INPS (TC22) sì. Le fatture del Noleggio non hanno cassa_tipo né cassa. */
+/* 26 nov 2026 — le spese anticipate art. 15 non sono un incasso tuo: si tolgono come la cassa. Stesso segno dell'imponibile (nota di credito). */
+function ftArt15(f,t){ if(!f||f.spese_regime!=='art15')return 0; const s=+f.spese||0; return (+((t||{}).imponibile)||0)<0?-s:s; }
 function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return String(f.cassa_tipo||'').trim().toUpperCase()!=='TC22'; }
 /* ═══ TASSE E FISCO — TAPPA 2: «LE TUE TASSE» ═════════════════════════════
    27 settembre 2026.
@@ -336,7 +338,7 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
     const [rP, rA, rF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("regime_fiscale").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo,cassa_tipo").eq("user_id", sbUid)
+      sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo,cassa_tipo,spese,spese_regime").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       ftNolFatture(Y)
     ]);
@@ -354,7 +356,7 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
     let incassi = 0, ivaAnno = 0;
     ff.forEach(f => {
       if (f.stato === "pagata" && String(f.data_pagata || "").slice(0, 4) === String(Y)) {
-        incassi += (+(tot[f.id] || {}).imponibile || 0) - (ftCassaFuori(f) ? (+(tot[f.id] || {}).cassa || 0) : 0);   /* 25 nov: la cassa non è tua */
+        incassi += (+(tot[f.id] || {}).imponibile || 0) - (ftCassaFuori(f) ? (+(tot[f.id] || {}).cassa || 0) : 0) - ftArt15(f, tot[f.id]);   /* 25 nov: la cassa non è tua */
         ivaAnno += +(tot[f.id] || {}).iva || 0;
       }
     });

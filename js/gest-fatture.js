@@ -460,6 +460,9 @@
     const b=fattBasi(f,righeDellaFattura||[]);
     let v=+b.imponibile||0;
     if(fattCassaFuori(f))v-=(+b.cassa||0);
+    /* 26 nov 2026 — anche le spese anticipate art. 15 (diritti, bolli, visure
+       pagati per il cliente) non sono tue: escono dall'incassato. Sì di Alex. */
+    if(b.art15)v-=(+b.spese||0);
     return v*fattSegno(f);
   }
   function fattNumero(f){

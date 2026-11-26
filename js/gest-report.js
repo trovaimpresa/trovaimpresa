@@ -336,8 +336,8 @@
             che è la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
       <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali di questo reparto</h3>
         <p class="rep-sub">Da quando usi il gestionale. Il margine è: soldi incassati meno tutte le spese.</p><table class="rep-table">
-        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA e senza cassa":"IVA esclusa"})</span></td>${_repZero(incAnno,"")}</tr>
-        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA e senza cassa":"IVA esclusa"})</span></td>${_repZero(totInc,"")}</tr>
+        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA, cassa e spese anticipate":"IVA esclusa"})</span></td>${_repZero(incAnno,"")}</tr>
+        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA, cassa e spese anticipate":"IVA esclusa"})</span></td>${_repZero(totInc,"")}</tr>
         <tr><td>${_repW().spLav}</td>${_repZero(totSp,"−")}</tr>
         ${(_repPro()&&!totCarte)?"":`<tr><td>Spese con le carte</td>${_repZero(totCarte,"−")}</tr>`}
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
