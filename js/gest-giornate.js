@@ -1075,6 +1075,32 @@ async function giorRidaiOre(opId,data,ore){
   }catch(e){}
 }
 
+/* 26 nov 2026 — IL ROVESCIO DI giorRidaiOre: UNA GIORNATA TORNA DAL CESTINO.
+   4 + 4 in due cantieri, ne butti una → l'altra torna 8. Rimetti a posto la
+   prima: tornava con le sue 4 e l'altra restava 8 → 12 ore. Adesso si
+   ridividono. Solo se TUTTE le righe del giorno sono «parti uguali» messe dal
+   gestionale (8, 4, 2,5…) e insieme passano le 8: le ore scritte a mano
+   dall'operaio (5 + 3) non si toccano. Se non riesce non si ferma niente. */
+async function giorRidividi(opId,data){
+  try{
+    if(!opId||!data) return;
+    const mezzi=x=>Math.max(.5,Math.round(x*2)/2);
+    const rr=await sb.from("gest_ore").select("id,ore,lavoro_id").eq("user_id",sbUid).is("eliminato_il",null).eq("operatore_id",opId).eq("data",data);
+    let v=(!rr.error&&rr.data)||[];
+    const vivi=await giorLavoriVivi(v.map(x=>x.lavoro_id)); if(vivi) v=v.filter(x=>String(x.lavoro_id) in vivi);
+    if(v.length<2) return;
+    const somma=v.reduce((a,x)=>a+(+x.ore||0),0);
+    if(somma<=GIOR_ORE_GIORNO) return;
+    const parti=[]; for(let n=1;n<=v.length;n++) parti.push(mezzi(GIOR_ORE_GIORNO/n));
+    if(!v.every(x=>parti.indexOf(+x.ore||0)>=0)) return;
+    const q=mezzi(GIOR_ORE_GIORNO/v.length);
+    /* una mezza giornata (4) resta al massimo 4: si tocca solo chi e' sopra la parte */
+    const daCambiare=v.filter(x=>(+x.ore||0)>q).map(x=>x.id);
+    if(daCambiare.length) await sb.from("gest_ore").update({ore:q}).in("id",daCambiare).eq("user_id",sbUid).select("id");
+  }catch(e){}
+}
+window.giorRidividi=giorRidividi;
+
 /* ---------------------------------------------------------------------
    18 nov 2026 — «MODIFICA» COMPLETA (ok di Alex). Prima si cambiava solo il
    testo: per un giorno, un cantiere o un nome sbagliato bisognava cancellare

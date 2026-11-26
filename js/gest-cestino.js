@@ -918,6 +918,17 @@
     if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
     extra+=await cestFigli(x.tab,x.id,x.quando,_conta);
 
+    /* 26 nov 2026 — una giornata (o le sue ore, o il lavoro) torna dal Cestino:
+       le ore della persona in quel giorno si ridividono (4 + 8 -> 4 + 4) */
+    if(["gest_rapportini","gest_ore","gest_lavori"].indexOf(x.tab)>=0&&typeof window.giorRidividi==="function"){
+      try{
+        const col=x.tab==="gest_ore"?"id":(x.tab==="gest_rapportini"?"rapportino_id":"lavoro_id");
+        const ro=await sb.from("gest_ore").select("operatore_id,data").eq("user_id",sbUid).eq(col,x.id).is("eliminato_il",null);
+        const visti={};
+        for(const o of ((!ro.error&&ro.data)||[])){ const k=o.operatore_id+"|"+o.data; if(visti[k]||!o.operatore_id) continue; visti[k]=1; await window.giorRidividi(o.operatore_id,o.data); }
+      }catch(e){}
+    }
+
     /* ⚠️ RIMETTERE A POSTO UNA PERSONA NON LE RIDAVA IL TELEFONO — 14/8/2026.
        Eliminando una persona il gestionale le toglie l'accesso
        (gest_membri.stato = 'revocato'): giusto, se no continuerebbe a entrare
