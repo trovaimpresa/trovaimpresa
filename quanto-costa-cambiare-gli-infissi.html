@@ -114,6 +114,9 @@
   .cta-band h3{margin-top:0;color:var(--primary-dark)}
   .cta-band .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px}
   .cta-band .cta-dark:hover{background:var(--accent-dark)}
+  .cta-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  .cta-form input[type=text]{flex:1 1 220px;max-width:320px;font:inherit;font-size:17px;padding:14px 16px;border:1px solid #c3d8ff;border-radius:12px;background:#fff}
+  .cta-form button.cta-dark{border:0;cursor:pointer;font:inherit;font-size:17px;font-weight:700;margin-top:0}
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
@@ -365,6 +368,16 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
     
 
+
+    <div class="cta-band cta-cerca">
+      <h3>Ti serve un serramentista vicino a casa?</h3>
+      <p>Su TrovaImpresa trovi i serramentisti della tua zona, con profilo, foto dei lavori e recensioni dei clienti. Chiedi il preventivo gratis.</p>
+      <form action="/cerca-artigiani.html" method="get" class="cta-form">
+        <input type="hidden" name="mestiere" value="Serramenti / Infissi">
+        <input type="text" name="citta" placeholder="Scrivi la tua città" aria-label="La tua città" autocomplete="address-level2">
+        <button type="submit" class="cta-dark">Cerca serramentisti →</button>
+      </form>
+    </div>
 
     <h2 id="prezzi-degli-infissi-per-materiale">Prezzi degli infissi per materiale</h2>
     <div class="tab-wrap"><table>
