@@ -300,6 +300,10 @@ header a img { height:62px; }
         <textarea class="form-textarea" id="cerca-desc" placeholder="Descrivi il lavoro nel dettaglio: quantità, materiali, modalità di esecuzione..."></textarea>
       </div>
       <div class="form-group">
+        <label class="form-label">Regione *</label>
+        <select class="form-input" id="cerca-regione"><option value="">— Seleziona —</option><option value="Tutta Italia">Tutta Italia</option><option value="Abruzzo">Abruzzo</option><option value="Basilicata">Basilicata</option><option value="Calabria">Calabria</option><option value="Campania">Campania</option><option value="Emilia-Romagna">Emilia-Romagna</option><option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option><option value="Lazio">Lazio</option><option value="Liguria">Liguria</option><option value="Lombardia">Lombardia</option><option value="Marche">Marche</option><option value="Molise">Molise</option><option value="Piemonte">Piemonte</option><option value="Puglia">Puglia</option><option value="Sardegna">Sardegna</option><option value="Sicilia">Sicilia</option><option value="Toscana">Toscana</option><option value="Trentino-Alto Adige">Trentino-Alto Adige</option><option value="Umbria">Umbria</option><option value="Valle d'Aosta">Valle d'Aosta</option><option value="Veneto">Veneto</option></select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Zona cantiere *</label>
         <input class="form-input" id="cerca-zona" placeholder="Es. Roma Nord, provincia di Milano..." type="text">
       </div>
@@ -348,6 +352,10 @@ header a img { height:62px; }
       <div class="form-group">
         <label class="form-label">Specializzazione *</label>
         <input class="form-input" id="offre-spec" value="Cappotto termico" placeholder="Es. Pavimentazioni industriali, impianti idraulici..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Regione *</label>
+        <select class="form-input" id="offre-regione"><option value="">— Seleziona —</option><option value="Tutta Italia">Tutta Italia</option><option value="Abruzzo">Abruzzo</option><option value="Basilicata">Basilicata</option><option value="Calabria">Calabria</option><option value="Campania">Campania</option><option value="Emilia-Romagna">Emilia-Romagna</option><option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option><option value="Lazio">Lazio</option><option value="Liguria">Liguria</option><option value="Lombardia">Lombardia</option><option value="Marche">Marche</option><option value="Molise">Molise</option><option value="Piemonte">Piemonte</option><option value="Puglia">Puglia</option><option value="Sardegna">Sardegna</option><option value="Sicilia">Sicilia</option><option value="Toscana">Toscana</option><option value="Trentino-Alto Adige">Trentino-Alto Adige</option><option value="Umbria">Umbria</option><option value="Valle d'Aosta">Valle d'Aosta</option><option value="Veneto">Veneto</option></select>
       </div>
       <div class="form-group">
         <label class="form-label">Zone coperte Italia *</label>
@@ -410,7 +418,7 @@ header a img { height:62px; }
       if (error) throw error;
       if (!data || !data.length) {
         const label = tipo === 'cerca' ? 'richieste' : 'subappaltatori';
-        div.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${tipo === 'cerca' ? '📋' : '🙋'}</div>Nessun${tipo === 'cerca' ? 'a' : ''} ${label} ancora.<br>Sii il primo a pubblicare!</div>`;
+        div.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${tipo === 'cerca' ? '📋' : '🙋'}</div>${tipo === 'cerca' ? 'Nessuna richiesta' : 'Nessuna disponibilità'} ancora.<br>Sii il primo a pubblicare!</div>`;
         return;
       }
       if (tipo === 'cerca') {
@@ -470,14 +478,15 @@ header a img { height:62px; }
     const tipoLavoro = document.getElementById('cerca-tipo-lavoro').value.trim();
     const desc = document.getElementById('cerca-desc').value.trim();
     const zona = document.getElementById('cerca-zona').value.trim();
+    const regione = document.getElementById('cerca-regione').value;
     const periodo = document.getElementById('cerca-periodo').value.trim();
     const budget = document.getElementById('cerca-budget').value.trim();
     const requisiti = document.getElementById('cerca-requisiti').value.trim();
     const tel = document.getElementById('cerca-tel').value.trim();
     const email = document.getElementById('cerca-email').value.trim();
 
-    if (!nome || !tipoLavoro || !zona) {
-      mostraMsg('cerca', 'Compila i campi obbligatori (nome impresa, tipo lavoro, zona).', 'err');
+    if (!nome || !tipoLavoro || !regione || !zona) {
+      mostraMsg('cerca', 'Compila i campi obbligatori (nome impresa, tipo lavoro, regione, zona).', 'err');
       return;
     }
     // 24 ott 2026: l'email serve: li' arriva il link per modificare, chiudere o rinnovare l'annuncio
@@ -503,6 +512,7 @@ header a img { height:62px; }
         nome_impresa: nome,
         descrizione,
         citta: zona,
+        regione,
         telefono: tel || null,
         email: email || null,
         user_id: _uid,
@@ -531,12 +541,13 @@ header a img { height:62px; }
     const nome = document.getElementById('offre-nome').value.trim();
     const spec = document.getElementById('offre-spec').value.trim();
     const zone = document.getElementById('offre-zone').value.trim();
+    const regione = document.getElementById('offre-regione').value;
     const esperienza = document.getElementById('offre-esperienza').value.trim();
     const tel = document.getElementById('offre-tel').value.trim();
     const email = document.getElementById('offre-email').value.trim();
 
-    if (!nome || !spec || !zone) {
-      mostraMsg('offre', 'Compila i campi obbligatori (nome impresa, specializzazione, zone coperte).', 'err');
+    if (!nome || !spec || !regione || !zone) {
+      mostraMsg('offre', 'Compila i campi obbligatori (nome impresa, specializzazione, regione, zone coperte).', 'err');
       return;
     }
     // 24 ott 2026: l'email serve: li' arriva il link per modificare, chiudere o rinnovare l'annuncio
@@ -563,6 +574,7 @@ header a img { height:62px; }
         nome_impresa: nome,
         lavoro: specializzazione,
         citta: zone,
+        regione,
         telefono: tel || null,
         email: email || null,
         user_id: _uid,

@@ -52,7 +52,8 @@ const REGIONI = [
    Parola INTERA: «roma» non deve scattare dentro «Emilia-Romagna»,
    «como» non dentro «comodo». */
 function regioniDi(a) {
-  const testo = ' ' + [a.regione, a.citta].filter(Boolean).join(' ').toLowerCase() + ' ';
+  // 27 nov 2026: «Friuli-Venezia Giulia» contiene «venezia» e mandava le email anche al Veneto
+  const testo = (' ' + [a.regione, a.citta].filter(Boolean).join(' ').toLowerCase() + ' ').replace(/friuli[\s-]*venezia[\s-]*giulia/g, ' friuli ');
   const trovate = [];
   for (const [nome, chiavi] of REGIONI) {
     if (chiavi.some(k => new RegExp('[^a-zàèéìòù]' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![a-zàèéìòù])').test(testo))) trovate.push(nome);

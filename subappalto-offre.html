@@ -557,5 +557,19 @@ header a img { height:62px; }
 </footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/app-invito.js" defer></script>
+<script>
+  // 27 nov 2026: un clic solo anche qui, come in subappalto.html (il 19 ott lo stesso annuncio era uscito 10 volte)
+  (function () {
+    var vera = window.salva;
+    if (typeof vera !== 'function') return;
+    window.salva = async function () {
+      var btn = document.querySelector('[onclick="salva()"]');
+      if (btn && btn.disabled) return;
+      if (btn) { btn.disabled = true; btn.style.opacity = '.6'; btn.style.cursor = 'wait'; }
+      try { await vera.apply(this, arguments); }
+      finally { if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = ''; } }
+    };
+  })();
+</script>
 </body>
 </html>
