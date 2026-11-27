@@ -230,7 +230,7 @@ document.addEventListener("click", function (e) {
   if (a === "p-prima" || a === "p-dopo") { if (!sqgPers) return; sqgPers.mese = sqgSposta(sqgPers.mese, a === "p-prima" ? -1 : 1); return sqgPersDisegna(); }
   if (a === "pratiche") {
     /* l'Agenda filtrata su questa persona, linguetta «Pratiche», «Da fare» */
-    try { agFilter.op = b.dataset.id; agFilter.stato = "aperti"; if (typeof segmOn === "function") { segmOn("#ag-stato", "aperti"); segmOn("#ag-vista", "lavori"); } } catch (x) {}
+    try { agFilter.op = b.dataset.id; agFilter.stato = "aperti"; if (typeof segmOn === "function") { segmOn("#ag-stato", "aperti"); segmOn("#ag-vista", "aperti"); } } catch (x) {}
     const pl = document.getElementById("ag-parte-lavori"), po = document.getElementById("ag-parte-ore");
     if (pl) pl.style.display = ""; if (po) po.style.display = "none";
     const v = document.querySelector('nav.tabs button[data-tab="agenda"]'); if (v) v.click();

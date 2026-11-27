@@ -692,6 +692,8 @@
     window._sqN=window._sqN||{};window._sqN.ag=L.filter(l=>l.stato!=="fatto").length;window._sqN.agMid=curMestiere();
     try{if(typeof agUnisci==="function")agUnisci();}catch(e){}
     try{if(typeof stUnisci==="function")stUnisci();}catch(e){}
+    /* 27 nov 2026 — la fila «Da fare · Tutti · Ore fatte» segue lo stato vero */
+    try{const po=document.getElementById("ag-parte-ore");segmOn("#ag-vista",po&&po.style.display!=="none"?"ore":(agFilter.stato==="tutti"?"tutti":"aperti"));}catch(e){}
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
     /* 18 nov 2026 — si' di Alex: nella tendina «Nessuno assegnato» e, accanto a
        ogni nome, quanti lavori ha (di quelli che si stanno guardando: «Da fare»

@@ -682,10 +682,11 @@
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     /* 6 set 2026 — le due linguette di Agenda operatore: «Da fare» e «Ore fatte» */
     if(a==="ag-vista"){
+      /* 27 nov 2026 — una fila sola: «Da fare · Tutti · Ore fatte» */
       const v=t.dataset.v; segmOn("#ag-vista",v);
       $("#ag-parte-lavori").style.display = v==="ore" ? "none" : "";
       $("#ag-parte-ore").style.display    = v==="ore" ? "" : "none";
-      if(v==="ore") renderOre();
+      if(v==="ore") renderOre(); else { agFilter.stato=v; renderAgenda(); }
       return;
     }
     if(a==="ore-mese"){_oreSpostaMese(+t.dataset.v);return;}

@@ -537,7 +537,7 @@
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
     /* 6 set 2026: cambiando reparto si riparte sempre da «Da fare», e il mese
        delle ore si azzera: se no si restava su un mese vecchio di un altro reparto */
-    segmOn("#ag-vista","lavori"); oreMese=null; oreAperte={};
+    segmOn("#ag-vista","aperti"); oreMese=null; oreAperte={};
     if($("#ag-parte-lavori"))$("#ag-parte-lavori").style.display="";
     if($("#ag-parte-ore"))$("#ag-parte-ore").style.display="none";
     mezziFilter="tutti";attrezzFilter="tutti";

@@ -814,16 +814,22 @@ async function giorAssicura(){
   if(ro.error||rl.error) throw new Error((ro.error||rl.error).message);
   giorOps=_gNelReparto(ro.data,true); giorLav=_gNelReparto(rl.data);
 }
-async function giorTrovaLavoro(dove,data){
+async function giorTrovaLavoro(dove,data,nomi){
   const mest=_gMest();
   let lav=giorLav.find(l=>_gNorm(_gNomeLav(l))===_gNorm(dove));
   if(lav) return lav;
-  const {data:d,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:mest,descrizione:dove.trim(),dove:dove.trim(),stato:"in_corso",data_prevista:data||_gOggi()}).select("id,descrizione,dove,stato,mestiere_id");
+  /* 27 nov 2026 (giro nuovo, sessione 6) — il cantiere nato da una giornata
+     va alla prima persona che c'era: prima nasceva «nessuno assegnato» e in
+     Agenda non stava sotto nessun nome. */
+  const op=(Array.isArray(nomi)?nomi:[]).map(n=>giorOps.find(o=>o.nome===n)).find(Boolean)||null;
+  const riga={user_id:sbUid,mestiere_id:mest,descrizione:dove.trim(),dove:dove.trim(),stato:"in_corso",data_prevista:data||_gOggi()};
+  if(op) riga.operatore_id=op.id;
+  const {data:d,error}=await sb.from("gest_lavori").insert(riga).select("id,descrizione,dove,stato,mestiere_id");
   if(error||!d||!d.length) throw new Error("Non riesco a creare il cantiere «"+dove+"»: "+((error&&error.message)||"nessuna riga")+".");
-  giorLav.unshift(d[0]); giorCantNuovi.push(String(dove).trim()); return d[0];
+  giorLav.unshift(d[0]); giorCantNuovi.push(String(dove).trim()); if(op) giorCantChi.push(op.nome); return d[0];
 }
 /* 27 nov 2026 — il cantiere nato da una giornata lo si dice nel messaggio verde (prima nasceva zitto in Lavori) */
-let giorCantNuovi=[];
+let giorCantNuovi=[], giorCantChi=[];
 async function giorScrivi(schede){
   const mest=_gMest();
   let fatte=0;
@@ -900,7 +906,7 @@ async function giorScrivi(schede){
   for(const c of schede){
     /* 3. il cantiere: un lavoro che c'e' gia', o uno nuovo */
     /* 10 nov 2026: se la scheda porta gia' il lavoro (giornata mandata dal telefono), si usa quello */
-    const lav=(c.lavoro_id&&giorLav.find(l=>String(l.id)===String(c.lavoro_id)))||await giorTrovaLavoro(c.dove,c.data);
+    const lav=(c.lavoro_id&&giorLav.find(l=>String(l.id)===String(c.lavoro_id)))||await giorTrovaLavoro(c.dove,c.data,c.nomi);
     const mid=lav.mestiere_id||mest;
     c._lavId=lav.id;   /* 24 nov 2026: per le spese dette nel racconto */
     /* 4. il rapportino */
@@ -936,7 +942,7 @@ async function giorSalva(){
     if(!c.dove.trim()){ giorDisegna({t:"In una scheda manca il cantiere.",k:"err"}); return; }
   }
   if(giorFermaPraticaNuova(schede)) return;
-  let fatte=0, sp={n:0,ko:0}; giorCantNuovi=[];
+  let fatte=0, sp={n:0,ko:0}; giorCantNuovi=[]; giorCantChi=[];
   try{ fatte=await giorScrivi(schede); }
   catch(e){ giorDisegna({t:e.message,k:"err"}); if(e.parziale) await renderGiornate(); return; }
   try{ sp=await giorScriviSpese(schede); }catch(e){ sp={n:0,ko:1}; }
@@ -944,7 +950,7 @@ async function giorSalva(){
   { const tv=document.getElementById("gior-voce"); if(tv) tv.value=""; }   /* 18 nov 2026: se no giorDisegna lo rileggeva dalla casella e il racconto restava li', pronto per un doppione */
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();
-  giorDisegna({t:(fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔")+(sp.n?(sp.n===1?" · 1 spesa aggiunta":" · "+sp.n+" spese aggiunte"):"")+(sp.ko?" · "+sp.ko+(sp.ko===1?" spesa non salvata: aggiungila da «Spesa»":" spese non salvate: aggiungile da «Spesa»"):"")+(giorCantNuovi.length?" · "+_gP("cantiere nuovo","pratica nuova")+" «"+[...new Set(giorCantNuovi)].join("», «")+"» "+_gP("messo in Lavori","messa in Pratiche"):""),k:sp.ko?"err":"ok"});
+  giorDisegna({t:(fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔")+(sp.n?(sp.n===1?" · 1 spesa aggiunta":" · "+sp.n+" spese aggiunte"):"")+(sp.ko?" · "+sp.ko+(sp.ko===1?" spesa non salvata: aggiungila da «Spesa»":" spese non salvate: aggiungile da «Spesa»"):"")+(giorCantNuovi.length?" · "+_gP("cantiere nuovo","pratica nuova")+" «"+[...new Set(giorCantNuovi)].join("», «")+"» "+_gP("messo in Lavori","messa in Pratiche")+(giorCantChi.length?_gP(", assegnato a ",", assegnata a ")+[...new Set(giorCantChi)].join(", "):""):""),k:sp.ko?"err":"ok"});
   if(fatte>0&&typeof window.tiSpunta==="function") window.tiSpunta(fatte===1?"Giornata salvata":fatte+" giornate salvate");
 }
 
@@ -1147,7 +1153,7 @@ async function giorModTutto(){
     const vecchio=giorLavoro(g.lavoro_id);
     const stesso=!!(vecchio&&_gNorm(_gNomeLav(vecchio))===_gNorm(c.dove));
     if(!stesso&&giorFermaPraticaNuova([c])) return;
-    const lav=stesso?vecchio:await giorTrovaLavoro(c.dove,c.data);
+    const lav=stesso?vecchio:await giorTrovaLavoro(c.dove,c.data,c.nomi);
     const mid=lav.mestiere_id||_gMest();
     const idOp=n=>giorOps.find(x=>x.nome===n).id;
     const mieId=new Set(g.ore.map(o=>String(o.id)));
