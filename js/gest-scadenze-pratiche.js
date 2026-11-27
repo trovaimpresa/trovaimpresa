@@ -795,7 +795,7 @@
         /* 19 nov 2026 (voce Pratiche) — per lo studio la data NON si mette da
            sola a oggi: una pratica creata e lasciata cosi' il giorno dopo era
            gia' «In ritardo» (rossa), mentre aspettava solo il Comune. */
-        +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||(pro?"":todayStr())}"></div>`
+        +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||((pro||!isNew)?"":todayStr())}"></div>`
         +`<div class="field"><label>${pro?"Collaboratore":"Operaio"}</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>`
         +'<div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>'
         +'</div>'
@@ -1401,7 +1401,8 @@
       /* 11 nov 2026 — collaudo 3.4: la casella che manca si segna (campoManca) */
       if(!descrizione){campoManca($("#j-desc"),"Manca cosa c'è da fare: scrivilo qui.");return;}
       /* 19 nov 2026 (voce Pratiche) — la pratica puo' nascere senza data (si aspetta il Comune) */
-      if(!data_prevista&&ruoloUtente!=='professionista'){campoManca($("#j-data"),"Manca la data: mettila qui.");return;}
+      /* 27 nov 2026 — un lavoro gia' fatto senza data (nato da un preventivo) si salva anche senza */
+      if(!data_prevista&&ruoloUtente!=='professionista'&&!editing.id){campoManca($("#j-data"),"Manca la data: mettila qui.");return;}
       const importo=_numIt("#j-imp")||0;
       if(editing.fattura&&!(importo>0)){campoManca($("#j-imp"),"Manca l'importo: scrivilo qui.");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;

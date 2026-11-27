@@ -1497,7 +1497,9 @@
     }
     /* 12 agosto 2026 (sera) — la scorciatoia che mancava: dal preventivo alla
        fattura, senza rifare la strada lunga da "Fatture -> + Nuova". */
-    v.push({lab:"\ud83e\uddfe Crea la fattura da qui",action:"prev-to-fatt",data:{id:p.id},top:true});
+    /* 27 nov 2026 — in alto solo quando il cliente ha accettato: prima stava
+       in alto anche su una bozza (fattura prima del sì). Resta in «Altro». */
+    v.push({lab:"\ud83e\uddfe Crea la fattura da qui",action:"prev-to-fatt",data:{id:p.id},top:p.stato==="accettato"});
     if(p.stato==="rifiutato")v.push({lab:"↩ Riapri",action:"prev-stato",data:{id:p.id,v:"bozza"}});
     v.push({sep:true});
     v.push({lab:"✏ Modifica",action:"edit-prev",data:{id:p.id}});

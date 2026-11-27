@@ -497,6 +497,8 @@
        usciva «Nome: Rossi Costruzioni» e «Cognome: Srl». Senza referente le
        caselle restano vuote, da scrivere. */
     var _cliT=String(_inv.cli&&_inv.cli.tipo||"privato");
+    /* 27 nov 2026 — anche un «privato» col nome da societa' (srl, snc…) */
+    if(/\b(s\.?\s?r\.?\s?l\.?s?|s\.?\s?n\.?\s?c|s\.?\s?a\.?\s?s|s\.?\s?p\.?\s?a|coop(erativa)?|societ[aà])\b/i.test(T(_inv.cli&&_inv.cli.nome)))_cliT="azienda";
     var nomeCli=(_cliT==="azienda"||_cliT==="condominio")?T(_inv.cli&&_inv.cli.referente):T(_inv.cli&&_inv.cli.nome), parti=nomeCli?nomeCli.split(/\s+/):[];
     var errore=f&&f.stato==="ERROR"?'<div class="aic-banda aic-banda--attesa" style="margin-bottom:8px"><b>L\'ultima volta non è andata:</b> '+esc(f.errore||"errore")+'</div>':'';
     return '<div class="sh-b">'+tit+fattaHtml+sotto+errore

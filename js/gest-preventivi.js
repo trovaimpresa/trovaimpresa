@@ -598,8 +598,14 @@
     if(ruoloUtente==='professionista')return "";   /* loro hanno la parcella */
     p=p||{};
     const val=(p.iva_perc==null||p.iva_perc==="")?"":String(+p.iva_perc);
-    const opz=[["","— non indicata (prezzi IVA esclusa)"],["22","22% — ordinaria"],
-               ["10","10% — ristrutturazione"],["4","4% — prima casa"],["0","0% — non applicata"]]
+    /* 27 nov 2026 (giro nuovo, sessione 2) — in forfettario l'IVA non si mette:
+       la casella dice «Niente IVA». Un preventivo vecchio con l'IVA la tiene
+       (non si cambia da solo), e il controllo avvisa. */
+    const _forf=(typeof fattForfettario==="function")&&fattForfettario();
+    const opz=(_forf
+        ? [["","Niente IVA — sei in regime forfettario"]].concat(val&&val!=="0"?[[val,val+"% — da togliere: in forfettario l'IVA non si applica"]]:[])
+        : [["","— non indicata (prezzi IVA esclusa)"],["22","22% — ordinaria"],
+           ["10","10% — ristrutturazione"],["4","4% — prima casa"],["0","0% — non applicata"]])
       .map(o=>'<option value="'+o[0]+'" '+(o[0]===val?'selected':'')+'>'+o[1]+'</option>').join("");
     /* 10 nov 2026 \u2014 LO SCONTO (chiesto da Spazio Giardino): in % o in euro.
        Si salva in sconto_perc (la %) o in sconto (gli euro): uno solo dei due. */
@@ -618,7 +624,8 @@
       +'<select id="pv-sconto-tipo" style="max-width:120px"><option value="perc" '+(scTipo==="perc"?"selected":"")+'>%</option><option value="eur" '+(scTipo==="eur"?"selected":"")+'>\u20ac</option></select></div>'
       +'<div class="campo-aiuto">Lascia vuoto se non fai sconto.</div></div>'
       +'<div class="field"><label>Aliquota IVA</label><select id="pv-iva-imp">'+opz+'</select>'
-      +'<div class="campo-aiuto">Scegliendo un\'aliquota, sul PDF il cliente vede anche il <b>totale finito</b>. Lasciandola su "non indicata" il preventivo resta come prima.</div></div>'
+      +(_forf?'<div class="campo-aiuto">In forfettario il totale che vede il cliente è già quello finito: niente IVA sopra.</div></div>'
+             :'<div class="campo-aiuto">Scegliendo un\'aliquota, sul PDF il cliente vede anche il <b>totale finito</b>. Lasciandola su "non indicata" il preventivo resta come prima.</div></div>')
       +'<div class="field"><label for="pv-acconto">Acconto alla firma</label>'
       +'<div class="ctr-riga" style="display:flex;gap:10px"><input id="pv-acconto" type="text" inputmode="decimal" placeholder="Es. 30" value="'+esc(acVal)+'" style="flex:1">'
       +'<select id="pv-acconto-tipo" style="max-width:120px"><option value="perc" '+(acTipo==="perc"?"selected":"")+'>%</option><option value="eur" '+(acTipo==="eur"?"selected":"")+'>\u20ac</option></select></div>'
@@ -1183,7 +1190,9 @@
        «Da preparare», cosi' il filtro «A che punto sta» la conta. */
     const _pro=ruoloUtente==='professionista';
     const _nuovo={user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
-      descrizione:p.titolo,dove:dove,data_prevista:_pro?null:todayStr(),cliente_id:p.cliente_id,importo:tot};
+      /* 27 nov 2026 — anche il lavoro nasce senza data: con la data di oggi il
+         giorno dopo era gia' «In ritardo». Sta in «Prossimi», la data la metti tu. */
+      descrizione:p.titolo,dove:dove,data_prevista:null,cliente_id:p.cliente_id,importo:tot};
     if(_pro)_nuovo.pratica_stato="da_preparare";
     let {data:lav,error}=await sb.from("gest_lavori").insert(_nuovo).select("id").single();
     if(error&&_pro&&/pratica_stato/i.test(error.message||"")){

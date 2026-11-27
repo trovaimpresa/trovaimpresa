@@ -861,7 +861,11 @@
     /* --- IVA (imprese e artigiani) oppure ritenuta (professionisti) --- */
     if(ruoloUtente!=='professionista'){
       const iva=$("#pv-iva-imp");
-      if(iva&&iva.value==="") out.push({el:iva,grave:"arancio",
+      /* 27 nov 2026 — in forfettario niente IVA: vuota va bene, un'IVA no */
+      const _forf=(typeof fattForfettario==="function")&&fattForfettario();
+      if(_forf){ if(iva&&iva.value!==""&&+iva.value>0) out.push({el:iva,grave:"arancio",
+        dice:"Sei in regime forfettario: l'IVA non si mette. Scegli «Niente IVA», se no il cliente vede un totale più alto di quello che fatturi."}); }
+      else if(iva&&iva.value==="") out.push({el:iva,grave:"arancio",
         dice:"Senza aliquota IVA il cliente vede solo l'imponibile, e ti richiamerà per chiederti quanto viene finito."});
     }else{
       const rit=$("#pv-rit"), tipo=ctrTipoCliente();
