@@ -4730,3 +4730,13 @@ Fatti col sì di Alex (foto prima):
 Non fatti (proposti, dopo): «Scrivilo invece» quando manca il permesso del microfono (il messaggio parla del lucchetto, che nell'app installata non c'è); ricerca che perdona gli errori («bianki» → Bianchi).
 Da sapere: nel browser dell'app la foto a 1440 mostra solo un pezzo: le foto si fanno col banco (`tools/banco-gestionale.js` + playwright) e il controllo dal vivo si fa leggendo la pagina.
 ⚠️ Rimasti 4 messaggi di prova della chat (conversazione b47c1e0e…, reparto ferramenta): il database chiede l'ok di Alex per cancellarli; dal browser RLS non lascia.
+
+# 27 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 2: DAL CLIENTE AL LAVORO (impresa e artigiano)
+Online: 00d666f (punti 11 e 13 della sessione 1) + 59744252, b093d5cf, a29d3221 (un push solo). Collaudato sul sito vero, 1440 e 375, reparto «ferramenta», «PROVA CONTROLLORE», poi tutto cancellato (clienti 2, preventivi 4, lavori 5).
+- Microfono bloccato: «Il microfono è bloccato» + «✍ Scrivilo invece» (js/gest-voce.js disegnaBloccato/disegnaScrivi; js/gest-dettato.js scriviInvece; js/gest-ai-cantiere.js). Nel browser dell'app il microfono è davvero bloccato: lì si prova dal vivo.
+- Ricerca: «Forse cercavi: Bianchi» (ctForse/ctSuono/ctDistanza in js/gest-ricerca.js); spazi, punti, trattini fra cifre non contano (ctPiatto: «3337654321» trova «333 7654321»).
+- Clienti: nome con srl/snc/spa/coop e tipo «Privato» → avviso arancio (ctrRegoleCliente); telefono «+ Nuovo …» per primo (.sec-head .btn.add order:-1 sotto 600 px, tutte le sezioni); «2 clienti» riga semplice (.tab-tot-conta quando la riga non ha euro); scheda del cliente sul telefono senza «Chiudi», Documenti e Modifica affiancati (.cli-chiudi).
+- Preventivi: in forfettario la casella IVA dice «Niente IVA — sei in regime forfettario» (bloccoIvaImpresa usa fattForfettario); un preventivo vecchio con IVA la tiene con «da togliere» e il controllo avvisa; «Crea la fattura da qui» in alto solo se accettato; il lavoro nato dal preventivo nasce SENZA data (va in «Prossimi»); un lavoro già esistente senza data si salva senza (jobForm, solo editing.id); firma SMS col referente anche per un «privato» col nome da società.
+- Lavori: i finiti in ordine dall'ultimo (data_fatto letta nella select); «✔ Fatto» accanto ad «Apri» sui lavori aperti (schedaAzioniLavoro, non allo studio); «▶ Avvia» → «▶ Inizio i lavori» (studio resta Avvia); la barra blu sparisce quando ripete il riquadro «Finiti e non ancora incassati».
+- Calendario: nessun difetto.
+Da sapere: nel browser dell'app la pagina non ha il fuoco (document.hasFocus() falso): per far rileggere la ricerca si manda a mano l'evento «focus». Il 📋 di «Capitolato» nel browser dell'app non si disegna (sembra uno spazio): non è un difetto.
