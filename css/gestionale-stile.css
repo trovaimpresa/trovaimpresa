@@ -380,3 +380,12 @@ body .wrap section .tab-tot.tab-tot-conta span{color:#334155 !important;font-siz
   .sheet--grande .sh-foot:has(.cli-chiudi)>*{width:100% !important;margin:0 !important}
   .sheet--grande:has(.cli-chiudi) .sh-head h3{font-size:22px !important;white-space:normal !important}
 }
+
+/* 27 nov 2026 (giro nuovo, sessione 5) — Fornitori sul telefono: 4 pulsanti uno
+   sotto l'altro prima dei fornitori. Prima «+ Fattura da pagare» (quello che si
+   usa di più) a tutta riga, poi gli altri due per riga. */
+@media (max-width:600px){
+  #fornitori .sec-head>div{display:grid!important;grid-template-columns:1fr 1fr;width:100%}
+  #fornitori .sec-head>div>.btn{width:100%;justify-content:center;white-space:normal;text-align:center;min-width:0}
+  #fornitori .sec-head>div>.btn.add{grid-column:1/-1;order:-1}
+}

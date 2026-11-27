@@ -140,12 +140,17 @@
       }).join("");
     }
     if(tt)tt.style.display=fattfCache.length?"":"none";
+    /* 27 nov 2026 (giro nuovo, sessione 5) — una fattura pagata stava sotto il
+       titolo «Fatture da pagare». Le pagate restano in fondo, sotto «Pagate». */
+    if(tt)tt.textContent=aperte.length?"Fatture da pagare":"Fatture pagate";
+    let _ffPagTit=!aperte.length;
     if(lst)lst.innerHTML=fattfCache.map(f=>{
       const nome=(fornCache.find(x=>String(x.id)===String(f.fornitore_id))||{}).nome||"Fornitore";
       const pag=f.stato==="pagata";
       const rit=!pag&&f.scadenza&&f.scadenza<oggi;
       const q=f.scadenza?quando(f.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
-      return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'">'
+      const _tp=(pag&&!_ffPagTit)?(_ffPagTit=true,'<h4 class="ff-pag-tit" style="margin:20px 0 10px;font-size:16px;color:var(--testo-2)">Pagate</h4>'):'';
+      return _tp+'<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'">'
         +'<div class="ff-info"><b>'+esc(nome)+'</b>'+(f.numero?' · n. '+esc(f.numero):'')+(f.note?'<small>'+esc(f.note)+'</small>':'')+_ffPerLavoro(f,lavNomi)+'</div>'
         +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta '+q.testo:q.testo))+'</span>'
         +'<span class="ff-imp">'+eur(f.importo)+'</span>'

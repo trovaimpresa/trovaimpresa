@@ -1177,6 +1177,11 @@
          la spesa esce anche dal saldo della carta (ffCartaPaga in gest-fornitori.js) */
       let _carta="";
       if(v==="pagata"&&typeof ffComeHaiPagato==="function"){_carta=await ffComeHaiPagato();if(_carta===null)return;}
+      /* 27 nov 2026 — con la carta: se la porta sotto zero, si chiede (cartaSottoZeroOk in gest-carte-documenti.js) */
+      if(_carta&&typeof window.cartaSottoZeroOk==="function"){
+        let _imp=0; try{const _rf=await sb.from("gest_fatture_fornitori").select("importo").eq("id",id).eq("user_id",sbUid).maybeSingle(); _imp=+((_rf&&_rf.data&&_rf.data.importo)||0);}catch(_){}
+        if(!(await window.cartaSottoZeroOk(_carta,_imp)))return;
+      }
       const patch={stato:v,data_pagata:v==="pagata"?todayStr():null};
       const {data:okFs,error}=await sb.from("gest_fatture_fornitori").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}

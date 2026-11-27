@@ -311,7 +311,7 @@
     /* 12 nov 2026 — un mezzo fuori a noleggio non e' «Disponibile» (blu = in corso, regola 15) */
     const _nl=mezziNolMap[m.id];
     if(_nl&&_libero){
-      if(_nl.peso===3) return {lab:"In ritardo · "+_nl.rit+(_nl.rit===1?" giorno":" giorni"),bg:"var(--err-bg)",fg:"var(--err)"};
+      if(_nl.peso===3) return {lab:"Non rientrato · "+_nl.rit+(_nl.rit===1?" giorno":" giorni"),bg:"var(--err-bg)",fg:"var(--err)"};
       if(_nl.peso===2) return {lab:"Fuori a noleggio",bg:"var(--info-bg)",fg:"var(--info)"};
       return {lab:"Prenotato",bg:"var(--attesa-bg)",fg:"var(--attesa)"};
     }
@@ -339,7 +339,7 @@
     }else{ tono="t-neutro"; }
     const cb=carbMap[m.id];
     const carbTesto=cb&&(+cb.spesa_totale)>0
-      ? "⛽ "+eur2(cb.spesa_totale)+(cb.km_litro?" · "+String(cb.km_litro).replace(".",",")+" km/l":"")
+      ? "⛽ Pieni: "+eur2(cb.spesa_totale)+(cb.km_litro?" · "+String(cb.km_litro).replace(".",",")+" km/l":"")
       : "";
     /* 7 nov 2026: con una scadenza passata l'etichetta non puo' dire
        «Disponibile» in verde. Diventa «Da rinnovare» in rosso
@@ -471,7 +471,15 @@
     /* 24 nov 2026 — il registro delle uscite sotto le note (solo i mezzi gia' salvati) */
     if(!isNew&&!attrezzo)mzRegistro(m.id);
   }
+  /* 27 nov 2026 (giro nuovo, sessione 5) — due tocchi veloci su «Crea» facevano
+     DUE mezzi uguali (provato dal vivo). Finche' il primo non risponde, il secondo aspetta. */
+  let _mzCreaSalvo=false;
   async function saveMezzo(id){
+    if(_mzCreaSalvo)return;
+    _mzCreaSalvo=true;
+    try{ await _saveMezzo(id); } finally{ _mzCreaSalvo=false; }
+  }
+  async function _saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){campoManca($("#m-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     /* 24 nov 2026 — il tagliando a km: si controlla prima di salvare niente */
@@ -489,7 +497,8 @@
     const categoria=ckAttr?(ckAttr.checked?"attrezzatura":"mezzo")
                           :((catFissa&&catFissa.value)||"attrezzatura");
     const tipo=$("#m-tipo").value.trim()||null;
-    const targa=$("#m-targa").value.trim(), stato=$("#m-stato").value, note=$("#m-note").value.trim();
+    /* 27 nov 2026 — la targa si scrive come sul libretto: «ab 123 cd» → «AB123CD» (la matricola di un'attrezzatura no) */
+    const _tg=$("#m-targa").value.trim(), targa=categoria==="mezzo"?_tg.replace(/[\s.\-]+/g,"").toUpperCase():_tg, stato=$("#m-stato").value, note=$("#m-note").value.trim();
     /* ⛔ 4 settembre 2026 — le scadenze del mezzo si scrivono QUI e stanno
        sulla riga del mezzo: sono le stesse identiche che vede il Noleggio.
        Prima erano due schede diverse in due pagine diverse e la revisione

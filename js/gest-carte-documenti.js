@@ -222,6 +222,9 @@
     const saldo=(sd&&sd.saldo)||0;
     const vuota=saldo<=0;
     if(saldoBox)saldoBox.innerHTML=`${vuota?'<div style="background:var(--err);color:#fff;font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center">⚠️ SENZA SOLDI — ricarica la carta</div>':""}<span style="color:${vuota?"var(--err)":"#0a2a4d"}">${eur(saldo)}</span>`;
+    /* 27 nov 2026 (giro nuovo, sessione 5) — carta ancora vuota (mai ricaricata):
+       il primo movimento e' quasi sempre la ricarica, non una spesa */
+    if(!movimentiCartaCache.length){const _tp=$("#mv-tipo");if(_tp&&_tp.value==="spesa"&&!$("#mv-importo").value){_tp.value="ricarica";_tp.dispatchEvent(new Event("change",{bubbles:true}));}}
     if(!movimentiCartaCache.length){lista.innerHTML='<div style="color:var(--testo-2);font-size:15px;text-align:center;padding:14px">Nessun movimento ancora</div>';return;}
     const fmtData=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
     lista.innerHTML=movimentiCartaCache.map(m=>{
@@ -241,6 +244,22 @@
     }).join("");
   }
   /* 19 nov 2026 — collaudo Carte: due tocchi su «Aggiungi movimento» = due movimenti */
+  /* 27 nov 2026 (giro nuovo, sessione 5) — una spesa piu' grossa di quello che
+     c'e' sulla carta: una prepagata non va sotto zero, quindi e' quasi sempre un
+     dito scivolato («1.200» invece di «12,00») o una ricarica dimenticata.
+     Si chiede, non si blocca. Vale per la spesa, il pieno e la fattura pagata. */
+  window.cartaSottoZeroOk=async function(cartaId,importo){
+    try{
+      if(!cartaId||!(importo>0)||typeof window.tiChiedi!=="function")return true;
+      const r=await sb.from("gest_carte_saldo").select("saldo").eq("carta_id",cartaId).maybeSingle();
+      if(!r||r.error||!r.data)return true;
+      const saldo=+r.data.saldo||0;
+      if(saldo-importo>=-0.005)return true;
+      const c=(carteCache||[]).find(x=>String(x.id)===String(cartaId));
+      return await window.tiChiedi((c&&c.nome?"Su «"+c.nome+"» ":"Sulla carta ")+"ci sono "+eur2(saldo)+": con questa spesa di "+eur2(importo)+" andrebbe sotto zero. Se l'importo è giusto, ricordati di registrare la ricarica.",
+        {titolo:"La carta va sotto zero",si:"Sì, l'importo è giusto",no:"No, lo correggo"});
+    }catch(_){ return true; }
+  };
   let _movSalvo=false;
   async function salvaMovimentoCarta(){
     if(_movSalvo)return;
@@ -259,6 +278,7 @@
     _movSalvo=true;
     try{
       const _c=(carteCache||[]).find(x=>String(x.id)===String(cartaAttivaId));
+      if(tipo==="spesa"&&!(await window.cartaSottoZeroOk(cartaAttivaId,importo))){const _ei=$("#mv-importo");if(_ei){try{_ei.focus();_ei.select();}catch(_){}}return;}
       if(tipo==="spesa"&&_c&&_c.stato==="bloccata"&&typeof window.tiChiedi==="function"
         &&!(await window.tiChiedi("Questa carta è segnata come bloccata.",{titolo:"Registro lo stesso la spesa?",si:"Sì, registra",no:"No"})))return;
       const _lavSel=$("#mv-lav"), lavoro_id=(tipo==="spesa"&&_lavSel&&_lavSel.value)||null;
@@ -392,7 +412,15 @@
     }).join("");
   }
 
+  /* 27 nov 2026 (giro nuovo, sessione 5) — due tocchi su «Registra il pieno»
+     facevano DUE pieni e la carta scalata DUE volte (provato dal vivo). */
+  let _rifSalvo=false;
   async function salvaRifornimento(){
+    if(_rifSalvo)return;
+    _rifSalvo=true;
+    try{ await _salvaRifornimento(); } finally{ _rifSalvo=false; }
+  }
+  async function _salvaRifornimento(){
     if(!rifMezzoId||!sbUid){toast("Devi essere loggato");return;}
     const importo=_numIt("#rf-importo")||0;
     if(!importo||importo<=0){toast("Scrivi quanto hai speso");return;}
@@ -420,6 +448,7 @@
 
     /* se ha pagato con la carta, la carta si scala qui: un posto solo */
     let movimento_id=null;
+    if(carta_id&&!(await window.cartaSottoZeroOk(carta_id,importo))){const _ei=$("#rf-importo");if(_ei){try{_ei.focus();_ei.select();}catch(_){}}return;}
     if(carta_id){
       const {data:mv,error:e1}=await sb.from("gest_carte_movimenti").insert({
         user_id:sbUid,carta_id,tipo:"spesa",importo,data,
@@ -437,6 +466,16 @@
          mai lasciare la carta scalata per un pieno che non esiste */
       if(movimento_id)await sb.from("gest_carte_movimenti").delete().eq("id",movimento_id).eq("user_id",sbUid);
       toast("Errore: "+error.message);return;
+    }
+    /* 27 nov 2026 — i km scritti al pieno sono quelli del cruscotto: se sono piu'
+       avanti di quelli che sa il gestionale, diventano i km del mezzo. Cosi' il
+       tagliando (Assistente, email del lunedi') li vede, come per le uscite. */
+    if(km!=null){
+      try{
+        const _m=mezziCache.find(x=>String(x.id)===String(rifMezzoId));
+        const _ora=(_m&&typeof mzKm==="function")?mzKm(_m):null;
+        if(_m&&(_ora==null||km>_ora))await sb.from("gest_mezzi").update({km_attuali:km}).eq("id",rifMezzoId).eq("user_id",sbUid).select("id");
+      }catch(_){}
     }
     ["#rf-importo","#rf-litri","#rf-km","#rf-distr"].forEach(s=>{const el=$(s);if(el)el.value="";});
     toast("Pieno registrato ✔");
@@ -642,6 +681,11 @@
     }
     const row={fornitore_id,numero:$("#ff-num").value.trim()||null,data:$("#ff-data").value||todayStr(),
       importo,scadenza:$("#ff-scad").value||null,lavoro_id:$("#ff-lav").value||null,note:$("#ff-note").value.trim()||null};
+    /* 27 nov 2026 (giro nuovo, sessione 5) — senza «La paghi entro» la fattura non
+       andava né in Scadenze né nel Calendario. Fattura NUOVA lasciata vuota:
+       30 giorni dalla data (il termine di legge se non c'e' scritto altro), e si dice. */
+    let _scad30=false;
+    if(!id&&!row.scadenza&&typeof _giorniDopo==="function"){row.scadenza=_giorniDopo(row.data,30);_scad30=true;}
     const {data,error}=id
       ?await sb.from("gest_fatture_fornitori").update(row).eq("id",id).eq("user_id",sbUid).select("id")
       :await sb.from("gest_fatture_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere(),stato:"da_pagare"})).select("id");
@@ -666,7 +710,7 @@
        in nessuna bolla: X rossa che resta finche' non la tocchi. Nessuna
        bolla: non si dice niente, non c'e' niente da confrontare. */
     if(nAcq>0&&fornitore_id&&typeof bfControllaFattura==="function"&&await bfControllaFattura(fornitore_id,row.data||todayStr()))return;
-    toast(id?"Aggiornata ✔":"Fattura registrata ✔");
+    toast(id?"Aggiornata ✔":(_scad30?"Fattura registrata ✔ · da pagare entro il "+fdate(row.scadenza)+" (30 giorni): se è un'altra data, cambiala":"Fattura registrata ✔"));
   }
 
   /* ============================================================

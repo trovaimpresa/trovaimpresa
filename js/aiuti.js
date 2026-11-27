@@ -323,7 +323,7 @@
     var s = document.createElement('style');
     s.textContent =
       '#ti-aiuto{position:fixed;z-index:99999;max-width:300px;background:#0a2a4d;color:#fff;' +
-      'font-family:inherit;font-size:14.5px;line-height:1.55;padding:12px 14px;border-radius:10px;' +
+      'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14.5px;line-height:1.55;padding:12px 14px;border-radius:10px;' +
       'box-shadow:0 6px 24px rgba(10,42,77,.28);pointer-events:none;opacity:0;transition:opacity .14s;' +
       'transform:translateY(4px)}' +
       '#ti-aiuto.on{opacity:1;transform:translateY(0)}' +

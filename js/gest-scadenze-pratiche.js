@@ -391,7 +391,19 @@
      adesso «In tempo»; i pulsanti delle righe si chiamano tutti «Apri». */
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
+  /* 27 nov 2026 (giro nuovo, sessione 5) — un'assicurazione fra 10 giorni diceva
+     «In tempo», come una fra un anno. Entro 30 giorni si dice quanto manca. */
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    const h=_scadCard(s,cliMap,oggi,lim,mezMap,lavMap);
+    try{
+      if(s&&s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza>lim){
+        const g=Math.round((new Date(s.data_scadenza)-new Date(oggi))/86400000);
+        if(g>0&&g<=30)return h.replace(">In tempo</span>",">Tra "+g+" giorni</span>");
+      }
+    }catch(_){}
+    return h;
+  }
+  function _scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
     if(s._cred){
       let bgR="var(--sfondo)",fgR="var(--testo-2)",labR="In tempo",tonoR="t-neutro";
       if(s.data_scadenza<oggi){bgR="var(--err-bg)";fgR="var(--err)";labR="Scaduta";tonoR="t-err";}
