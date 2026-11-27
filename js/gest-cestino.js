@@ -1186,7 +1186,7 @@
     _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
-    toast("Eliminato per sempre");
+    toast(_cestFem(x)?"Eliminata per sempre":"Eliminato per sempre");   /* 27 nov sera: «Foto … Eliminato» */
   }
 
   /* il file nello storage se ne va solo adesso, non prima: e' l'unico momento
@@ -1213,6 +1213,11 @@
 
   /* via di riserva: vale solo finche' non e' stato eseguito
      sql/gest-cestino-elimina.sql, e solo sulle cose senza figli */
+  /* 27 nov 2026 (sera) — stessa regola del femminile di «Rimessa a posto» */
+  function _cestFem(x){
+    const pro=typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
+    return !!x&&((pro&&x.tab==="gest_lavori")||x.tab==="gest_operatori"||(x.tab==="gest_foto"&&String(x.sotto||"")!=="documento"));
+  }
   async function cestDefinitivoFoglia(x){
     if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9.")))return;
     const {data,error}=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
@@ -1222,7 +1227,7 @@
     _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario","computi","sal");
-    toast("Eliminato per sempre");
+    toast(_cestFem(x)?"Eliminata per sempre":"Eliminato per sempre");   /* 27 nov sera: «Foto … Eliminato» */
   }
 
 

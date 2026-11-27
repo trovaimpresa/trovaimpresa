@@ -171,6 +171,7 @@
        gia' altrove: Chat con AI (menu), «Chiedi all'AI cosa fare oggi» (qui
        sopra), Genera con AI (Preventivi), Fotografa (qui sopra). */
     /* try{ rieFabAI(); }catch(e){ console.warn("[fab AI]",e); } */
+    if(typeof fattAziendaPronta==="function"){ try{ await fattAziendaPronta(); }catch(_){ } }   /* 27 nov sera: regime giusto per «IVA esclusa» */
     const G=$("#rie-grid");if(!G)return;
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
     if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
@@ -1124,7 +1125,7 @@
          TOTALE delle spese — quello che, tolto dall'incassato, fa l'utile
          grande in cima alla scheda. Nessun conto nuovo: speseMese e' lo
          stesso di sempre. */
-      righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese),fisso:1},
+      righe:[{t:(typeof _repIncNome==="function"?_repIncNome("Incassato questo mese"):"Incassato questo mese (IVA esclusa)"),v:eur(incMese),fisso:1},   /* 27 nov sera: in forfettario niente «IVA esclusa», stessa regola del Report */
              (function(){
                const voci=[];
                if(speseLav)  voci.push("lavori "+eur(speseLav));
