@@ -6574,4 +6574,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #report .sec-head>div{flex-wrap:nowrap!important;width:100%}
   #report .sec-head>div .btn{flex:1 1 0;min-width:0;padding:10px 6px;font-size:14px;gap:4px;justify-content:center;white-space:nowrap}
   #report .rep-mese>div{flex:1 1 100%}
+  /* 27 nov sera: «#appview .sec-head .btn.add» in gestionale-stile.css mette 18px e padding 0 22px con !important
+     e batteva la riga sopra: qui due id per vincere. */
+  #appview #report .sec-head>div .btn.add{font-size:15px!important;padding:0 6px!important;min-width:0!important}
 }
