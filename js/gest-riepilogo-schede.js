@@ -404,7 +404,7 @@
      voci che prima stavano sotto i «...». */
   function schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab){
     const az=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
-    if(withFoto&&l.stato==="da_fare")az.push({lab:"▶ Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(withFoto&&l.stato==="da_fare")az.push({lab:ruoloUtente==='professionista'?"▶ Avvia":"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
     /* 7 nov 2026 — «Segna fatto» per primo nella finestra del lavoro (trovato nel collaudo dal vivo) */
     if(withFoto&&!fatto)az.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true,prima:true});
     if(withFoto&&fatto)az.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
@@ -424,6 +424,11 @@
     if(uno&&fatto){
       const f=az.find(v=>v&&v.action==="fatt"&&/Crea fattura/.test(String(v.lab||"")));
       if(f)return `<button class="btn btn-sm ja ja-fatt" data-action="fatt"${tabAttr(f.data)}>🧾 Crea fattura</button>`+uno;
+    }
+    /* 27 nov 2026 (sì di Alex) — sul lavoro DA FARE «✔ Fatto» accanto ad «Apri»:
+       stessa azione di «Segna fatto» nella finestra, senza entrarci */
+    if(uno&&!fatto&&ruoloUtente!=='professionista'){
+      return `<button class="btn btn-sm ja ja-fatto" data-action="stato-supa"${tabAttr({id:l.id,v:"fatto",dp:dp||""})}>✔ Fatto</button>`+uno;
     }
     return uno||schedaAzioni(az);
   }

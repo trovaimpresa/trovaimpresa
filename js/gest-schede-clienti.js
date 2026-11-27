@@ -345,7 +345,7 @@
       /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
          anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
-      sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato,dove_lat,dove_lon,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,data_fatto,operatore_id,cliente_id,importo,fatt_stato,dove_lat,dove_lon,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       /* 17 nov 2026 (voce Clienti) — anche i clienti nel Cestino, come fa
          l'elenco dei Preventivi: il lavoro di un cliente buttato non diceva
@@ -381,8 +381,13 @@
     /* In "Tutti" i finiti scendono in fondo: la lista serve a vedere cosa resta da fare.
        Nelle altre viste i lavori sono già tutti aperti o tutti chiusi, quindi conta solo la data. */
     const _fin=l=>l.stato==="fatto"?1:0;
+    /* 27 nov 2026 (giro nuovo, sessione 2) — i FINITI in cima l'ultimo: prima
+       andavano dal piu' vecchio (agosto sopra novembre). Gli aperti restano per
+       data, dal piu' vicino. */
     L.sort((a,b)=>(filter.vista==="tutti"?_fin(a)-_fin(b):0)
-                ||(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+                ||((a.stato==="fatto"&&b.stato==="fatto")
+                    ? String(b.data_fatto||b.data_prevista||"").localeCompare(String(a.data_fatto||a.data_prevista||""))
+                    : (a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")));
     const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
     const _praPro=(ruoloUtente==='professionista');
     renderTabella({
@@ -419,7 +424,10 @@
         };
       }),
       numeri:lavNumeri(TUTTI,oggi,_praPro),
-      totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
+      /* 27 nov 2026 — se la riga dice gli stessi soldi del riquadro «Finiti e
+         non ancora incassati» (stessi lavori), non si ripete */
+      totale:(function(){const di=lavFiltra(TUTTI,"incassare",oggi);const vi=di.reduce((s,l)=>s+(+l.importo||0),0);
+        return (di.length===L.length&&eur(vi)===eur(tot)&&tot>0)?null:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)};})(),
       /* 7 nov 2026 — collaudo della semplicita': l'importo si vede su ogni riga,
          se no il totale in cima non si capisce da dove viene */
       cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",true,"lav","",cliVista[l.cliente_id]||"")).join("")

@@ -649,7 +649,7 @@
     const dp=l.data_prevista||"", fatto=l.stato==="fatto";
     const v=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
     if(l.dove)v.push({lab:"🗺 Mappa",action:"map",data:{q:l.dove}});
-    if(l.stato==="da_fare")v.push({lab:"▶ Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(l.stato==="da_fare")v.push({lab:ruoloUtente==='professionista'?"▶ Avvia":"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
     if(!fatto)v.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
     else v.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     v.push({lab:"📷 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
