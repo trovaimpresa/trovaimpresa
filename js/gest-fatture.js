@@ -124,6 +124,18 @@
     }
     return (fattAzienda&&fattAzienda.regime_fiscale)==="RF19";
   }
+  /* 27 nov 2026 (giro nuovo, sessione 3) — I DATI AZIENDA PRIMA DEI CONTI.
+     Entrando da Lavori (Fatture mai aperta) fattAzienda era ancora vuota:
+     «Crea fattura» copiava l'IVA 22% di un preventivo vecchio e il bollo da
+     2 € non si metteva, anche in forfettario. Chi decide IVA o bollo chiama
+     prima questa. */
+  async function fattAziendaPronta(){
+    if(fattAzienda||!sb||!sbUid)return;
+    try{
+      const {data,error}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+      if(!error)fattAzienda=data||null;
+    }catch(_){}
+  }
   function fattForfDi(f){
     return (f&&f.numero&&f.regime_fiscale)?(f.regime_fiscale==="RF19"):fattForfettario();
   }
@@ -922,7 +934,9 @@
          due sbagliato — qui sono i soldi entrati davvero (IVA compresa,
          ritenuta tolta), là è l'imponibile su cui si fa l'utile. Adesso si
          chiamano con parole diverse, così non si confondono più. */
-      + box(eur2(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok");
+      /* 27 nov 2026 (sessione 3) — in forfettario l'IVA non c'e': la riga diceva
+         «IVA compresa» anche a lui. Bolli compresi, perche' sono soldi entrati. */
+      + box(eur2(incAnno),"Entrato in cassa "+anno,fattForfettario()?"soldi entrati davvero":"IVA compresa, ritenuta tolta","ok");
     /* 30 settembre 2026 — DA CINQUE RIQUADRI A TRE + UNA RIGA ROSSA.
        «Il credito piu' vecchio» e «Fatture emesse» (coi buchi nella
        numerazione) erano due riquadri sempre accesi, anche quando andava
@@ -1267,6 +1281,11 @@
     fattRegimeCorrente=isNew?"art15":(f.spese_regime||null);
     /* la fattura gia' emessa tiene il suo regime per tutto il modulo */
     _fattForfModulo=(f.id&&f.numero&&f.regime_fiscale)?(f.regime_fiscale==="RF19"):null;
+    await fattAziendaPronta();
+    /* una fattura NUOVA in forfettario non si porta dietro l'IVA di chi l'ha
+       generata (preventivo vecchio, lavoro, acconto, duplica) */
+    if(isNew&&fattForfettario()&&preset&&Array.isArray(preset._righe))
+      preset._righe=preset._righe.map(r=>Object.assign({},r,{iva:0}));
     fattBolloAuto=isNew&&fattForfettario()&&!(+f.bollo);
     let righe=[];
     if(sb&&sbUid){
@@ -1943,6 +1962,7 @@
   }
 
   async function fattDaLavoriConferma(){
+    await fattAziendaPronta();
     const ck=Array.from($$("#fl-lista .fl-ck:checked"));
     const _st=(ruoloUtente==='professionista');
     if(!ck.length){toast(_st?"Spunta almeno una pratica":"Spunta almeno un lavoro");return;}
@@ -1961,6 +1981,18 @@
       righeIva.push({descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
         qta:1, prezzo:+l.importo||0, iva:al, ordine:i});
     }
+    /* 27 nov 2026 (sessione 3) — gli acconti gia' fatturati si tolgono anche
+       da qui, non solo da «Crea fattura» del lavoro: se no il cliente li
+       pagava due volte. Una fattura d'acconto si toglie UNA volta sola,
+       anche se tocca piu' lavori spuntati. */
+    const _visti=new Set();
+    for(const l of lavori){
+      for(const r of await _accontiDelLavoro(l.id)){
+        if(_visti.has(r.descrizione))continue;
+        _visti.add(r.descrizione);
+        righeIva.push(Object.assign({},r,{ordine:righeIva.length}));
+      }
+    }
     closeSheet();
     fattForm(null,{
       cliente_id:clienteId||null,
@@ -1968,6 +2000,7 @@
       _lavori:ids,
       _righe:righeIva
     });
+    if(_visti.size)toast(_visti.size===1?"Tolto l'acconto che hai già fatturato":"Tolti i "+_visti.size+" acconti che hai già fatturato");
   }
 
   async function fattDaPreventivoScegli(){
@@ -2028,6 +2061,7 @@
   async function fattDaPreventivoId(pid,opz){
     opz=opz||{};
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    await fattAziendaPronta();
     const [{data:p,error:eP},{data:rr,error:eR}]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("id",pid).eq("user_id",sbUid).maybeSingle(),
       sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",pid).order("ordine")
@@ -2046,6 +2080,13 @@
           if(ff&&ff.length){closeSheet();await fattForm(ff[0]);toast("Questo preventivo è già in una fattura: te l'ho aperta");return;}
         }
       }catch(_){}
+      /* 27 nov 2026 (sessione 3) — anche da «Da un preventivo accettato» si
+         tolgono gli acconti gia' fatturati del suo lavoro (prima solo da
+         «Crea fattura» del lavoro): il cliente non li paga due volte */
+      if(!opz.dedurre){
+        opz.dedurre=await _accontiDelLavoro(p.lavoro_id);
+        if(opz.dedurre.length)opz.daLavoro=true;
+      }
     }
     /* la percentuale della cassa passa SEMPRE intera, qualunque sia. Quale
        cassa sia lo dice la fattura: se non l'hai mai scritta, il modulo la
@@ -2210,6 +2251,7 @@
   }
   async function fattDaUnLavoro(lavoroId){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    await fattAziendaPronta();
     /* se quel lavoro sta già dentro una fattura, non ne creo un'altra: apro quella */
     const {data:gia}=await sb.from("gest_fattura_lavori").select("fattura_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).limit(1);
     if(gia&&gia.length){

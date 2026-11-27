@@ -5615,6 +5615,8 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 .co-az .co-prev{ height:46px; padding:0 20px; font-size:17px; font-weight:700; white-space:nowrap; border-radius:12px; }
 .co-altro{ position:relative; }
 .co-altro-b{ height:46px; padding:0 16px; font-size:16px; font-weight:600; white-space:nowrap; }
+/* 27 nov 2026 (sessione 3) — «💶 Acconti» in vista, come «Altro» */
+.co-az .co-acc{ height:46px; padding:0 16px; font-size:16px; font-weight:600; white-space:nowrap; }
 .co-menu{ display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:60;
   background:var(--card,#fff); border:1px solid var(--bordo,#E2E8F0); border-radius:12px;
   box-shadow:0 10px 30px rgba(15,23,42,.18); padding:6px; min-width:300px; max-width:calc(100vw - 32px); }
@@ -5630,6 +5632,10 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 @media(max-width:900px){
   .sheet--grande .sh-head .co-az{ order:3; flex:1 0 100%; margin-left:0; }
   .co-az .co-prev{ flex:1 1 auto; }
+  .co-az:has(.co-acc){ flex-wrap:wrap; }
+  .co-az:has(.co-acc) .co-prev{ flex:1 0 100%; }
+  .co-az .co-acc,.co-az:has(.co-acc) .co-altro{ flex:1 1 0; }
+  .co-az:has(.co-acc) .co-altro-b{ width:100%; }
   .co-menu{ min-width:270px; }
 }
 /* in fondo Annulla e Salva stanno sulla stessa riga anche a 375 px:

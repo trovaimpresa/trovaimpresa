@@ -100,7 +100,8 @@
         out.nota_iva="I prezzi delle singole voci sono al netto dell'IVA.";
       }else{
         out.totale=["Totale",eur2(_pc.totale)];
-        out.totale_nota="IVA esclusa";
+        /* 27 nov 2026 (sessione 3) — in forfettario «IVA esclusa» era falso */
+        out.totale_nota=((typeof fattForfettario==="function")&&fattForfettario())?"Senza IVA (regime forfettario)":"IVA esclusa";
       }
       /* 19 nov 2026 — l'acconto: righe DOPO il totale. La chiave «dopo» c'e'
          solo se c'e' l'acconto: i preventivi gia' firmati non hanno questa

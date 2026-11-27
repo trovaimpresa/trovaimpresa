@@ -356,6 +356,9 @@
     const az=document.createElement("div");
     az.className="co-az";
     az.innerHTML=(prev?'<button type="button" class="btn-primary co-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(c.id))+'">→ Crea il preventivo</button>':'')
+      /* 27 nov 2026 (sessione 3) — gli acconti stavano solo dentro «Altro»:
+         a impresa e artigiano un pulsante in vista */
+      +((ruoloUtente!=='professionista'&&c.id)?'<button type="button" class="btn co-acc" data-action="co-pag" data-p="5">💶 Acconti</button>':'')
       +'<div class="co-altro"><button type="button" class="btn co-altro-b" aria-haspopup="true" aria-expanded="false">Altro ▾</button>'
       +'<div class="co-menu" role="menu">'
       +  doc.map(btn).join("")
@@ -363,11 +366,15 @@
       /* 6 nov 2026 — il capitolato si apre anche da qui, se da questo computo
          e' gia' nato un preventivo (il capitolato vive dentro il preventivo) */
       +  (_capDaComputo(c)?'<hr><button type="button" data-chiudi="1" data-action="prev-capitolato" data-id="'+esc(String(c.preventivo_id))+'">Capitolato del preventivo</button>':'')
+      /* 27 nov 2026 (sessione 3) — senza data-chiudi: quello chiude la FINESTRA
+         del computo (#overlay), non il menu. Premendo «Acconti a lavoro fatto»
+         il computo spariva e si tornava all'elenco. Il menu si chiude da solo
+         col clic (ascoltatore .co-altro qui sotto). */
       +  ((ruoloUtente!=='professionista')?('<hr>'
-           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="4">La scheda (titolo, cliente, dove)</button>'
-           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="5">Acconti a lavoro fatto</button>'
-           +'<button type="button" data-chiudi="1" data-action="co-pag" data-p="6">Calendario dei lavori</button>'
-           +(c.variante_di?'<button type="button" data-chiudi="1" data-action="co-pag" data-p="7">Cosa è cambiato</button>':'')):'')
+           +'<button type="button" data-action="co-pag" data-p="4">La scheda (titolo, cliente, dove)</button>'
+           +'<button type="button" data-action="co-pag" data-p="5">Acconti a lavoro fatto</button>'
+           +'<button type="button" data-action="co-pag" data-p="6">Calendario dei lavori</button>'
+           +(c.variante_di?'<button type="button" data-action="co-pag" data-p="7">Cosa è cambiato</button>':'')):'')
       +  '<div class="co-menu-ctr"></div>'
       +  (via.length?'<hr>'+via.map(btn).join(""):'')
       +'</div></div>';
@@ -2479,7 +2486,11 @@
           +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-annulla">Annulla</button>'
           +'</div></div>'
         : '')
-      +(_niente?'':'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>');
+      /* 27 nov 2026 (sessione 3) — a impresa e artigiano la quantita' si scrive
+         anche a mano («quantità scritta»): la frase diceva il contrario */
+      +(_niente?'':'<div class="sh-nota">'+(ruoloUtente==='professionista'
+        ?'Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.'
+        :'Clicca una lavorazione per aprirla: scrivi la quantità, oppure le misure e la calcola il gestionale.')+'</div>');
     if(compCapNuovo){const i=$("#cc-tit");if(i){i.focus();
       /* 16 nov 2026 — collaudo dal vivo: scritto il nome e premuto Invio non succedeva niente */
       i.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();const b=document.querySelector('[data-action="comp-cap-salva"]');if(b)b.click();}});}}

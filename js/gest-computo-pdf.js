@@ -1956,7 +1956,9 @@
        dire. L'IVA (4, 10 o 22%) si decide nel preventivo, non qui. */
     if(!pubblico){
       doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
-      doc.text("Importi IVA esclusa",R-2,y-2.6,{align:"right"});
+      /* 27 nov 2026 (sessione 3) — in forfettario «IVA esclusa» fa credere al
+         cliente che ci sia da aggiungere l'IVA: non c'e' */
+      doc.text(((az&&az.regime_fiscale)==="RF19")?"Senza IVA — regime forfettario":"Importi IVA esclusa",R-2,y-2.6,{align:"right"});
       doc.setTextColor(0);y+=2.5;
     }
 

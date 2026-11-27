@@ -513,7 +513,7 @@
         +      'background:var(--card,#fff);border:1.5px solid var(--bordo-forte,#cbd2da);'
         +      'border-radius:10px">'
         +  '<small style="font-size:14px;color:var(--testo2,#5a6672)">'
-        +    'su '+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
+        +    'su '+_misLetta(v.quantita)+(v.unita?" "+esc((typeof _umSchermo==="function")?_umSchermo(v.unita):v.unita):"")
         +    ' previsti × '+eur2(v.prezzo_unitario)
         +    (prima!=null?(' · l\'ultima volta: '+_misLetta(prima)):'')
         +  '</small>'
@@ -869,6 +869,9 @@
     }
 
     salFattDati={sal:s,comp:comp,k:k};
+    /* 27 nov 2026 (sessione 3) — senza ritenuta di garanzia le due scelte
+       erano uguali («intero 720» / «al netto 720»): si va dritti alla fattura */
+    if(!(+k.ritenuta>0))return salFatturaCon("intero");
 
     openSheetGrande("La fattura di questo acconto",
        '<div class="sh-b"><div class="sh-tit">Per quale cifra la faccio?</div>'
@@ -892,6 +895,7 @@
     if(!d){toast("Riapri "+_sa("lo stato di avanzamento","l'acconto")+" e riprova");return;}
     const s=d.sal, comp=d.comp, k=d.k;
     const importo=(modo==="netto")?k.netto:k.lordo;
+    if(typeof fattAziendaPronta==="function")await fattAziendaPronta();
     if(!(importo>0)){toast("Non c'è niente da fatturare");return;}
 
     const periodo=(s.periodo_dal||s.periodo_al)
@@ -1180,7 +1184,7 @@
       doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
       if(i===np){
         doc.text("Le quantità indicate sono quelle eseguite dall'inizio dei lavori; l'importo del presente stato di avanzamento è "
-          +"la differenza rispetto a quanto già liquidato. Importi al netto dell'IVA.",M,286,{maxWidth:R-M-24});
+          +"la differenza rispetto a quanto già liquidato. "+((az.regime_fiscale==="RF19")?"Senza IVA (regime forfettario).":"Importi al netto dell'IVA."),M,286,{maxWidth:R-M-24});
       }
       doc.text("Pag. "+i+" di "+np,R,289,{align:"right"});
       doc.setTextColor(0);
@@ -1347,7 +1351,7 @@
      stavano in mezzo, mai usati. Tre pulsanti in alto: tutte, solo le tue
      (fonte «mio» o vuota), una tariffa. Compaiono solo se ci sono almeno due
      gruppi. Il filtro vale per l'elenco, «Mostra altre» e la ricerca. */
-  let pzFonte="", pzFontiN=null;
+  let pzFonte="", pzFontiN=null, pzFonteScelta=false;
   function _pzFiltro(qy){
     if(pzFonte==="mio")return qy.or("fonte.eq.mio,fonte.is.null");
     if(pzFonte)return qy.eq("fonte",pzFonte);
@@ -1376,7 +1380,7 @@
         const b=ev.target.closest("[data-pzf]"); if(!b)return;
         const f=b.getAttribute("data-pzf");
         if(f===pzFonte)return;
-        pzFonte=f; renderPrezzario();
+        pzFonte=f; pzFonteScelta=true; renderPrezzario();
       });
     }
     const _n=n=>Number(n||0).toLocaleString("it-IT");
@@ -1404,6 +1408,12 @@
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Prezzario","Accedi per usare il tuo prezzario.","");return;}
     /* 6 nov 2026 — «Mostra altre» e la ricerca non rileggono le mille voci
        dal database: usano quelle gia' lette (daCache===true) */
+    /* 27 nov 2026 (sessione 3) — chi ha prezzi suoi E una tariffa regionale
+       la prima volta vede i SUOI (prima finivano in mezzo a 12.000 voci) */
+    if(!pzFonteScelta){
+      pzFonteScelta=true;
+      try{ const N=await _pzFontiConta(); if(N&&N.mio>0&&N.tar.length)pzFonte="mio"; }catch(_){}
+    }
     if(!(daCache===true&&pzCache.length)){
       const [r1,r2]=await Promise.all([
         _pzOrdina(_pzFiltro(sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null))).limit(PZ_MAX),

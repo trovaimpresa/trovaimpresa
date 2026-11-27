@@ -4740,3 +4740,18 @@ Online: 00d666f (punti 11 e 13 della sessione 1) + 59744252, b093d5cf, a29d3221 
 - Lavori: i finiti in ordine dall'ultimo (data_fatto letta nella select); «✔ Fatto» accanto ad «Apri» sui lavori aperti (schedaAzioniLavoro, non allo studio); «▶ Avvia» → «▶ Inizio i lavori» (studio resta Avvia); la barra blu sparisce quando ripete il riquadro «Finiti e non ancora incassati».
 - Calendario: nessun difetto.
 Da sapere: nel browser dell'app la pagina non ha il fuoco (document.hasFocus() falso): per far rileggere la ricerca si manda a mano l'evento «focus». Il 📋 di «Capitolato» nel browser dell'app non si disegna (sembra uno spazio): non è un difetto.
+
+# 27 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 3: I SOLDI (impresa e artigiano)
+Giro da utente vero su Fatture, Computo e acconti, Prezzario. Reparto «ferramenta» (Alex è in forfettario RF19), «PROVA CONTROLLORE», 1440 e 375. `?v=27nov-soldi` su 6 js + gestionale.css.
+Difetti sistemati:
+- ⛔ Fattura nata da Lavori (Fatture mai aperta): `fattAzienda` vuota → copiava l'IVA 22% del preventivo vecchio (nascosta) e NON metteva il bollo da 2 € (provato: 2.220,50 senza bollo). Ora `fattAziendaPronta()` in js/gest-fatture.js, chiamata in fattForm (prima di `fattBolloAuto`), fattDaPreventivoId, fattDaUnLavoro, fattDaLavoriConferma, salFatturaCon. Fattura NUOVA in forfettario: le righe preset nascono a IVA 0.
+- ⛔ Acconti già fatturati tolti solo da «Crea fattura» del lavoro: ora anche da «Da uno o più lavori finiti» (una volta sola anche con più lavori, `_visti`) e da «Da un preventivo accettato» (`_accontiDelLavoro(p.lavoro_id)`). ⬜ Non provato dal vivo: serve una fattura d'acconto EMESSA (vietato).
+- ⛔ Computo, «Altro ▾» → La scheda / Acconti a lavoro fatto / Calendario / Cosa è cambiato: avevano `data-chiudi` che chiude #overlay = TUTTO il computo. Tolto (il menu si chiude da solo).
+- In forfettario niente «IVA esclusa / oltre IVA»: riquadro Fatture «Entrato in cassa» («soldi entrati davvero»), PDF acconto (salPdf), PDF computo («Senza IVA — regime forfettario»), PDF preventivo e conferma d'ordine (`azLetta`/`az` RF19), link al cliente (`totale_nota`).
+- Acconto: «m2» → «m²» (`_umSchermo`).
+Fatti col sì di Alex (foto prima):
+- Ritenuta di garanzia 0 → «Crea la fattura di questo acconto» va dritto alla fattura (niente scelta con due cifre uguali).
+- «💶 Acconti» in vista nella testa del computo (impresa/artigiano, `.co-acc`; telefono: Crea il preventivo sopra, Acconti + Altro sotto).
+- Frase sotto le lavorazioni: «scrivi la quantità, oppure le misure e la calcola il gestionale» (lo studio resta com'era).
+- Prezzario: la prima volta si apre su «I tuoi prezzi» se ci sono prezzi tuoi E una tariffa (`pzFonteScelta`).
+Da sapere: la descrizione della fattura d'acconto resta «Stato avanzamento lavori n. …» (va al cliente e allo SDI, decisione del 17 nov). Le foto si fanno con /home/claude/foto/foto3.js (stampo di tools/foto-gestionale.js con dati in più); il finto database NON capisce `.or` (I tuoi prezzi = tutte): il Prezzario si fotografa dal vivo.

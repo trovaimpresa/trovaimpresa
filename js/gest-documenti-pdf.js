@@ -212,7 +212,8 @@
       vociBox.forEach(function(v){doc.text(v[0],R-88,ry);doc.text(v[1],R-2,ry,{align:"right"});ry+=6;});
       doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
       doc.setFont("helvetica","bold");doc.setFontSize(11.5);
-      doc.text(conIva?"TOTALE":"TOTALE (IVA esclusa)",R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
+      /* 27 nov 2026 (sessione 3) — in forfettario non c'e' IVA da aggiungere */
+      doc.text(conIva?"TOTALE":(((azLetta||{}).regime_fiscale==="RF19")?"TOTALE (senza IVA)":"TOTALE (IVA esclusa)"),R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
       if(accBox.length){
         doc.setFont("helvetica","normal");doc.setFontSize(9.5);
         let ay=ry+13;
@@ -251,7 +252,9 @@
       ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente è sostituto d'imposta."
       : (ivaIndicata
         ? "Preventivo non vincolante, salvo diversa indicazione nelle note. I prezzi delle singole voci sono al netto dell'IVA; il totale sopra riportato è comprensivo di IVA al "+(+p.iva_perc||0)+"%."
-        : "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato."),
+        : (((azLetta||{}).regime_fiscale==="RF19")
+          ? "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi senza IVA: regime forfettario (art. 1, commi 54-89, L. 190/2014)."
+          : "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato.")),
       M,286,{maxWidth:R-M});
     /* «BOZZA» sta anche nel NOME DEL FILE: e' quello che si legge nella
        cartella dei download e nell'allegato dell'email, cioe' l'ultimo
@@ -908,7 +911,9 @@
       y+=3;
     }
     paragrafo(perc==null
-      ? "Il corrispettivo si intende IVA esclusa. Il prezzo è fisso e invariabile per le opere sopra indicate."
+      ? (az.regime_fiscale==="RF19"
+          ? "Il corrispettivo è senza IVA: regime forfettario (art. 1, commi 54-89, L. 190/2014). Il prezzo è fisso e invariabile per le opere sopra indicate."
+          : "Il corrispettivo si intende IVA esclusa. Il prezzo è fisso e invariabile per le opere sopra indicate.")
       : "Il prezzo è fisso e invariabile per le opere sopra indicate, comprensivo di IVA nella misura riportata.",8.8,false,90);
 
     titoletto("Modalità di pagamento");
