@@ -1369,7 +1369,7 @@ const STRUMENTI = [
   {
     // ⛔ come compila_lavoro: non legge e non scrive niente
     name: 'compila_preventivo',
-    description: 'Apre nel gestionale il modulo «Nuovo preventivo» GIÀ COMPILATO con titolo e voci. Usalo quando ti chiede un preventivo. PRIMA guarda i SUOI prezzi con `miei_prezzi` e, se serve, i suoi preventivi vecchi. NON salva niente: l\'utente controlla e preme Salva lui. Il prezzo di una voce lo metti SOLO se lo hai letto fra i suoi prezzi o nei suoi preventivi: altrimenti lo lasci fuori (resta vuoto, lo scrive lui). La quantità la metti solo se te l\'ha detta o si ricava dalle misure che ti ha dato.',
+    description: 'Apre nel gestionale il modulo «Nuovo preventivo» GIÀ COMPILATO con titolo e voci. Usalo quando ti chiede un preventivo. PRIMA guarda i SUOI prezzi con `miei_prezzi` e, se serve, i suoi preventivi vecchi. NON salva niente: l\'utente controlla e preme Salva lui. I PREZZI (27 nov 2026): dove c\'è un prezzo SUO lo usi e metti fonte «tuo»; per le altre voci metti un prezzo del gestionale preso dai PREZZI DI RIFERIMENTO delle istruzioni e fonte «gestionale» (lui lo controlla). Se ti ha detto «solo i miei prezzi», le voci senza un suo prezzo restano senza prezzo. La quantità la metti solo se te l\'ha detta o si ricava dalle misure che ti ha dato.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1383,7 +1383,8 @@ const STRUMENTI = [
               descrizione:     { type:'string' },
               unita:           { type:'string', description:'mq, ml, cad, ore…' },
               quantita:        { type:'number' },
-              prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' }
+              prezzo_unitario: { type:'number', description:'euro per unità: il SUO prezzo se l\'hai letto, se no un prezzo di riferimento del gestionale' },
+              fonte:           { type:'string', enum:['tuo','gestionale'], description:'«tuo» SOLO se il prezzo è quello esatto letto fra i suoi prezzi o nei suoi preventivi; «gestionale» se viene dai prezzi di riferimento' }
             },
             required: ['descrizione']
           }
@@ -1409,7 +1410,8 @@ const STRUMENTI = [
               descrizione:     { type:'string' },
               unita:           { type:'string', description:'m², m, cad, ore, a corpo…' },
               quantita:        { type:'number' },
-              prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' },
+              prezzo_unitario: { type:'number', description:'euro per unità: il SUO prezzo se l\'hai letto, se no un prezzo di riferimento del gestionale' },
+              fonte:           { type:'string', enum:['tuo','gestionale'], description:'«tuo» SOLO se il prezzo è quello esatto letto fra i suoi prezzi o nei suoi preventivi; «gestionale» se viene dai prezzi di riferimento' },
               prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene il prezzo, come sta scritta (corta)' },
               codice:          { type:'string', description:'il `codice` della voce del suo prezzario da cui hai preso il prezzo, come l\'hai letto con miei_prezzi' },
               capitolo:        { type:'string', description:'il capitolo del computo in cui va la riga, se te lo dice («nel capitolo Opere murarie» → «Opere murarie»). NON scriverlo dentro la descrizione' }
@@ -1652,6 +1654,20 @@ const MANUALE_STUDIO = (function manualeStudio() {
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
 //    la fa lui, non Claude.
 // ---------------------------------------------------------------------
+/* ⛔ 27 nov 2026 — I PREZZI DEL GESTIONALE. Un'impresa nuova non ha
+   prezzi suoi: la chat si fermava a «non ho trovato i tuoi prezzi» e il primo
+   preventivo non nasceva mai (visto nel registro vero). Adesso dove manca un
+   suo prezzo si mette uno di questi, segnato «del gestionale — da
+   controllare». ⚠️ Sono gli stessi numeri di supabase/functions/ai-generate
+   (feature «preventivo»): se cambiano lì, si cambiano anche qui. */
+const PREZZI_DI_RIFERIMENTO = 'PREZZI DI RIFERIMENTO DEL GESTIONALE (fornitura e posa, finiture medie, IVA esclusa, area Roma/Lazio, verso il centro della forbice): '
+  + 'manodopera manovale 25 €/h, muratore specializzato 33 €/h; demolizione pavimenti/rivestimenti con carico macerie 12-18 €/mq; demolizione tramezzo 40-50 €/mq; '
+  + 'trasporto e conferimento macerie a corpo (bagno o stanza 300-600 €, appartamento 1.200-2.500 €); cartongesso posato e stuccato 60-85 €/mq; massetto 18-25 €/mq; '
+  + 'pavimento in gres posato 45-70 €/mq; rivestimento bagno posato 50-70 €/mq; battiscopa 8-12 €/ml; impianto elettrico completo 70-100 €/mq della casa o 80-150 € a punto; '
+  + 'impianto idraulico bagno completo 900-1.300 €, cucina 800-900 €, a punto acqua 75-150 €; sanitari sospesi posati 1.000-1.600 € a bagno; rubinetteria 300-600 € a bagno; '
+  + 'piatto doccia 150-300 € + box 300-550 €; caldaia a condensazione chiavi in mano 1.800-2.500 €; radiatore posato 250-400 €; rasatura 10-15 €/mq; '
+  + 'tinteggiatura pareti e soffitti 6-12 €/mq; porta interna posata 350-600 €; porta blindata posata 1.200-1.900 €; finestra PVC 2 ante posata 480-680 €; '
+  + 'portafinestra PVC 2 ante 800-1.150 €; protezioni e allestimento cantiere a corpo 100-300 €; pulizia finale a corpo 100-250 €.';
 function istruzioniFisse(ruolo) {
   return [
     'Sei la chat di aiuto dentro il gestionale di TrovaImpresa, usato da imprese edili, artigiani, studi tecnici, negozi di materiali e noleggi.',
@@ -1718,7 +1734,8 @@ function istruzioniFisse(ruolo) {
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per una cosa da RICORDARE («ricordami…», «domani devo…», o con un\'ora) `compila_promemoria`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
-    'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
+    'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ 27 nov 2026 — NON FERMARTI PERCHÉ MANCANO I SUOI PREZZI: dove ha un suo prezzo lo usi (fonte «tuo»), per le altre voci metti un prezzo dai PREZZI DI RIFERIMENTO qui sotto (fonte «gestionale»): nel modulo si vede scritto «prezzo del gestionale — da controllare» e può salvarli come suoi. Se ti dice «solo i miei prezzi», le voci senza un suo prezzo restano SENZA prezzo; se dice «coi prezzi del gestionale» usi solo quelli di riferimento. ⛔ Una voce con fonte «tuo» deve avere ESATTAMENTE il prezzo letto: mai un prezzo di riferimento spacciato per suo. ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi sono SUOI e quali del gestionale da controllare. Non salvi niente: salva lui. (STUDIO TECNICO: la parcella si fa solo coi suoi onorari; quelli che mancano restano vuoti, niente prezzi di riferimento.)',
+    PREZZI_DI_RIFERIMENTO,
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo` (se il prezzo viene da una sua voce passa anche il suo `codice`; se ti dice il capitolo passalo in `capitolo`, mai dentro la descrizione). ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
     'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (20 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',

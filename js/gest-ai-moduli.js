@@ -242,6 +242,155 @@
     + 'Metti SOLO le prestazioni professionali del tecnico (sopralluogo e rilievo, progetto, pratica edilizia e deposito al Comune, '
     + 'direzione lavori, coordinamento sicurezza, aggiornamento catastale, APE, fine lavori), a corpo, con l\'onorario del tecnico. '
     + 'NIENTE lavori edili, materiali o manodopera di cantiere: quelli li fa l\'impresa. Niente capitoli se le voci sono 8 o meno.]\n';
+  /* ============================================================
+     ⛔ 27 nov 2026 — CON QUALI PREZZI? (idea di Alessio)
+     ============================================================
+     Visto nel registro vero: un'impresa nuova chiede un preventivo, non ha
+     ancora prezzi suoi, e si blocca. E le due strade facevano il contrario:
+     la riga AI del modulo usava SOLO i prezzi del gestionale (ignorava i
+     suoi), la Chat SOLO i suoi (e senza si fermava).
+     Adesso, prima di «Riempi le caselle», si sceglie:
+       - Tutti e due (gia' scelto): i suoi dove ci sono, il gestionale per il resto
+       - Solo i miei: le voci senza un suo prezzo restano vuote
+       - Del gestionale
+     Chi non ha prezzi suoi non vede la domanda: usa il gestionale e lo dice.
+     Sotto ogni prezzo si legge da dove viene; quelli del gestionale si
+     possono salvare come suoi con un tocco (il Prezzario si riempie da solo).
+     ⚠️ «tuo» lo dice l'AI ma lo CONTROLLA il gestionale: il prezzo deve
+        essere uno di quelli del suo elenco, se no e' «del gestionale».
+     ⚠️ Lo studio tecnico (parcella) resta com'era: niente domanda. */
+  let aiPzModo="entrambi", aiPzMiei=null;
+  function aiPzSceltaHTML(){
+    return '<div class="pzs" id="ai-pzs" hidden>'
+      + '<div class="pzs-t">Con quali prezzi?</div>'
+      + '<div class="pzs-b" role="group" aria-label="Con quali prezzi">'
+      +   '<button type="button" data-pzs="entrambi" class="on" aria-pressed="true">Tutti e due</button>'
+      +   '<button type="button" data-pzs="miei" aria-pressed="false">Solo i miei</button>'
+      +   '<button type="button" data-pzs="gestionale" aria-pressed="false">Del gestionale</button>'
+      + '</div>'
+      + '<div class="pzs-n" id="ai-pzs-n">I tuoi prezzi dove ci sono, quelli del gestionale per il resto.</div>'
+      + '</div>';
+  }
+  const AI_PZS_NOTE={
+    entrambi:"I tuoi prezzi dove ci sono, quelli del gestionale per il resto.",
+    miei:"Solo i tuoi prezzi: dove non ne hai uno, la casella resta vuota e la scrivi tu.",
+    gestionale:"Tutti prezzi del gestionale, da controllare."
+  };
+  async function aiPzCaricaMiei(){
+    if(aiPzMiei) return aiPzMiei;
+    if(typeof sb==="undefined"||!sbUid) return [];
+    try{
+      const r=await sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario")
+        .eq("user_id",sbUid).is("eliminato_il",null).or("fonte.eq.mio,fonte.is.null")
+        .order("usata_volte",{ascending:false}).limit(150);
+      if(r.error) return [];
+      aiPzMiei=(r.data||[]).filter(x=>String(x.descrizione||"").trim()&&+x.prezzo_unitario>0);
+      return aiPzMiei;
+    }catch(e){ return []; }
+  }
+  async function aiPzPrepara(){
+    const box=$("#ai-pzs"); if(!box) return;
+    aiPzModo="entrambi";
+    const miei=await aiPzCaricaMiei();
+    if(!document.body.contains(box)) return;
+    box.hidden=false;
+    if(!miei.length){
+      aiPzModo="gestionale";
+      box.querySelector(".pzs-b").hidden=true;
+      box.querySelector(".pzs-t").hidden=true;
+      $("#ai-pzs-n").textContent="Non hai ancora prezzi tuoi: uso quelli del gestionale, da controllare. Dopo puoi salvarli come tuoi.";
+    }
+  }
+  /* il testo che va all'AI insieme alla richiesta: il suo listino */
+  function aiPzContesto(miei){
+    if(!miei||!miei.length) return "";
+    return "[I PREZZI DELL'IMPRESA — è il suo listino. Quando una voce è la STESSA lavorazione con la STESSA unità di misura, usa il SUO prezzo ESATTO e nella voce metti \"fonte\":\"tuo\". Per tutte le altre voci usa i tuoi prezzi di riferimento e metti \"fonte\":\"gestionale\".\n"
+      + miei.map(x=>"- "+String(x.descrizione).replace(/\s+/g," ").slice(0,140)+" | "+(x.unita||"")+" | "+(+x.prezzo_unitario)).join("\n")
+      + "]\n";
+  }
+  /* «tuo» solo se il prezzo e' davvero uno dei suoi */
+  function aiPzVerifica(voci,miei,modo){
+    (voci||[]).forEach(function(v){
+      if(!v) return;
+      const p=+v.prezzo_unitario;
+      const suo=modo!=="gestionale"&&String(v.fonte||"").toLowerCase()==="tuo"&&isFinite(p)&&p>0
+        &&(miei||[]).some(x=>Math.abs((+x.prezzo_unitario)-p)<0.005);
+      if(suo){ v._fonte="tuo"; return; }
+      if(modo==="miei"){ v.prezzo_unitario=null; v._fonte=""; return; }
+      v._fonte=(isFinite(p)&&p>0)?"ges":"";
+    });
+    return voci;
+  }
+  function aiPzEtichetta(f){
+    if(f==="tuo") return '<div class="pr-fonte tuo">✔ prezzo tuo</div>';
+    if(f==="ges") return '<div class="pr-fonte ges">⚠ prezzo del gestionale — da controllare</div>';
+    if(f==="corretto") return '<div class="pr-fonte tuo">✔ prezzo corretto da te</div>';
+    return "";
+  }
+  function aiPzBanner(){
+    const box=$("#prev-righe"); if(!box) return;
+    let b=$("#pzs-salva");
+    const n=$$('#prev-righe [data-riga][data-fonte="ges"],#prev-righe [data-riga][data-fonte="corretto"]').length;
+    if(!n){ if(b) b.remove(); return; }
+    if(!b){
+      box.insertAdjacentHTML("afterend",'<div class="pzs-salva" id="pzs-salva"><span class="pzs-salva-t"></span><button type="button" class="pzs-salva-b" data-pzs-salva>Salvali come tuoi prezzi</button></div>');
+      b=$("#pzs-salva");
+    }
+    b.querySelector(".pzs-salva-t").textContent=(n===1?"1 prezzo è del gestionale":n+" prezzi sono del gestionale")+". Li hai controllati?";
+  }
+  async function aiPzSalva(btn){
+    const righe=$$('#prev-righe [data-riga][data-fonte="ges"],#prev-righe [data-riga][data-fonte="corretto"]');
+    const da=[];
+    righe.forEach(function(r){
+      const desc=String((r.querySelector(".pr-desc")||{}).value||"").trim();
+      const pz=_numRiga(r,".pr-prezzo",null);
+      if(desc&&pz!=null&&pz>0) da.push({r:r,desc:desc,unita:(r.querySelector(".pr-um")||{}).value||null,prezzo:pz});
+    });
+    if(!da.length){ toast("Non ci sono prezzi da salvare: scrivi prima descrizione e prezzo."); return; }
+    btn.disabled=true; const prima=btn.textContent; btn.textContent="Salvo…";
+    let fatti=0, agg=0, err="";
+    for(const x of da){
+      try{
+        const g=await sb.from("gest_prezzi_propri").select("id").eq("user_id",sbUid).is("eliminato_il",null)
+          .or("fonte.eq.mio,fonte.is.null").ilike("descrizione",x.desc.replace(/[%_\\]/g,"\\$&")).limit(1);
+        if(g.error){ err=g.error.message; break; }
+        const riga={descrizione:x.desc,unita:x.unita,prezzo_unitario:x.prezzo};
+        let r;
+        if(g.data&&g.data.length){ r=await sb.from("gest_prezzi_propri").update(riga).eq("id",g.data[0].id).eq("user_id",sbUid).select("id"); agg++; }
+        else r=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid,fonte:"mio"},riga)).select("id");
+        if(r.error||!r.data||!r.data.length){ err=(r.error&&r.error.message)||"nessuna riga salvata"; break; }
+        fatti++;
+        x.r.dataset.fonte="tuo";
+        const e=x.r.querySelector(".pr-fonte"); if(e) e.outerHTML=aiPzEtichetta("tuo");
+      }catch(e){ err=(e&&e.message)||"errore"; break; }
+    }
+    aiPzMiei=null;
+    try{ ppTutte=[]; if(typeof rinfresca==="function") rinfresca("prezzario"); }catch(_){}
+    btn.disabled=false; btn.textContent=prima;
+    aiPzBanner();
+    if(err) toast("Salvati "+fatti+" prezzi su "+da.length+". Gli altri no: "+(typeof traduciErrore==="function"?traduciErrore(err):err));
+    else toast((fatti===1?"1 prezzo salvato":fatti+" prezzi salvati")+" nel tuo Prezzario ✔"+(agg?" ("+agg+" già c'erano: aggiornati)":""));
+  }
+  document.addEventListener("click",function(e){
+    const b=e.target.closest&&e.target.closest("[data-pzs]");
+    if(b){
+      aiPzModo=b.dataset.pzs;
+      $$("#ai-pzs [data-pzs]").forEach(x=>{const on=x===b; x.classList.toggle("on",on); x.setAttribute("aria-pressed",on?"true":"false");});
+      const n=$("#ai-pzs-n"); if(n) n.textContent=AI_PZS_NOTE[aiPzModo]||"";
+      return;
+    }
+    const s=e.target.closest&&e.target.closest("[data-pzs-salva]");
+    if(s){ aiPzSalva(s); return; }
+    if(e.target.closest&&e.target.closest('#prev-righe [data-action="prev-riga-del"]')) setTimeout(aiPzBanner,0);
+  });
+  /* se cambi un prezzo del gestionale, adesso e' tuo: la scritta lo dice */
+  document.addEventListener("input",function(e){
+    const t=e.target; if(!t||!t.classList||!t.classList.contains("pr-prezzo")) return;
+    const r=t.closest("[data-riga]"); if(!r||r.dataset.fonte!=="ges") return;
+    r.dataset.fonte="corretto";
+    const el=r.querySelector(".pr-fonte"); if(el) el.outerHTML=aiPzEtichetta("corretto");
+  });
+
   function aiRigaHTML(tipo){
     const m = AI_MODULI[tipo]; if(!m) return "";
     const pro = ruoloUtente==='professionista' && tipo==='lavoro';
@@ -273,7 +422,8 @@
                il consiglio delle piastrelle era per l'impresa */
             ? (proPrev
                 ? '<div class="campo-aiuto">Scrivi <b>la pratica</b> e <b>cosa fai tu</b> (rilievo, progetto, deposito, direzione lavori, catasto): ogni cosa diventa una voce della parcella.</div>'
-                : '<div class="campo-aiuto">Scrivi anche <b>quanti mq</b> e <b>fino a che altezza vanno le piastrelle</b> (di solito 1 m o 2 m): se no le quantità me le invento io.</div>')
+                : '<div class="campo-aiuto">Scrivi anche <b>quanti mq</b> e <b>fino a che altezza vanno le piastrelle</b> (di solito 1 m o 2 m): se no le quantità me le invento io.</div>'
+                  + aiPzSceltaHTML())
             : '')
       +   '<div class="ai-riga-az">'
       +     '<button type="button" class="ai-riga-go" id="ai-riga-go">Riempi le caselle</button>'
@@ -371,6 +521,7 @@
     }
     apri.onclick=()=>mostra(giu.hasAttribute("hidden"));
     if(typeof aiMicrofono==="function") aiMicrofono($("#ai-riga-mic"),inp,st);
+    if(m.feature==='preventivo'&&$("#ai-pzs")) aiPzPrepara();
 
     /* ============================================================
        ⛔ 22 agosto 2026 — LE MISURE SI CHIEDONO PRIMA, E GRATIS
@@ -415,9 +566,14 @@
            bagno per Rossi» rispondeva con demolizioni e piastrelle. Allo studio
            le si dice prima che servono solo le prestazioni del tecnico. Provato
            dal vivo: rilievo, progetto, CILA, direzione lavori, catasto, a corpo. */
-        const testoAI = (ruoloUtente==='professionista' && m.feature==='preventivo') ? (PARCELLA_CONTESTO + testo) : testo;
+        let testoAI = (ruoloUtente==='professionista' && m.feature==='preventivo') ? (PARCELLA_CONTESTO + testo) : testo;
+        /* 27 nov 2026 — con i suoi prezzi: il suo listino va all'AI */
+        const _pz = m.feature==='preventivo' && !!$("#ai-pzs");
+        const _miei = _pz ? await aiPzCaricaMiei() : [];
+        if(_pz && aiPzModo!=="gestionale" && _miei.length) testoAI = aiPzContesto(_miei) + testoAI;
         const d=pratica ? await window.AI.pratica(testo,null) : (_aiCli ? await window.AI.cliente(testo) : await window.AI.dati(m.feature,testoAI));
         if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
+        if(_pz && d && Array.isArray(d.voci)) aiPzVerifica(d.voci,_miei,_miei.length?aiPzModo:"gestionale");
         const messi=[], nonTrovati=[];
         m.campi.forEach(c=>{
           const v=d[c.da];
@@ -572,10 +728,15 @@
           unita:  v.unita||null,
           prezzo: pz
         }));
+        if(v._fonte&&pz!==""){
+          box.lastElementChild.dataset.fonte=v._fonte;
+          box.lastElementChild.insertAdjacentHTML("beforeend",aiPzEtichetta(v._fonte));
+        }
         _aiIllumina(box.lastElementChild);
         messe++;
       });
       if(messe){
+        aiPzBanner();
         prevTotaleLive();
         if(ruoloUtente==='professionista') aggiornaRiepilogoParcella();
         else aggiornaRiepilogoIvaImpresa();
@@ -2096,6 +2257,11 @@
       const t=String((d&&d.titolo)||"").trim().slice(0,200);
       const el=$("#pv-tit");
       if(t&&el){ el.value=t; el.dispatchEvent(new Event("input",{bubbles:true})); }
+      /* 27 nov 2026 — la chat segna «tuo» / «gestionale»: si controlla qui */
+      if(ruoloUtente!=='professionista'&&d&&Array.isArray(d.voci)&&d.voci.some(v=>v&&v.fonte)){
+        aiPzMiei=null;
+        aiPzVerifica(d.voci,await aiPzCaricaMiei(),"entrambi");
+      }
       aiRiempiPreventivo(d,messi);
       return true;
     }catch(e){ return false; }

@@ -6551,3 +6551,18 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 #ffc-az button:focus-visible{outline:3px solid #ff8800;outline-offset:2px}
 .lav-mat-tit{margin-top:18px}
 .spesa-row.sp-carta .sdel{font-size:18px}
+
+/* 27 nov 2026 — «Con quali prezzi?» nella riga AI del preventivo, e da dove
+   viene ogni prezzo (js/gest-ai-moduli.js) */
+.pzs{margin:10px 0 6px}
+.pzs-t{font-size:16px;font-weight:700;color:#0a2a4d;margin-bottom:6px}
+.pzs-b{display:flex;gap:8px;flex-wrap:wrap}
+.pzs-b button{font-size:16px;padding:10px 14px;min-height:44px;border:2px solid #cbd5e1;border-radius:10px;background:#fff;color:#0a2a4d;cursor:pointer}
+.pzs-b button.on{border-color:#0066ff;background:#eaf2ff;font-weight:700}
+.pzs-b button.on::before{content:"✓ "}
+.pzs-n{font-size:15px;color:#475569;margin-top:6px}
+.prev-riga .pr-fonte{grid-column:1/-1;font-size:15px;font-weight:600;margin:-2px 0 6px 2px}
+.prev-riga .pr-fonte.tuo{color:#15803d}
+.prev-riga .pr-fonte.ges{color:#b45309}
+.pzs-salva{margin:10px 0;padding:12px 14px;border:1px solid #fcd34d;background:#fffbeb;border-radius:12px;font-size:15px;color:#0a2a4d;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pzs-salva .pzs-salva-b{font-size:15px;min-height:44px;padding:8px 14px;border-radius:10px;border:0;background:#0066ff;color:#fff;font-weight:700;cursor:pointer}
