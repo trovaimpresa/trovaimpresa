@@ -588,7 +588,8 @@
     if(dipSonoIo(o))return "Tu";
     if(o&&o.acc==="scaduto")return "Invito scaduto";
     if(o&&o.acc==="tolto")return "Accesso tolto";
-    return o&&o.attivo?"Attivo":(o&&o.codice?"Invitato":"Senza invito");
+    /* 27 nov 2026: «Invitato» lo diceva anche a chi non aveva ancora ricevuto niente (il codice nasce con la persona): adesso dice la cosa vera */
+    return o&&o.attivo?"Attivo":(o&&o.codice?"Non è entrato":"Senza invito");
   }
   /* 18 nov 2026 (voce Squadra) — COME STA DAVVERO L'INVITO.
      Il codice d'invito vale 14 giorni e una volta sola (gest_redeem_invito),

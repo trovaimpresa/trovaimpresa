@@ -133,6 +133,10 @@
 
   function avvia() {
     if (document.querySelector('.sh-back')) return;   /* il gestionale ha gia' la sua */
+    /* 27 nov 2026 — l'app dell'operaio: la prima schermata E' casa sua. La
+       freccia, aperta dall'icona sul telefono (niente pagina prima), lo
+       portava alla home del sito. Pagine così: <body data-senza-freccia>. */
+    if (document.body && document.body.hasAttribute('data-senza-freccia')) return;
     mettiStile();
 
     var sezioni = document.querySelectorAll('.section[id^="sec-"]');

@@ -131,7 +131,10 @@ function sqgCard(o) {
        si metteva solo con la mansione scritta a mano); il numero si tocca */
     + '<div class="sqg-sotto">' + [esc(o.mansione || (io ? "Titolare" : "") || (typeof sqRuoloNome === "function" && sqRuoloNome(o.ruolo)) || ""),
         o.telefono ? (/\d/.test(String(o.telefono)) ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : esc(o.telefono)) : ""
-      ].filter(Boolean).join(" · ") + '</div></div>'
+      /* 27 nov 2026 (giro nuovo, sessione 4): mestiere e telefono su due righe —
+         col « · » in mezzo, sul telefono il numero andava a capo e il punto
+         restava appeso in fondo alla riga («muratore ·») */
+      ].filter(Boolean).join("<br>") + '</div></div>'
     + '<div class="sqg-dx"><span class="stato ' + (o.attivo || io ? "fatto" : (o.acc === "scaduto" ? "da_fare" : "bozza")) + '">' + (typeof dipStato === "function" ? dipStato(o) : (o.attivo ? "Attivo" : "Invitato")) + '</span>' + altro + '</div></div>'
     + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + ((typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? (d.lavori.size === 1 ? " pratica" : " pratiche") : (d.lavori.size === 1 ? " cantiere" : " cantieri")) : "") + '</span></div>'
     + ((sqgStru[String(o.id)] || []).length ? '<div class="sqg-sotto" style="margin:6px 0 0">🔧 Ha: ' + esc(sqgStru[String(o.id)].join(", ")) + '</div>' : "")
@@ -172,7 +175,8 @@ async function sqgApri(id, nome, mese) {
   sqgPers = { id: String(id), nome: nome || "", mese: mese || sqgMese || todayStr().slice(0, 7) };
   const n = esc(sqgPers.nome);
   openSheetGrande("Giornate di " + (sqgPers.nome || "questa persona"), '<div id="sqg-corpo"><div class="acq-vuoto">Un attimo…</div></div>',
-    '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+    /* 27 nov 2026: cli-chiudi = sul telefono «Chiudi» sparisce (c'è «Indietro» in alto) e gli altri due stanno affiancati, come nella scheda del cliente */
+    '<button class="btn b-cancel cli-chiudi" data-action="close">Chiudi</button>'
     + '<button class="btn" data-action="sq-edit" data-id="' + esc(sqgPers.id) + '">' + SQG_IC.scheda + ' Scheda</button>'
     + '<button class="btn-primary" data-action="chat-squadra" data-id="' + esc(sqgPers.id) + '" data-nome="' + n + '">' + SQG_IC.msg + ' Messaggi</button>');
   await sqgPersDisegna();

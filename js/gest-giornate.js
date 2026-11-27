@@ -531,6 +531,10 @@ function giorTotali(righe){
    --------------------------------------------------------------------- */
 async function renderGiornate(){
   const box=document.getElementById("gior-box"); if(!box) return;
+  /* 27 nov 2026 — dopo una giornata salvata, cambiata o cancellata Squadra
+     diceva ancora «0 giorni» finché non si ricaricava: le sezioni che contano
+     le giornate si ridisegnano alla prossima apertura. */
+  try{ if(typeof _tabSporchi!=="undefined") ["squadra","riepilogo","report","calendario"].forEach(t=>_tabSporchi.add(t)); }catch(_){}
   /* 24 nov 2026 — allo studio niente «Acquisti del mese» (merce letta da
      fatture e bolle): tolto in Fornitori il 20 nov, restava qui. */
   { const ab=document.querySelector('#giornate [data-acq="mese"]'); if(ab) ab.style.display=_gPro()?"none":""; }
@@ -743,7 +747,14 @@ function giorDaNome(n){
   const k=_gNorm(n); if(!k) return null;
   if(n==="IO") return "IO";
   const o=giorOps.find(x=>_gNorm(x.nome)===k) || giorOps.find(x=>_gNorm(x.nome).split(" ")[0]===k.split(" ")[0]);
-  return o?o.nome:null;
+  if(o) return o.nome;
+  /* 27 nov 2026: detto solo il cognome («Rossi») o un nome che non sta per primo:
+     se in Squadra c'è UNA sola persona con quella parola nel nome, è lei (niente doppione) */
+  if(!k.includes(" ")&&k.length>=3){
+    const tanti=giorOps.filter(x=>_gNorm(x.nome).split(" ").includes(k));
+    if(tanti.length===1) return tanti[0].nome;
+  }
+  return null;
 }
 async function giorCompila(){
   const ta=document.getElementById("gior-voce"); const t=(ta&&ta.value||"").trim(); giorVoce=t;
@@ -808,8 +819,10 @@ async function giorTrovaLavoro(dove,data){
   if(lav) return lav;
   const {data:d,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:mest,descrizione:dove.trim(),dove:dove.trim(),stato:"in_corso",data_prevista:data||_gOggi()}).select("id,descrizione,dove,stato,mestiere_id");
   if(error||!d||!d.length) throw new Error("Non riesco a creare il cantiere «"+dove+"»: "+((error&&error.message)||"nessuna riga")+".");
-  giorLav.unshift(d[0]); return d[0];
+  giorLav.unshift(d[0]); giorCantNuovi.push(String(dove).trim()); return d[0];
 }
+/* 27 nov 2026 — il cantiere nato da una giornata lo si dice nel messaggio verde (prima nasceva zitto in Lavori) */
+let giorCantNuovi=[];
 async function giorScrivi(schede){
   const mest=_gMest();
   let fatte=0;
@@ -922,7 +935,7 @@ async function giorSalva(){
     if(!c.dove.trim()){ giorDisegna({t:"In una scheda manca il cantiere.",k:"err"}); return; }
   }
   if(giorFermaPraticaNuova(schede)) return;
-  let fatte=0, sp={n:0,ko:0};
+  let fatte=0, sp={n:0,ko:0}; giorCantNuovi=[];
   try{ fatte=await giorScrivi(schede); }
   catch(e){ giorDisegna({t:e.message,k:"err"}); if(e.parziale) await renderGiornate(); return; }
   try{ sp=await giorScriviSpese(schede); }catch(e){ sp={n:0,ko:1}; }
@@ -930,7 +943,7 @@ async function giorSalva(){
   { const tv=document.getElementById("gior-voce"); if(tv) tv.value=""; }   /* 18 nov 2026: se no giorDisegna lo rileggeva dalla casella e il racconto restava li', pronto per un doppione */
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();
-  giorDisegna({t:(fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔")+(sp.n?(sp.n===1?" · 1 spesa aggiunta":" · "+sp.n+" spese aggiunte"):"")+(sp.ko?" · "+sp.ko+(sp.ko===1?" spesa non salvata: aggiungila da «Spesa»":" spese non salvate: aggiungile da «Spesa»"):""),k:sp.ko?"err":"ok"});
+  giorDisegna({t:(fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔")+(sp.n?(sp.n===1?" · 1 spesa aggiunta":" · "+sp.n+" spese aggiunte"):"")+(sp.ko?" · "+sp.ko+(sp.ko===1?" spesa non salvata: aggiungila da «Spesa»":" spese non salvate: aggiungile da «Spesa»"):"")+(giorCantNuovi.length?" · "+_gP("cantiere nuovo","pratica nuova")+" «"+[...new Set(giorCantNuovi)].join("», «")+"» "+_gP("messo in Lavori","messa in Pratiche"):""),k:sp.ko?"err":"ok"});
   if(fatte>0&&typeof window.tiSpunta==="function") window.tiSpunta(fatte===1?"Giornata salvata":fatte+" giornate salvate");
 }
 
