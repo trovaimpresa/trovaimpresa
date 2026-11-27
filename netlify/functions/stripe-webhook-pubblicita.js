@@ -59,8 +59,41 @@ function euro(cent) {
 
 // La data fino a cui il cliente ha pagato, in formato aaaa-mm-gg.
 function fineDelPeriodo(sub) {
-  if (!sub || !sub.current_period_end) return null;
-  return new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
+  /* 27 nov 2026 — con la versione nuova delle API di Stripe (2026-02-25.clover)
+     la fine del periodo sta sulla riga dell'abbonamento, non piu' sopra. */
+  const t = sub && (sub.current_period_end
+    || (sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end));
+  if (!t) return null;
+  return new Date(t * 1000).toISOString().slice(0, 10);
+}
+
+/* 27 nov 2026 (primo cliente vero, Caserta) — con le API nuove la fattura NON ha
+   piu' `subscription`: sta in parent.subscription_details.subscription. Prima
+   ogni rinnovo pagato veniva «saltato» e la pubblicita' si spegneva lo stesso
+   alla fine del mese, e l'avviso del non pagato diceva «Abbonamento: -». */
+function abbDellaFattura(inv) {
+  if (!inv) return null;
+  const s = inv.subscription
+    || (inv.parent && inv.parent.subscription_details && inv.parent.subscription_details.subscription)
+    || null;
+  return (s && typeof s === 'object') ? s.id : s;
+}
+/* Il pagamento della fattura: prima `payment_intent`, ora fra i «payments». */
+async function pagamentoDellaFattura(inv) {
+  if (inv.payment_intent) return typeof inv.payment_intent === 'string' ? inv.payment_intent : inv.payment_intent.id;
+  try {
+    const f = await stripe.invoices.retrieve(inv.id, { expand: ['payments'] });
+    const p = f.payments && f.payments.data && f.payments.data.find(x => x.status === 'paid') || (f.payments && f.payments.data && f.payments.data[0]);
+    const pi = p && p.payment && p.payment.payment_intent;
+    return pi ? (typeof pi === 'string' ? pi : pi.id) : null;
+  } catch (e) {
+    /* la libreria (stripe 14) parla la versione vecchia: li' la fattura ha ancora payment_intent */
+    try {
+      const f = await stripe.invoices.retrieve(inv.id);
+      const pi = f.payment_intent;
+      return pi ? (typeof pi === 'string' ? pi : pi.id) : null;
+    } catch (e2) { console.error('[pubblicita] pagamento della fattura non letto:', e2.message); return null; }
+  }
 }
 
 // L'id dell'annuncio viaggia in due posti: sulla sessione e sull'abbonamento.
@@ -341,6 +374,7 @@ exports.handler = async (event) => {
   // =========================================================================
   if (stripeEvent.type === 'invoice.paid') {
     const inv = stripeEvent.data.object;
+    inv.subscription = abbDellaFattura(inv);
 
     // Il primo pagamento e' gia' gestito dalla sessione qui sopra: qui
     // interessano solo i giri successivi.
@@ -374,8 +408,9 @@ exports.handler = async (event) => {
       const chiuso = await chiudiAbbonamento(inv.subscription);
       let reso = 'non riuscito';
       try {
-        if (inv.payment_intent) {
-          const r = await stripe.refunds.create({ payment_intent: inv.payment_intent, reason: 'requested_by_customer' });
+        const piRim = await pagamentoDellaFattura(inv);
+        if (piRim) {
+          const r = await stripe.refunds.create({ payment_intent: piRim, reason: 'requested_by_customer' });
           reso = 'fatto (' + r.id + ')';
         }
       } catch (e) { reso = 'NON RIUSCITO: ' + e.message; }
@@ -431,6 +466,15 @@ exports.handler = async (event) => {
   // =========================================================================
   if (stripeEvent.type === 'invoice.payment_failed') {
     const inv = stripeEvent.data.object;
+    inv.subscription = abbDellaFattura(inv);
+    /* 27 nov 2026 — il PRIMO pagamento si fa nella pagina di Stripe: se la banca
+       chiede la conferma (codice, app) Stripe manda «payment_failed» mentre il
+       cliente sta ancora confermando, e 20 secondi dopo e' pagato. Successo col
+       primo cliente vero: email «Rinnovo non pagato» falsa. Se non paga, la
+       sessione non si chiude e l'annuncio non si accende: niente da avvisare. */
+    if (inv.billing_reason === 'subscription_create') {
+      return { statusCode: 200, body: JSON.stringify({ received: true, saltato: 'primo pagamento' }) };
+    }
     let annuncioId = null;
     try {
       if (inv.subscription) {

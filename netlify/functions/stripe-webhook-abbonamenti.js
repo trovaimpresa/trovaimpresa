@@ -375,7 +375,8 @@ exports.handler = async (event) => {
   // -------------------------------------------------------------------
   if (ev.type === 'invoice.paid' || ev.type === 'invoice.payment_succeeded') {
     const inv = ev.data.object;
-    const meta = (inv.subscription_details && inv.subscription_details.metadata) || {};
+    const meta = (inv.subscription_details && inv.subscription_details.metadata)
+      || (inv.parent && inv.parent.subscription_details && inv.parent.subscription_details.metadata) || {};   /* 27 nov 2026: API nuove di Stripe */
     // ⚠️ la PRIMA fattura di un abbonamento arriva insieme al checkout: si
     // salta, se no lo stesso incasso finisce dentro due volte con due
     // numeri diversi (la sessione e la fattura) e l'«unique» non se ne
