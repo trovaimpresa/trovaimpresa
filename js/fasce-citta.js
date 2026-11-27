@@ -92,6 +92,13 @@
       '.fc-s{display:block;font-size:16px;line-height:1.4;opacity:.92;margin-top:4px;color:inherit}',
       '.fc-btn{flex:0 0 auto;margin-left:auto;background:#ff8800;color:#fff;font-weight:700;font-size:16px;padding:12px 20px;border-radius:10px;white-space:nowrap}',
       '.fc-libero{background:#fff;background-image:none;color:#0a2a4d;border-style:dashed}',
+      /* 27 nov sera (Alex, foto dal suo 1920): la A rientrava di 16 px rispetto al riquadro
+         della ricerca sotto e tutto era piccolo accanto alle locandine. Su computer: A con gli
+         stessi bordi del riquadro, scritte e pulsante piu' grandi su tutte e tre le fasce. */
+      '@media(min-width:761px){.hero-banda + .fc-fascia{padding:0;max-width:none;width:auto}',
+      '.fc-ban{padding:26px 30px;gap:24px}.fc-t{font-size:28px}.fc-s{font-size:19px;margin-top:6px}',
+      '.fc-btn{font-size:20px;padding:16px 26px}.fc-piu{flex-basis:92px;height:92px;font-size:50px}',
+      '.fc-tag{font-size:15px;padding:4px 13px;top:-14px}.fc-img{flex-basis:240px;width:240px}}',
       '@media(max-width:760px){.fc-fascia{margin:20px auto}.fc-ban{flex-wrap:wrap;padding:22px 16px 16px;gap:14px}',
       '.fc-img{flex-basis:100%;width:100%}.fc-t{font-size:20px}.fc-btn{margin-left:0;width:100%;text-align:center;box-sizing:border-box}',
       '.fc-piu{flex-basis:60px;height:60px;font-size:32px}}',
