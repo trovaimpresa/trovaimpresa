@@ -482,6 +482,8 @@
 .pub-altre{margin:10px 0 26px;background:#fff;border:2px solid #0a2a4d;color:#0a2a4d;border-radius:10px;padding:9px 18px;font-weight:700;font-size:15px;cursor:pointer}
 .pub-vuoto{background:#fff;border:2px dashed #cbd5e1;border-radius:14px;padding:20px 22px;font-size:16px;color:#334155;line-height:1.6;margin-top:26px}
 .pub-vuoto a{color:#0066ff;font-weight:700}
+.rec-st{display:inline-block;font-size:14px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.rec-ok{background:#e7f6ec;color:#1a7f43}.rec-no{background:#f1f5f9;color:#64748b}.rec-finta{background:#fdecec;color:#c92a2a}
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
@@ -1217,13 +1219,15 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <thead>
             <tr>
               <th>Cliente</th>
+              <th>Per l'impresa</th>
               <th>Voto</th>
               <th>Testo</th>
               <th>Data</th>
+              <th>Confermata?</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-recensioni"><tr><td colspan="5" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-recensioni"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
 
@@ -5293,20 +5297,37 @@ async function caricaRecensioni() {
   if (_rc) _rc.className = 'stat-conf ' + (_recAtt ? 'giu' : 'pari');
   renderCrescita();
   const tbody = document.getElementById('table-recensioni');
+  // 27 nov 2026: serve il nome dell'impresa; all'avvio le imprese si caricano
+  // in parallelo, quindi se non sono ancora arrivate si chiedono qui.
+  let _impRec = tutteImprese;
+  if (!_impRec.length && data && data.length) { try { _impRec = await adminLista('imprese'); } catch (e) { _impRec = []; } }
   if (!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
     return;
   }
   tbody.innerHTML = data.map(r => {
     const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
     const voto = Math.max(0, Math.min(5, Math.round(r.stelle ?? (sub.length ? sub.reduce((a,b)=>a+b,0)/sub.length : 0))));
     const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#0066ff;font-size:13.5px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
+    /* 27 nov 2026 — per chi e' la recensione, se il cliente l'ha confermata
+       dall'email (solo quelle si vedono sul sito) e se l'ha scritta l'impresa
+       stessa con la sua email (il caso GRUPPO ALIBERTI, cancellato il 27 nov). */
+    const imp = (_impRec || []).find(x => String(x.id) === String(r.impresa_id)) || {};
+    const nomeImp = imp.nome_attivita || imp.nome || (r.impresa_id ? '#' + r.impresa_id : '—');
+    const daSola = r.email_cliente && imp.email && String(r.email_cliente).trim().toLowerCase() === String(imp.email).trim().toLowerCase();
+    const stato = daSola
+      ? '<span class="rec-st rec-finta">Scritta dall\'impresa stessa</span>'
+      : r.confermata === true
+        ? '<span class="rec-st rec-ok">Sì · si vede sul sito</span>'
+        : '<span class="rec-st rec-no">No · non si vede</span>';
     return `
     <tr>
       <td><strong>${esc(r.nome_cliente)}</strong>${badge}</td>
+      <td>${r.impresa_id ? '<a href="/profilo-impresa.html?id=' + encodeURIComponent(r.impresa_id) + '" target="_blank" style="color:#0a2a4d;font-weight:600">' + esc(nomeImp) + '</a>' : '—'}${imp.citta ? '<div style="font-size:13.5px;color:#64748b">' + esc(imp.citta) + '</div>' : ''}</td>
       <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
       <td style="max-width:200px">${esc(r.testo||'')}</td>
       <td style="font-size:0.78rem;color:var(--light)">${_data(r.created_at)}</td>
+      <td>${stato}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaRecensione('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
