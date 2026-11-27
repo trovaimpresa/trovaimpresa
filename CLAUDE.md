@@ -4794,3 +4794,16 @@ Fatti col sì di Alex (foto prima):
 - Carta senza movimenti: il modulo parte da «Ricarica» (renderMovimentiCarta).
 Da sapere: le foto si fanno con /home/claude/foto/foto5.js (stampo di tools/foto-gestionale.js, dati in più in B.DATI; BANCO_RADICE=/tmp/prima per il «prima»). In nuvola il banco gira con `executablePath:/usr/bin/google-chrome` (cambiato solo in locale, non nel repo).
 ⬜ Non provato dal vivo: la domanda «sotto zero» su «Pagata» della fattura del fornitore con la carta (provati spesa e codice), l'email del lunedì coi km del pieno.
+
+# 27 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 6: CONTI E IL RESTO (impresa e artigiano, online 6592920)
+Giro da utente vero su Report, Tasse e fisco, Galleria, Mappa, Cestino, Chiedi una funzione, Assistenza. Reparto «ferramenta» (Alex in forfettario RF19), 1440 e 375. «Facciamo tutto» di Alex, foto del Report approvate.
+Difetto sistemato:
+- ⛔ Report in forfettario diceva «Incassato (IVA esclusa)» (schermo, PDF, file per Excel). Ora `_repNotaInc()` / `_repIncNome()` in js/gest-report.js: forfettario niente parentesi; studio forfettario «senza cassa e spese anticipate». `renderReport` chiama `fattAziendaPronta()` prima dei conti (regime giusto anche se Fatture non è mai stata aperta).
+Fatti col sì di Alex:
+- Report: i 3 numeri del mese (incassato, spese, utile) in cima, riquadro `.rep-mese-card` senza bordo; tolti dal riquadro del grafico. Sotto 700 px «Scarica PDF» e «File per Excel» affiancati, i 3 numeri uno per riga (fondo di css/gestionale.css).
+- Mappa: `mpGiroDisegna` nasconde «🚗 Il giro di…» (`#mp-giro` hidden) se nessuna riga ha il punto sulla carta; torna appena c'è un cantiere (provato: «Lavori da fare» → nascosto, «Tutti i lavori» → visibile).
+- Tasse, «Quanto ti resta» senza incassi: «Sono i contributi fissi: circa 376,78 € al mese» (tasse/12) al posto di «Cioè circa −415,53 € al mese» (diviso per i mesi passati). Con incassi la frase di prima.
+Pulito: 3 scadenze SCIA di prova del 25 nov (nel Cestino). ⚠️ Rimasta in gest_richieste la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov: il permesso di cancellarla è stato negato (si toglie dal pannello admin).
+Collaudo dopo il push (Netlify pubblicato in →30← s): Report col riquadro del mese in cima e senza «IVA esclusa», Tasse «376,78 € al mese», Mappa senza giro, nessuna richiesta in errore dalle 7 sezioni. ⚠️ Sul telefono vero i pulsanti del Report restano a 18 px (un'altra regola più forte batte il 14 px): «File per Excel» tocca il bordo del pulsante, senza uscire. Da sistemare col prossimo push.
+Galleria, Cestino, Chiedi una funzione, Assistenza: nessun difetto a 375 (niente fuori schermo, niente sotto 13 px).
+Da sapere: nella schermata reparti, cercare il pulsante «Apri» risalendo dal nome del reparto prende il CESTINO del reparto (chiede «Stai per eliminare…»): si entra cliccando «Apri →» con le coordinate. Push: il clone con permesso sta in /home/claude/ti-push se /home/claude/trovaimpresa è occupato.
