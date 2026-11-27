@@ -106,9 +106,25 @@ exports.handler = async function (event) {
       if (r.giorno >= da7)  { per[id].viste7  += v; per[id].clic7  += c; }
     });
 
+    // 27 nov 2026 — anche i loghi in prova (js/loghi-ospiti.js, fino al 31 dic):
+    // viste e clic per impresa. Servono all'admin per sapere a chi proporre
+    // uno spazio quando finisce la prova. Se la lettura fallisce, si va avanti
+    // senza: i numeri degli annunci pagati restano buoni.
+    const loghi = {};
+    try {
+      const rl = await supabaseAdmin.from('loghi_statistiche').select('impresa_id,viste,clic');
+      if (rl.error) throw rl.error;
+      (rl.data || []).forEach(function (r) {
+        const id = r.impresa_id;
+        if (!loghi[id]) loghi[id] = { viste: 0, clic: 0 };
+        loghi[id].viste += Number(r.viste) || 0;
+        loghi[id].clic  += Number(r.clic) || 0;
+      });
+    } catch (e) { console.warn('[admin-statistiche-pubblicita] loghi:', e.message || e); }
+
     return {
       statusCode: 200, headers: corsHeaders,
-      body: JSON.stringify({ success: true, statistiche: per })
+      body: JSON.stringify({ success: true, statistiche: per, loghi: loghi })
     };
   } catch (err) {
     return {

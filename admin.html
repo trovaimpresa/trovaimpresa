@@ -469,6 +469,19 @@
   .cpc-rosso{background:#fff1f2;border-color:#fecdd3 !important}
   .cpc-rosso .cpc-pill{background:#ffe4e6;color:#b3261e}
   @media(max-width:900px){.cpc-due{grid-template-columns:1fr}.cpc-tab{font-size:15px}.cpc-tab th,.cpc-tab td{padding:8px 5px}}
+.pub-riep{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:26px}
+.pub-card{background:#fff;border:1px solid var(--border);border-top:6px solid #0a2a4d;border-radius:14px;padding:18px 20px}
+.pub-card-l{font-size:16px;font-weight:700;color:#475569}
+.pub-card-n{font-size:40px;font-weight:800;line-height:1.15;margin-top:4px}
+.pub-card-n small{font-size:18px;font-weight:600;color:#64748b}
+.pub-card-s{font-size:14.5px;color:#64748b;margin-top:6px}
+.pub-h3{font-size:22px;color:#0a2a4d;margin:8px 0 6px}
+.pub-nota{font-size:15px;color:#475569;margin:0 0 12px}
+.pub-num{font-size:18px;font-weight:700;text-align:center}
+.pub-btn{display:inline-block;background:#0a2a4d;color:#fff!important;border-radius:8px;padding:7px 14px;font-weight:700;font-size:14.5px;text-decoration:none}
+.pub-altre{margin:10px 0 26px;background:#fff;border:2px solid #0a2a4d;color:#0a2a4d;border-radius:10px;padding:9px 18px;font-weight:700;font-size:15px;cursor:pointer}
+.pub-vuoto{background:#fff;border:2px dashed #cbd5e1;border-radius:14px;padding:20px 22px;font-size:16px;color:#334155;line-height:1.6;margin-top:26px}
+.pub-vuoto a{color:#0066ff;font-weight:700}
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
@@ -1345,7 +1358,12 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Pubblicità clienti</div>
       </div>
       <div style="padding:16px">
-        <div id="pub-riepilogo" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px"></div>
+        <div id="pub-riepilogo" class="pub-riep"></div>
+        <!-- 27 nov 2026: chi ha il logo in prova e quanto e' stato visto = a chi proporre uno spazio -->
+        <div id="pub-prova"></div>
+        <div id="pub-vuoto" class="pub-vuoto" style="display:none"></div>
+        <div id="pub-tabella-wrap">
+        <h3 class="pub-h3">Chi ha comprato</h3>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <input id="pub-search" type="text" placeholder="Cerca azienda, città, email..." oninput="renderPubblicitaClienti()" style="flex:1;min-width:220px;max-width:360px;padding:10px;border:1.5px solid var(--border);border-radius:10px">
           <select id="pub-filtro-stato" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
@@ -1371,6 +1389,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
             </thead>
             <tbody id="table-pubblicita"><tr><td colspan="11" class="loading">Caricamento...</td></tr></tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>
@@ -2201,6 +2220,8 @@ let _pubData = [];
 // apposta (ogni cliente vede solo i suoi numeri) e l'admin qui usa la chiave
 // pubblica. Si passa da una funzione lato server, come per le altre schede.
 let _pubStat = {};
+let _pubLoghi = {};   // 27 nov 2026: viste/clic dei loghi in prova, per impresa
+let _pubImprese = []; // tutte le imprese, per la lista «a chi proporlo»
 
 // Listino completo: deve restare allineato a pubblicita.html e a
 // netlify/functions/crea-checkout-pubblicita.js. Se aggiungi uno spazio, aggiungilo qui.
@@ -2297,6 +2318,8 @@ async function caricaPubblicitaClienti(segnaVisti = true) {
   // Recupero i dati delle imprese collegate (nome, contatti)
   const ids = [...new Set((ann || []).map(a => a.impresa_id).filter(Boolean))];
   let impMap = {};
+  try { _pubImprese = tutteImprese.length ? tutteImprese : await adminLista('imprese'); }
+  catch (e) { _pubImprese = []; }
   if (ids.length) {
     /* ⛔ 19 set 2026 — stesso difetto dell'elenco imprese, ma piu' subdolo:
        qui la colonna col nome dell'impresa restava semplicemente vuota, e
@@ -2305,8 +2328,7 @@ async function caricaPubblicitaClienti(segnaVisti = true) {
        si tengono quelle che servono. Se l'elenco e' gia' in memoria dalla
        sezione Imprese, non si chiede niente a nessuno. */
     let imp = [];
-    try { imp = tutteImprese.length ? tutteImprese : await adminLista('imprese'); }
-    catch (e) { console.warn('[pubblicita] imprese:', e.message || e); }
+    imp = _pubImprese;
     const voluti = new Set(ids.map(String));
     imp.forEach(i => { if (voluti.has(String(i.id))) impMap[i.id] = i; });
   }
@@ -2321,7 +2343,8 @@ async function caricaPubblicitaClienti(segnaVisti = true) {
     });
     const js = await rs.json().catch(function(){ return {}; });
     _pubStat = (js && js.success && js.statistiche) ? js.statistiche : {};
-  } catch (e) { _pubStat = {}; }
+    _pubLoghi = (js && js.success && js.loghi) ? js.loghi : {};
+  } catch (e) { _pubStat = {}; _pubLoghi = {}; }
 
   renderPubblicitaClienti();
   // Aprendo la sezione, segno come "visti" tutti gli annunci pagati e azzero il badge.
@@ -2402,14 +2425,38 @@ function renderPubblicitaClienti() {
   const rimborsati = _pubData.filter(a => a.stato === 'rimborsato').length;
   const percOk = partiti ? Math.round(pagati * 100 / partiti) : null;
 
+  /* 27 nov 2026 (Alex: «non e' un gran che»): quattro numeri grandi che
+     rispondono a «quanto vendo?», in euro all'italiana. Sotto, la lista di
+     chi ha il logo in prova: e' a loro che si propone lo spazio. */
+  const SPAZI_PER_CITTA = 14; // i 14 di js/spazi-elenco.js
+  const totSpazi = MAP_TUTTE_CITTA.length * SPAZI_PER_CITTA;
+  const alMese = attivi.reduce((t, a) => t + (parseFloat(a.prezzo) || 0) / (pubMesi(a) || 1), 0);
+  const inProva = pubInProva();
+  const ggProva = Math.max(0, Math.ceil((new Date('2026-12-31T23:59:59') - new Date()) / 86400000));
   ril.innerHTML =
-    pubCard('Annunci attivi', attivi.length, 'var(--verde)') +
-    pubCard('In scadenza (7gg)', inScad.length, inScad.length ? '#e67700' : '#999') +
-    pubCard('Abbonamenti annuali', annuali, '#0066ff') +
-    pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2') +
-    pubCard('Arrivano al pagamento', (percOk === null ? '—' : percOk + '%'), '#1a7f43') +
-    pubCard('Lasciati a metà', persi + (persi ? ' · €' + persiEuro.toFixed(2) : ''), persi ? '#c92a2a' : '#999') +
-    (rimborsati ? pubCard('Rimborsati', rimborsati, '#7b1fa2') : '');
+    pubCardGrande('Spazi venduti', attivi.length + '<small> su ' + String(totSpazi).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '</small>', '#0a2a4d',
+      inScad.length ? inScad.length + ' in scadenza fra 7 giorni' : 'in tutte le città') +
+    pubCardGrande('Incasso ogni mese', pubEuro(alMese), '#1a7f43',
+      'totale incassato finora ' + pubEuro(incasso)) +
+    pubCardGrande('Loghi in prova', inProva.length, '#ff8800',
+      ggProva ? 'regalo fino al 31 dicembre · mancano ' + ggProva + ' giorni' : 'la prova è finita') +
+    pubCardGrande('Lasciati a metà', persi, persi ? '#c92a2a' : '#94a3b8',
+      persi ? 'valevano ' + pubEuro(persiEuro) + (percOk !== null ? ' · arriva a pagare il ' + percOk + '%' : '') : 'nessun carrello perso') +
+    (rimborsati ? pubCardGrande('Rimborsati', rimborsati, '#7b1fa2', '') : '');
+  renderPubProva(inProva);
+  const wrapTab = document.getElementById('pub-tabella-wrap');
+  const vuoto = document.getElementById('pub-vuoto');
+  if (!_pubData.length) {
+    wrapTab.style.display = 'none';
+    vuoto.style.display = '';
+    vuoto.innerHTML = '<b>Nessuna impresa ha ancora comprato uno spazio.</b> Quando qualcuno compra, '
+      + 'qui compare chi è, dove, quanto paga e quante persone hanno visto il suo cartello. '
+      + '<a href="/pubblicita" target="_blank">Apri il listino</a> · '
+      + '<a href="/?citta=Roma" target="_blank">Guarda una pagina città</a>';
+    return;
+  }
+  wrapTab.style.display = '';
+  vuoto.style.display = 'none';
 
   let righe = _pubData.slice();
   if (fs === 'scadenza') righe = righe.filter(a => pubInScadenza(a, 7));
@@ -2480,7 +2527,7 @@ function renderPubblicitaClienti() {
       + '<td style="font-size:14.5px">' + periodo + '</td>'
       + '<td style="font-size:14.5px">' + scadCol + '</td>'
       + '<td>' + numeriPub(a) + '</td>'
-      + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
+      + '<td><strong>' + pubEuro(parseFloat(a.prezzo) || 0) + '</strong></td>'
       + '<td>' + badge + '</td>'
       + '<td>' + banner + link + '</td>'
       + '<td><button class="action-btn btn-elimina" onclick="eliminaAnnuncioPub(\'' + a.id + '\')">🗑️</button></td>'
@@ -2607,6 +2654,49 @@ function mapVaiA(citta) {
   if (sel) { sel.value = citta; renderMappaSpazi(); }
 }
 
+function pubEuro(n) {
+  return (Number(n) || 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
+}
+function pubCardGrande(label, val, color, sotto) {
+  return '<div class="pub-card" style="border-top-color:' + color + '">'
+    + '<div class="pub-card-l">' + label + '</div>'
+    + '<div class="pub-card-n" style="color:' + color + '">' + val + '</div>'
+    + (sotto ? '<div class="pub-card-s">' + sotto + '</div>' : '') + '</div>';
+}
+// Chi ha il logo in prova: le imprese vere (non di prova) col logo caricato.
+function pubInProva() {
+  return (_pubImprese || []).filter(i => i && i.logo_url && !i.is_test).map(i => {
+    const n = _pubLoghi[i.id] || { viste: 0, clic: 0 };
+    return Object.assign({}, i, { _viste: n.viste || 0, _clic: n.clic || 0 });
+  }).sort((a, b) => (b._clic - a._clic) || (b._viste - a._viste));
+}
+let _pubProvaTutte = false;
+function renderPubProva(lista) {
+  const box = document.getElementById('pub-prova');
+  if (!box) return;
+  if (!lista.length) { box.innerHTML = ''; return; }
+  const righe = _pubProvaTutte ? lista : lista.slice(0, 10);
+  box.innerHTML = '<h3 class="pub-h3">A chi proporre uno spazio</h3>'
+    + '<p class="pub-nota">Hanno il logo in prova nella pagina della loro città. In cima chi è stato cliccato e visto di più: '
+    + 'sono i primi a cui scrivere quando finisce il regalo.</p>'
+    + '<div class="table-wrap"><table class="pub-prova-t"><thead><tr><th>Impresa</th><th>Città</th><th>Visto</th><th>Clic</th><th>Contatti</th><th></th></tr></thead><tbody>'
+    + righe.map(i => {
+        const nome = esc(i.nome_attivita || i.nome || ('#' + i.id));
+        const mail = i.email ? '<a href="mailto:' + esc(i.email) + '">' + esc(i.email) + '</a>' : '';
+        const tel = i.telefono ? '<a href="tel:' + esc(i.telefono) + '">' + esc(i.telefono) + '</a>' : '';
+        return '<tr><td><strong>' + nome + '</strong></td>'
+          + '<td>' + esc(i.citta || '—') + '</td>'
+          + '<td class="pub-num">' + i._viste + '</td>'
+          + '<td class="pub-num">' + (i._clic ? '<b style="color:#1a7f43">' + i._clic + '</b>' : '0') + '</td>'
+          + '<td style="font-size:14.5px">' + ([mail, tel].filter(Boolean).join('<br>') || '—') + '</td>'
+          + '<td><a class="pub-btn" target="_blank" href="/profilo-impresa.html?id=' + encodeURIComponent(i.id) + '">Scheda</a></td></tr>';
+      }).join('')
+    + '</tbody></table></div>'
+    + (lista.length > 10
+      ? '<button class="pub-altre" onclick="_pubProvaTutte=!_pubProvaTutte;renderPubProva(pubInProva())">'
+        + (_pubProvaTutte ? 'Mostra solo le prime 10' : 'Mostra tutte le ' + lista.length) + '</button>'
+      : '');
+}
 function pubCard(label, val, color) {
   return '<div style="background:#fff;border:1px solid var(--border);border-left:4px solid ' + color
     + ';border-radius:12px;padding:12px 18px;min-width:150px">'
