@@ -700,7 +700,7 @@ function giorDisegnaProp(){
         ${giorAggiungi===i?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-nuovo" placeholder="Nome"><button type="button" class="btn" data-gior="piu-ok" data-i="${i}" style="flex:0 0 auto">Aggiungi</button></div>`:""}
         ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}
         ${giorMezzeHTML(c,i,nomi,io)}</div>
-      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" placeholder="${_gP("Spese e note qui","Cosa avete fatto, note")}">${esc(c.cosa)}</textarea></div>
+      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" data-cg-gia="${esc(c.daAI||"")}" placeholder="${_gP("Spese e note qui","Cosa avete fatto, note")}">${esc(c.cosa)}</textarea></div>
       ${giorModK?"":giorSpeseHTML(c,i)}
       ${giorProp.length>1?`<button type="button" class="glink rosso" data-gior="togli" data-i="${i}" style="align-self:flex-start">Togli questa</button>`:""}
     </div>`;
@@ -791,7 +791,8 @@ async function giorCompila(){
     /* 18 nov 2026: «mezza giornata» detta nel racconto accende «Mezza giornata» per chi sta in quella scheda (si vede e si cambia prima del Salva) */
     const mezza=/mezza\s+giornata/i.test(cosa)?new Set(chi):new Set();
     if(_gPro()) dove=giorPraticaDa(dove,cosa);
-    return {data:d,chi,dove,cosa,mezza,spese:giorSpeseDa(cosa)};
+    /* 27 nov 2026: daAI = il testo l'ha gia' scritto l'AI; il correttore non lo rigira (prima «Salva» andava premuto due volte) */
+    return {data:d,chi,dove,cosa,daAI:cosa,mezza,spese:giorSpeseDa(cosa)};
   });
   giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});
 }

@@ -77,6 +77,12 @@
   function casella(id) { var t = document.getElementById(id); return t && t.tagName === 'TEXTAREA' ? t : null; }
   function daFare(ta) {
     var v = ta.value.trim();
+    /* 27 nov 2026 (giro nuovo, sessione 4) — il testo che ha appena scritto
+       l'AI della giornata («Compila la giornata») e' gia' corretto: girarlo di
+       nuovo aggiungeva solo un punto e costringeva a premere «Salva» due
+       volte (al primo tocco non si salvava niente). Se lo cambi a mano, si
+       corregge come sempre. */
+    if (ta.getAttribute('data-cg-gia') && ta.getAttribute('data-cg-gia') === ta.value) return false;
     return v.length >= 6 && s(ta.id).fatto !== ta.value;
   }
   function micAcceso(ta) {
