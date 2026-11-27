@@ -46,11 +46,21 @@
     return (+v||0)===0 ? '<td style="color:#5f6b7a">'+eur(0)+'</td>'   /* lo stesso grigio di .fp-zero in Tasse e fisco */
                        : '<td style="color:var(--testo)">'+segno+eur(v)+'</td>';
   }
+  /* 27 nov 2026 (giro nuovo, sessione 6) — in forfettario l'IVA non c'e':
+     «IVA esclusa» accanto all'incassato faceva pensare che mancasse qualcosa
+     (stessa regola della sessione 3 per Fatture, PDF e preventivi). */
+  function _repNotaInc(){
+    const f=typeof fattForfettario==="function"&&fattForfettario();
+    if(_repPro()) return f?"senza cassa e spese anticipate":"senza IVA, cassa e spese anticipate";
+    return f?"":"IVA esclusa";
+  }
+  function _repIncNome(base){ const n=_repNotaInc(); return n?base+" ("+n+")":base; }
   async function renderReport(){
     const box=$("#rep-body");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun dato","Accedi per vedere i report.",
       _SVGV+'<path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>');return;}
     const mid=curMestiere();
+    if(typeof fattAziendaPronta==="function")await fattAziendaPronta();   /* regime per «IVA esclusa» */
     const _rR=await Promise.all([
       sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
       /* 24 nov 2026 (collaudo Cestino dello studio) — cliente o collaboratore
@@ -325,19 +335,22 @@
       repData.oreOp=opRows.map(([id,v])=>[opMap[id]||(id?"—":"Senza nome"),v]);
       repData.oreLette=_md.oreLette!==false;
     }
+    /* 27 nov 2026 (giro nuovo, sessione 6, «facciamo tutto» di Alex) — I 3
+       NUMERI DEL MESE IN CIMA: prima stavano sotto l'elenco dei lavori e,
+       sul telefono, due schermate più giù. Sono la prima cosa che si cerca. */
     box.innerHTML=`<div class="rep-grid">
+      <div class="rep-card rep-mese-card" style="grid-column:1/-1">${meseBox}</div>
       ${mlCard}
       ${anniCard}
       <div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_TREND}Incassi e spese — ultimi 12 mesi</h3>
-        ${meseBox}
         <div class="rep-bar-wrap">${bars}</div>
         <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i class="rep-i-sp"></i>Spese</span></div></div>
       ${/* Solo dati storici: da fare / in corso / fatti stanno già nel Riepilogo,
             che è la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
       <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali di questo reparto</h3>
         <p class="rep-sub">Da quando usi il gestionale. Il margine è: soldi incassati meno tutte le spese.</p><table class="rep-table">
-        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA, cassa e spese anticipate":"IVA esclusa"})</span></td>${_repZero(incAnno,"")}</tr>
-        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(${_repPro()?"senza IVA, cassa e spese anticipate":"IVA esclusa"})</span></td>${_repZero(totInc,"")}</tr>
+        <tr><td>Incassato ${anno} ${_repNotaInc()?`<span style="font-size:13px;color:var(--testo-3)">(${_repNotaInc()})</span>`:""}</td>${_repZero(incAnno,"")}</tr>
+        <tr><td>Incassato totale ${_repNotaInc()?`<span style="font-size:13px;color:var(--testo-3)">(${_repNotaInc()})</span>`:""}</td>${_repZero(totInc,"")}</tr>
         <tr><td>${_repW().spLav}</td>${_repZero(totSp,"−")}</tr>
         ${(_repPro()&&!totCarte)?"":`<tr><td>Spese con le carte</td>${_repZero(totCarte,"−")}</tr>`}
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
@@ -389,7 +402,7 @@
     const T=repData.tot;
     if(T){
       rows.push([]); rows.push(["Totali di questo reparto"]);
-      [["Incassato "+T.anno+" (IVA esclusa)",T.incAnno],["Incassato totale (IVA esclusa)",T.totInc],
+      [[_repIncNome("Incassato "+T.anno),T.incAnno],[_repIncNome("Incassato totale"),T.totInc],
        [W.spLav,-T.totSp],["Spese con le carte",-T.totCarte],["Rifornimenti pagati in contanti",-T.totRif],
        ["Fatture dei fornitori",-T.totFF],["Noleggio interno",-T.totNol],[W.mdTot.replace("×","x"),-T.totMD],
        ["Margine totale",T.marg]].forEach(([n,v])=>{ if(v||/Incassato|Margine|lavori|pratiche/.test(n)||(/carte/.test(n)&&!_repPro())) rows.push([n,num(v)]); });
@@ -450,7 +463,7 @@
     if(!repData.oreLette){ doc.setTextColor(200,0,0); doc.setFontSize(10); doc.text(T("Attenzione: le ore non si sono potute leggere, la manodopera non e' contata."),M,y); doc.setTextColor(0); y+=8; }
     tabella(ms.nome+" (questo mese)",["Voce","Importo"],[["Incassato",E(ms.inc)],["Spese",E(-ms.sp)],Object.assign(["Utile",E(ms.ut)],{_b:1})],[130,50]);
     const PW=_repW();
-    const tr=[["Incassato "+t.anno+" (IVA esclusa)",E(t.incAnno)],["Incassato totale (IVA esclusa)",E(t.totInc)],[PW.spLav,E(-t.totSp)]];
+    const tr=[[_repIncNome("Incassato "+t.anno),E(t.incAnno)],[_repIncNome("Incassato totale"),E(t.totInc)],[PW.spLav,E(-t.totSp)]];
     if(!_repPro()||t.totCarte) tr.push(["Spese con le carte",E(-t.totCarte)]);
     if(t.totRif) tr.push(["Rifornimenti pagati in contanti",E(-t.totRif)]);
     if(t.totFF)  tr.push(["Fatture dei fornitori",E(-t.totFF)]);

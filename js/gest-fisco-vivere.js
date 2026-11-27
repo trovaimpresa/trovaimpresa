@@ -113,7 +113,8 @@
       <div class="fv-riga meno"><span>Spese segnate nel gestionale</span>${fvZero(sp.tot, "− ", "")}</div>
       <div class="fv-riga meno"><span>Tasse e contributi su questi incassi (stima)</span><b>${tasse != null ? "− " + eur(tasse) : "chiedi al commercialista"}</b></div>
       <div class="fv-riga tot"><span>Ti resta</span>${resta != null ? fvZero(Math.abs(resta), resta < 0 ? "− " : "", resta < 0 ? "fp-rosso" : "fp-verde") : "<b>—</b>"}</div>
-      ${resta != null ? `<div class="fv-sotto">Cioè circa <b>${(resta < 0 ? "− " : "") + eur(Math.abs(resta / mesi))}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
+      ${resta != null && !(incassi > 0) ? `<div class="fv-sotto">Sono i contributi fissi: circa <b>${eur((tasse || 0) / 12)}</b> al mese.</div>` : ""}
+      ${resta != null && incassi > 0 ? `<div class="fv-sotto">Cioè circa <b>${(resta < 0 ? "− " : "") + eur(Math.abs(resta / mesi))}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
     </div>`;
     if (!p) {
       h += `<div class="fp-cons giallo"><div>${fpIc("matita")}</div><div><b>Manca il tuo profilo fiscale</b>Senza non posso stimare le tasse. <button class="fp-link" data-action="ft-profilo">Compilalo adesso</button> (6 domande).</div></div>`;

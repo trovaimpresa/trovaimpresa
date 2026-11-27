@@ -6566,3 +6566,12 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .prev-riga .pr-fonte.ges{color:#b45309}
 .pzs-salva{margin:10px 0;padding:12px 14px;border:1px solid #fcd34d;background:#fffbeb;border-radius:12px;font-size:15px;color:#0a2a4d;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .pzs-salva .pzs-salva-b{font-size:15px;min-height:44px;padding:8px 14px;border-radius:10px;border:0;background:#0066ff;color:#fff;font-weight:700;cursor:pointer}
+/* 27 nov 2026 (giro nuovo, sessione 6) — Report: i 3 numeri del mese in cima,
+   in un riquadro loro; sul telefono «Scarica PDF» e «File per Excel» affiancati. */
+#report .rep-mese-card{padding:0;border:0;background:none;box-shadow:none}
+#report .rep-mese-card .rep-mese{margin:0}
+@media(max-width:700px){
+  #report .sec-head>div{flex-wrap:nowrap!important;width:100%}
+  #report .sec-head>div .btn{flex:1 1 0;min-width:0;padding:10px 6px;font-size:14px;gap:4px;justify-content:center;white-space:nowrap}
+  #report .rep-mese>div{flex:1 1 100%}
+}

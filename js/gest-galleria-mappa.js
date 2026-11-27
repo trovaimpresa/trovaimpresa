@@ -645,6 +645,11 @@
     if(!box){box=document.createElement("div");box.id="mp-giro";box.className="mp-giro";if(filtri)filtri.parentNode.insertBefore(box,filtri);else m.appendChild(box);}
     if(!mpGiroData)mpGiroData=_mpDomani();
     const D=mpGiroDati, pro=_mpPro();
+    /* 27 nov 2026 (giro nuovo, sessione 6) — nessun cantiere sulla carta:
+       il «giro» non serve e «Nessun cantiere con questa data» in cima
+       sembrava un errore. Si nasconde; torna appena c'è un punto. */
+    box.hidden=!(D&&(D.righe||[]).some(r=>r.p));
+    if(box.hidden){box.innerHTML="";return;}
     const cosa=pro?["sopralluogo","sopralluoghi"]:["cantiere","cantieri"];
     const tappe=(D&&D.righe||[]).filter(r=>r.p&&r.l&&r.l.data_prevista===mpGiroData);
     const senzaPunto=(D&&D.righe||[]).filter(r=>!r.p&&r.l&&r.l.data_prevista===mpGiroData).length;
