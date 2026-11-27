@@ -415,7 +415,8 @@ header a img { height:62px; }
         const lines = (r.lavoro || '').split('\n');
         const spec = lines[0] || '';
         const extra = lines.slice(1);
-        const espLine = extra.find(l => l.includes('anni di esperienza'));
+        // 27 nov 2026: solo la riga «N anni di esperienza» (una descrizione che dice «questi anni di esperienza» non vale)
+        const espLine = extra.find(l => /^\d+\s+anni di esperienza$/.test(l.trim()));
         const certLine = extra.find(l => l.startsWith('Certificazioni:'));
         const certTags = certLine
           ? certLine.replace('Certificazioni:', '').split(',').map(t => `<span class="annuncio-cert-tag">${esc(t.trim())}</span>`).join('')
@@ -571,5 +572,6 @@ header a img { height:62px; }
     };
   })();
 </script>
+<script src="/js/subappalti-leggi-tutto.js?v=1" defer></script>
 </body>
 </html>
