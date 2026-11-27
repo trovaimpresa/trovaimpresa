@@ -628,6 +628,11 @@ function pulisciVoci(lista, conFonte) {
     else if (conFonte && /^(a\s+)?corpo$/i.test(un)) voce.quantita = 1;
     const pz = (v.prezzo_unitario === null || v.prezzo_unitario === undefined || v.prezzo_unitario === '') ? NaN : Number(v.prezzo_unitario);
     if (isFinite(pz) && pz >= 0 && pz < 10000000) voce.prezzo_unitario = pz;
+    /* 27 nov 2026 — preventivo: da dove viene il prezzo (lo controlla il browser) */
+    if (!conFonte && voce.prezzo_unitario !== undefined) {
+      const fo = String(v.fonte == null ? '' : v.fonte).trim().toLowerCase();
+      if (fo === 'tuo' || fo === 'gestionale') voce.fonte = fo;
+    }
     if (conFonte && voce.prezzo_unitario !== undefined) {
       const da = String(v.prezzo_da == null ? '' : v.prezzo_da).trim().slice(0, 160);
       if (da) voce.prezzo_da = da;
@@ -1410,8 +1415,7 @@ const STRUMENTI = [
               descrizione:     { type:'string' },
               unita:           { type:'string', description:'m², m, cad, ore, a corpo…' },
               quantita:        { type:'number' },
-              prezzo_unitario: { type:'number', description:'euro per unità: il SUO prezzo se l\'hai letto, se no un prezzo di riferimento del gestionale' },
-              fonte:           { type:'string', enum:['tuo','gestionale'], description:'«tuo» SOLO se il prezzo è quello esatto letto fra i suoi prezzi o nei suoi preventivi; «gestionale» se viene dai prezzi di riferimento' },
+              prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' },
               prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene il prezzo, come sta scritta (corta)' },
               codice:          { type:'string', description:'il `codice` della voce del suo prezzario da cui hai preso il prezzo, come l\'hai letto con miei_prezzi' },
               capitolo:        { type:'string', description:'il capitolo del computo in cui va la riga, se te lo dice («nel capitolo Opere murarie» → «Opere murarie»). NON scriverlo dentro la descrizione' }
