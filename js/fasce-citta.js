@@ -111,7 +111,12 @@
       '.fc-bar .fc-btn{font-size:15px;padding:10px 16px;width:auto;margin-left:auto}',
       '.fc-x{position:absolute;top:-15px;right:10px;width:30px;height:30px;border-radius:50%;border:0;background:#fff;color:#0a2a4d;',
       'font-size:18px;font-weight:700;line-height:30px;text-align:center;padding:0;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.3)}',
-      'body.fc-con-barra{padding-bottom:96px!important}'
+      'body.fc-con-barra{padding-bottom:96px!important}',
+      /* locandina in verticale: riquadro alto, il disegno intero senza tagli */
+      '.fc-vert .fc-img{flex:0 0 auto;width:auto;aspect-ratio:auto;height:300px;background:#fff;display:flex;justify-content:center}',
+      '.fc-vert .fc-img img{width:auto;max-width:100%;height:100%;object-fit:contain}',
+      '@media(max-width:760px){.fc-vert .fc-img{flex-basis:100%;width:100%;height:auto}.fc-vert .fc-img img{height:auto;max-height:380px}}',
+      '.fc-tagliata .fc-img img{object-fit:contain;background:#fff}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -233,7 +238,53 @@
       + (nome ? '<span class="fc-t">' + esc(nome) + '</span><span class="fc-s">' + esc(sottoDi(ann)) + '</span>' : '')
       + '</span><span class="fc-btn">Vedi l’impresa →</span>';
     guarda(a, ann.id);
+    var im = a.querySelector('.fc-img img');
+    if (im) { im.crossOrigin = 'anonymous'; im.addEventListener('load', function () { verticale(a, im); }, { once: true }); }
     return a;
+  }
+
+  /* 27 nov 2026 sera (sì di Alex) — LOCANDINA IN VERTICALE E BORDI DA TOGLIERE.
+     Il ritaglio del listino salva sempre 800x520: una locandina da telefono ci
+     entra stretta in mezzo, col bianco ai lati, e si vedeva grande come un
+     francobollo (primo abbonato, Caserta). In piu' spesso l'immagine e' la FOTO
+     DELLO SCHERMO del telefono: bande nere sopra e sotto con l'ora e le icone.
+     Qui si cerca il disegno vero: via il bianco intorno, via le bande scure
+     (righe/colonne quasi tutte nere, anche con l'ora scritta dentro), e se
+     resta alto o quadrato il riquadro diventa alto (300 px su computer). Il file sul server non
+     si tocca: si taglia solo quello che si mostra. */
+  function verticale(a, im) {
+    try {
+      if (im.dataset.fcVert) return;
+      var W = im.naturalWidth, H = im.naturalHeight;
+      if (!W || !H) return;
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      var d = x.getImageData(0, 0, W, H).data;
+      function px(k, y) { var i = (y * W + k) * 4; return [d[i], d[i + 1], d[i + 2]]; }
+      function bianco(p) { return p[0] >= 235 && p[1] >= 235 && p[2] >= 235; }
+      function scuro(p) { return p[0] < 45 && p[1] < 45 && p[2] < 45; }
+      // 1) via il bianco intorno
+      var l = W, r = -1, t = H, b = -1, y, k;
+      for (y = 0; y < H; y += 2) for (k = 0; k < W; k += 2) {
+        if (!bianco(px(k, y))) { if (k < l) l = k; if (k > r) r = k; if (y < t) t = y; if (y > b) b = y; }
+      }
+      if (r < 0) return;
+      // 2) via le bande scure: una riga (o colonna) e' banda se il 75% e' quasi nero (l'ora e le icone non la salvano)
+      function rigaScura(yy) { var n = 0, s = 0; for (var kk = l; kk <= r; kk += 2) { s++; if (scuro(px(kk, yy))) n++; } return n >= s * 0.75; }
+      function colScura(kk) { var n = 0, s = 0; for (var yy = t; yy <= b; yy += 2) { s++; if (scuro(px(kk, yy))) n++; } return n >= s * 0.75; }
+      while (b - t > 40 && rigaScura(t)) t += 2;
+      while (b - t > 40 && rigaScura(b)) b -= 2;
+      while (r - l > 40 && colScura(l)) l += 2;
+      while (r - l > 40 && colScura(r)) r -= 2;
+      var cw = r - l + 2, ch = b - t + 2;
+      if (cw * ch > W * H * 0.9) return;           // niente da togliere: resta com'e'
+      var c2 = document.createElement('canvas'); c2.width = cw; c2.height = ch;
+      c2.getContext('2d').drawImage(c, l, t, cw, ch, 0, 0, cw, ch);
+      im.dataset.fcVert = '1';
+      im.src = c2.toDataURL('image/jpeg', 0.92);
+      if (cw / ch <= 1.3) a.classList.add('fc-vert');   // alta o quadrata: riquadro alto, si vede grande
+      else a.classList.add('fc-tagliata');               // larga: riquadro di sempre, senza bordi
+    } catch (e) { /* immagine non leggibile: resta com'era */ }
   }
 
   function cartelloLibero(spazio) {
