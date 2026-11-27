@@ -1314,6 +1314,8 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 .navbar .nav-login:hover{background:#0a2a4d !important;color:#fff !important}
 .navbar .nav-iscriviti{display:none !important}
 .navbar .nav-sinistra{gap:24px !important}
+/* 27 nov 2026: sul portatile (1100-1650 px) il quarto pulsante «Accedi a Lavoro Edilizia» usciva dallo schermo a destra e non si vedeva: i pulsanti si stringono con la finestra */
+@media(min-width:1100px) and (max-width:1650px){.navbar .nav-login{font-size:clamp(13px,1.15vw,21px) !important;padding:9px clamp(8px,.8vw,26px) !important}.navbar .nav-sinistra{gap:clamp(6px,.8vw,24px) !important}}
 .hb-btns{flex-wrap:nowrap !important}
 .hb-btns a{font-size:21px !important;padding:18px 28px !important;white-space:nowrap}
 }
@@ -2590,6 +2592,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 <script src="/js/locandine-home.js?v=4" defer></script>
 <script src="/js/spazi-elenco.js"></script>
 <script src="/js/spazi-citta.js?v=5" defer></script>
+<script src="/js/fasce-citta.js?v=1" defer></script>
 <script src="/js/loghi-ospiti.js?v=3" data-modo="telefono" defer></script>
 <!-- 10 ott 2026: banda «Tutto GRATIS» tolta dalla home, unita al blocco #registrati (js/banda-gratis.js resta per le altre pagine). -->
 <script>
