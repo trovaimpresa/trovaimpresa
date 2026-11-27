@@ -699,9 +699,6 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span> Idee per il gestionale
         <span class="nav-badge" id="badge-richieste-gest" style="background:var(--rosso);display:none">0</span>
       </div>
-      <div class="nav-item" onclick="showSection('locandine',this)">
-        <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span> Locandine Pub.
-      </div>
       <div class="nav-item" onclick="showSection('pubblicita-clienti',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg></span> Pubblicità clienti
         <span class="nav-badge" id="badge-pubblicita" style="background:var(--verde);display:none">0</span>
@@ -1260,110 +1257,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
     </div>
 
     <!-- LOCANDINE PUBBLICITARIE -->
-    <div class="section" id="sec-locandine">
-      <div class="topbar">
-        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Locandine Pubblicitarie</div>
-      </div>
-      <div style="padding:24px; max-width:900px;">
-        <p style="color:#666; font-size:14px; margin-bottom:24px;">Carica le locandine di TrovaImpresa per ogni spazio. Vengono mostrate finché lo spazio non viene acquistato da un cliente.</p>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;">
-
-          <!-- SPAZI GRANDI -->
-          <div id="loc-card-1" class="loc-card">
-            <div style="font-weight:700; color:#92400e; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="m8.2 9.5-3-6.5h13.6l-3 6.5"/></svg> Spazio 1 — In cima (€15/mese)</div>
-            <div id="loc-preview-1" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-1" accept="image/*" style="display:none" onchange="uploadLocandina(1,this)">
-            <button onclick="document.getElementById('loc-input-1').click()" style="width:100%; padding:9px; background:#f59e0b; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(1)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-1" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-2" class="loc-card">
-            <div style="font-weight:700; color:#0066ff; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="m8.2 9.5-3-6.5h13.6l-3 6.5"/></svg> Spazio 2 — A metà (€10/mese)</div>
-            <div id="loc-preview-2" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-2" accept="image/*" style="display:none" onchange="uploadLocandina(2,this)">
-            <button onclick="document.getElementById('loc-input-2').click()" style="width:100%; padding:9px; background:#0066ff; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(2)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-2" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-3" class="loc-card">
-            <div style="font-weight:700; color:#4338ca; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="m8.2 9.5-3-6.5h13.6l-3 6.5"/></svg> Spazio 3 — In fondo (€8/mese)</div>
-            <div id="loc-preview-3" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-3" accept="image/*" style="display:none" onchange="uploadLocandina(3,this)">
-            <button onclick="document.getElementById('loc-input-3').click()" style="width:100%; padding:9px; background:#4338ca; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(3)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-3" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-4" class="loc-card">
-            <div style="font-weight:700; color:#FF6B35; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Spazio 4 — Sidebar (€10/mese)</div>
-            <div id="loc-preview-4" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-4" accept="image/*" style="display:none" onchange="uploadLocandina(4,this)">
-            <button onclick="document.getElementById('loc-input-4').click()" style="width:100%; padding:9px; background:#FF6B35; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(4)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-4" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <!-- SPAZI PICCOLI -->
-          <div id="loc-card-5" class="loc-card">
-            <div style="font-weight:700; color:#666; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg> Spazio Piccolo 1 (€5/mese)</div>
-            <div id="loc-preview-5" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-5" accept="image/*" style="display:none" onchange="uploadLocandina(5,this)">
-            <button onclick="document.getElementById('loc-input-5').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(5)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-5" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-6" class="loc-card">
-            <div style="font-weight:700; color:#666; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg> Spazio Piccolo 2 (€5/mese)</div>
-            <div id="loc-preview-6" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-6" accept="image/*" style="display:none" onchange="uploadLocandina(6,this)">
-            <button onclick="document.getElementById('loc-input-6').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(6)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-6" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-7" class="loc-card">
-            <div style="font-weight:700; color:#666; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg> Spazio Piccolo 3 (€5/mese)</div>
-            <div id="loc-preview-7" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-7" accept="image/*" style="display:none" onchange="uploadLocandina(7,this)">
-            <button onclick="document.getElementById('loc-input-7').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(7)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-7" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-          <div id="loc-card-8" class="loc-card">
-            <div style="font-weight:700; color:#666; margin-bottom:4px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg> Spazio Piccolo 4 (€5/mese)</div>
-            <div id="loc-preview-8" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
-            </div>
-            <input type="file" id="loc-input-8" accept="image/*" style="display:none" onchange="uploadLocandina(8,this)">
-            <button onclick="document.getElementById('loc-input-8').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Carica immagine</button>
-            <button onclick="eliminaLocandina(8)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Elimina immagine</button>
-            <div id="loc-status-8" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- SEGNALAZIONI -->
+    <!-- 27 nov 2026: tolta la vecchia sezione «Locandine Pub.» (8 spazi di luglio, prezzi vecchi): le sue immagini locandina-slotN.jpg non le leggeva piu' nessuna pagina del sito. -->
     <div class="section" id="sec-segnalazioni">
       <div class="topbar">
         <div class="topbar-title">🆘 Segnalazioni</div>
@@ -2268,7 +2162,6 @@ function showSection(id, el, fromPopstate) {
     })[0];
   }
   if (el) el.classList.add('active');
-  if (id === 'locandine') caricaPreviewLocandine();
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') { caricaSubappalti(); segnaVistiLavoro('subappalti'); }
