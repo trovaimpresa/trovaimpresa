@@ -43,21 +43,40 @@
   // "dove" e' la frase che il CLIENTE legge nel listino: deve dire il vero,
   // compreso quando lo stesso cartello si vede in piu' di una pagina.
   var FASCE = {
-    hero:       { nome: 'Hero — banner in alto', prezzo: 20, misura: 340,
+    hero:       { nome: 'Hero — banner in alto', prezzo: 20, misura: 340, larga: 'A',
                   dove: 'In cima alla pagina della tua città' },
-    imprese:    { nome: "Trova un'impresa",      prezzo: 17, misura: 270,
-                  dove: 'Nella pagina della tua città, accanto a «Scegli la categoria»' },
-    inserzioni: { nome: 'Inserzioni lavoro',     prezzo: 15, misura: 210,
+    imprese:    { nome: "Trova un'impresa",      prezzo: 17, misura: 270, larga: 'B',
+                  dove: 'Nella pagina della tua città, di lato a «Cerchi idee per casa?», subito sotto la ricerca' },
+    inserzioni: { nome: 'Inserzioni lavoro',     prezzo: 15, misura: 210, larga: 'C',
                   dove: 'Accanto alle offerte di lavoro e nella pagina della tua città' },
-    guide:      { nome: 'Guide e costi',         prezzo: 13, misura: 311,
+    guide:      { nome: 'Guide e costi',         prezzo: 13, misura: 311, larga: 'C',
                   dove: 'Nella pagina della tua città, accanto alle guide «quanto costa»' },
-    perche:     { nome: 'Perché TrovaImpresa',    prezzo: 10, misura: 264,
+    perche:     { nome: 'Perché TrovaImpresa',    prezzo: 10, misura: 264, larga: 'C',
                   dove: 'Nella pagina della tua città, accanto a «Perché scegliere TrovaImpresa»' },
-    profiloAlto:  { nome: 'Recensioni — cartello alto',  prezzo: 7, misura: 170,
+    profiloAlto:  { nome: 'Recensioni — cartello alto',  prezzo: 7, misura: 170, larga: 'C',
                   dove: 'Nelle schede delle imprese e nella pagina della tua città' },
-    profiloBasso: { nome: 'Recensioni — cartello basso', prezzo: 5, misura: 170,
+    profiloBasso: { nome: 'Recensioni — cartello basso', prezzo: 5, misura: 170, larga: 'C',
                   dove: 'Nelle schede delle imprese e nella pagina della tua città' }
   };
+
+  /* 27 nov 2026 — LE FASCE LARGHE (js/fasce-citta.js).
+     Ogni spazio comprato esce ANCHE in una fascia larga dentro la pagina
+     della citta', che si vede su computer, telefono e app. Quale fascia lo
+     decide la fascia di prezzo (campo «larga» qui sopra). Il listino lo deve
+     dire, se no il cliente clicca «Prendi questo spazio» sulla fascia grande
+     e qui legge di un cartellino di lato: le due cose non coincidevano. */
+  var LARGHE = {
+    A: { dove: 'in cima alla pagina, sopra la ricerca', turno: false },
+    B: { dove: 'sotto \u00abCerchi idee per casa?\u00bb', turno: false },
+    C: { dove: 'pi\u00f9 in basso nella pagina', turno: true }
+  };
+  function fraseLarga(k) {
+    var L = LARGHE[FASCE[k].larga];
+    if (!L) return '';
+    return 'In pi\u00f9 la fascia larga ' + FASCE[k].larga + ' ' + L.dove
+      + (L.turno ? ', a turno con gli altri spazi della citt\u00e0' : '')
+      + ': si vede anche sul telefono e nell\u2019app';
+  }
 
   // --- dove si vede ogni spazio --------------------------------------------
   // pagina : il file. 'index.html' con citta:true vuol dire index.html?citta=X
@@ -197,14 +216,17 @@
       out.push({
         chiave: k, nome: FASCE[k].nome, prezzo: FASCE[k].prezzo,
         misura: FASCE[k].misura, spazi: ids,
-        desc: FASCE[k].dove + REGALO
+        larga: FASCE[k].larga, fraseLarga: fraseLarga(k),
+        desc: FASCE[k].dove + '. ' + fraseLarga(k) + REGALO
       });
     });
     return out;
   }
 
   window.SPAZI_TI = {
-    aggiornato: '2026-09-09',
+    aggiornato: '2026-11-27',
+    LARGHE: LARGHE,
+    larghaDi: function (id) { var f = fasciaDi(id); return f ? f.larga : null; },
     FASCE: FASCE,
     SPAZI: SPAZI,
     diQuestaPagina: diQuestaPagina,

@@ -87,6 +87,19 @@
       font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
     .misura-card{margin-top:7px;font-size:13px;font-weight:700;color:#0b2c66;background:#eef3ff;border-radius:8px;padding:5px 8px;display:inline-block;}
     .avviso-piccolo{background:#fff8e6;border:1.5px solid #ffd07a;border-radius:10px;padding:10px 12px;font-size:13px;color:#5a4600;line-height:1.5;margin:0 0 8px;}
+    .larga-card{background:#fff3e6;color:#b45309;margin-left:4px;}
+    .mappa-spazi{display:flex;gap:22px;align-items:center;background:#fff;border:2px solid #0a2a4d;border-radius:14px;padding:18px;margin:0 0 18px;}
+    .ms-pag{position:relative;flex:0 0 210px;background:#e7eef8;border-radius:10px;padding:10px 34px;display:flex;flex-direction:column;gap:6px;}
+    .ms-riga{font-size:13px;line-height:1.2;border-radius:6px;padding:6px 8px;text-align:center;color:#0a2a4d;background:#fff;}
+    .ms-testa{background:#0a2a4d;color:#fff;}
+    .ms-a,.ms-b,.ms-c{background:#ff8800;color:#fff;font-weight:700;}
+    .ms-a b,.ms-b b,.ms-c b{font-size:15px;margin-right:4px;}
+    .ms-lato{position:absolute;top:44px;bottom:10px;width:22px;border-radius:5px;background:repeating-linear-gradient(#ff8800 0 26px,transparent 26px 40px);opacity:.75;}
+    .ms-sx{left:6px}.ms-dx{right:6px}
+    .ms-testo{font-size:15px;line-height:1.5;color:#0a2a4d;}
+    .ms-testo p{margin:0 0 8px;}
+    .ms-t{font-size:18px;font-weight:800;}
+    @media(max-width:640px){.mappa-spazi{flex-direction:column;align-items:stretch}.ms-pag{flex-basis:auto}}
     .guida-misura{background:#fff;border:2px dashed #cbd5e6;border-radius:12px;padding:14px 16px;margin:0 0 16px;font-size:13px;color:#333;line-height:1.6;}
     .guida-misura b{color:#0b2c66;}
 
@@ -281,6 +294,27 @@
     Esce anche di lato alle nostre <b>guide dei prezzi</b> &mdash; quelle che Google mostra a chi cerca
     <i>quanto costa rifare il bagno</i> &mdash; a chi le legge dalla tua citt&agrave;.
     Il cliente legge il prezzo, e accanto trova te. Nessun costo in pi&ugrave;.</p>
+  </div>
+  <!-- 27 nov 2026 — dove si vede davvero: di lato sul computer + la fascia larga (js/fasce-citta.js) -->
+  <div class="mappa-spazi">
+    <div class="ms-pag" aria-hidden="true">
+      <div class="ms-riga ms-testa">Testata della città</div>
+      <div class="ms-riga ms-a"><b>A</b> fascia larga</div>
+      <div class="ms-riga ms-cont">Ricerca</div>
+      <div class="ms-riga ms-cont ms-basso">Cerchi idee per casa?</div>
+      <div class="ms-riga ms-b"><b>B</b> fascia larga</div>
+      <div class="ms-riga ms-cont">Fatti trovare dai clienti</div>
+      <div class="ms-riga ms-c"><b>C</b> fascia larga</div>
+      <div class="ms-riga ms-cont ms-basso">Guide, recensioni…</div>
+      <div class="ms-lato ms-sx"></div><div class="ms-lato ms-dx"></div>
+    </div>
+    <div class="ms-testo">
+      <p class="ms-t">Dove si vede il tuo spazio</p>
+      <p><b>Sul computer</b>: di lato alla pagina della tua città (i riquadri arancioni sul disegno).</p>
+      <p><b>Ovunque, anche su telefono e app</b>: nella sua fascia larga.
+      <b>A</b> = Hero, <b>B</b> = Trova un'impresa, <b>C</b> = tutti gli altri, a turno.</p>
+      <p><b>Sul telefono</b>, in più, la barra in basso, a turno fra chi ha comprato nella città.</p>
+    </div>
   </div>
   <div id="schema"></div>
   <div style="max-width:760px;margin:24px auto 0;">
@@ -583,7 +617,8 @@ function buildSchema() {
         '<div class="fmt-head"><span class="fmt-nome">' + latoLabel(id) + '</span>' +
         '<span class="fmt-price">€' + PREZZI_MENSILI[id] + '<small>/mese</small></span></div>' +
         '<div class="fmt-desc">' + f.desc + '</div>' +
-        '<div class="misura-card">Si vede largo ' + (MISURE_FASCIA[id] || 260) + ' px</div>';
+        '<div class="misura-card">Di lato: largo ' + (MISURE_FASCIA[id] || 260) + ' px</div>' +
+        (SPAZI_TI.larghaDi(id) ? ' <div class="misura-card larga-card">+ fascia larga ' + SPAZI_TI.larghaDi(id) + '</div>' : '');
       card.addEventListener('click', function(){ selSpazio(id); });
       grid.appendChild(card);
     });

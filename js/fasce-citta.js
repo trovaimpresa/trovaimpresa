@@ -17,8 +17,8 @@
  *
  *   A  sotto la testata, sopra la ricerca  -> chi ha comprato hero-sx / hero-dx
  *   B  sotto «Cerchi idee per casa?»       -> chi ha comprato imprese-sx / -dx
- *   C  sotto «Fatti trovare dai clienti»   -> tutti gli altri spazi pagati
- *   D  barra in basso, solo telefono/app   -> chi ha pagato (mai «libero»:
+ *   C  sotto «Fatti trovare dai clienti»   -> tutti gli altri spazi pagati, a turno
+ *   D  barra in basso, solo telefono/app   -> chi ha pagato, a turno (mai «libero»:
  *      una barra fissa che chiede soldi ai clienti sarebbe solo fastidio)
  *
  * Posto non venduto = cartello «SPAZIO LIBERO» che porta al listino gia' sullo
@@ -44,8 +44,10 @@
   var FASCE = [
     { lettera: 'A', dopo: '.hero-banda',  spazi: ['hero-sx', 'hero-dx'] },
     { lettera: 'B', dopo: '#le-idee',     spazi: ['imprese-sx', 'imprese-dx'] },
-    { lettera: 'C', dopo: '#registrati',  spazi: null } // null = tutti gli altri
+    { lettera: 'C', dopo: '#registrati',  spazi: null, turno: true } // null = tutti gli altri
   ];
+  // ⚠️ Cosa va in quale fascia lo scrive anche il listino (js/spazi-elenco.js,
+  // campo «larga»): se si cambia qui, si cambia anche li'.
 
   function tuttiGliSpazi() {
     if (window.SPAZI_TI && window.SPAZI_TI.SPAZI) {
@@ -137,6 +139,10 @@
     } catch (e) { return []; }
   }
 
+  // a turno = tutti uguali, uno a visita (fascia C e barra in basso: lo dice il listino)
+  function aCaso(lista) {
+    return lista.length ? lista[Math.floor(Math.random() * lista.length)] : null;
+  }
   function scegli(lista) {
     if (!lista.length) return null;
     var maxP = 0;
@@ -277,7 +283,7 @@
       var w = document.createElement('div');
       w.className = 'fc-fascia';
       w.setAttribute('data-fascia', f.lettera);
-      var ann = scegli(miei);
+      var ann = f.turno ? aCaso(miei) : scegli(miei);
       if (ann) {
         w.appendChild(cartelloPagato(ann));
         giaMostrati.push(ann);
@@ -292,7 +298,7 @@
       }
       dopo.insertAdjacentElement('afterend', w);
     });
-    if (venduti.length && window.matchMedia(TELEFONO).matches) barra(scegli(venduti));
+    if (venduti.length && window.matchMedia(TELEFONO).matches) barra(aCaso(venduti));
   }
 
   if (document.readyState === 'loading') {
