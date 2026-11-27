@@ -4775,3 +4775,22 @@ Nato dai dati veri: in 30 giorni →33← imprese entrate nel gestionale, →20�
 - Riga AI del preventivo (`js/gest-ai-moduli.js`, `aiPzSceltaHTML` / `aiPzPrepara` / `aiPzContesto` / `aiPzVerifica` / `aiPzBanner` / `aiPzSalva`): «Con quali prezzi?» Tutti e due (già scelto) · Solo i miei · Del gestionale. Senza prezzi suoi niente domanda: usa il gestionale e lo dice. I suoi prezzi (gest_prezzi_propri, fonte mio/vuota, max 150) vanno all'AI insieme al testo; l'AI segna `fonte` per voce, il gestionale la CONTROLLA («tuo» solo se il prezzo è davvero uno dei suoi). Sotto ogni prezzo «✔ prezzo tuo» / «⚠ prezzo del gestionale — da controllare» / «✔ prezzo corretto da te»; riquadro «N prezzi sono del gestionale. Salvali come tuoi prezzi» → nel Prezzario (stessa descrizione = aggiorna). Studio (parcella): niente domanda, come prima.
 - Chat (`chat-gestionale.mjs`): `compila_preventivo` ha `fonte`; regola nuova «non fermarti se mancano i suoi prezzi», costante `PREZZI_DI_RIFERIMENTO` (stessi numeri di ai-generate: se cambiano lì, cambiano anche qui). «Solo i miei prezzi» detto in chat = voci vuote. Il modulo aperto dalla chat verifica e segna allo stesso modo (`gestRiempiPreventivoDaChat`).
 - Stile `.pzs*`, `.pr-fonte` in fondo a css/gestionale.css. Le emoji ✔ ⚠ le trasforma in icone gest-icone.js.
+
+# 27 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 5: MEZZI E SPESE (impresa e artigiano, online 3bb2018)
+Giro da utente vero su Mezzi e attrezzature, Carte, Fornitori, Scadenze e promemoria. Reparto «ferramenta», «PROVA CONTROLLORE», 1440 e 375; collaudato sul sito vero dopo il push, poi tutto cancellato: mezzi 4, rifornimenti 0, carte 3, movimenti 6, fornitori 5, fatture fornitori 4, scadenze 11, promemoria 0 (uguali a prima). `?v=27nov-s5` su 6 js, gestionale-stile.css `?v=44`.
+Difetti sistemati:
+- ⛔ Due tocchi su «Crea» mezzo = 2 mezzi (provato): chiavistello `_mzCreaSalvo` (saveMezzo → _saveMezzo, js/gest-mezzi.js).
+- ⛔ Due tocchi su «Registra il pieno» = 2 pieni e carta scalata 2 volte: `_rifSalvo` (salvaRifornimento → _salvaRifornimento, js/gest-carte-documenti.js).
+- ⛔ I km scritti al pieno non arrivavano al tagliando: se più avanti di `mzKm`, diventano `gest_mezzi.km_attuali` (Assistente, email del lunedì li vedono).
+- ⛔ Spesa più grossa del saldo su una prepagata → saldo negativo in silenzio. `window.cartaSottoZeroOk(cartaId, importo)` (legge gest_carte_saldo, chiede con tiChiedi, non blocca): spesa della carta, pieno con la carta, fattura del fornitore «Pagata» con la carta (gest-finestre-eventi.js, `fattf-stato`).
+- Targa scritta come capita → «AB123CD» (solo categoria mezzo; la matricola di un'attrezzatura resta com'è).
+- Fumetto blu d'aiuto `#ti-aiuto` (js/aiuti.js) usciva in Times (body senza font): ora Inter.
+Fatti col sì di Alex (foto prima):
+- Scheda del mezzo: «In ritardo · N giorni» → «Non rientrato · N giorni» (noleggio non tornato; «Noleggio in ritardo» finiva sotto «Apri» sul telefono). «⛽ 160,80 €» → «⛽ Pieni: 160,80 €».
+- Fornitori sul telefono (≤600 px): «+ Fattura da pagare» in cima a tutta riga, gli altri due per riga (css/gestionale-stile.css).
+- Fornitori: le fatture pagate in fondo sotto «Pagate» (titolo «Fatture pagate» se non c'è niente da pagare) — js/gest-fornitori.js.
+- Scadenze: entro 30 giorni «Tra N giorni» invece di «In tempo» (wrapper `scadCard` → `_scadCard`, js/gest-scadenze-pratiche.js; entro 7 resta «In scadenza»).
+- Fattura del fornitore NUOVA senza «La paghi entro» → 30 giorni dalla data, e il messaggio lo dice (`_saveFattf`).
+- Carta senza movimenti: il modulo parte da «Ricarica» (renderMovimentiCarta).
+Da sapere: le foto si fanno con /home/claude/foto/foto5.js (stampo di tools/foto-gestionale.js, dati in più in B.DATI; BANCO_RADICE=/tmp/prima per il «prima»). In nuvola il banco gira con `executablePath:/usr/bin/google-chrome` (cambiato solo in locale, non nel repo).
+⬜ Non provato dal vivo: la domanda «sotto zero» su «Pagata» della fattura del fornitore con la carta (provati spesa e codice), l'email del lunedì coi km del pieno.
