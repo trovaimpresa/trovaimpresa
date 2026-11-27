@@ -4755,3 +4755,17 @@ Fatti col sì di Alex (foto prima):
 - Frase sotto le lavorazioni: «scrivi la quantità, oppure le misure e la calcola il gestionale» (lo studio resta com'era).
 - Prezzario: la prima volta si apre su «I tuoi prezzi» se ci sono prezzi tuoi E una tariffa (`pzFonteScelta`).
 Da sapere: la descrizione della fattura d'acconto resta «Stato avanzamento lavori n. …» (va al cliente e allo SDI, decisione del 17 nov). Le foto si fanno con /home/claude/foto/foto3.js (stampo di tools/foto-gestionale.js con dati in più); il finto database NON capisce `.or` (I tuoi prezzi = tutte): il Prezzario si fotografa dal vivo.
+
+# 27 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 4: PERSONE IN CANTIERE (impresa e artigiano)
+Online: d1551f6a + 3b2a31ec. Collaudato sul sito vero (375 e 1440), reparto «ferramenta», «PROVA CONTROLLORE Marco», poi tutto cancellato per davvero (sb.raw): operatori 4, ore 11, rapportini 4, lavori 17, membri 3, uguali a prima. ⚠️ In gest_scadenze restano 3 righe nel Cestino del 25 nov (prove vecchie, non di questa sessione).
+Difetti sistemati:
+- ⛔ Giornate: detto «Marco» o «Rossi», con «Marco Rossi» in Squadra, proponeva «+ Marco» (persona doppia). `giorDaNome` (js/gest-giornate.js): se il nome detto è UNA parola e in Squadra c'è UNA sola persona con quella parola nel nome, è lei. Due «Rossi» → resta nuovo (non si indovina). Vale anche per «Parla» (gest-parla.js usa giorDaNome).
+- ⛔ Dopo una giornata salvata/cambiata/cancellata, Squadra diceva «0 giorni» fino al ricaricare: `renderGiornate` segna sporche squadra, riepilogo, report, calendario (`_tabSporchi`).
+- ⛔ Correttore (js/correggi-giornata.js `?v=7`): il testo scritto dall'AI di «Compila la giornata» veniva ricorretto (solo un punto in più) e il primo «Salva» non salvava. Ora la casella ha `data-cg-gia` = testo dell'AI (`c.daAI`): uguale → non si corregge, salva al primo tocco. Cambiato a mano → si corregge come sempre. banco-correttore ZERO difetti.
+Fatti col sì di Alex (foto prima):
+- Telefono: in tutte le sezioni prima il titolo (riga sua) e sotto «+ Nuovo…» (`#appview .sec-head>h2{flex-basis:100%}`, tolto l'order:-1 del 26 nov; gestionale-stile.css `?v=43`). Misurato: 11 sezioni con pulsante, titolo sempre sopra a sinistra.
+- App dell'operaio: niente «Indietro» sulla prima schermata (dall'icona sul telefono lo portava alla home del sito). `<body data-senza-freccia>` + controllo in js/freccia-indietro.js (`?v=27nov`). Nel lavoro «Indietro» resta (btn-back, torna all'agenda).
+- Squadra: «Invitato» → «Non è entrato» (dipStato in gest-squadra.js; il codice nasce con la persona, quindi «Invitato» lo diceva anche a chi non aveva ricevuto niente). Mestiere e telefono su due righe (prima «muratore ·» col punto appeso).
+- Giornate della persona: «Chiudi» con classe `cli-chiudi` (sul telefono sparisce, c'è «Indietro»).
+- Giornata che crea un cantiere nuovo lo dice: «Giornata salvata ✔ · cantiere nuovo «X» messo in Lavori» (`giorCantNuovi`; allo studio «pratica nuova … messa in Pratiche»).
+Da sapere: il correttore che ferma il primo «Salva» quando corregge davvero è voluto (3 nov, con avviso). Il lavoro nato da una giornata dice «nessuno assegnato» anche se ci ha lavorato qualcuno (non toccato).
