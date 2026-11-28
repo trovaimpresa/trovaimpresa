@@ -45,7 +45,7 @@
           return '<a class="vfb-c" href="/profilo-impresa.html?id=' + x.id + '"><img src="' + esc(x.foto) + '" alt="' + esc(x.nome) + '" loading="lazy">' +
             '<div class="vfb-t"><b>' + esc(x.nome) + '</b><span>' + esc(x.mestiere) + '</span><em class="vfb-d">f &nbsp;Uscita il ' + data(x.giorno) + '</em></div></a>';
         }).join('') + '</div>' +
-        '<div class="vfb-b"><a class="posto-btn gest-btn" href="' + PAGINA + '" target="_blank" rel="noopener">Segui la pagina Facebook</a></div>';
+        '<div class="vfb-b"><a class="posto-btn gest-btn" href="' + PAGINA + '" target="_blank" rel="noopener">Segui la pagina Facebook</a> <a class="posto-btn gest-btn" href="https://www.instagram.com/trovaimpresa/" target="_blank" rel="noopener">Seguici su Instagram</a></div>';
       ancora.after(s);
     }).catch(function () {});
   }

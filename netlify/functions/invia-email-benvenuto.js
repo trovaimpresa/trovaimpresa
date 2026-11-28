@@ -403,6 +403,7 @@ exports.handler = async function(event) {
   <div style="font-size:15px;line-height:1.5;color:#0a2a4d;margin-top:6px">Quando la tua scheda è completa, ti presentiamo sulla pagina Facebook <b>Trova impresa</b>, gratis.</div>
   <div style="font-size:15px;line-height:1.5;color:#0a2a4d;margin-top:6px">Vuoi farti vedere di più? <b>Rispondi a questa email</b> con le foto dei tuoi lavori, la tua locandina o il link del tuo sito: li pubblichiamo noi sulla pagina, gratis.</div>
   <a href="https://www.facebook.com/profile.php?id=61575390415610" style="display:inline-block;margin-top:10px;background:#1877f2;color:#ffffff;font-size:15px;font-weight:800;text-decoration:none;padding:11px 20px;border-radius:9px">Segui la pagina &rarr;</a>
+  <a href="https://www.instagram.com/trovaimpresa/" style="display:inline-block;margin-top:10px;margin-left:6px;background:#c13584;color:#ffffff;font-size:15px;font-weight:800;text-decoration:none;padding:11px 20px;border-radius:9px">Instagram &rarr;</a>
 </td></tr></table></td></tr>
 
 ${appStore}<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
