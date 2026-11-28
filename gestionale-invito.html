@@ -74,7 +74,14 @@
 <meta name="apple-mobile-web-app-title" content="Gestionale">
 </head>
 <body>
-<header><h1>Invito al gestionale</h1><small>TrovaImpresa</small></header>
+<header><h1 id="hd-tit">Invito al gestionale</h1><small>TrovaImpresa</small></header>
+<script>
+/* 28 nov 2026 — dentro la app iPhone «Giornate di cantiere» la testata dice il nome della app, col casco */
+if(/TrovaImpresaApp/i.test(navigator.userAgent)){
+  document.getElementById("hd-tit").innerHTML='<img src="/img/app/giornate-icona.png" alt="" width="34" height="34" style="vertical-align:-8px;border-radius:8px;margin-right:10px">Giornate di cantiere';
+  document.title="Giornate di cantiere";
+}
+</script>
 <div class="wrap">
   <div id="msg" class="msg"></div>
 

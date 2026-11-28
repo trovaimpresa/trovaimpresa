@@ -15,6 +15,8 @@
 
   function giaApp(){
     try{
+      /* 28 nov 2026: anche dentro la app iPhone «Giornate di cantiere» (Capacitor): li' la scheda non serve */
+      if (/TrovaImpresaApp/i.test(navigator.userAgent) || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return true;
       return (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
     }catch(_){ return false; }
   }
