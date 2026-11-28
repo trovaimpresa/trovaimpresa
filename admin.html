@@ -556,6 +556,22 @@
   .u-det{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
   .u-det > div{background:#f4f7fb;border-radius:10px;padding:12px 14px}
   .u-det .k{font-size:16px;color:#3d4b5c} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
+  /* 28 nov 2026 — Facebook */
+  .fb-grafico{display:flex;align-items:flex-end;gap:6px;overflow-x:auto;padding:10px 0 4px}
+  .fb-col{flex:1 0 46px;text-align:center}
+  .fb-bar{background:#1877f2;border-radius:6px 6px 0 0;margin:0 auto;width:70%}
+  .fb-n{font-size:15px;font-weight:800;color:#0a2a4d;margin-bottom:4px}
+  .fb-g{font-size:13px;color:#3d4b5c;margin-top:6px;font-weight:700}
+  .fb-p{font-size:12px;color:#5b6b80}
+  .fb-tipo{display:grid;grid-template-columns:minmax(120px,220px) 1fr 50px;gap:12px;align-items:center;margin:10px 0}
+  .fb-tn{font-size:16px;font-weight:700;color:#0a2a4d}
+  .fb-tb{background:#eef1f5;border-radius:999px;height:16px;overflow:hidden}
+  .fb-tb div{background:#1877f2;height:100%;border-radius:999px}
+  .fb-tv{font-size:17px;font-weight:800;text-align:right}
+  .fb-post{padding:10px 0;border-top:1px solid #e5e7eb;font-size:16px}
+  .fb-et{display:inline-block;background:#e7f0fe;color:#1877f2;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;margin-right:6px}
+  .fb-q{display:block;font-size:14px;color:#5b6b80;margin-top:2px}
+  @media (max-width:600px){ .fb-tipo{grid-template-columns:1fr 44px} .fb-tipo .fb-tb{grid-column:1 / -1;order:3} }
   /* Scrivi a tutti */
   .st-lab{display:block;font-weight:800;font-size:18px;margin:20px 0 8px;color:#0a1a2e}
   .st-campo{width:100%;padding:14px;font-size:18px;line-height:1.7;color:#0a1a2e;
@@ -816,6 +832,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
            guarda chi su TrovaImpresa non ha nessun account. -->
       <div class="nav-item" onclick="showSection('ricerche',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg></span> Ricerche e visite
+      </div>
+      <!-- 28 nov 2026 - la pagina Facebook: post di Make e persone arrivate sul sito -->
+      <div class="nav-item" onclick="showSection('facebook',this)">
+        <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></span> Facebook
       </div>
       <div class="nav-item" onclick="showSection('mie-viste',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6z"/></svg></span> Le mie viste
@@ -1969,6 +1989,30 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       </div>
     </div>
 
+    <!-- FACEBOOK — 28 novembre 2026 (Alex: «un nuovo contatore chiamato
+         Facebook, da lì controlliamo tutto l'andamento della mia pagina»;
+         «così come mi consigli tu contiamo i clic»).
+         Quanti post ha pubblicato Make (fb_pubblicati) e quante persone sono
+         arrivate sul sito da Facebook (visite_sito con da_meta), divise per
+         la pagina dove arrivano = il tipo di post che hanno cliccato.
+         ⛔ Mi piace e copertura della pagina NON ci sono: li sa solo Meta.
+         I dati li legge netlify/functions/admin-facebook.js. -->
+    <div class="section" id="sec-facebook">
+      <div class="topbar">
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> Facebook</div>
+        <div class="topbar-right"><span class="admin-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="fb-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" onclick="filtraFacebook(7,this)">Ultimi 7 giorni</button>
+          <button class="u-btn" onclick="filtraFacebook(30,this)">Ultimi 30 giorni</button>
+          <button class="u-btn" onclick="caricaFacebook()">Aggiorna</button>
+        </div>
+        <div id="fb-corpo"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- RICERCHE E VISITE — 7 settembre 2026.
          Che cosa fa il CLIENTE sul sito pubblico: quante schede impresa
          apre, quante ricerche fa, che cosa cerca, dove, e quante volte
@@ -2241,6 +2285,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') { caricaSubappalti(); segnaVistiLavoro('subappalti'); }
   if (id === 'forum') caricaForum();
+  if (id === 'facebook') caricaFacebook();
   if (id === 'offerte-lavoro') { caricaOfferteLavoro(); segnaVistiLavoro('offerte-lavoro'); }
   if (id === 'candidati') caricaCandidati();
   if (id === 'clienti-iscritti') caricaClientiIscritti();
@@ -3598,6 +3643,53 @@ function _ceTempo(sec){
   if(min < 60) return min + ' minut' + (min === 1 ? 'o' : 'i');
   const ore = Math.floor(min / 60), resto = min % 60;
   return ore + ' or' + (ore === 1 ? 'a' : 'e') + (resto ? ' e ' + resto + ' minut' + (resto === 1 ? 'o' : 'i') : '');
+}
+
+/* ===== FACEBOOK — 28 nov 2026 ===== */
+let fbGiorni = 7, fbDati = null;
+function fbEsc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function caricaFacebook(){
+  const corpo = document.getElementById('fb-corpo');
+  corpo.innerHTML = '<div class="loading">Caricamento...</div>';
+  try {
+    const r = await fetch('/.netlify/functions/admin-facebook', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: fbGiorni })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!j.success) throw new Error(j.error || 'errore sconosciuto');
+    fbDati = j.data; disegnaFacebook(j.data);
+  } catch(e) { corpo.innerHTML = '<div class="u-riga mai"><div class="n">Non riesco a leggere i numeri</div><div class="s">' + fbEsc(e.message) + '</div></div>'; }
+}
+function filtraFacebook(g, btn){
+  fbGiorni = g;
+  document.querySelectorAll('#sec-facebook .u-filtri .u-btn').forEach(b => b.classList.remove('attivo'));
+  if (btn) btn.classList.add('attivo');
+  caricaFacebook();
+}
+function disegnaFacebook(d){
+  const conf = d.giorni + ' giorni prima: ' + d.persone_prima;
+  document.getElementById('fb-numeri').innerHTML =
+    '<div class="u-num verde"><div class="v">' + d.persone + '</div><div class="e">Persone arrivate sul sito da Facebook negli ultimi ' + d.giorni + ' giorni<br><b>' + conf + '</b></div></div>' +
+    '<div class="u-num"><div class="v">' + d.persone_oggi + '</div><div class="e">Persone arrivate oggi</div></div>' +
+    '<div class="u-num arancio"><div class="v">' + d.post + '</div><div class="e">Post pubblicati da Make negli ultimi ' + d.giorni + ' giorni<br>(' + d.post_oggi + ' oggi)</div></div>' +
+    '<div class="u-num viola"><div class="v">' + (d.post ? (d.persone / d.post).toFixed(1).replace('.', ',') : '–') + '</div><div class="e">Persone arrivate per ogni post</div></div>';
+  const max = Math.max(1, ...d.per_giorno.map(x => x.persone));
+  const barre = d.per_giorno.map(x => {
+    const h = Math.round(x.persone / max * 150);
+    const gg = new Date(x.giorno + 'T12:00:00').toLocaleDateString('it-IT', { day:'numeric', month:'short' });
+    return '<div class="fb-col"><div class="fb-n">' + x.persone + '</div><div class="fb-bar" style="height:' + Math.max(h, 3) + 'px"></div><div class="fb-g">' + gg + '</div><div class="fb-p">' + x.post + ' post</div></div>';
+  }).join('');
+  const maxT = Math.max(1, ...d.per_tipo.map(x => x.persone));
+  const tipi = d.per_tipo.map(x =>
+    '<div class="fb-tipo"><div class="fb-tn">' + fbEsc(x.nome) + '</div><div class="fb-tb"><div style="width:' + Math.max(2, Math.round(x.persone / maxT * 100)) + '%"></div></div><div class="fb-tv">' + x.persone + '</div></div>').join('');
+  const ultimi = d.ultimi.map(x =>
+    '<div class="fb-post"><span class="fb-et">' + fbEsc(x.tipo) + '</span> <b>' + fbEsc(x.nome) + '</b><span class="fb-q">' + fbEsc(x.quando) + '</span></div>').join('');
+  document.getElementById('fb-corpo').innerHTML =
+    '<div class="u-riga"><div class="n">Giorno per giorno</div><div class="s">Persone arrivate da Facebook (sopra) e post usciti (sotto)</div><div class="fb-grafico">' + barre + '</div></div>' +
+    '<div class="u-riga"><div class="n">Quali post fanno più clic</div><div class="s">Persone arrivate, divise per il tipo di post che hanno toccato</div>' + (tipi || '<div class="s">Ancora nessuno.</div>') + '</div>' +
+    '<div class="u-riga"><div class="n">Ultimi post usciti</div><div class="s">In cima i più nuovi</div>' + (ultimi || '<div class="s">Ancora nessuno.</div>') + '</div>' +
+    '<div class="u-riga ferma"><div class="n">Mi piace e copertura della pagina</div><div class="s">Questi numeri li sa solo Facebook: per ora guardali su Meta Business Suite. Si possono portare qui più avanti, facendoli leggere a Make.</div></div>';
 }
 
 async function caricaChiEntra(){
