@@ -304,7 +304,7 @@
           + (k?'<button type="button" class="btn gal-pdf gal-apri" data-action="edit-job" data-id="'+esc(k)+'">'+(ruoloUtente==='professionista'?'Apri la pratica ›':'Apri il lavoro ›')+'</button>':"")
           + '</div><div class="thumbs">';
       arr.forEach(({x,kind})=>{
-        const q=quando(x), tag=_galTag(q), tcls=q==="prima"?"prima":"dopo";
+        const q=quando(x), tag=(x.tipo==="lavoro"?"In corso":_galTag(q)), tcls=q==="prima"?"prima":"dopo";
         const op=galNomeOp(x.operatore);
         galInfo[x.id]={kind,lav:lavName[k]||"",tag,op,quando:x.created_at||"",path:x.storage_path||""};
         if(kind==="foto"){

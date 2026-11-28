@@ -179,6 +179,31 @@
     });
   }
 
+
+  /* 28 nov 2026 — «Scrivi» accanto a «Parla»: chi non vuole dettare apre
+     subito «Racconta la giornata» e scrive */
+  function scrivi() {
+    if (document.getElementById("gv-scrivi")) return;
+    var st = document.createElement("style");
+    st.textContent = "#gv-scrivi{position:fixed;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;background:#fff;color:#0a2a4d;border:2px solid #0a2a4d;border-radius:999px;padding:14px 22px;font:inherit;font-size:19px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}#gv-scrivi svg{width:24px;height:24px;flex:none}@media(max-width:600px){#gv-scrivi{padding:14px 18px}}";
+    document.head.appendChild(st);
+    var b = document.createElement("button"); b.type = "button"; b.id = "gv-scrivi";
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Scrivi';
+    b.onclick = function () {
+      if (typeof rvApri !== "function") return;
+      rvApri();
+      setTimeout(function () { var v = document.querySelector('#rv-corpo [data-tipo="voce"]'); if (v) v.click(); }, 60);
+    };
+    document.body.appendChild(b);
+    function posto() {
+      var p = document.getElementById("gv-btn"), ov = document.getElementById("rv-ov");
+      var vis = p && getComputedStyle(p).display !== "none" && p.offsetWidth > 0 && !(ov && !ov.classList.contains("hidden"));
+      b.style.display = vis ? "" : "none";
+      if (vis) { var r = p.getBoundingClientRect(); b.style.right = (window.innerWidth - r.left + 10) + "px"; b.style.bottom = (window.innerHeight - r.bottom) + "px"; }
+    }
+    posto(); setInterval(posto, 700); window.addEventListener("resize", posto);
+  }
+
   function parti() {
     var st = document.createElement("style"); st.id = "oh-css"; st.textContent = css; document.head.appendChild(st);
     var giri = 0;
@@ -188,6 +213,7 @@
       frecceViste();
       if (location.hash.indexOf("#sez-") === 0) history.replaceState(null, "", location.pathname + location.search);
       casa();
+      scrivi();
       /* i riquadri si rifanno quando arrivano i numeri (giornate, lavori, chat) */
       [1500, 4000, 9000].forEach(function (t) { setTimeout(function () { if (!SEZ) disegna(); }, t); });
     })();

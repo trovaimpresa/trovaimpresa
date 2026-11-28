@@ -97,34 +97,46 @@ $("#btn-back").onclick=()=>{renderCal();renderDay();show("agenda");};
    foto» come immagini rotte. Adesso solo foto vere e non nel Cestino. */
 const OP_TIPI_FOTO=["da_fare","fatto","lavoro"];
 async function caricaFoto(lavoroId){
-  const {data}=await sb.from("gest_foto").select("storage_path,tipo").eq("lavoro_id",lavoroId).in("tipo",OP_TIPI_FOTO).is("eliminato_il",null).order("created_at",{ascending:false});
-  const capo=$("#lv-foto-capo"), grid=$("#lv-foto");
-  capo.innerHTML="";grid.innerHTML="";
+  const {data}=await sb.from("gest_foto").select("storage_path,tipo,created_at").eq("lavoro_id",lavoroId).in("tipo",OP_TIPI_FOTO).is("eliminato_il",null).order("created_at",{ascending:false});
+  const capo=$("#lv-foto-capo"), fin=$("#lv-foto"), corso=$("#lv-foto-corso");
+  capo.innerHTML="";fin.innerHTML="";if(corso)corso.innerHTML="";
   const rows=data||[];
-  const daCapo=rows.filter(f=>f.tipo==="da_fare"), mie=rows.filter(f=>f.tipo!=="da_fare");
-  if(!daCapo.length)capo.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Nessuna foto dal capo.</div>';
-  else for(const f of daCapo){
-    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
-    if(su&&su.signedUrl){const img=document.createElement("img");img.src=su.signedUrl;capo.appendChild(img);}
-  }
-  if(!mie.length)grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Ancora nessuna foto.</div>';
-  else for(const f of mie){
-    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
-    if(su&&su.signedUrl){const img=document.createElement("img");img.src=su.signedUrl;grid.appendChild(img);}
-  }
+  /* 28 nov 2026 — le foto dell'operaio divise: «in corso» (tipo lavoro) e
+     «finito» (tipo fatto), in cima le ultime, sotto giorno e ora */
+  const daCapo=rows.filter(f=>f.tipo==="da_fare"), fatte=rows.filter(f=>f.tipo==="fatto"), inCorso=rows.filter(f=>f.tipo==="lavoro");
+  const GG=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+  const quando=t=>{const d=new Date(t);if(isNaN(d))return "";const z=n=>String(n).padStart(2,"0");return GG[d.getDay()]+" "+z(d.getDate())+"/"+z(d.getMonth()+1)+" · "+z(d.getHours())+":"+z(d.getMinutes());};
+  const paths=rows.map(f=>f.storage_path);
+  const url={};
+  if(paths.length){const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrls(paths,3600);(su||[]).forEach(x=>{if(x&&x.signedUrl)url[x.path]=x.signedUrl;});}
+  const metti=(box,lista,vuoto,conOra)=>{
+    if(!box)return;
+    if(!lista.length){box.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">'+vuoto+'</div>';return;}
+    box.innerHTML=lista.filter(f=>url[f.storage_path]).map(f=>conOra
+      ?'<div class="lv-fc"><img src="'+url[f.storage_path]+'" alt=""><span class="lv-fq">'+esc(quando(f.created_at))+'</span></div>'
+      :'<img src="'+url[f.storage_path]+'" alt="">').join("");
+  };
+  metti(capo,daCapo,"Nessuna foto dal capo.",false);
+  if(corso){metti(corso,inCorso,"Ancora nessuna foto.",true);metti(fin,fatte,"Ancora nessuna foto.",true);}
+  else metti(fin,fatte.concat(inCorso),"Ancora nessuna foto.",true);
 }
 
-/* foto: carica */
-$("#btn-foto").onclick=()=>{ if(chiedoPermesso("foto","di aggiungere foto"))$("#lv-file").click(); };
+/* foto: carica — il pulsante scelto dice se e' «in corso» o «finito» */
+let OP_FOTO_TIPO="lavoro", OP_FOTO_BTN=null;
+document.querySelectorAll(".lv-fbtn").forEach(b=>b.onclick=()=>{
+  if(!chiedoPermesso("foto","di aggiungere foto"))return;
+  OP_FOTO_TIPO=b.dataset.ftipo||"lavoro";OP_FOTO_BTN=b;$("#lv-file").click();
+});
 $("#lv-file").onchange=async e=>{
   const file=e.target.files[0];if(!file||!curLavoro)return;
-  $("#btn-foto").disabled=true;$("#btn-foto").textContent="Carico…";
+  const btn=OP_FOTO_BTN||$("#btn-foto"), testo=btn.textContent, tipo=OP_FOTO_TIPO;
+  btn.disabled=true;btn.textContent="Carico…";
   /* ridimensiona a 1600px/JPEG 0.75 e blocca oltre 15 MB (js/foto-upload.js).
      Qui conta doppio: si carica dal cantiere, spesso con poco campo. */
   const p=await preparaFileUpload(file);
   if(p.errore){
     toast(p.errore);
-    $("#btn-foto").disabled=false;$("#btn-foto").textContent="📷 Aggiungi foto";
+    btn.disabled=false;btn.textContent=testo;
     e.target.value="";return;
   }
   const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -132,11 +144,11 @@ $("#lv-file").onchange=async e=>{
   const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
   if(up){toast("Foto non caricata: "+up.message);}
   else{
-    const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo:"lavoro",operatore:MIO.nome,storage_path:path});
+    const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo,operatore:MIO.nome,storage_path:path});
     if(ins){await _fileOrfano("gestionale-foto",path);toast("Foto non salvata: "+ins.message+" — riprova");}
-    else{toast("Foto aggiunta ✔");await caricaFoto(curLavoro.id);}
+    else{toast(tipo==="fatto"?"Foto del lavoro finito aggiunta ✔":"Foto dei lavori in corso aggiunta ✔");await caricaFoto(curLavoro.id);}
   }
-  $("#btn-foto").disabled=false;$("#btn-foto").textContent="📷 Aggiungi foto";
+  btn.disabled=false;btn.textContent=testo;
   e.target.value="";
 };
 
@@ -213,7 +225,7 @@ function opCartaLavori(){
   const sel=$("#carta-lav");if(!sel)return;
   const L=(typeof LAVORI!=="undefined"?LAVORI:[]).filter(l=>l.stato!=="fatto");
   const v=sel.value;
-  sel.innerHTML='<option value="">'+(MIO.tipoStudio==='professionista'?'Per quale pratica? (facoltativo)':'Per quale lavoro? (facoltativo)')+'</option>'
+  sel.innerHTML='<option value="">'+(MIO.tipoStudio==='professionista'?'Per quale pratica?':'Per quale lavoro?')+'</option>'
     +L.map(l=>'<option value="'+esc(String(l.id))+'">'+esc(l.descrizione||"Senza nome")+'</option>').join("");
   if(v&&L.some(l=>String(l.id)===v))sel.value=v;
   else if(curLavoro&&L.some(l=>String(l.id)===String(curLavoro.id||curLavoro)))sel.value=String(curLavoro.id||curLavoro);
@@ -231,6 +243,8 @@ $("#btn-carta-salva").onclick=async()=>{
   /* un tetto ci vuole: senza, un dito appoggiato sullo zero manda al database
      un numero che la colonna non regge, e l'errore arriva dopo */
   if(importo>1000000){toast("Importo troppo alto: controlla quello che hai scritto");return;}
+  /* 28 nov 2026 — la spesa va sempre su un lavoro (se ce ne sono): il capo la ritrova al suo posto */
+  { const sl=$("#carta-lav"); if(sl&&sl.style.display!=="none"&&sl.options.length>1&&!sl.value){toast(MIO.tipoStudio==='professionista'?"Scegli per quale pratica è la spesa":"Scegli per quale lavoro è la spesa");sl.focus();return;} }
   const causale=$("#carta-causale").value.trim()||null;
   $("#btn-carta-salva").disabled=true;
   const {error}=await sb.from("gest_carte_movimenti").insert({

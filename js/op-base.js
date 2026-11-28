@@ -210,6 +210,7 @@ function applicaPermessi(){
   ["#op-tabs","#op-p-lavori","#op-p-foto","#op-p-preventivi","#op-p-chat","#op-p-archivio"].forEach(s=>{const e=$(s); if(e&&!vediLavori)e.style.display="none"; else if(e)e.style.display="";});
   /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
   _mostra("#btn-foto",  puo("foto"));
+  document.querySelectorAll(".lv-fbtn").forEach(b=>{b.style.display=puo("foto")?"":"none";});
   _mostra("#btn-video", puo("foto"));
   /* + Rapido: compare solo se c'e' almeno UNA cosa che questa persona puo'
      segnare, e solo se vede i lavori (senza, non c'e' niente su cui segnarla) */

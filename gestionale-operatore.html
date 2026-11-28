@@ -397,6 +397,17 @@
   html body .op-card.op-prev.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #c62828 !important}
   html body .op-card.op-prev.v.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #1c7a43 !important}
 </style>
+<style>
+/* 28 nov 2026 — le foto dell'operaio divise: in corso / finito, con giorno e ora */
+.lv-ft{font-weight:800;font-size:17px;color:#0a2a4d;margin:12px 0 6px}
+.lv-fbtn{margin-top:10px;font-size:18px!important;padding:14px!important}
+.lv-fbtn-fin{background:#ff8800!important;border-color:#ff8800!important;color:#fff!important}
+.lv-fc{display:flex;flex-direction:column;gap:3px}
+.lv-fc img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
+.lv-fq{font-size:14px;font-weight:600;color:#334155}
+.op-apri{flex-basis:100%;width:100%;background:#ff8800!important;border-color:#ff8800!important;color:#fff!important;font-size:18px!important;padding:14px!important}
+.op-btns{flex-wrap:wrap}
+</style>
 </head>
 <body data-senza-freccia>
 
@@ -624,9 +635,13 @@
 
     <div class="panel">
       <div class="label">Le tue foto</div>
+      <div class="lv-ft">Lavori in corso</div>
+      <div class="foto-grid" id="lv-foto-corso"></div>
+      <button class="btn-line lv-fbtn" data-ftipo="lavoro" style="width:100%">📷 Lavori in corso</button>
+      <div class="lv-ft">Lavoro finito</div>
       <div class="foto-grid" id="lv-foto"></div>
       <input type="file" id="lv-file" accept="image/*" capture="environment" class="hidden">
-      <button class="btn-line" id="btn-foto" style="width:100%"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Aggiungi foto</button>
+      <button class="btn-fill lv-fbtn lv-fbtn-fin" data-ftipo="fatto" id="btn-foto" style="width:100%">📷 Lavoro finito</button>
     </div>
 
     <div class="panel">
@@ -667,15 +682,15 @@
 
 <div id="toast"></div>
 
-<script src="/js/op-base.js?v=24nov-mz"></script>
+<script src="/js/op-base.js?v=28nov-ft"></script>
 <script src="/js/op-agenda-giorno.js?v=28nov-inv"></script>
-<script src="/js/op-spese-foto.js?v=25nov-carta"></script>
+<script src="/js/op-spese-foto.js?v=28nov-ft"></script>
 <script src="/js/op-rapido-voce.js?v=28nov-scrivi"></script>
 <script src="/js/op-rapportini.js?v=28nov-sq"></script>
 <script src="/js/op-giornate.js?v=11nov9"></script>
 <script src="/js/op-giornata-completa.js?v=11nov9"></script>
 <script src="/js/op-salvataggio-lavoro.js?v=11nov1"></script>
-<script src="/js/op-schede.js?v=24nov-mz"></script>
+<script src="/js/op-schede.js?v=28nov-ft"></script>
 <script src="/js/op-mezzi.js?v=24nov-mz2"></script>
 <script src="/js/op-strumenti.js?v=25nov"></script>
 <script src="/js/op-preventivi.js?v=1"></script>
@@ -695,7 +710,7 @@
 <script src="/js/caselle-operaio.js?v=1" defer></script>
 <script src="/js/op-installa.js?v=28nov-app" defer></script>
 <!-- 28 nov 2026: la prima pagina a riquadri (foto approvata da Alex) -->
-<script src="/js/op-casa.js?v=1" defer></script>
+<script src="/js/op-casa.js?v=28nov-ft" defer></script>
 <!-- 20 nov 2026: al collaboratore di uno studio tecnico l'app dice pratiche, sopralluogo, titolare (solo se il titolare e' uno studio) -->
 <script src="/js/op-studio.js?v=28nov-scrivi"></script>
 </body>

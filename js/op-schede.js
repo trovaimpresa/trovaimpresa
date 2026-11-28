@@ -78,6 +78,7 @@ function opCard(l,conFoto){
     <div class="op-btns">
       ${dove?`<a class="op-b p" href="${esc(opStradaUrl(l))}" target="_blank" rel="noopener" data-mappa="1">${OP_MAPPA} Portami lì</a>`:""}
       ${n?`<button type="button" class="op-b" data-foto="${l.id}">Foto (${n})</button>`:""}
+      <button type="button" class="op-b op-apri">Apri il lavoro ›</button>
     </div></div>`;
 }
 function opLegaCard(box){
@@ -134,25 +135,44 @@ async function opRender(){
 async function opRenderFoto(){
   const box=document.getElementById("op-foto-lista");if(!box)return;
   const vivi=(LAVORI||[]).filter(l=>!opVecchio(l));
-  if(!vivi.length){box.innerHTML='<div class="empty-state">Nessuna foto.</div>';return;}
-  box.innerHTML='<div class="empty-state">Carico le foto…</div>';
+  if(!vivi.length){box.innerHTML='<div class="empty-state">Nessun lavoro: le foto si fanno dentro un lavoro.</div>';return;}
+  /* 28 nov 2026 — una foto va sempre su un lavoro: prima si sceglie quale */
+  const testa='<button type="button" class="op-b p" id="op-foto-nuova" style="width:100%;font-size:18px;padding:14px;margin-bottom:14px">📷 Fai una foto</button><div id="op-foto-scegli" class="hidden"></div>';
+  box.innerHTML=testa+'<div class="empty-state">Carico le foto…</div>';
+  const legaTesta=()=>{
+    const b=document.getElementById("op-foto-nuova"), sc=document.getElementById("op-foto-scegli");
+    if(!b||!sc)return;
+    b.onclick=()=>{
+      if(vivi.length===1){opApriFoto(vivi[0].id);return;}
+      sc.classList.toggle("hidden");
+      sc.innerHTML='<div class="op-flab" style="font-size:18px;margin-bottom:8px">Per quale lavoro?</div>'+vivi.map(l=>`<button type="button" class="op-b" data-fl="${l.id}" style="width:100%;margin-bottom:8px;text-align:left;font-size:17px;padding:14px">${esc(opTitolo(l))}${opDove(l)&&opDove(l)!==opTitolo(l)?`<br><span style="font-weight:500;color:#475569">${esc(opDove(l))}</span>`:""}</button>`).join("");
+      sc.querySelectorAll("[data-fl]").forEach(x=>x.onclick=()=>opApriFoto(x.dataset.fl));
+    };
+  };
   const ids=vivi.map(l=>l.id);
   const {data}=await sb.from("gest_foto").select("lavoro_id,tipo,storage_path").in("lavoro_id",ids).is("eliminato_il",null).in("tipo",["da_fare","fatto","lavoro"]).order("created_at",{ascending:false});
   const per={};(data||[]).forEach(f=>{(per[f.lavoro_id]=per[f.lavoro_id]||[]).push(f);});
   const conFoto=vivi.filter(l=>per[l.id]);
-  if(!conFoto.length){box.innerHTML='<div class="empty-state">Ancora nessuna foto. Le foto si aggiungono dentro il lavoro.</div>';return;}
+  if(!conFoto.length){box.innerHTML=testa+'<div class="empty-state">Ancora nessuna foto.</div>';legaTesta();return;}
   const paths=[...new Set((data||[]).map(f=>f.storage_path))];
   const {data:urls}=await sb.storage.from("gestionale-foto").createSignedUrls(paths,3600);
   const mappa={};(urls||[]).forEach(u=>{if(u&&u.path&&u.signedUrl)mappa[u.path]=u.signedUrl;});
   const grid=arr=>arr.length?'<div class="foto-grid">'+arr.map(f=>mappa[f.storage_path]?`<img src="${mappa[f.storage_path]}" alt="">`:"").join("")+'</div>':'<div class="op-nofoto">Nessuna</div>';
-  box.innerHTML=conFoto.map(l=>{
-    const prima=per[l.id].filter(f=>f.tipo==="da_fare"), dopo=per[l.id].filter(f=>f.tipo!=="da_fare");
+  box.innerHTML=testa+conFoto.map(l=>{
+    const prima=per[l.id].filter(f=>f.tipo==="da_fare"), corso=per[l.id].filter(f=>f.tipo==="lavoro"), fin=per[l.id].filter(f=>f.tipo==="fatto");
     return `<div class="op-fblocco"><div class="op-t">${esc(opTitolo(l))}</div>
-      <div class="op-flab">Prima</div>${grid(prima)}
-      <div class="op-flab">Dopo</div>${grid(dopo)}
+      <div class="op-flab">Dal capo</div>${grid(prima)}
+      <div class="op-flab">Lavori in corso</div>${grid(corso)}
+      <div class="op-flab">Lavoro finito</div>${grid(fin)}
       <button type="button" class="op-b" data-apri="${l.id}" style="margin-top:10px;width:100%">Apri il lavoro</button></div>`;
   }).join("");
+  legaTesta();
   box.querySelectorAll("[data-apri]").forEach(b=>b.onclick=()=>openLavoro(b.dataset.apri));
+}
+/* apre il lavoro e scende alle foto */
+function opApriFoto(id){
+  openLavoro(id);
+  setTimeout(()=>{const p=document.getElementById("lv-foto-corso")||document.getElementById("lv-foto");if(p)p.closest(".panel").scrollIntoView({behavior:"smooth",block:"start"});},400);
 }
 
 function opRenderArchivio(){
