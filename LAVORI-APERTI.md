@@ -10,6 +10,21 @@ Ultimo aggiornamento: 17 novembre 2026 — riassunto di ottobre e inizio novembr
 
 
 
+## 🆕 28 NOVEMBRE 2026 — CONTROLLO FINALE DEL GIRO NUOVO (sessione 11, online 7622b33)
+
+### ✅ FATTO E ONLINE — dettagli in CLAUDE.md, «SESSIONE 11»
+- Lavoro doppio dalle Giornate, Report vecchio, «IVA esclusa» nei preventivi in forfettario, link della chat, richieste 400 all'apertura, «Dati dello studio», «Vale», «Fatto il …», casella delle note in Giornate.
+
+### 🔴 DA FARE (proposte non fatte: prima le foto 1440 e 375, poi l'ok di Alex)
+1. Lavoro nato da una giornata: «dove» = nome del cantiere (si legge due volte e conta come «con indirizzo»). Proposta: dove vuoto (`giorTrovaLavoro`).
+2. Primi passi dell'Assistente: «Bravo, hai mandato il primo preventivo… quando il cliente lo accetta» anche con preventivo già accettato. Proposta: frase diversa se accettato (js/gest-primi-passi.js).
+3. Calendario studio: pratica Finita, nel giorno del deposito resta «Depositata: …». Proposta: «Depositata (ora finita)».
+4. Telefono: pulsanti «i» d'aiuto 28–30 px (`.ti-i`). Proposta: 40 px di area da toccare.
+5. Pratica: scegliendo «Depositata» mettere da sola la data di deposito di oggi.
+6. Chat: una domanda semplice ≈39.000 token (≈0,08 $). Da alleggerire il contesto mandato.
+7. Preventivi vuoti in forfettario: la frase dice «totale con l'IVA».
+8. Restano: app del collaboratore con un account vero di uno studio (serve una seconda email da Alex); Tasse per un geometra nuovo provata solo sul banco.
+
 ## 🆕 28 NOVEMBRE 2026 — IL GIRO DELLE RICHIESTE (cliente → impresa → cliente)
 
 ### ✅ FATTO E ONLINE (→922ba34←, collaudato dal vivo) — dettagli in CLAUDE.md, capitolo del 28 nov

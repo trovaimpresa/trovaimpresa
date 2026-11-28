@@ -4936,3 +4936,19 @@ Fatti col sì di Alex:
 Collaudo dopo il push: Assistente «2 prezzi tuoi», 3× «Dati dello studio», legenda e giorno del Calendario, Report col punto, Mappa senza «Chi ci va» (nessuno nel reparto) e «controlla l'indirizzo» → con l'indirizzo giusto 0,9 km, tendina della scadenza con «(finita)» in fondo, domanda «rimetterla». Pulito: lavori 5, clienti 2, scadenze 2, fatture 3, foto 5, ore 1 (uguali a prima); chat di prova buttata con la ×.
 Da sapere: `sb.raw('tabella')` è una funzione (non `sb.raw.from`). Nominatim: «Piazza Vittorio Emanuele» senza «II» a Rieti non si trova, si trova solo in altri paesi della provincia.
 ⬜ App del collaboratore con un account vero di uno studio: ancora mai provata.
+
+# 28 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 11: CONTROLLO FINALE (online 7622b33)
+Un agente separato ha rifatto il giro da zero (impresa e studio, 1440 e 375, «PROVA CONTROLLORE», ferramenta). Conti giusti: preventivo 400,00 = lavoro = bozza 402,00 col bollo, Report = Assistente. Tutto cancellato con sb.raw, conteggi uguali a prima (clienti 2, preventivi 4, lavori 5, fatture 3, operatori 1, ore 1, rapportini 1, spese 0, scadenze 2).
+Difetti trovati e sistemati (`?v=28nov-s11` su 9 js):
+- ⛔ Giornate: lavoro DOPPIO se nato da un preventivo dopo l'apertura di Giornate (giorLav vecchio). `giorScrivi` chiama prima `giorAssicura()` (js/gest-giornate.js). Provato dal vivo: lo trova, nessun doppione.
+- ⛔ Report/Tasse vecchi dopo un salvataggio: `rinfresca` (js/gest-riepilogo-schede.js) con lavori/fatture/preventivi segna anche report e fisco.
+- ⛔ Preventivi in forfettario «IVA esclusa»: `_prevForf/_prevIvaEt` in js/gest-ore-spese.js («senza IVA»; totale in alto senza scritta), `renderPreventivi` chiama `fattAziendaPronta()`. Modulo: «Totale» / «Totale scontato»; passaggio a lavoro senza «IVA esclusa» (gest-preventivi.js). Provato dal vivo.
+- ⛔ Chat: «[Parla](#)» a schermo → `pulisciMarkdown` fa «Parla» fra «» (i segnalini [apri:…] restano).
+- ⛔ 6 richieste con `mestiere_id=eq.null` (400) dalla schermata dei reparti: `renderComputi`, `renderSalTutti`, `renderPreventivi` escono se `curMestiere()==null`. Provato: 0.
+- Studio: titolo della finestra «Dati dello studio» (js/gest-azienda.js). Provato.
+- Assistente: «1 lavoro… Vale 860,50 € e non è ancora…» (era «Valgono»).
+- Scheda del lavoro fatto senza data prevista: «📅 Fatto il 28/11» (studio «Finita il»), non «Senza data».
+- Giornate: la casella dice «Cosa avete fatto, note» (prometteva «Spese e note qui», ma le spese scritte lì non si registrano).
+Banco ZERO difetti, banco-chat-studio 38 verdi.
+Non fatti (da proporre con le foto): vedi LAVORI-APERTI, «28 NOVEMBRE 2026 — CONTROLLO FINALE».
+Da sapere: la frase di Squadra «Mandagli l'app» è giusta (il pulsante si chiama «Nuovo invito» solo con l'invito scaduto). Il clone con permesso di push sta in /home/claude/ti-push.
