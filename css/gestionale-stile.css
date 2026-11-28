@@ -398,3 +398,6 @@ body .wrap section .tab-tot.tab-tot-conta span{color:#334155 !important;font-siz
   #fatture .sec-head>div>.btn{width:100%;justify-content:center;white-space:normal;text-align:center;min-width:0;padding-left:6px;padding-right:6px}
   #fatture .sec-head>div>.btn.add{grid-column:1/-1;order:-1}
 }
+
+/* 28 nov 2026 — sul telefono tutto il gestionale piu' piccolo del 12% (ok di Alex). Sul computer resta grande. */
+@media (max-width:600px){html{zoom:.88}}
