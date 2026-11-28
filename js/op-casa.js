@@ -43,7 +43,14 @@
     + "body.oh-sez-giornate [id^='op-p-'],body.oh-sez-altro [id^='op-p-']{display:none!important}"
     + "body.oh-sez:not(.oh-sez-giornate) #mie-giornate{display:none!important}"
     + "body:not(.oh-sez) #oh-back,body:not(.oh-sez) #oh-tit{display:none}"
-    + "#oh-tit{font-size:28px;font-weight:800;color:#0a2a4d;margin:6px 2px 10px;line-height:1.2}"
+    + "#oh-tit{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px;padding:0 64px;text-align:center;font-size:28px;font-weight:800;color:#0a2a4d;line-height:1.2}"
+    + "#oh-tit #oh-back,.oh-vback{position:absolute;left:0;top:50%;transform:translateY(-50%);width:52px!important;height:52px;margin:0!important;padding:0!important;justify-content:center;border-radius:14px!important}"
+    + "#view-lavoro .ti-back-riga{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px}"
+    + "#view-lavoro .ti-back-riga::after{content:'Lavoro';font-size:28px;font-weight:800;color:#0a2a4d}"
+    + "body.oh-studio #view-lavoro .ti-back-riga::after{content:'Pratica'}"
+    + "#view-lavoro #btn-back{position:absolute;left:0;top:50%;transform:translateY(-50%);width:52px!important;height:52px!important;min-width:0!important;padding:0!important;margin:0!important;display:flex;align-items:center;justify-content:center;background:#fff!important;border:1.5px solid #d5dbe3!important;border-radius:14px!important;color:#0a2a4d!important}"
+    + "#view-lavoro #btn-back span{display:none}#view-lavoro #btn-back svg{width:26px;height:26px}"
+    + ".oh-vrow{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px;padding:0 64px;text-align:center}"
     + "#oh-back{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer}"
     + "#oh-back b{flex:1;text-align:left}"
     + "body.oh-casa #btn-rapido{background:#ff8800!important;border-color:#ff8800!important;color:#fff!important;border-radius:18px!important;padding:18px 16px!important;text-align:left;display:flex!important;align-items:center;gap:14px}"
@@ -101,10 +108,11 @@
     }
     if (!$("#oh-back")) {
       var b = document.createElement("button"); b.type = "button"; b.id = "oh-back";
-      va.insertBefore(b, va.firstChild);
-      /* 28 nov 2026 — il nome della sezione sta sopra, fuori dal riquadro;
-         dentro il riquadro solo «‹ Indietro» (deciso da Alex) */
-      var tt = document.createElement("div"); tt.id = "oh-tit"; va.insertBefore(tt, b);
+      /* 28 nov 2026 — il nome della sezione al centro, a sinistra una
+         freccia in un riquadro bianco piccolo (deciso da Alex) */
+      var tt = document.createElement("div"); tt.id = "oh-tit"; tt.innerHTML = '<span id="oh-tit-t"></span>';
+      va.insertBefore(tt, va.firstChild); tt.appendChild(b);
+      b.setAttribute("aria-label", "Indietro");
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else casa(); };
     }
     var r = $("#btn-rapido");
@@ -131,8 +139,8 @@
     var b = $("#oh-back");
     if (b && sez) {
       var nomi = { giornate: "Le mie giornate", lavori: "Lavori", mezzi: "Mezzi", chat: "Chat col capo", foto: "Foto", altro: "Altro", preventivi: "Preventivi", archivio: "Lavori vecchi" };
-      b.innerHTML = '<span style="font-size:26px;line-height:1">‹</span><b>Indietro</b>';
-      var tt = $("#oh-tit"); if (tt) tt.textContent = nomi[sez] || "";
+      b.innerHTML = '<span style="font-size:34px;line-height:1;margin-top:-4px">‹</span>';
+      var tt = $("#oh-tit-t"); if (tt) tt.textContent = nomi[sez] || "";
     }
     if (!sez) disegna();
     window.scrollTo(0, 0);
@@ -178,10 +186,11 @@
       var w = document.getElementById("view-" + v); if (!w || w.querySelector(".oh-vback")) return;
       var b = document.createElement("button"); b.type = "button"; b.className = "oh-vback"; b.id = "oh-vback-" + v;
       b.style.cssText = "display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer";
-      b.innerHTML = '<span style="font-size:24px">‹</span>Indietro';
+      b.innerHTML = '<span style="font-size:34px;line-height:1;margin-top:-4px">‹</span>';
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else { var na = $("#nav-agenda"); if (na) na.click(); casa(); } };
       var ti = w.querySelector(".day-title");
-      if (ti) { ti.style.cssText = "font-size:28px;font-weight:800;color:#0a2a4d;margin:6px 2px 10px"; w.insertBefore(b, ti.nextSibling); } else w.insertBefore(b, w.firstChild);
+      b.setAttribute("aria-label", "Indietro");
+      if (ti) { ti.classList.add("oh-vrow"); ti.style.cssText = "font-size:28px;font-weight:800;color:#0a2a4d"; ti.appendChild(b); } else w.insertBefore(b, w.firstChild);
     });
   }
 
@@ -217,6 +226,7 @@
       /* si parte quando l'agenda e' pronta (permessi letti): se no si riprova */
       if (typeof MIO === "undefined" || !MIO.impresaId || !$("#view-agenda")) { if (++giri < 120) setTimeout(aspetta, 500); return; }
       frecceViste();
+      if (MIO.tipoStudio === "professionista") document.body.classList.add("oh-studio");
       if (location.hash.indexOf("#sez-") === 0) history.replaceState(null, "", location.pathname + location.search);
       casa();
       scrivi();
