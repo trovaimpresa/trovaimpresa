@@ -41,7 +41,7 @@ async function vetrina(giorno, turno) {
   if (!i) return null;
   const foto = (await get(`lavori_foto?owner_id=eq.${i.user_id}&pubblico=eq.true&foto=like.https*&select=foto&order=ordine.desc,created_at.desc&limit=4`))
     .map(f => f.foto).filter(u => /^https:\/\//.test(u || ''));
-  return { chiave: `vet:${giorno}:${turno}`, ...testoVetrina(i, foto) };
+  return { chiave: `vet:${giorno}:${turno}`, _t: 'vet', _id: i.id, _dove: i.citta, ...testoVetrina(i, foto) };
 }
 
 // 28 nov 2026 (Alex: «mandami una e-mail quando un post su fb viene
@@ -52,20 +52,20 @@ async function avvisaAlex(post, turno) {
   const KEY = process.env.RESEND_API_KEY;
   if (!KEY || !post.length) return;
   const ore = { 1: '8', 2: '13', 3: '19' }[turno] || '';
+  // 28 nov (Alex, con la foto dell'email delle 6): stessa forma dell'email del
+  // mattino — titolo, citta', e su OGNI post «Apri e condividi nel gruppo».
   const blocchi = post.map(p => {
-    const t = p.chiave.split(':')[0];
-    const id = t === 'vet' ? '' : p.chiave.split(':').slice(1).join(':');
-    const gruppo = ['imp', 'sub', 'off'].includes(t) ? `${SITO}/facebook-post?t=${t}&id=${encodeURIComponent(id)}` : '';
-    return `<div style="border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin:0 0 14px">
-      <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin:0 0 8px">${esc(p.titolo)}${p.foto && p.foto.length ? ` · 📷 ${p.foto.length} foto` : ''}</div>
-      <div style="font-size:15px;color:#334155;white-space:pre-line;line-height:1.5">${esc(p.testo)}</div>
-      ${gruppo ? `<a href="${gruppo}" style="display:inline-block;margin-top:10px;background:#1877f2;color:#fff;font-weight:800;font-size:15px;text-decoration:none;padding:10px 18px;border-radius:9px">Condividi nel gruppo</a>` : ''}
-    </div>`;
+    const gruppo = p._t && p._id != null ? `${SITO}/facebook-post?t=${p._t}&id=${encodeURIComponent(p._id)}` : '';
+    return `<tr><td style="padding:12px 0;border-bottom:1px solid #e5e7eb">
+      <div style="font-size:17px;font-weight:800;color:#0a2a4d">📣 ${esc(p.titolo)}${p.foto && p.foto.length ? ` · 📷 ${p.foto.length}` : ''}</div>
+      ${p._dove ? `<div style="font-size:15px;color:#475569;margin:2px 0 8px">📍 ${esc(p._dove)}</div>` : '<div style="height:8px"></div>'}
+      ${gruppo ? `<a href="${gruppo}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:800;font-size:16px;text-decoration:none;padding:11px 20px;border-radius:9px">Apri e condividi nel gruppo</a>` : ''}
+    </td></tr>`;
   }).join('');
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
     <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Facebook: ${post.length} post in uscita${ore ? ' (giro delle ' + ore + ')' : ''}</h2>
-    <p style="font-size:16px;color:#475569;margin:0 0 14px">Make li sta pubblicando adesso sulla pagina «Trova impresa». Non devi fare niente.</p>
-    ${blocchi}
+    <p style="font-size:16px;color:#475569;margin:0 0 8px">Make li sta pubblicando adesso sulla pagina. Se vuoi, condividili nel <b>gruppo</b>: tocca il pulsante, copia il testo e apri il gruppo.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${blocchi}</table>
     <p style="font-size:14px;color:#64748b;margin:6px 0 0">I numeri li trovi nel pannello admin, voce «Facebook».</p>
   </div>`;
   try {
@@ -98,19 +98,19 @@ exports.handler = async (event) => {
       // 72 ore: se un giro salta, il mattino dopo i post ci sono ancora; i doppioni li ferma fb_pubblicati.
       const da = encodeURIComponent(new Date(Date.now() - 3 * 864e5).toISOString());
       (await get(`imprese_pubbliche?created_at=gte.${da}&select=id,tipo,nome_attivita,nome,mestiere,citta,provincia&order=created_at.asc&limit=10`))
-        .forEach(i => post.push({ chiave: `imp:${i.id}`, ...testoIscritto(i) }));
+        .forEach(i => post.push({ chiave: `imp:${i.id}`, _t: 'imp', _id: i.id, _dove: i.citta, ...testoIscritto(i) }));
       (await get(`subappalti?attivo=eq.true&created_at=gte.${da}&select=id,tipo,nome_impresa,lavoro,citta&order=created_at.asc&limit=10`))
-        .forEach(a => post.push({ chiave: `sub:${a.id}`, ...testoSubappalto(a) }));
+        .forEach(a => post.push({ chiave: `sub:${a.id}`, _t: 'sub', _id: a.id, _dove: a.citta, ...testoSubappalto(a) }));
       (await get(`offerte_lavoro?attiva=eq.true&data_pubblicazione=gte.${da}&select=id,titolo,nome_azienda,citta,provincia,tipo_contratto,stipendio&order=data_pubblicazione.asc&limit=10`))
-        .forEach(o => post.push({ chiave: `off:${o.id}`, ...testoOfferta(o) }));
+        .forEach(o => post.push({ chiave: `off:${o.id}`, _t: 'off', _id: o.id, _dove: o.citta, ...testoOfferta(o) }));
     } else if (turno === 2) {
-      const m = testoMarchio(marchioDelGiorno());
-      if (m) post.push({ chiave: `mar:${giorno}`, ...m });
-      const s = testoSezione(sezioneDelGiorno());
-      if (s) post.push({ chiave: `sit:${giorno}`, ...s });
+      const mc = marchioDelGiorno(), m = testoMarchio(mc);
+      if (m) post.push({ chiave: `mar:${giorno}`, _t: 'mar', _id: mc, ...m });
+      const sc = sezioneDelGiorno(), s = testoSezione(sc);
+      if (s) post.push({ chiave: `sit:${giorno}`, _t: 'sit', _id: sc, ...s });
     } else {
-      const g = testoGestionale(gestionaleDelGiorno());
-      if (g) post.push({ chiave: `ges:${giorno}`, ...g });
+      const gc = gestionaleDelGiorno(), g = testoGestionale(gc);
+      if (g) post.push({ chiave: `ges:${giorno}`, _t: 'ges', _id: gc, ...g });
     }
     // togli quelli gia' consegnati
     const chiavi = post.map(p => p.chiave);
@@ -133,7 +133,7 @@ exports.handler = async (event) => {
         body: JSON.stringify(nuovi.map(p => ({ chiave: p.chiave }))), signal: AbortSignal.timeout(8000)
       });
       if (!r.ok) throw new Error('segno consegnati ' + r.status);
-      await avvisaAlex(nuovi, turno);
+      await avvisaAlex(post.filter(p => !fatti.has(p.chiave)), turno);
     }
     return risposta(200, { giorno, turno, prova, post: nuovi });
   } catch (e) {
