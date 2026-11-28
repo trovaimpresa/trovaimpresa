@@ -51,8 +51,16 @@
     + "#view-lavoro #btn-back{position:absolute;left:0;top:50%;transform:translateY(-50%);width:52px!important;height:52px!important;min-width:0!important;padding:0!important;margin:0!important;display:flex;align-items:center;justify-content:center;background:#fff!important;border:1.5px solid #d5dbe3!important;border-radius:14px!important;color:#0a2a4d!important}"
     + "#view-lavoro #btn-back span{display:none}#view-lavoro #btn-back svg{width:26px;height:26px}"
     + "body.oh-sez-giornate #mie-giornate>.label{display:none}"
-    + "#oh-mg-btn{display:none;width:100%;margin:0 0 14px;padding:16px;border:0;border-radius:14px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
-    + "body.oh-sez-giornate #oh-mg-btn{display:block}"
+    + "#oh-mg-box{display:none;background:#fff;border-radius:20px;padding:16px;margin:14px 0 18px;box-shadow:0 1px 3px rgba(10,42,77,.08)}"
+    + "body.oh-sez-giornate #oh-mg-box{display:block}"
+    + ".oh-mg-seg{display:flex;background:#eceae5;border-radius:14px;padding:5px;margin-bottom:14px}"
+    + ".oh-mg-seg button{flex:1;border:0;background:transparent;border-radius:11px;padding:12px 6px;font:inherit;font-size:18px;font-weight:800;color:#6b7280;cursor:pointer}"
+    + ".oh-mg-seg button.on{background:#fff;color:#0a2a4d;box-shadow:0 1px 3px rgba(0,0,0,.12)}"
+    + "#oh-mg-testo{width:100%;box-sizing:border-box;min-height:120px;border:2px solid #dcdad5;border-radius:16px;padding:14px;font:inherit;font-size:19px;resize:vertical;background:#f7f6f3}"
+    + "#oh-mg-vai{width:100%;margin-top:12px;padding:16px;border:0;border-radius:16px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
+    + ".oh-mg-nota{font-size:15px;color:#64707c;margin-top:8px}"
+    + "body.oh-sez-giornate:not(.oh-mg-corr) #mie-giornate .mg-r,body.oh-sez-giornate:not(.oh-mg-corr) #mie-giornate .mg-vuoto{display:none}"
+    + "body.oh-sez-giornate.oh-mg-corr #oh-mg-nuova{display:none}"
     + ".oh-vrow{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px;padding:0 64px;text-align:center}"
     + "#oh-back{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer}"
     + "#oh-back b{flex:1;text-align:left}"
@@ -118,10 +126,30 @@
       b.setAttribute("aria-label", "Indietro");
       /* 28 nov 2026 — in «Le mie giornate» si segna la giornata da li' */
       var mg = document.getElementById("mie-giornate");
-      if (mg && !document.getElementById("oh-mg-btn")) {
-        var mb = document.createElement("button"); mb.type = "button"; mb.id = "oh-mg-btn"; mb.textContent = "＋ Segna una giornata";
-        mb.onclick = function () { if (typeof window.opGiornataCompleta === "function") window.opGiornataCompleta(""); };
-        mg.parentNode.insertBefore(mb, mg);
+      /* come la pagina «Giornate di cantiere» del capo: Nuova giornata / Correggi */
+      if (mg && !document.getElementById("oh-mg-box")) {
+        var bx = document.createElement("div"); bx.id = "oh-mg-box";
+        bx.innerHTML = '<div class="oh-mg-seg"><button type="button" class="on" data-mgv="nuova">Nuova giornata</button><button type="button" data-mgv="corr">Correggi</button></div>'
+          + '<div id="oh-mg-nuova"><textarea id="oh-mg-testo" placeholder="🎤 «Oggi a Campoloniano, rifatto il tetto»"></textarea>'
+          + '<button type="button" id="oh-mg-vai">Avanti: foto, spese e manda al capo</button>'
+          + '<div class="oh-mg-nota">Scrivi come ti viene, oppure detta col microfono della tastiera.</div></div>'
+          + '<div id="oh-mg-corrnota" class="oh-mg-nota" style="display:none">Qui sotto le tue giornate del mese. Per correggerne una, scrivi al capo nella Chat.</div>';
+        mg.parentNode.insertBefore(bx, mg.nextSibling);
+        bx.addEventListener("click", function (ev) {
+          var v = ev.target.closest("[data-mgv]");
+          if (v) {
+            bx.querySelectorAll("[data-mgv]").forEach(function (x) { x.classList.toggle("on", x === v); });
+            var corr = v.getAttribute("data-mgv") === "corr";
+            document.body.classList.toggle("oh-mg-corr", corr);
+            document.getElementById("oh-mg-corrnota").style.display = corr ? "" : "none";
+            if (corr) bx.parentNode.insertBefore(bx, mg); else bx.parentNode.insertBefore(bx, mg.nextSibling);
+            return;
+          }
+          if (ev.target.closest("#oh-mg-vai")) {
+            var t = document.getElementById("oh-mg-testo");
+            if (typeof window.opGiornataCompleta === "function") { window.opGiornataCompleta(t.value.trim()); t.value = ""; }
+          }
+        });
       }
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else casa(); };
     }
