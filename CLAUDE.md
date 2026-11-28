@@ -4842,3 +4842,26 @@ Fatti col sì di Alex (foto prima, tutte e 7):
 Da sapere: le foto dello studio si fanno con /home/claude/foto/foto7.js (route su `/rest/v1/imprese` con `tipo:"professionista"`: l'ultima route vince; lanciarlo dalla cartella del progetto, cerca node_modules nella cartella corrente). Il «Parla» nella foto locale si vede in basso anche prima (quella sopra la domenica si vedeva solo coi dati veri).
 💡 Da decidere con Alex (non fatto): nella pratica ci sono due «stato» («A che punto sta» del Comune e «Stato» Da fare/In corso/Fatto): per un geometra è un doppione, unirli è un lavoro grosso.
 ⚠️ Ancora in gest_richieste la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov: Alex la toglie dal pannello admin (ha detto «domani», 27 nov).
+
+# 28 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 8: I SOLDI DELLO STUDIO (online 8a856c0)
+Giro da geometra su Fatture, Computo e SAL, Prezzario, Fornitori. Reparto «ferramenta», `?vedi=professionista`, «PROVA CONTROLLORE», 1440 e 375. Collaudato sul sito vero dopo il push, poi tutto cancellato con `sb.raw` (ferramenta: fatture 0, computi 0, fornitori 0, carte 0, lavori 1, clienti 1 = come prima).
+Provati dal vivo (prima erano «non provati»):
+- Acconto già fatturato tolto nella fattura di fine lavoro: 1.200,00 − 97,24 = 1.102,76 (fattura d'acconto FINTA n. 999 messa nel database per pochi secondi e cancellata; niente emissione, niente SDI).
+- «La carta va sotto zero» su una fattura del fornitore pagata con la carta: la domanda arriva, «No» lascia «da pagare».
+- Riaddebito delle fatture del fornitore nel rimborso spese; conti computo (216,11 − 10% = 194,50) e SAL.
+Difetti sistemati:
+- Fattura in forfettario: casella «Ritenuta d'acconto» nascosta come nella parcella (resta `#fa-rit`, vale 0; si vede se la fattura ce l'ha). Tutte le facce.
+- Fattura in forfettario: «il rimborso spese l'IVA ce l'ha» → «entra nel totale della fattura (in forfettario niente IVA)».
+- Bozza riaperta col bollo già a 2 €: non dice più «Scrivi 2 nel campo» ma «Su questa fattura è già messo».
+- `cartaSottoZeroOk` (js/gest-carte-documenti.js): con Carte mai aperta diceva «Sulla carta» senza nome → legge il nome da `gest_carte`.
+Fatti col sì di Alex («ok a tutto»):
+- Fatture vuote allo studio: «più pratiche dello stesso cliente».
+- Computo, Ribasso allo studio: «Il ribasso offerto dall'impresa sul totale dei lavori».
+- Fattura del fornitore: «Pratica collegata — nessuna —».
+- Telefono, Fatture: «+ Nuova fattura» a tutta riga per prima, sotto «Fatture ricevute» e «Ricevuta di pagamento» affiancati (css/gestionale-stile.css, come Fornitori).
+- Computo allo studio: «→ Crea il preventivo» diventa «→ Fai la parcella su questo computo» (`computoAParcella` in js/gest-sal-prezzario.js): parcella nuova col cliente e il titolo del computo, riquadro del decreto parametri aperto, importo dei lavori = totale PRIMA del ribasso (`gest_computo_voci_calc.importo`). Impresa e artigiano: invariato.
+- Linguetta «Stati di avanzamento»: «+ Nuovo SAL» (`salNuovo`: 0 computi → Computi; 1 → lo apre sulla linguetta SAL; più → scegli quale) e «🏗 impresa» sulla scheda del SAL allo studio.
+Da sapere: foto dello studio con `node docs/foto-studio.js <scena> <larghezza> <file>` (sta in docs/ così il push non costa crediti) (faccia professionista + forfettario RF19 col banco; in nuvola cambiare chromium.launch col google-chrome di sistema dentro tools/banco-gestionale.js e rimetterlo prima del commit). Dal contenitore curl verso trovaimpresa.com non risponde: per vedere se Netlify ha pubblicato si usa `fetch` nel browser.
+⚠️ Ancora in gest_richieste (id 4) la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov: chiedere ad Alex se cancellarla.
+💡 Da decidere con Alex (dalla sessione 7, non fatto): due «stato» nella pratica («A che punto sta» del Comune e «Stato» Da fare/In corso/Fatto).
+⚠️ Visto e non toccato: in forfettario «Il conto» chiama «Totale imponibile» la somma con le spese art. 15 (scelta del 13 ago); nel prezzario regionale ci sono voci con unità strane (es. S01.01.002.16 «costo mensile» in m²): testo della tariffa, non si tocca.
