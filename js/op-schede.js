@@ -117,7 +117,7 @@ async function opRender(){
   const nRossi=vivi.filter(l=>!opFatto(l)).length;
   const sub=document.getElementById("op-sub");
   if(sub)sub.textContent=vivi.length?(nRossi?(nRossi+(nRossi===1?" lavoro da fare":" lavori da fare")):"Tutto fatto"):"";
-  box.innerHTML=vivi.length?vivi.map(l=>opCard(l,null)).join(""):'<div class="empty-state">'+etic("Nessun lavoro da fare.")+'</div>';
+  box.innerHTML=vivi.length?vivi.map(l=>opCard(l,null)).join("")+opBtnNuovo():'<div class="empty-state">'+etic("Il capo non ti ha ancora dato lavori: quando lo fa, li trovi qui.")+'</div>'+opBtnNuovo();
   opLegaCard(box);
   try{
     const m=await opConta();
@@ -135,7 +135,7 @@ async function opRender(){
 async function opRenderFoto(){
   const box=document.getElementById("op-foto-lista");if(!box)return;
   const vivi=(LAVORI||[]).filter(l=>!opVecchio(l));
-  if(!vivi.length){box.innerHTML='<div class="empty-state">Nessun lavoro: le foto si fanno dentro un lavoro.</div>';return;}
+  if(!vivi.length){box.innerHTML='<div class="empty-state">'+etic("Il capo non ti ha ancora dato lavori: le foto si fanno dentro un lavoro.")+'</div>'+opBtnNuovo();return;}
   /* 28 nov 2026 — una foto va sempre su un lavoro: prima si sceglie quale */
   const testa='<button type="button" class="op-b p" id="op-foto-nuova" style="width:100%;font-size:18px;padding:14px;margin-bottom:14px">📷 Fai una foto</button><div id="op-foto-scegli" class="hidden"></div>';
   box.innerHTML=testa+'<div class="empty-state">Carico le foto…</div>';
@@ -168,6 +168,11 @@ async function opRenderFoto(){
   }).join("");
   legaTesta();
   box.querySelectorAll("[data-apri]").forEach(b=>b.onclick=()=>openLavoro(b.dataset.apri));
+}
+/* 28 nov 2026 — il capo l'ha detto a voce: l'operaio scrive lui il posto,
+   con foto e spese, dentro «La giornata completa» */
+function opBtnNuovo(){
+  return '<button type="button" class="op-b p" onclick="opGiornataCompleta&&opGiornataCompleta(\'\')" style="width:100%;font-size:18px;padding:14px;margin-top:12px">📍 '+etic("Lavoro in un posto nuovo")+'</button><div class="op-sub" style="margin-top:6px">'+etic("Te l'ha detto il capo a voce? Scrivi dove, cosa hai fatto, foto e spese: lo mandi al capo.")+'</div>';
 }
 /* apre il lavoro e scende alle foto */
 function opApriFoto(id){

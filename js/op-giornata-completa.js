@@ -126,6 +126,16 @@
     if (RV.tipo === "completa" && RV.passo === 2) {
       var r2 = _disegna.apply(this, arguments);
       var bk = document.getElementById("rv-indietro"); if (bk && unaSola) bk.classList.add("hidden");
+      /* 28 nov 2026 — il capo a volte lo dice a voce: «vai li' e sistema».
+         Il posto non e' nell'elenco: lo scrive l'operaio, il capo approvando
+         la giornata lo trova gia' fra i suoi lavori */
+      var cp = document.getElementById("rv-corpo");
+      if (cp && !cp.querySelector("[data-gc-nuovo]")) {
+        var nb = document.createElement("button"); nb.type = "button"; nb.className = "rv-scelta"; nb.setAttribute("data-gc-nuovo", "1");
+        nb.innerHTML = "📍 Un posto nuovo<small>Te l'ha detto il capo a voce: scrivi tu dove</small>";
+        nb.onclick = function (ev) { ev.stopPropagation(); RV.lavoro = null; RV.autoLavoro = false; RV.passo = 3; window.rvDisegna(); };
+        cp.appendChild(nb);
+      }
       return r2;
     }
     if (RV.passo <= 1 && !(GC && GC.cosa)) GC = null;
