@@ -246,6 +246,7 @@
     var bz = GC.bozzaId; GC = null;
     if (bz) bozzaVia(bz);
     if (typeof rvChiudi === "function") rvChiudi();
+    try { if (window.mgRidisegna) window.mgRidisegna(); if (window.opSpeseMese) window.opSpeseMese(); } catch (x) {}
     if (typeof window.tiSpunta === "function") window.tiSpunta("Mandata al capo", pezzi.length ? { sotto: "Con " + pezzi.join(", ") } : null);
     else if (typeof toast === "function") toast("Mandata al capo" + (pezzi.length ? ", con " + pezzi.join(", ") : ""));
   }

@@ -85,7 +85,7 @@
       var ore = r.data || [];
       /* le giornate che ha mandato lui e che il capo non ha ancora approvato */
       var mie = [];
-      if (!scrive && MIO.uid) {
+      if (MIO.uid) {
         var rp = await sb.from("gest_giornate_proposte").select("id,data,dove,cosa,stato")
           .eq("user_id", MIO.impresaId).eq("membro_id", MIO.uid)
           .in("stato", ["da_vedere", "scartata"]).gte("data", a).lt("data", b).order("data", { ascending: false });
@@ -152,6 +152,7 @@
     disegna().then(function () { var p2 = document.getElementById("mie-giornate"); if (p2) p2.scrollIntoView({ behavior: "smooth", block: "start" }); var f = document.getElementById(c.length === 1 ? "mg-cosa" : "mg-dove"); if (f && !t) f.focus(); });
   }
   window.mgRacconta = apriRacconto;
+  window.mgRidisegna = function () { disegna(); };
   async function manda() {
     leggiModulo();
     var err = !/^\d{4}-\d{2}-\d{2}$/.test(racconta.data) ? "Scegli il giorno."
