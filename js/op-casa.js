@@ -50,6 +50,9 @@
     + "body.oh-studio #view-lavoro .ti-back-riga::after{content:'Pratica'}"
     + "#view-lavoro #btn-back{position:absolute;left:0;top:50%;transform:translateY(-50%);width:52px!important;height:52px!important;min-width:0!important;padding:0!important;margin:0!important;display:flex;align-items:center;justify-content:center;background:#fff!important;border:1.5px solid #d5dbe3!important;border-radius:14px!important;color:#0a2a4d!important}"
     + "#view-lavoro #btn-back span{display:none}#view-lavoro #btn-back svg{width:26px;height:26px}"
+    + "body.oh-sez-giornate #mie-giornate>.label{display:none}"
+    + "#oh-mg-btn{display:none;width:100%;margin:0 0 14px;padding:16px;border:0;border-radius:14px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
+    + "body.oh-sez-giornate #oh-mg-btn{display:block}"
     + ".oh-vrow{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px;padding:0 64px;text-align:center}"
     + "#oh-back{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer}"
     + "#oh-back b{flex:1;text-align:left}"
@@ -113,6 +116,13 @@
       var tt = document.createElement("div"); tt.id = "oh-tit"; tt.innerHTML = '<span id="oh-tit-t"></span>';
       va.insertBefore(tt, va.firstChild); tt.appendChild(b);
       b.setAttribute("aria-label", "Indietro");
+      /* 28 nov 2026 — in «Le mie giornate» si segna la giornata da li' */
+      var mg = document.getElementById("mie-giornate");
+      if (mg && !document.getElementById("oh-mg-btn")) {
+        var mb = document.createElement("button"); mb.type = "button"; mb.id = "oh-mg-btn"; mb.textContent = "＋ Segna una giornata";
+        mb.onclick = function () { if (typeof window.opGiornataCompleta === "function") window.opGiornataCompleta(""); };
+        mg.parentNode.insertBefore(mb, mg);
+      }
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else casa(); };
     }
     var r = $("#btn-rapido");

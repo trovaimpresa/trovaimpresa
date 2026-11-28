@@ -91,7 +91,12 @@ function rvDisegna(){
     tit.textContent="Su quale lavoro?";
     const lv=rvLavori();
     if(!lv.length){
-      corpo.innerHTML='<div class="rv-nota">'+esc(_p('nessunLavoro'))+'</div>';
+      corpo.innerHTML='<div class="rv-nota">'+esc(_p('nessunLavoro'))+'</div>'
+        /* 28 nov 2026 — niente vicolo cieco: se il capo l'ha detto a voce,
+           l'operaio scrive lui il posto nella giornata completa */
+        +(typeof window.opGiornataCompleta==="function"?'<button type="button" class="rv-scelta" id="rv-posto-nuovo">📍 Un posto nuovo<small>Te l\'ha detto il capo a voce: scrivi tu dove</small></button>':"");
+      const pn=document.getElementById("rv-posto-nuovo");
+      if(pn)pn.onclick=ev=>{ev.stopPropagation();window.opGiornataCompleta(RV.detto||"");};
       return;
     }
     const bottone=function(l){
