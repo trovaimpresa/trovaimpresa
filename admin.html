@@ -5149,7 +5149,7 @@ function _prChiavi(r) {
 function _prMotivi(r, imprese, conta) {
   const mot = [];
   const k = _prChiavi(r);
-  const telVero = String(r.telefono || '').replace(/[\s.\-\/()+]/g, '');
+  const telVero = String(r.telefono || '').replace(/[\s.\-\/()]/g, '');
   /* il telefono o l'email sono di un'impresa iscritta */
   let cosa = '';
   const sua = imprese.find(i => { const c = _ctrlChiavi(i);
