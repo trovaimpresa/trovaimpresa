@@ -4917,3 +4917,22 @@ Collaudo sul sito vero (ferramenta, faccia studio): nuova pratica Depositata →
 - Cancellate (sì di Alex) le 2 richieste di prova di luglio in `incarichi_richieste` («Rieti», «Mario Rossi (TEST)»).
 - ⚠️ Nel file admin.html la scritta «6 settembre 2026 — RICHIESTE DEI CLIENTI» c'è DUE volte (CSS in alto e JS): chi taglia il file con `index()` deve partire dalla funzione giusta, se no duplica mezzo file.
 - 28 nov (dopo): admin, «Offerte di lavoro», «Candidati registrati» e «Candidature» = una voce «Lavoro» con 3 linguette (`.lav-ling`, `lavLinguette(id)` chiamata da `showSection`). Le tre sezioni restano coi loro id; le due voci di menu hanno `.lav-dentro` (nascoste). Numeri delle linguette in `_LAV_N`. Candidature ha le sue carte (`#cdt-numeri`).
+
+# 28 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 10 (parte 2): CONTI E IL RESTO (studio, online d3c4259)
+Giro da geometra su Assistente, Chat, Scadenze, Report, Tasse, Galleria, Mappa, Cestino, Dati azienda (+ «Finita» in Assistente, Chat, Report, Calendario, Agenda). Reparto «ferramenta», faccia studio, «PROVA CONTROLLORE», 1440 e 375. «Sì a tutte, ok e pubblica» di Alex (foto prima/dopo mandate).
+Difetti sistemati:
+- ⛔ Mappa, comune SCRITTO: «Piazza Vittorio Emanuele, Rieti» finiva a Stimigliano/Poggio Mirteto (provincia di Rieti, 26 km) e il punto andava nella pratica (navigatore del collaboratore). `mpTrovaPunto(q,vicino,{voluto:comune})` chiede 8 risultati e prende il primo nel comune scritto; se nessuno: «controlla l'indirizzo» e il punto salvato prima si toglie (dove_lat/lon/km/geo null). Provato dal vivo: «Piazza Vittorio Emanuele II, Rieti» → 0,9 km. Tutte le facce.
+- ⛔ Mappa «Chi ci va»: c'erano persone di altri reparti (gest_operatori senza mestiere_id). Ora come Agenda e Calendario.
+- ⛔ Assistente, scheda Prezzario: «12.764 voci nel tuo prezzario» (contava la tariffa regionale). Ora `.or(fonte null/mio)`, «N prezzi tuoi». Tutte le facce.
+- Elimina pratica: «rimetterla a posto» (gest-finestre-eventi.js).
+Fatti col sì di Alex:
+- Calendario allo studio parla come «A che punto sta»: legenda «Da preparare / Al Comune / Finita», colore da `praPunto` (`_calCls` in js/gest-schede-clienti.js: Da preparare = ambra anche se lo stato nascosto è in_corso), riquadro del giorno col nome del punto (Depositata…).
+- Mappa: legenda «Aperta / Finita», filtro «Pratiche aperte» (traduzione in gest-reparti.js).
+- Tasse: `ftCassaPro(az)` (js/gest-fisco-tasse.js) indovina la cassa dall'albo dei Dati azienda (geometr → CIPAG, architett/ingegner → Inarcassa, altrimenti Gestione separata); modulo del profilo vuoto allo studio parte da «Professionista». «Il prezzo giusto» con parole dello studio (auto, programmi, polizza, Ordine; attese in Comune; spese vive in parcella).
+- Report: accanto a ogni pratica il punto («Finita · Importo …», `pratica_stato` nella select, `.mlav-pt`).
+- Nuova scadenza: pratiche/lavori fatti in fondo con «(finita)» / «(fatto)». Tutte le facce.
+- Allo studio «Dati dello studio» (pulsanti `[data-action="azienda"]` in adattaMenuProfessionista; titolo della finestra con _FRASI; manuale della chat in STUDIO_MANUALE, banco-chat-studio 38 verdi).
+`?v=28nov-s10b` su 9 js. Banco ZERO difetti. Scene nuove in docs/foto-studio.js: calendario (GIORNO=), mappa, tasse-profilo, tasse-prezzo, report, scadenza-nuova (STUDIO_DATE=1; gest_azienda del banco con albo dei geometri).
+Collaudo dopo il push: Assistente «2 prezzi tuoi», 3× «Dati dello studio», legenda e giorno del Calendario, Report col punto, Mappa senza «Chi ci va» (nessuno nel reparto) e «controlla l'indirizzo» → con l'indirizzo giusto 0,9 km, tendina della scadenza con «(finita)» in fondo, domanda «rimetterla». Pulito: lavori 5, clienti 2, scadenze 2, fatture 3, foto 5, ore 1 (uguali a prima); chat di prova buttata con la ×.
+Da sapere: `sb.raw('tabella')` è una funzione (non `sb.raw.from`). Nominatim: «Piazza Vittorio Emanuele» senza «II» a Rieti non si trova, si trova solo in altri paesi della provincia.
+⬜ App del collaboratore con un account vero di uno studio: ancora mai provata.
