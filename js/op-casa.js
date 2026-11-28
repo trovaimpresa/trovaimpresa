@@ -53,6 +53,9 @@
     + "body.oh-sez-giornate #mie-giornate>.label{display:none}"
     + "#oh-mg-box{display:none;background:#fff;border-radius:20px;padding:16px;margin:14px 0 18px;box-shadow:0 1px 3px rgba(10,42,77,.08)}"
     + "body.oh-sez-giornate #oh-mg-box{display:block}"
+    + ".oh-mg-az{display:none;flex-direction:column;gap:12px;margin:14px 0 0}"
+    + "body.oh-sez-giornate .oh-mg-az{display:flex}"
+    + ".oh-mg-az button{width:100%;padding:16px;border:2px solid #1d4f91;border-radius:16px;background:#fff;color:#1d4f91;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
     + ".oh-mg-seg{display:flex;background:#eceae5;border-radius:14px;padding:5px;margin-bottom:14px}"
     + ".oh-mg-seg button{flex:1;border:0;background:transparent;border-radius:11px;padding:12px 6px;font:inherit;font-size:18px;font-weight:800;color:#6b7280;cursor:pointer}"
     + ".oh-mg-seg button.on{background:#fff;color:#0a2a4d;box-shadow:0 1px 3px rgba(0,0,0,.12)}"
@@ -135,6 +138,14 @@
           + '<div class="oh-mg-nota">Scrivi come ti viene, oppure detta col microfono della tastiera.</div></div>'
           + '<div id="oh-mg-corrnota" class="oh-mg-nota" style="display:none">Qui sotto le tue giornate del mese. Per correggerne una, scrivi al capo nella Chat.</div>';
         mg.parentNode.insertBefore(bx, mg.nextSibling);
+        var az = document.createElement("div"); az.className = "oh-mg-az";
+        az.innerHTML = '<button type="button" data-mgaz="riep">📋 Riepilogo del mese</button><button type="button" data-mgaz="pdf">📄 Scarica PDF del mese</button>';
+        mg.parentNode.insertBefore(az, bx);
+        az.addEventListener("click", function (ev) {
+          var a = ev.target.closest("[data-mgaz]"); if (!a) return;
+          if (a.getAttribute("data-mgaz") === "riep") { var c = bx.querySelector('[data-mgv="corr"]'); if (c) c.click(); mg.scrollIntoView({ behavior: "smooth", block: "start" }); }
+          else pdfMese(a);
+        });
         bx.addEventListener("click", function (ev) {
           var v = ev.target.closest("[data-mgv]");
           if (v) {
@@ -255,6 +266,45 @@
       if (vis) { var r = p.getBoundingClientRect(); b.style.right = (window.innerWidth - r.left + 10) + "px"; b.style.bottom = (window.innerHeight - r.bottom) + "px"; }
     }
     posto(); setInterval(posto, 700); window.addEventListener("resize", posto);
+  }
+
+  /* 28 nov 2026 — il PDF delle MIE giornate del mese, preso da quello che
+     «Le mie giornate» ha gia' scritto a schermo (stesse righe, stesso mese) */
+  function jspdf() {
+    if (window.jspdf) return Promise.resolve(true);
+    return new Promise(function (ok) {
+      var sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      sc.onload = function () { ok(!!window.jspdf); }; sc.onerror = function () { ok(false); }; document.head.appendChild(sc);
+    });
+  }
+  async function pdfMese(btn) {
+    var mg = document.getElementById("mie-giornate"); if (!mg) return;
+    var mese = ((mg.querySelector(".mg-mese b") || {}).textContent || "").trim();
+    var tot = ((mg.querySelector(".mg-tot b") || {}).textContent || "").trim();
+    var righe = Array.prototype.map.call(mg.querySelectorAll(".mg-r"), function (r) {
+      var g = ((r.querySelector("small") || {}).textContent || "").trim();
+      var d = ((r.querySelector("div") || {}).textContent || "").trim();
+      return [g, d];
+    });
+    var t0 = btn.textContent; btn.disabled = true; btn.textContent = "Preparo il PDF…";
+    var ok = await jspdf();
+    btn.disabled = false; btn.textContent = t0;
+    if (!ok) { if (typeof toast === "function") toast("Non riesco a fare il PDF adesso: controlla la rete"); return; }
+    var doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" }), y = 20, W = 210, M = 16;
+    var nome = (typeof MIO !== "undefined" && MIO.nome) ? MIO.nome : "";
+    doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.text("Le mie giornate — " + mese, M, y); y += 8;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(12);
+    if (nome) { doc.text(nome, M, y); y += 6; }
+    doc.text("Giorni lavorati: " + (tot || "0"), M, y); y += 10;
+    if (!righe.length) { doc.text("Nessuna giornata segnata in questo mese.", M, y); }
+    righe.forEach(function (r) {
+      var lin = doc.splitTextToSize(r[1] || "", W - M * 2 - 38);
+      if (y + lin.length * 6 > 285) { doc.addPage(); y = 20; }
+      doc.setFont("helvetica", "bold"); doc.text(r[0] || "", M, y);
+      doc.setFont("helvetica", "normal"); doc.text(lin, M + 38, y);
+      y += Math.max(1, lin.length) * 6 + 3;
+    });
+    doc.save("giornate-" + mese.toLowerCase().replace(/\s+/g, "-") + ".pdf");
   }
 
   function parti() {
