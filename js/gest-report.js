@@ -62,7 +62,7 @@
     const mid=curMestiere();
     if(typeof fattAziendaPronta==="function")await fattAziendaPronta();   /* regime per «IVA esclusa» */
     const _rR=await Promise.all([
-      sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",mid),
       /* 24 nov 2026 (collaudo Cestino dello studio) — cliente o collaboratore
          nel Cestino: le sue ore e la sua classifica restavano, ma col nome «—».
          Si leggono anche quelli nel Cestino, col nome «… (nel cestino)». */
@@ -273,7 +273,9 @@
     try{repData.rimPer=rimPer;}catch(e){}
     let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]||ffPer[l.id]||_md.per[String(l.id)])
       .map(l=>({id:l.id,d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
-                ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0, rim:rimPer[String(l.id)]||0}));
+                ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0, rim:rimPer[String(l.id)]||0,
+                /* 28 nov 2026 (sì di Alex) — allo studio a che punto sta la pratica */
+                pt:(_repPro()&&typeof praPuntoNome==="function")?praPuntoNome(l):""}));
     ML.forEach(m=>{m.marg=margineLavoro(m.inc,m.sp,m.ff,m.md,m.rim);
       /* 19 nov 2026 — la barra grigia e' TUTTO quello che e' uscito (spese +
          fornitori + manodopera), come il guadagno scritto accanto. Prima era
@@ -288,7 +290,7 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.cost/mlMax*100,m.cost?1:0)}%"></div></div>
-      <div class="mlav-sub">Importo ${eur(m.inc)}${m.rim?" · Rimborso spese +"+eur(m.rim):""} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div>
+      <div class="mlav-sub">${m.pt?`<b class="mlav-pt">${esc(m.pt)}</b> · `:""}Importo ${eur(m.inc)}${m.rim?" · Rimborso spese +"+eur(m.rim):""} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · "+_repW().md+" "+eur(m.md):""}</div>
       <button class="btn rep-apri" data-action="edit-job" data-id="${esc(String(m.id))}">${_repPro()?"Apri la pratica ›":"Apri il lavoro ›"}</button></div>`;
     }).join("");
     /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i

@@ -1226,11 +1226,14 @@
     }
     if(_menuVisto("prezzario")){
       try{
+        /* 28 nov 2026 (sessione 10) — contava anche le righe della tariffa
+           regionale caricata: «12.764 voci nel tuo prezzario» con 2 prezzi suoi.
+           Adesso solo i prezzi suoi (fonte vuota o «mio»), come «I tuoi prezzi». */
         const {count:nPz,error:ePz}=await sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true})
-          .eq("user_id",sbUid).is("eliminato_il",null);
+          .eq("user_id",sbUid).is("eliminato_il",null).or("fonte.is.null,fonte.eq.mio");
         if(!ePz&&nPz>0)C.push(rieCard({
           tab:"prezzario", titolo:"Prezzario", n:nPz.toLocaleString("it-IT",{useGrouping:true}), dati:true,
-          lab:_plur(nPz,"voce nel tuo prezzario","voci nel tuo prezzario"), tono:"neutro", male:false, righe:[]
+          lab:_plur(nPz,"prezzo tuo","prezzi tuoi"), tono:"neutro", male:false, righe:[]
         }));
       }catch(e){}
     }

@@ -723,7 +723,7 @@
       if(_cest&&_nm&&typeof window.tiChiedi==="function"){
         if(!(await window.tiChiedi(_scT+(_pro?"La riprendi":"Lo riprendi")+" dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
       }else if(!(await gconfirm(_scT+(_cest
-          ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
+          ? (_pro?"Eliminare questa pratica? Finisce nel Cestino: da lì puoi rimetterla a posto.":"Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto.")
           : "Eliminare questo lavoro? L'azione non si può annullare."))))return;
       const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
       /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */

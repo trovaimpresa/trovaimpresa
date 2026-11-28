@@ -21,6 +21,9 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
    Object.assign(L[0],{descrizione:"CILA bagno Rossi",pratica_tipo:"CILA",pratica_stato:"integrazioni",pratica_comune:"Rieti",pratica_protocollo:"4567/2026",pratica_data_dep:g(-40)});
    Object.assign(L[1],{descrizione:"SCIA ampliamento Verdi",pratica_tipo:"SCIA",pratica_stato:"depositata",pratica_comune:"Rieti",pratica_data_dep:g(-10)});
    Object.assign(L[2],{descrizione:"Accatastamento box",pratica_tipo:"Accatastamento",pratica_stato:"da_preparare"});
+   if(process.env.STUDIO_DATE){const m=new Date().toISOString().slice(0,8);
+     Object.assign(L[0],{data_prevista:m+"05",stato:"in_corso",dove:"Via Garibaldi 10, Rieti"});Object.assign(L[1],{data_prevista:m+"29",stato:"in_corso",dove:"Piazza Vittorio Emanuele II, Rieti"});Object.assign(L[2],{data_prevista:m+"30",stato:"in_corso",dove:"Via Roma 1, Rieti"});
+     if(L[3])Object.assign(L[3],{descrizione:"APE villetta Neri",pratica_tipo:"APE",pratica_stato:"archiviata",stato:"fatto",data_prevista:m+"18",dove:"Via Cintia 5, Rieti"});}
   }
   await B.collega(page,{rete:true,scritture:[]});
   const cors={"access-control-allow-origin":"*","access-control-allow-headers":"*","access-control-allow-methods":"*"};
@@ -29,7 +32,7 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
     const uno=/vnd\.pgrst\.object/.test(r.request().headers()["accept"]||"");
     const riga=t==="imprese"
       ?{id:1,user_id:"x",email:"banco@trovaimpresa.test",nome_attivita:"Studio di prova",nome:"Mario Prova",mestiere:"Geometra",mestieri:["Geometra"],telefono:"3331234567",descrizione:"Studio di prova del banco: serve solo a far aprire il gestionale. Non esiste davvero e non va mai online.",logo_url:"/img/trovaimpresa-logo.svg",email_confermata:true,premium_pagato:true,vetrina_attiva:true,tipo:"professionista",ruolo:"professionista",piano:"premium",premium_scadenza:"2099-12-31",chat_pro:true,chat_pro_scadenza:"2099-12-31",gest_prova_fine:"2099-12-31",gest_piano_scelto:"premium",citta:"Rieti",attivo:true,stato:"attivo"}
-      :{ragione_sociale:"Studio di prova",nome:"Studio di prova",piva:"00000000009",indirizzo:"Via Roma 10",cap:"02100",citta:"Rieti",prov:"RI",iban:"IT60 X054 2811 1010 0000 0123 456",giorni_pagamento:30,regime_fiscale:"RF19"};
+      :{ragione_sociale:"Studio di prova",nome:"Studio di prova",piva:"00000000009",indirizzo:"Via Roma 10",cap:"02100",citta:"Rieti",prov:"RI",iban:"IT60 X054 2811 1010 0000 0123 456",giorni_pagamento:30,regime_fiscale:"RF19",albo_nome:"Collegio dei Geometri di Rieti",albo_numero:"1234"};
     if(r.request().method()==="OPTIONS")return r.fulfill({status:204,headers:cors});
     return r.fulfill({status:200,headers:cors,contentType:"application/json",body:JSON.stringify(uno?riga:[riga])});
   });
@@ -62,6 +65,13 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
   if(scena==="pratica"){await vai("lavori");await B.aspetta(page,1200);await clic('#lavori [data-action="edit-job"]');await B.aspetta(page,2000);await scorri("Dati della pratica");}
   if(scena==="pratica-stato"){await vai("lavori");await B.aspetta(page,1200);await clic('#lavori [data-action="edit-job"]');await B.aspetta(page,2000);await scorri(process.env.SCORRI||"Data prevista");}
   if(scena==="crediti"){await vai("crediti");await B.aspetta(page,1500);}
+  /* sessione 10, parte 2: Calendario, Mappa, Tasse allo studio */
+  if(scena==="calendario"){await vai("calendario");await B.aspetta(page,1500);if(process.env.GIORNO){await page.evaluate(d=>{const c=document.querySelector('#calendario [data-action="open-day"][data-d="'+d+'"]');if(c)c.click();},process.env.GIORNO);await B.aspetta(page,1200);}else{await page.evaluate(()=>{const l=document.querySelector("#calendario .cal-legend");if(l)l.scrollIntoView({block:"end"});});await B.aspetta(page,500);}}
+  if(scena==="mappa"){await vai("mappa");await B.aspetta(page,6000);await page.evaluate(()=>{const l=document.querySelector("#mappa .mp-legenda");if(l)l.scrollIntoView({block:"center"});});await B.aspetta(page,500);}
+  if(scena==="tasse-profilo"){await vai("fisco");await B.aspetta(page,2500);await page.evaluate(()=>{try{ftProfilo=null;}catch(e){}});await testo("Le tue tasse");await B.aspetta(page,1500);await testo("Cambia")||await testo("Imposta");await B.aspetta(page,1500);}
+  if(scena==="report"){await vai("report");await B.aspetta(page,2500);await scorri("Guadagno o perdita");await B.aspetta(page,500);}
+  if(scena==="scadenza-nuova"){await vai("scadenzario");await B.aspetta(page,1500);await clic('[data-action="new-scad"]');await B.aspetta(page,1500);await scorri("A che cosa si riferisce");await page.evaluate(()=>{const s=document.getElementById("s-lav");if(s){s.size=6;}});await B.aspetta(page,400);}
+  if(scena==="tasse-prezzo"){await vai("fisco");await B.aspetta(page,2500);await testo("Quanto ti resta");await B.aspetta(page,2000);await scorri("Il prezzo giusto");await B.aspetta(page,500);}
   await B.aspetta(page,700);
   await page.screenshot({path:file});
   await browser.close();srv.close();

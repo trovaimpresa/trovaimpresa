@@ -79,6 +79,17 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
 
   /* il profilo che si puo' indovinare quando non l'ha ancora scritto:
      dal regime scritto nei Dati azienda (RF19 = forfettario) e dal mestiere */
+  /* 28 nov 2026 (sessione 10) — allo studio la cassa giusta: un geometra paga
+     la Cassa Geometri, architetti e ingegneri Inarcassa. Prima si indovinava
+     sempre la Gestione separata INPS (giusta solo per chi non ha un albo). Si
+     legge l'albo scritto nei Dati azienda; senza albo resta la Gestione separata. */
+  function ftCassaPro(az) {
+    const a = String((az && az.albo_nome) || "").toLowerCase();
+    if (/geometr/.test(a)) return "cipag";
+    if (/architett|ingegner/.test(a)) return "inarcassa";
+    return "separata";
+  }
+  let ftAzUlt = null;   /* i Dati azienda letti da ftCarica (per il modulo del profilo) */
   function ftIndovina(az) {
     const pro = (typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista");
     const rf = String((az && az.regime_fiscale) || "");
@@ -86,7 +97,7 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
     return {
       forma: pro ? "professionista" : "ditta",
       regime: rf === "RF19" ? "forfettario" : "ordinario",
-      cassa: pro ? "separata" : "artigiani",
+      cassa: pro ? ftCassaPro(az) : "artigiani",
       coeff: pro ? 78 : 86, aliquota_5: false, riduzione35: false, iva: "trimestrale"
     };
   }
@@ -337,12 +348,13 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
     const Y = ftAnno(), oggi = todayStr();
     const [rP, rA, rF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_azienda").select("regime_fiscale").eq("user_id", sbUid).maybeSingle(),
+      sb.from("gest_azienda").select("regime_fiscale,albo_nome").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo,cassa_tipo,spese,spese_regime").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       ftNolFatture(Y)
     ]);
     let profilo = rP.data || null, presunto = false;
+    ftAzUlt = rA.data || null;
     if (!profilo) { profilo = ftIndovina(rA.data); presunto = !!profilo; }
 
     const ff = rF.data || [];
@@ -481,13 +493,16 @@ function ftCassaFuori(f){ if(!f||!('cassa_tipo' in f))return false; return Strin
   // ---------------------------------------------------------------------
   function ftProfiloForm() {
     const p = ftProfilo || {};
+    /* 28 nov 2026 — modulo vuoto allo studio: «Professionista» e la sua cassa, non «Ditta / INPS Artigiani» */
+    const _pro = (typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista");
+    const formaDef = p.forma || (_pro ? "professionista" : "ditta"), cassaDef = p.cassa || (_pro ? ftCassaPro(ftAzUlt) : "artigiani");
     const opz = (el, sel) => el.map(x => `<option value="${x[0]}"${String(x[0]) === String(sel == null ? "" : sel) ? " selected" : ""}>${x[1]}</option>`).join("");
-    const coeffSel = FT_COEFF.some(x => +x[0] === +p.coeff) ? String(+p.coeff) : (p.coeff ? "altro" : (p.forma === "professionista" ? "78" : "86"));
+    const coeffSel = FT_COEFF.some(x => +x[0] === +p.coeff) ? String(+p.coeff) : (p.coeff ? "altro" : (formaDef === "professionista" ? "78" : "86"));
     fpSheet("Il tuo profilo fiscale", `<div class="sh-cols"><div class="sh-col">
       <div class="sh-b"><div class="sh-tit">Chi sei</div>
-        <div class="field"><label>1. Che attività hai?</label><select id="ft-forma">${opz(FT_FORME, p.forma || "ditta")}</select></div>
+        <div class="field"><label>1. Che attività hai?</label><select id="ft-forma">${opz(FT_FORME, formaDef)}</select></div>
         <div class="field ft-solo-indiv"><label>2. Che regime hai?</label><select id="ft-regime">${opz([["forfettario", "Forfettario (niente IVA in fattura)"], ["ordinario", "Ordinario / semplificato (con IVA)"]], p.regime || "forfettario")}</select></div>
-        <div class="field"><label>3. Dove paghi i contributi?</label><select id="ft-cassa">${opz(FT_CASSE, p.cassa || "artigiani")}</select></div>
+        <div class="field"><label>3. Dove paghi i contributi?</label><select id="ft-cassa">${opz(FT_CASSE, cassaDef)}</select></div>
         <div class="field"><label>4. In che anno hai aperto la partita IVA?</label><input id="ft-anno" type="number" inputmode="numeric" min="1950" max="${ftAnno()}" value="${esc(String(p.anno_inizio || ""))}" placeholder="Es. 2019"></div>
       </div></div><div class="sh-col">
       <div class="sh-b"><div class="sh-tit">I dettagli</div>

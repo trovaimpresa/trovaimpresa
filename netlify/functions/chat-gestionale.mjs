@@ -1640,6 +1640,7 @@ const STUDIO_MANUALE = [
   ['«+ Nuova scadenza» per revisioni, assicurazioni, DURC, visite mediche, pratiche (sono del reparto)', '«+ Nuova scadenza» per integrazioni del Comune, proroghe, tarature, polizza, iscrizione all\'albo (sono del reparto)'],
   ['SQUADRA: «+ Persona», con le sue scadenze (visite, corsi). MEZZI E ATTREZZATURE (una voce del menu, due linguette): linguetta «Mezzi» → «+ Nuovo mezzo», con scadenze e rifornimenti; linguetta «Attrezzature» → «+ Nuova attrezzatura» (ponteggi, betoniere, utensili), con le scadenze delle verifiche.',
    'COLLABORATORI: «+ Nuova persona», con le sue scadenze e le sue pratiche. AGENDA: chi fa quale pratica e le «Ore fatte». STRUMENTI: «+ Nuovo strumento» (stazione totale, laser scanner, drone, termocamera), con tarature e manutenzioni.'],
+  ['LA BARRA IN ALTO (computer): «Dati azienda»', 'LA BARRA IN ALTO (computer): «Dati dello studio»'],
   ['GALLERIA: «Carica foto o video» dei lavori;', 'GALLERIA: «Carica foto o video» delle pratiche (prima dei lavori e fine lavori), «📄 PDF delle foto» per ogni pratica;']
 ];
 const STUDIO_PEZZI_PERSI = [];

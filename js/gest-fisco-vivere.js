@@ -138,11 +138,11 @@
       <div class="fp-card fv-pg"><p class="fp-sotto" style="margin-top:0">Dimmi quanto vuoi portare a casa: ti dico quanto devi chiedere al giorno e all'ora per starci dentro, tasse comprese.</p>
       <div class="fv-pg-campi">
         <div class="field"><label>Quanto vuoi in tasca al mese</label><input id="fv-netto" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_netto_mese) || ""))}" placeholder="Es. 2000"></div>
-        <div class="field"><label>Spese fisse al mese (furgone, assicurazione, telefono, commercialista…)</label><input id="fv-fisse" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_spese_mese) || ""))}" placeholder="Es. 700"></div>
+        <div class="field"><label>${(typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? "Spese fisse al mese (auto, programmi, polizza, Ordine, commercialista…)" : "Spese fisse al mese (furgone, assicurazione, telefono, commercialista…)"}</label><input id="fv-fisse" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_spese_mese) || ""))}" placeholder="Es. 700"></div>
         <div class="field"><label>Mesi di lavoro in un anno</label><input id="fv-mesi" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_mesi) || 11))}"></div>
         <div class="field"><label>Giorni di lavoro al mese</label><input id="fv-giorni" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_giorni) || 20))}"></div>
         <div class="field"><label>Ore al giorno</label><input id="fv-ore" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_ore) || 8))}"></div>
-        <div class="field"><label>Ore che nessuno ti paga (preventivi, viaggi, materiali) %</label><input id="fv-nf" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_non_fatt != null) ? p.pg_non_fatt : 20))}"></div>
+        <div class="field"><label>${(typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? "Ore che nessuno ti paga (preventivi, viaggi, attese in Comune) %" : "Ore che nessuno ti paga (preventivi, viaggi, materiali) %"}</label><input id="fv-nf" type="text" inputmode="decimal" autocomplete="off" value="${esc(fpNumTesto((p && p.pg_non_fatt != null) ? p.pg_non_fatt : 20))}"></div>
       </div>
       <div id="fv-pg-out"></div></div>`;
 
@@ -270,7 +270,7 @@
         <div><small>Al giorno, almeno</small><b>${eur(alGiorno)}</b></div>
         <div><small>All'ora, almeno</small><b class="fp-verde">${eur(allOra)}</b></div>
       </div>
-      <p class="ft-grigio">Materiali esclusi: quelli li fai pagare a parte. Su ${giornate.toLocaleString("it-IT")} giornate l'anno, di cui ${Math.round(nf)}% di ore che nessuno ti paga.</p>
+      <p class="ft-grigio">${(typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") ? "Spese vive escluse (diritti, bolli, visure): quelle le metti in parcella." : "Materiali esclusi: quelli li fai pagare a parte."} Su ${giornate.toLocaleString("it-IT")} giornate l'anno, di cui ${Math.round(nf)}% di ore che nessuno ti paga.</p>
       ${cfr}
       <div class="fp-btns"><button class="btn-primary" data-action="fv-tariffa" data-v="${oraTonda}">Usa ${eur(oraTonda)} come mia tariffa oraria</button>
       ${fvDati.profiloVero ? `<button class="btn" data-action="fv-pg-salva">${fpIc("salva")} Ricorda questi numeri</button>` : ""}</div>`;

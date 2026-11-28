@@ -804,7 +804,7 @@
         /* 24 nov 2026 — una pratica depositata o in istruttoria con la data
            passata aspetta il Comune: non e' in ritardo (inRitardo, come Lavori
            e il riquadro del giorno). Prima la casella la faceva rossa. */
-        const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        const cls=_calCls(j,ds);
         const tit=j.descrizione||(_calPro()?"Pratica":"Lavoro");
         return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}${calChiNome(j)?` <span class="cal-chi-n">· ${esc(calChiNome(j))}</span>`:""}</span></span>`;
       }).join("");
@@ -844,7 +844,10 @@
       rit.hidden=!n;
     }
     /* 24 nov 2026 — allo studio la legenda dice «Fatta» (la pratica), come la Mappa */
-    try{const lf=document.querySelector("#calendario .cal-legend .dot.done");if(lf&&lf.nextSibling)lf.nextSibling.nodeValue=_calPro()?"Fatta":"Fatto";}catch(e){}
+    /* 28 nov 2026 (sessione 10, un solo stato) — allo studio la legenda parla
+       come «A che punto sta»: Da preparare · Al Comune · Finita */
+    try{const P=_calPro(),nomi={todo:P?"Da preparare":"Da fare",corso:P?"Al Comune":"In corso",done:P?"Finita":"Fatto"};
+      Object.keys(nomi).forEach(k=>{const d=document.querySelector("#calendario .cal-legend .dot."+k);if(d&&d.nextSibling)d.nextSibling.nodeValue=nomi[k];});}catch(e){}
     /* 24 nov 2026 — la legenda del deposito, solo allo studio */
     try{const lg=document.querySelector("#calendario .cal-legend");if(lg){let s=lg.querySelector(".cal-leg-dep");if(_calPro()&&!s){lg.insertAdjacentHTML("beforeend",'<span class="cal-leg-dep"><i class="dot dep"></i>Deposito</span>');}else if(!_calPro()&&s)s.remove();}}catch(e){}
     calListaTelefono(y,m,days);
@@ -978,7 +981,7 @@
       h+='<div class="cl-g'+(ds===oggi?" oggi":"")+'" data-action="open-day" data-d="'+ds+'">'
         +(ds===oggi?"Oggi \u00b7 ":"")+esc(tit)+'</div>';
       jobs.forEach(j=>{
-        const cls=j.stato==="fatto"?"fatto":(inRitardo(j.stato,ds,j.pratica_stato)?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        const cls=_calCls(j,ds);
         h+='<div class="cl-r" data-action="edit-job" data-id="'+esc(String(j.id))+'"><i class="cal-lav-bar '+cls+'"></i>'
           +'<span class="cl-t">'+esc(j.descrizione||(_calPro()?"Pratica":"Lavoro"))+(calChiNome(j)?' <span class="cal-chi-n">\u00b7 '+esc(calChiNome(j))+'</span>':'')+'</span><span class="cl-f">\u203a</span></div>';
       });
@@ -1014,13 +1017,22 @@
      3) UN LAVORO "IN CORSO" VENIVA SCRITTO "DA FARE". Nella cella del
         calendario la barretta blu c'e' e la legenda lo promette; appena
         aprivi il giorno diventava "Da fare" col pallino ambra. */
+  /* 28 nov 2026 (sessione 10) — il colore della pratica nel Calendario: allo
+     studio segue «A che punto sta» (Da preparare = ambra, al Comune = blu,
+     Finita = verde), non lo «stato» nascosto. Impresa e artigiano: come prima. */
+  function _calCls(j,ds){
+    if(j.stato==="fatto")return "fatto";
+    if(inRitardo(j.stato,ds,j.pratica_stato))return "ritardo";
+    if(_calPro()&&typeof praPunto==="function")return praPunto(j)==="da_preparare"?"da_fare":"in_corso";
+    return j.stato==="in_corso"?"in_corso":"da_fare";
+  }
   function openDay(ds){
     const jobs=calJobs.filter(calChiPassa).filter(l=>l.data_prevista===ds);
     const list=jobs.length?jobs.map(j=>{
-      const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds,j.pratica_stato);
-      const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
+      const sf=j.stato==="fatto", late=inRitardo(j.stato,ds,j.pratica_stato);
+      const cls=_calCls(j,ds), inCorso=cls==="in_corso";
       /* 17 nov 2026 — pallino rosso e scritta «Da fare»: adesso dice «In ritardo», come in Lavori e nella legenda */
-      const lab=sf?(_calPro()?'Fatta':'Fatto'):(late?'In ritardo':(inCorso?'In corso':'Da fare'));
+      const lab=_calPro()?(sf?'Finita':(late?'In ritardo':((typeof praPuntoNome==='function'&&praPuntoNome(j))||'Da preparare'))):(sf?'Fatto':(late?'In ritardo':(inCorso?'In corso':'Da fare')));
       const dot=sf?'done':(late?'ritardo':(inCorso?'corso':'todo'));  /* .dot.corso esiste gia' nel CSS, la usa la legenda del calendario */
       return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="${_calPro()?"Apri la pratica":"Apri il lavoro"}"><i class="dot ${dot}"></i>
         <div style="flex:1"><b>${esc(j.descrizione||"(senza descrizione)")}</b>${calChiNome(j,true)?`<div class="day-chi">Ci va: ${esc(calChiNome(j,true))}</div>`:""}</div>

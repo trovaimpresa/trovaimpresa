@@ -482,7 +482,10 @@
      100, Rieti» finiva in via Garibaldi a Fara in Sabina, PROVINCIA di Rieti,
      a 33 km, con scritto accanto «comune ipotizzato: Rieti». */
   async function mpTrovaPunto(indirizzo,vicinoA,opz){
-    const q=opz?("c:"+mpChiave(opz.via)+"|"+mpChiave(opz.comune)):mpChiave(indirizzo);
+    /* 28 nov 2026 — opz={voluto}: indirizzo scritto col comune, e il punto
+       deve stare in QUEL comune: chiedo 8 risultati e prendo il primo giusto. */
+    const voluto=opz&&opz.voluto?mpChiave(opz.voluto):"";
+    const q=voluto?("v:"+mpChiave(indirizzo)+"|"+voluto):opz?("c:"+mpChiave(opz.via)+"|"+mpChiave(opz.comune)):mpChiave(indirizzo);
     if(!q||q==="c:|")return null;
     const C=mpLeggiCache();
     if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: già cercato e non trovato */
@@ -493,8 +496,8 @@
     let trovato;
     for(let prova=0;;prova++){
     try{
-      let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it"
-        +(opz?"&street="+encodeURIComponent(opz.via)+"&city="+encodeURIComponent(opz.comune)
+      let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit="+(voluto?8:1)+"&countrycodes=it"
+        +((opz&&!voluto)?"&street="+encodeURIComponent(opz.via)+"&city="+encodeURIComponent(opz.comune)
              :"&q="+encodeURIComponent(indirizzo));
       /* spingo la ricerca verso la zona dell'ufficio: senza questo, una via che
          esiste anche in un'altra provincia poteva essere pescata a 400 km */
@@ -518,7 +521,8 @@
         return diPrima();                 /* non si scrive niente in memoria */
       }
       const d0=await r.json();
-      const a=(d0&&d0[0])?d0[0]:null;
+      const _com=x=>{const ad=(x&&x.address)||{};return ad.city||ad.town||ad.village||ad.municipality||"";};
+      const a=voluto?((d0||[]).find(x=>mpChiave(_com(x))===voluto)||null):((d0&&d0[0])?d0[0]:null);
       const ad=(a&&a.address)||{};
       trovato=a?{lat:+a.lat,lon:+a.lon,nome:a.display_name||"",
                  comune:ad.city||ad.town||ad.village||ad.municipality||""}:null;
@@ -698,7 +702,9 @@
     const box=$("#mp-lista"), avviso=$("#mp-avviso");
     if(!box)return;
     /* 24 nov 2026 — la legenda: allo studio «Fatta» (la pratica) */
-    try{const lf=document.querySelector("#mappa .mp-legenda .dot.done");if(lf&&lf.nextSibling)lf.nextSibling.nodeValue=_mpPro()?"Fatta":"Fatto";}catch(e){}
+    /* 28 nov 2026 (sessione 10, un solo stato) — allo studio «Aperta / Finita» */
+    try{const P=_mpPro(),nomi={todo:P?"Aperta":"Da fare o in corso",done:P?"Finita":"Fatto"};
+      Object.keys(nomi).forEach(k=>{const d=document.querySelector("#mappa .mp-legenda .dot."+k);if(d&&d.nextSibling)d.nextSibling.nodeValue=nomi[k];});}catch(e){}
     if(!sb||!sbUid||!cur){box.innerHTML="";return;}
     if(mpInCorso){mpRifai=true;if(forza)mpRifaiForza=true;return;}
     mpInCorso=true;
@@ -738,7 +744,9 @@
          (sql/2026-11-19-lavori-punto-mappa.sql): la Mappa e l'app dell'operaio
          adesso si parlano. Se le colonne nuove mancassero, si legge come prima. */
       let _rOp=null;
-      try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);}catch(e){}
+      /* 28 nov 2026 — solo le persone di QUESTO reparto, come Agenda e Calendario
+         (prima in «Chi ci va» c'era anche chi lavora in un altro reparto) */
+      try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());}catch(e){}
       let _rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id,dove_lat,dove_lon,dove_km,dove_geo,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if(_rL.error&&/dove_|column/i.test(_rL.error.message||""))_rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       const mpOp={};
@@ -878,6 +886,20 @@
           if(pt2&&(!pt2.comune||mpChiave(pt2.comune)===mpChiave(comuneUff))){pt=pt2;circa=false;}
           else fuoriComune=true;
         }
+        /* 28 nov 2026 — anche col comune SCRITTO il punto deve stare in quel
+           comune: «Piazza Vittorio Emanuele, Rieti» finiva a Poggio Mirteto
+           (provincia di Rieti), 26 km, e il navigatore del collaboratore ci
+           mandava lì. Se non torna si riprova con via e comune separati; se
+           neanche così torna, resta il punto di prima (frazioni, nomi diversi). */
+        if(haComune&&pt&&pt.comune){
+          const parti=String(v.ind).split(",").map(x=>x.replace(/\(\s*[A-Za-z]{2}\s*\)/g,"").replace(/\b\d{5}\b/g,"").trim()).filter(Boolean);
+          const scritto=parti.length>1?parti[parti.length-1]:"";
+          if(scritto&&!/\d/.test(scritto)&&/[a-zà-ù]/i.test(scritto)&&mpChiave(pt.comune)!==mpChiave(scritto)){
+            const pt2=await mpTrovaPunto(v.ind+", Italia",pPart,{voluto:scritto});
+            if(pt2){pt=pt2;circa=false;}
+            else fuoriComune=true;   /* meglio «controlla l'indirizzo» che un numero sbagliato */
+          }
+        }
         const guasto=!pt&&mpGuasto;
         let km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
         /* rete di sicurezza: se l'indirizzo era incompleto e il risultato è
@@ -888,6 +910,9 @@
         const strada=(ipotesi&&!sospetto)?v.ind+", "+comuneUff:v.ind;
         righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto,circa,guasto,strada});
         /* 19 nov 2026 — il punto trovato si salva nel lavoro (per l'app dell'operaio) */
+        /* 28 nov 2026 — punto sbagliato salvato prima (altro comune): si toglie,
+           se no il navigatore dell'app continua a mandare lì */
+        if(sospetto&&!guasto&&v.l&&v.l.dove_lat!=null&&("dove_geo" in v.l))mpDaSalvare.push({id:v.l.id,dove_lat:null,dove_lon:null,dove_km:null,dove_geo:null});
         if(pt&&!sospetto&&!guasto){
           const kmS=km!=null?Math.round(km*10)/10:null, L0=v.l;
           const cambia=L0.dove_geo!==v.ind||Math.abs((+L0.dove_lat||0)-pt.lat)>1e-6||Math.abs((+L0.dove_lon||0)-pt.lon)>1e-6
@@ -981,7 +1006,7 @@
                  :(!partenzaTxt?'<div class="mp-km">—</div><div class="mp-min">manca l\'ufficio</div>'
                    :(mpGuasto&&(r.guasto||!pPart)?'<div class="mp-km">?</div><div class="mp-min">riprova pi&ugrave; tardi</div>'
                    :(!pPart?'<div class="mp-km">?</div><div class="mp-min">ufficio non trovato</div>'
-                   :(r.sospetto?'<div class="mp-km">?</div><div class="mp-min">scrivi anche il comune</div>'
+                   :(r.sospetto?'<div class="mp-km">?</div><div class="mp-min">'+(r.ipotesi?'scrivi anche il comune':'controlla l\'indirizzo')+'</div>'
                                :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')))))
             +'</div>'
             /* 19 nov 2026 (sì di Alex) — «Apri» il lavoro */

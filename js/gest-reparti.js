@@ -306,6 +306,13 @@
       tabNascosti().forEach(function(t){
         document.querySelectorAll('[data-tab="'+t+'"]').forEach(function(el){ el.style.display='none'; });
       });
+      /* 28 nov 2026 (sì di Alex) — «Dati azienda» -> «Dati dello studio»: pulsanti
+         della barra in alto, schermata reparti e menu del telefono (il titolo della
+         finestra lo cambia il traduttore, _FRASI) */
+      document.querySelectorAll('[data-action="azienda"]').forEach(function(b){
+        var w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT),n;
+        while((n=w.nextNode()))if(/Dati azienda/.test(n.nodeValue))n.nodeValue=n.nodeValue.replace('Dati azienda','Dati dello studio');
+      });
       /* Squadra -> Collaboratori */
       document.querySelectorAll('[data-tab="squadra"] span').forEach(function(s){
         if(s.textContent.trim()==='Squadra')s.textContent='Collaboratori';
@@ -732,6 +739,8 @@
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
     /* 20 nov 2026 (studio, voce Fornitori): allo studio non ci sono materiali */
     ['Spese e materiali di questo lavoro','Spese di questa pratica'],
+    /* 28 nov 2026 (sì di Alex) — allo studio «Dati dello studio» */
+    ['Dati azienda','Dati dello studio'],
     ['Guadagno o perdita per lavoro','Guadagno o perdita per pratica'],
     ['lavori in perdita','pratiche in perdita'],
     ['lavoro in perdita','pratica in perdita'],
@@ -739,7 +748,7 @@
        a «Tutti i lavori»: mezza tradotta. Va DOPO 'Tutti i lavori del reparto',
        che e' piu' lunga e deve vincere. */
     ['Tutti i lavori','Tutte le pratiche'],
-    ['Lavori da fare','Pratiche da fare'],
+    ['Lavori da fare','Pratiche aperte'],   /* 28 nov 2026: allo studio «aperte» (Da preparare + al Comune), come la legenda */
     ['Lavori in corso','Pratiche in corso'],
     ['Lavori fatti','Pratiche fatte'],
     ['Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.','Mostro le 15 pratiche col margine più basso: se una pratica non compare, è tra quelle in positivo.'],

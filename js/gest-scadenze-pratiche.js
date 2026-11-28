@@ -522,9 +522,10 @@
        Le più recenti in cima, massimo 100: oltre non serve e la tendina resta corta. */
     let lv=[];
     if(sb&&sbUid){
-      const {data:dl}=await sb.from("gest_lavori").select("id,descrizione,dove,data_prevista")
+      const {data:dl}=await sb.from("gest_lavori").select("id,descrizione,dove,data_prevista,stato")
         .eq("user_id",sbUid).eq("mestiere_id",mid).order("data_prevista",{ascending:false}).limit(100);
-      lv=dl||[];
+      /* 28 nov 2026 (sì di Alex) — le finite in fondo, con «(finita)» / «(fatto)» */
+      lv=(dl||[]).filter(l=>l.stato!=="fatto").concat((dl||[]).filter(l=>l.stato==="fatto"));
     }
     /* 18 nov 2026 — collaudo dello Scadenzario: una scadenza NUOVA nasceva col
        tipo «DURC» gia' scelto. Chi scriveva «Revisione furgone» e non toccava
@@ -536,7 +537,7 @@
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     const opeOpts=(dipCache||[]).map(o=>`<option value="${o.id}" ${String(o.id)===String(s.operatore_id||"")?"selected":""}>${esc(o.nome)}</option>`).join("");
     const mezOpts=mz.map(m=>`<option value="${m.id}" ${m.id===s.mezzo_id?"selected":""}>${esc(m.nome)}${m.targa?" ("+esc(m.targa)+")":""}</option>`).join("");
-    const lavOpts=lv.map(l=>`<option value="${l.id}" ${String(l.id)===String(s.lavoro_id||"")?"selected":""}>${esc(l.descrizione||("Senza nome"))}${l.dove?" — "+esc(l.dove):""}</option>`).join("");
+    const lavOpts=lv.map(l=>`<option value="${l.id}" ${String(l.id)===String(s.lavoro_id||"")?"selected":""}>${esc(l.descrizione||("Senza nome"))}${l.dove?" — "+esc(l.dove):""}${l.stato==="fatto"?(pro?" (finita)":" (fatto)"):""}</option>`).join("");
     const avvisaOn=s.avvisa!==false;
     openSheetGrande(isNew?("Nuova scadenza"):("Modifica scadenza"),
       '<div class="sh-cols"><div class="sh-col">'
