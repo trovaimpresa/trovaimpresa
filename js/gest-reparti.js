@@ -351,6 +351,9 @@
         var _i=_secA.querySelector('.gal-intro');
         if(_i)_i.textContent="Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche. L'Assistente ti avvisa prima che scadano.";
       }
+      /* 28 nov 2026 (sessione 9): l'app del collaboratore segna ore, SPESE e foto (i materiali sono del cantiere) */
+      var _aop=document.querySelector('#squadra .app-op-p');
+      if(_aop&&/ore, materiali e foto/.test(_aop.innerHTML))_aop.innerHTML=_aop.innerHTML.replace('ore, materiali e foto','ore, spese e foto');
       /* intestazione del gruppo: "Azienda" -> "Studio" */
       document.querySelectorAll('.side-group').forEach(function(g){
         if(g.textContent.trim()==='Azienda')g.textContent='Studio';

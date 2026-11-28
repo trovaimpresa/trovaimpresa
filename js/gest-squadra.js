@@ -723,6 +723,8 @@
     rapportini:"Può scrivere il resoconto della giornata: le ore di chi ci ha lavorato su quella pratica. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Pratiche."
   };
   function permDescr(p){ return (_sqPro()&&PERMS_D_PRO[p.key])||p.d; }
+  /* 28 nov 2026 (sessione 9): allo studio «Rapportini» si chiama «Resoconti» (come nelle Giornate) */
+  function permNome(p){ return (_sqPro()&&p.key==="rapportini")?"Resoconti":p.label; }
   function permNascosto(k){ return _sqPro()&&(k==="pagamenti"||k==="mezzi"); }
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
@@ -735,8 +737,8 @@
   function permAvviso(){
     const box=$("#d-perms-avviso"); if(!box)return;
     const on={};$$("#d-perms input[data-perm]").forEach(ch=>on[ch.dataset.perm]=ch.checked);
-    const sezioni=PERMS.filter(p=>p.sez&&on[p.key]).map(p=>p.label);
-    const spente=PERMS.filter(p=>!p.sez&&on[p.key]).map(p=>p.label);
+    const sezioni=PERMS.filter(p=>p.sez&&on[p.key]).map(permNome);
+    const spente=PERMS.filter(p=>!p.sez&&on[p.key]).map(permNome);
     let t="";
     if(!sezioni.length&&!spente.length) t="⚠️ Senza nessuna spunta questa persona apre l'app e trova il lucchetto.";
     else if(!sezioni.length) t="⚠️ "+spente.join(" e ")+": da sole non aprono nessuna schermata. Accendi anche "+(_sqPro()?"<b>Pratiche</b>, Clienti o Fatture":"<b>Lavori</b>, Clienti, Fatture o Pagamenti")+", se no trova il lucchetto.";
@@ -843,7 +845,7 @@ ${vecchi?`
 
       <div class="sh-b">
         <details${apriSic}>
-          <summary class="sh-tit sh-tit--click">\ud83e\uddba Documenti e sicurezza</summary>
+          <summary class="sh-tit sh-tit--click">${_sqPro()?"\ud83d\udcc4 Documenti e scadenze":"\ud83e\uddba Documenti e sicurezza"}</summary>
           <div class="row2">
             <div class="field"><label>Visita medica \u2014 scade il</label><input id="d-visita" type="date" value="${esc(op.visita_medica_scadenza||"")}"></div>
             <div class="field"><label>Formazione sicurezza \u2014 scade il</label><input id="d-formazione" type="date" value="${esc(op.formazione_scadenza||"")}"></div>
@@ -868,7 +870,7 @@ ${vecchi?`
           <option value="preposto">${sqRuoloNome("preposto")}</option>
           <option value="segretaria">${sqRuoloNome("segretaria")}</option></select></div>
         <div class="field"><label>Permessi</label><div id="d-perms">
-          ${PERMS.map(p=>`<label class="perm-row"${permNascosto(p.key)?' style="display:none"':''}><span><b>${p.label}</b><small>${permDescr(p)}</small></span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div>
+          ${PERMS.map(p=>`<label class="perm-row"${permNascosto(p.key)?' style="display:none"':''}><span><b>${permNome(p)}</b><small>${permDescr(p)}</small></span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div>
           <p class="sh-nota" id="d-perms-avviso" style="margin:10px 0 0;display:none;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px"></p>
           <p class="sh-nota" style="margin:10px 0 0">Decide cosa vede e cosa può fare <b>dal telefono</b>. Le prime ${_sqPro()?"tre":"quattro"} aprono una schermata; le altre quattro cambiano cosa può fare dentro. Il ruolo qui sopra riempie le caselle con la scelta più comune: poi le cambi come vuoi.</p></div>
       </div>

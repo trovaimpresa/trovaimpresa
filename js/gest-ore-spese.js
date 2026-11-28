@@ -166,6 +166,11 @@
       });
       const scrMs = (scritte[id] || 0) * 3600000;
       const scr = (scrRighe[id] || []).slice().sort((a,b) => String(b.data||"").localeCompare(String(a.data||"")));
+      /* 28 nov 2026 (sessione 9): «Giorni 0» per chi ha solo ore scritte a mano.
+         Un giorno conta se c'e' una timbratura OPPURE un'ora scritta (una volta sola). */
+      const _gSet = new Set(Object.keys(giorni).filter(g => _oreCoppie(giorni[g]).ms > 0));
+      (scrRighe[id] || []).forEach(r => { if(r.data && (+r.ore||0) > 0) _gSet.add(String(r.data).slice(0,10)); });
+      nGiorni = _gSet.size;
       return { id:id, nome:NOMI[id] || "Persona non in elenco", ms:ms, giorni:nGiorni,
                scrMs:scrMs, scr:scr, det:det, buchi:buchi, niente:(ms === 0 && scrMs === 0 && buchi.length === 0) };
     }).sort((a,b) => b.ms - a.ms || a.nome.localeCompare(b.nome));
@@ -324,7 +329,7 @@
   /* il file per Excel: una riga per persona, ore in numero (9,42) e in ore e minuti */
   function oreScaricaCsv(){
     if(!ORE_ULTIMO || !ORE_ULTIMO.pers.length){ toast("Non c'è ancora niente da scaricare."); return; }
-    const righe = [["Persona","Giorni timbrati","Ore timbrate","Ore timbrate (numero)","Ore scritte a mano","Ore scritte (numero)","Giornate aperte"]];
+    const righe = [["Persona","Giorni","Ore timbrate","Ore timbrate (numero)","Ore scritte a mano","Ore scritte (numero)","Giornate aperte"]];
     ORE_ULTIMO.pers.forEach(p => righe.push([
       p.nome, p.giorni, _oreHM(p.ms), String(_oreDec(p.ms)).replace(".", ","),
       _oreHM(p.scrMs), String(_oreDec(p.scrMs)).replace(".", ","), p.buchi.length

@@ -225,7 +225,7 @@
         tutti.length?"Prova a cambiare filtro qui sopra."
           :(attrezzo
             ? (STRU
-               ? "Stazione totale, distanziometro laser, termocamera, livello. Con le date delle tarature: l'Assistente ti avvisa prima che scadano."
+               ? "Aggiungi il primo e scrivi la data della prossima taratura."   /* 28 nov 2026: la frase lunga sta gia' in alto */
                : "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: l'Assistente ti avvisa prima che scadano.")
             : "Furgoni, escavatori, auto. Con le date di revisione, assicurazione e bollo, e i rifornimenti: l'Assistente ti avvisa prima che scadano."),
         attrezzo
@@ -289,7 +289,7 @@
     if(!md.n)return "";
     const nomi=md.scadute.map(x=>x.t);
     if(!nomi.length)return md.n+" "+(md.n===1?"scadenza scaduta":"scadenze scadute");
-    if(nomi.length===1)return nomi[0]+": scadeva il "+fdate(md.scadute[0].d);
+    if(nomi.length===1)return nomi[0]+": scaduta il "+fdate(md.scadute[0].d);   /* 28 nov 2026: era «scadeva il» */
     return "Scadute: "+nomi.slice(0,3).join(", ")+(nomi.length>3?" e altre "+(nomi.length-3):"");
   }
   /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
@@ -307,7 +307,8 @@
   function mezzoEtichetta(m,md){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
     const _libero=(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato);
-    if(md.n&&_libero) return {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"};
+    /* 28 nov 2026 (sessione 9): se quello che e' scaduto e' solo la taratura, «Da tarare» */
+    if(md.n&&_libero) return {lab:(md.scadute.length&&md.scadute.every(x=>/taratur/i.test(x.t||""))?"Da tarare":"Da rinnovare"),bg:"var(--err-bg)",fg:"var(--err)"};
     /* 12 nov 2026 — un mezzo fuori a noleggio non e' «Disponibile» (blu = in corso, regola 15) */
     const _nl=mezziNolMap[m.id];
     if(_nl&&_libero){

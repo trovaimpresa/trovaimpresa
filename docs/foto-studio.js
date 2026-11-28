@@ -1,5 +1,5 @@
 /* foto dello studio (sessione 8): faccia professionista + forfettario.
-   node docs/foto-studio.js <fatture|fattura-fondo|computo|ribasso|parcella|sal> <larghezza> <file.png>   (dalla cartella del progetto; in nuvola google-chrome di sistema)  */
+   node docs/foto-studio.js <fatture|fattura-fondo|computo|ribasso|parcella|sal|collaboratori|persona|strumenti|giornate|crediti> <larghezza> <file.png>   (dalla cartella del progetto; in nuvola google-chrome di sistema)  */
 "use strict";
 const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"));
 (async()=>{
@@ -11,6 +11,12 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
   const page=await ctx.newPage();
   page.on("dialog",d=>d.dismiss().catch(()=>{}));
   page.on("pageerror",e=>console.log("ERRORE PAGINA:",e.message));
+  /* sessione 9: una collaboratrice, uno strumento con la taratura scaduta, una pratica sua */
+  {const D=B.DATI, g=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+   const op=D.gest_operatori[0]; Object.assign(op,{nome:"Giulia Bianchi",mansione:"Disegnatore CAD",costo_orario:20,visita_medica_scadenza:null,formazione_scadenza:null});
+   D.gest_mezzi.push(Object.assign({},D.gest_mezzi[1],{id:"00000000-0000-4000-8000-000000000699",nome:"Stazione totale Leica TS07",categoria:"attrezzatura",tipo:"stazione totale",targa:"TS-123",revisione_scad:null,operatore_id:op.id,noleggiabile:false}));
+   D.gest_scadenze.push(Object.assign({},D.gest_scadenze[0],{id:"00000000-0000-4000-8000-000000000698",titolo:"Taratura strumento",tipo_pratica:"Taratura strumento",data_scadenza:g(-18),mezzo_id:"00000000-0000-4000-8000-000000000699"}));
+  }
   await B.collega(page,{rete:true,scritture:[]});
   const cors={"access-control-allow-origin":"*","access-control-allow-headers":"*","access-control-allow-methods":"*"};
   await page.route(/\/rest\/v1\/(imprese|gest_azienda)\b/,async r=>{
@@ -40,6 +46,14 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
     if(scena==="parcella"){await clic('.co-az [data-action="comp-prev"]');await B.aspetta(page,2500);await page.evaluate(()=>{const c=document.getElementById("dp-cat");if(c){c.value=c.options[1].value;c.dispatchEvent(new Event("change",{bubbles:true}));const b=document.getElementById("dp-box");if(b)b.scrollIntoView({block:"start"});}});await B.aspetta(page,800);}
   }
   if(scena==="sal"){await vai("sal");await B.aspetta(page,800);}
+  if(scena==="collaboratori"){await vai("squadra");await B.aspetta(page,1200);}
+  if(scena==="persona"){await vai("squadra");await B.aspetta(page,800);await clic('#squadra [data-action="sq-edit"]');await B.aspetta(page,1500);await page.evaluate(()=>{const d=[...document.querySelectorAll("#sheet details")].find(x=>/Documenti/.test(x.textContent));if(d){d.open=true;d.scrollIntoView({block:"start"});}});await B.aspetta(page,500);}
+  if(scena==="persona-perm"){await vai("squadra");await B.aspetta(page,800);await clic('#squadra [data-action="sq-edit"]');await B.aspetta(page,1500);await scorri("Rapportini")||await scorri("Resoconti");}
+  if(scena==="strumenti"){await vai("attrezzature");await B.aspetta(page,1500);}
+  if(scena==="giornate"){await vai("giornate");await B.aspetta(page,1200);
+    await page.evaluate(()=>{const n="Giulia Bianchi";giorProp=[{data:todayStr(),chi:new Set([n]),dove:"Rilievo Rossi",cosa:"Rilievo con la stazione totale. Parcheggio 12 €.",mezza:new Set(),oreX:{[n]:6},spese:[{desc:"Parcheggio",imp:12,on:true}]}];giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});});
+    await B.aspetta(page,600);await scorri("Controlla e salva");}
+  if(scena==="crediti"){await vai("crediti");await B.aspetta(page,1500);}
   await B.aspetta(page,700);
   await page.screenshot({path:file});
   await browser.close();srv.close();

@@ -1283,10 +1283,12 @@
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
          dello schermo, mappa e richieste si disegnano solo quando le apri. */
       const tb=b.dataset.tab;
-      const SEMPRE=["lavori","agenda","mappa","richieste","dalsito","mezzi","attrezzature","assistenza","fisco"]; /* fisco: i soldi da incassare cambiano da Fatture, va sempre riletto */
+      const SEMPRE=["lavori","agenda","mappa","richieste","dalsito","mezzi","attrezzature","assistenza","fisco","squadra"]; /* 28 nov 2026 (sessione 9): squadra sempre — la scheda dice «Pratiche (N)» e «🔧 Ha: …», che cambiano salvando una pratica o uno strumento */ /* fisco: i soldi da incassare cambiano da Fatture, va sempre riletto */
       if(_tabSporchi.has(tb)||SEMPRE.includes(tb)){
         _tabSporchi.delete(tb);
         const fn=RENDER_TAB[tb];if(fn)fn();
+        /* 28 nov 2026 — la linguetta «Agenda (N)» la scrive renderAgenda: si rilegge anche lei */
+        if(tb==="squadra"&&RENDER_TAB.agenda){try{RENDER_TAB.agenda();}catch(_e){}}
       }
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});

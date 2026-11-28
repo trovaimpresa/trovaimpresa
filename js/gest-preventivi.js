@@ -1357,7 +1357,10 @@
       '<div class="cred-box cred-'+tono+'">'
       +(titolo?'<div class="cred-per">'+esc(titolo)+'</div>':'')
       +'<div class="cred-testa"><div class="cred-num">'+_n2(K.fatti)+' <small>di '+_n2(reg.obiettivo)+' CFP</small></div>'
-      +'<button type="button" class="btn cred-cambia" data-action="cred-traguardo">Come conta il tuo Ordine</button></div>'
+      /* 28 nov 2026 (sessione 9): senza Ordine scelto il conto e' quello di partenza (30 l'anno, la
+         regola degli ingegneri): un geometra vedeva «0 di 30». Prima la domanda. */
+      +'<button type="button" class="'+(reg.ordine?'btn':'btn-primary')+' cred-cambia" data-action="cred-traguardo">'+(reg.ordine?'Come conta il tuo Ordine':'Scegli il tuo Ordine')+'</button></div>'
+      +(reg.ordine?'':'<div class="cred-msg cred-ordine">Ogni Ordine conta i crediti in modo diverso: geometri e architetti <b>60 in tre anni</b>, ingegneri <b>30 l\'anno</b>. Scegli il tuo e il conto qui sotto si mette a posto da solo.</div>')
       +'<div class="cred-barra"><span style="width:'+perc+'%"></span></div>'
       +'<div class="cred-msg">'+msg+'</div>'
       +(rigaAnni?'<div class="cred-tipi">'+rigaAnni+'</div>':'')
