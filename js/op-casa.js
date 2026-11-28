@@ -94,6 +94,8 @@
     + ".oh-n{display:inline-block;background:#e11d48;color:#fff;border-radius:10px;font-size:13px;padding:1px 7px;margin-left:4px;vertical-align:2px}"
     + "#oh-altro .oh-r{display:flex;align-items:center;gap:14px;width:100%;background:#fff;border:1px solid #e3e8ef;border-radius:14px;padding:14px;margin-bottom:10px;font:inherit;font-size:18px;font-weight:700;color:#0b1220;cursor:pointer;text-align:left}"
     + "#oh-altro .oh-r .oh-ic{width:48px;height:48px;margin:0;border-radius:12px}"
+    /* 28 nov 2026 — tutta l'app piu' piccola del 12% (ok di Alex, anteprima) */
+    + "html{zoom:.88}"
     /* 28 nov 2026 — schermata di casa compatta, tutto in una pagina (ok di Alex) */
     + "body.oh-casa header{padding-top:12px!important;padding-bottom:10px!important}"
     + "body.oh-casa header .h-hi{display:inline;font-size:16px!important;margin-right:6px}"
