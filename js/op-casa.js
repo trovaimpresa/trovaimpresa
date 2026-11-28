@@ -64,6 +64,7 @@
     + ".oh-mg-nota{font-size:15px;color:#64707c;margin-top:8px}"
     + "#oh-mg-ai{width:100%;margin-top:12px;padding:16px;border:0;border-radius:16px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
     + "#oh-mg-mano{display:block;margin:14px auto 0;background:none;border:0;color:#64707c;font:inherit;font-size:17px;text-decoration:underline;cursor:pointer}"
+    + "#oh-bz-lav{background:#fff7ed;border:2px solid #ff8800;border-radius:20px;padding:16px;margin:0 0 18px}#oh-bz-lav h3{margin:2px 0 10px;font-size:21px;color:#0a2a4d}"
     + "#oh-bz-card{background:#fff7ed;border:2px solid #ff8800;border-radius:20px;padding:16px;margin:0 0 18px}"
     + "#oh-bz-card h3{margin:2px 0 10px;font-size:21px;color:#0a2a4d}"
     + ".oh-bz-r{padding:12px 0;border-top:1px solid #fde1c2}.oh-bz-r b{display:block;font-size:17px;color:#0a2a4d}.oh-bz-r small{display:block;font-size:14px;color:#64707c;margin:2px 0 8px}"
@@ -170,7 +171,8 @@
       var tt = $("#oh-tit-t"); if (tt) tt.textContent = nomi[sez] || "";
     }
     if (!sez) disegna();
-    if (sez === "giornate") { mgBox(); speseMese(); bozzeDisegna(); }
+    if (sez === "giornate") { mgBox(); speseMese(); }
+    if (sez === "giornate" || sez === "lavori") bozzeDisegna();
     window.scrollTo(0, 0);
   }
   function casa() { modo(null); }
@@ -364,9 +366,32 @@
   window.opSpeseMese = speseMese;
 
   /* 28 nov 2026 — le giornate salvate sul telefono e non ancora mandate */
+  /* lo stesso riquadro anche in cima a «Lavori»: e' li' che uno lo cerca */
+  function bozzeLav() {
+    var pl = document.getElementById("op-p-lavori"); if (!pl) return null;
+    var c = document.getElementById("oh-bz-lav");
+    if (!c) {
+      c = document.createElement("div"); c.id = "oh-bz-lav"; c.className = "oh-bz-card2"; c.style.display = "none";
+      pl.insertBefore(c, pl.firstChild);
+    }
+    return c;
+  }
   async function bozzeDisegna() {
-    var c = window._ohMg && window._ohMg.bz; if (!c || !window.opBozze) return;
+    if (!window.opBozze) return;
+    var c = window._ohMg && window._ohMg.bz, c2 = bozzeLav();
     var l = await window.opBozze.lista();
+    if (c2) {
+      if (!l.length) { c2.style.display = "none"; c2.innerHTML = ""; }
+      else {
+        c2.style.display = "";
+        c2.innerHTML = '<h3>Giornate salvate da mandare (' + l.length + ')</h3>' + l.map(function (z) {
+          return '<div class="oh-bz-r"><b>' + e(z.lavoroNome || z.dove || "Cantiere da scrivere") + '</b><small>' + e((z.cosa || "").slice(0, 90)) + '</small>'
+            + '<div class="oh-bz-az"><button type="button" class="oh-bz-apri" data-bz2="' + e(z.id) + '">Apri e manda</button></div></div>';
+        }).join("");
+        c2.querySelectorAll("[data-bz2]").forEach(function (x) { x.onclick = function (ev) { ev.stopPropagation(); window.opBozze.apri(x.getAttribute("data-bz2")); }; });
+      }
+    }
+    if (!c) return;
     if (!l.length) { c.style.display = "none"; c.innerHTML = ""; return; }
     var GG = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"], MM = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
     var gg = function (s) { var x = new Date(String(s || "").slice(0, 10) + "T12:00:00"); return isNaN(x) ? "" : GG[x.getDay()] + " " + x.getDate() + " " + MM[x.getMonth()]; };
