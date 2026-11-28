@@ -64,10 +64,13 @@
       if (b.dataset.mg === "racconta") { apriRacconto(""); }
       if (b.dataset.mg === "annulla") { racconta = null; disegna(); }
       if (b.dataset.mg === "manda") { b.disabled = true; manda(); }
+      if (b.dataset.mg === "corr" && window.opProposta) { window.opProposta.correggi(MG_MIE[b.dataset.id]); }
+      if (b.dataset.mg === "butta" && window.opProposta) { window.opProposta.butta(b.dataset.id); }
     });
     return p;
   }
 
+  var MG_MIE = {};
   async function disegna(){
     var p = pannello(); if (!p) return;
     if (racconta && document.getElementById("mg-data")) leggiModulo();
@@ -86,7 +89,7 @@
       /* le giornate che ha mandato lui e che il capo non ha ancora approvato */
       var mie = [];
       if (MIO.uid) {
-        var rp = await sb.from("gest_giornate_proposte").select("id,data,dove,cosa,stato")
+        var rp = await sb.from("gest_giornate_proposte").select("id,data,dove,cosa,stato,lavoro_id,extra")
           .eq("user_id", MIO.impresaId).eq("membro_id", MIO.uid)
           .in("stato", ["da_vedere", "scartata"]).gte("data", a).lt("data", b).order("data", { ascending: false });
         if (!rp.error) mie = rp.data || [];
@@ -101,7 +104,10 @@
       ore.forEach(function (o) { giorni[o.data] = 1; });
       var n = Object.keys(giorni).length;
       var attesa = mie.map(function (m) {
-        return '<div class="mg-r"><small>' + e(giorno(m.data)) + (m.stato === "scartata" ? '<span class="mg-att no">il capo l\'ha scartata</span>' : '<span class="mg-att">aspetta il capo</span>') + '</small><div>' + e(m.dove) + (m.cosa ? " — " + e(m.cosa) : "") + '</div></div>';
+        /* 28 nov 2026 — finche' il capo non l'approva, si corregge o si butta */
+        MG_MIE[m.id] = m;
+        return '<div class="mg-r"><small>' + e(giorno(m.data)) + (m.stato === "scartata" ? '<span class="mg-att no">il capo l\'ha scartata</span>' : '<span class="mg-att">aspetta il capo</span>') + '</small><div>' + e(m.dove) + (m.cosa ? " — " + e(m.cosa) : "") + '</div>'
+          + '<div class="mg-corr"><button type="button" data-mg="corr" data-id="' + e(m.id) + '">Correggi</button><button type="button" data-mg="butta" data-id="' + e(m.id) + '">Butta via</button></div></div>';
       }).join("");
       var righe = ore.map(function (o) {
         var t = note[o.rapportino_id] || "";

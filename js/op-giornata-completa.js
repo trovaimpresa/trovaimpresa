@@ -43,6 +43,8 @@
     ".gc-in{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:13px;border:1.5px solid var(--line);border-radius:12px;background:#fff}" +
     "textarea.gc-in{min-height:96px;resize:vertical}" +
     "input.gc-in[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;text-align:left;min-height:52px}" +
+    ".gc-gia{font-size:15px;color:#334155;margin:4px 0 6px}" +
+    ".mg-corr{display:flex;gap:8px;margin-top:8px}.mg-corr button{flex:1;padding:10px;border-radius:10px;font:inherit;font-size:16px;font-weight:800;cursor:pointer;border:1.5px solid #1a3f7d;background:#fff;color:#1a3f7d}.mg-corr button[data-mg=butta]{border-color:#e5b3b0;color:#b3261e}" +
     ".gc-salva{display:block;width:100%;margin-top:10px;padding:15px;border:2px solid #1a3f7d;border-radius:14px;background:#fff;color:#1a3f7d;font:inherit;font-size:18px;font-weight:800;cursor:pointer}" +
     ".gc-foto{display:flex;flex-wrap:wrap;gap:10px}" +
     ".gc-th{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;background:#e5e9ee;border:1px solid var(--line)}" +
@@ -90,6 +92,7 @@
       + '<label class="gc-lab" for="gc-cosa">Cosa hai fatto</label><textarea class="gc-in" id="gc-cosa" placeholder="Puoi anche dettarlo col microfono della tastiera">' + e(GC.cosa) + '</textarea>'
 
       + '<div class="gc-sez"><div class="gc-tit">' + IC.cam + 'Foto del lavoro' + (GC.foto.length ? " (" + GC.foto.length + ")" : "") + '</div>'
+      + (GC.gia && GC.gia.foto.length ? '<div class="gc-gia">Già mandate: ' + GC.gia.foto.length + ' foto (restano)</div>' : "")
       + (GC.foto.length ? '<div class="gc-foto">' + GC.foto.map(function (f, i) { return '<div class="gc-th"><img alt="" src="' + e(f.url) + '"><button type="button" class="gc-via" data-gc="via-foto" data-i="' + i + '" aria-label="Togli la foto">' + IC.x + '</button></div>'; }).join("") + '</div>' : "")
       + (GC.foto.length < MAX_FOTO ? '<button type="button" class="gc-add" data-gc="foto">' + IC.cam + 'Aggiungi foto</button>' : "")
       + '</div>'
@@ -110,8 +113,8 @@
       + '</div>'
 
       + '<div class="gc-msg ' + e(GC.k) + '">' + e(GC.msg) + '</div>'
-      + '<button type="button" class="rv-ok" id="gc-manda"' + (GC.invio ? " disabled" : "") + '>' + (GC.invio ? "Mando…" : "Manda al capo") + '</button>'
-      + (GC.invio ? '' : '<button type="button" class="gc-salva" id="gc-salva">💾 Salva per dopo</button>')
+      + '<button type="button" class="rv-ok" id="gc-manda"' + (GC.invio ? " disabled" : "") + '>' + (GC.invio ? "Mando…" : (GC.propId ? "Rimanda corretta al capo" : "Manda al capo")) + '</button>'
+      + (GC.invio || GC.propId ? '' : '<button type="button" class="gc-salva" id="gc-salva">💾 Salva per dopo</button>')
       + '<div class="gc-nota">Il capo la controlla e la approva. Fino ad allora non entra nei conti.</div>';
   }
 
@@ -231,9 +234,11 @@
         user_id: MIO.impresaId, operatore_id: MIO.operatoreId,
         lavoro_id: RV.lavoro ? RV.lavoro.id : null,
         data: GC.data, dove: dove.slice(0, 120), cosa: String(GC.cosa || "").trim().slice(0, 2000) || null,
-        extra: { spese: spese, foto: foto, bolle: bolle }
+        extra: { spese: spese, foto: (GC.gia ? GC.gia.foto : []).concat(foto), bolle: (GC.gia ? GC.gia.bolle : []).concat(bolle) }
       };
-      var r = await sb.from("gest_giornate_proposte").insert(riga).select("id");
+      var r;
+      if (GC.propId) { riga.stato = "da_vedere"; r = await sb.from("gest_giornate_proposte").update(riga).eq("id", GC.propId).select("id"); }
+      else r = await sb.from("gest_giornate_proposte").insert(riga).select("id");
       if (r.error || !r.data || !r.data.length) throw new Error((r.error && r.error.message) || "non arrivata");
     } catch (err) {
       GC.invio = false; GC.msg = "Non mandata: " + err.message + ". Riprova: quello che hai scritto è ancora qui."; GC.k = "err"; modulo();
@@ -311,6 +316,31 @@
     window.rvDisegna();
   }
   window.opBozze = { lista: bozzeLista, apri: bozzaApri, via: bozzaVia };
+
+  /* 28 nov 2026 — correggere una giornata gia' mandata, finche' il capo non
+     l'ha approvata: si riapre il modulo con quello che c'era; foto e bolle
+     gia' mandate restano, se ne possono aggiungere altre */
+  function propCorreggi(m) {
+    if (!m || typeof rvApri !== "function") return;
+    rvApri();
+    var x = m.extra || {};
+    GC = nuovo(m.cosa || ""); GC.propId = m.id; GC.data = m.data || GC.data; GC.dove = m.dove || "";
+    GC.spese = (x.spese || []).map(function (s) { return { importo: String(s.importo).replace(".", ","), cosa: s.cosa || "" }; });
+    GC.gia = { foto: x.foto || [], bolle: x.bolle || [] };
+    RV.tipo = "completa";
+    var lv = (typeof LAVORI !== "undefined" ? LAVORI : []).filter(function (l) { return String(l.id) === String(m.lavoro_id); })[0];
+    RV.lavoro = lv || null; RV.autoLavoro = !!lv; RV.passo = 3;
+    window.rvDisegna();
+  }
+  async function propButta(id) {
+    var si = typeof window.tiChiedi === "function" ? await window.tiChiedi("Buttare via questa giornata mandata al capo?", { si: "Butta via", no: "Tienila", rosso: true }) : confirm("Buttare via questa giornata?");
+    if (!si) return;
+    var r = await sb.from("gest_giornate_proposte").delete().eq("id", id).select("id");
+    if (r.error || !r.data || !r.data.length) { if (typeof toast === "function") toast("Non buttata: " + ((r.error && r.error.message) || "forse il capo l'ha già approvata")); return; }
+    if (typeof toast === "function") toast("Giornata buttata via");
+    try { if (window.mgRidisegna) window.mgRidisegna(); if (window.opSpeseMese) window.opSpeseMese(); } catch (x) {}
+  }
+  window.opProposta = { correggi: propCorreggi, butta: propButta };
 
   /* la freccia «‹» rifà la schermata: prima si tiene quello che ha scritto */
   var ind = document.getElementById("rv-indietro");

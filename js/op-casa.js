@@ -262,7 +262,7 @@
           + '<div id="oh-mg-nuova"><textarea id="oh-mg-testo" placeholder="🎤 «Oggi a Campoloniano, rifatto il tetto»"></textarea>'
           + '<button type="button" id="oh-mg-ai">Compila la giornata</button>'
           + '<button type="button" id="oh-mg-mano">Oppure scrivila a mano</button></div>'
-          + '<div id="oh-mg-corrnota" class="oh-mg-nota" style="display:none">Qui sotto le tue giornate del mese. Per correggerne una, scrivi al capo nella Chat.</div>';
+          + '<div id="oh-mg-corrnota" class="oh-mg-nota" style="display:none">Qui sotto le tue giornate del mese. Quelle che aspettano il capo le correggi col pulsante «Correggi». Quelle già approvate le corregge il capo: scrivigli in Chat.</div>';
         mg.parentNode.insertBefore(bx, mg.nextSibling);
         var sp = document.createElement("div"); sp.id = "oh-sp-card";
         sp.innerHTML = '<h3>Spese, benzina, bolle e fatture</h3>'
