@@ -187,13 +187,18 @@ function testoGestionale(chiave) {
 // gestionale»):
 //   lun sito (per chi cerca)   mar gestionale        mer forum (chiedi)
 //   gio lavoro: subappalti + offerte + candidature, in un post solo
-//   ven sito (per chi lavora)  sab gestionale (2ª)   dom forum (rispondi)
+//   ven sito (per chi lavora)  sab gestionale (2ª)
+//   dom sito per i clienti, 2ª versione (Alex 28 nov: «domenica sempre sito ma
+//       per i clienti che cercano una impresa»)
 // Il post «gestionale del giorno» delle 19 resta com'e' (una funzione a giro).
 // ⛔ Scrivere solo cose che il sito fa DAVVERO oggi.
 const SEZIONI = {
   sito_clienti: { titolo: 'Il sito — per chi cerca', pagina: '/', tag: '#ristrutturazione #casa',
     righe: ['🏠 Devi fare dei lavori in casa?', 'Su TrovaImpresa trovi imprese, artigiani e professionisti della tua città.', 'Guardi le foto dei loro lavori e li contatti direttamente: nessun intermediario.', 'Gratis, senza registrarti.'],
     invito: '👉 Cerca nella tua città:' },
+  sito_clienti_2: { titolo: 'Il sito — trova l\'impresa', pagina: '/', tag: '#ristrutturazione #lavoridicasa',
+    righe: ['🔨 Cerchi un muratore, un idraulico, un elettricista?', 'Scrivi la tua città su TrovaImpresa e vedi chi lavora vicino a te, con le foto dei lavori fatti.', 'Chiedi il preventivo direttamente all\'impresa che scegli.', 'Gratis, senza registrarti.'],
+    invito: '👉 Trova l\'impresa nella tua città:' },
   gestionale: { titolo: 'Il gestionale gratis', pagina: '/gestionale', tag: '#gestionale #imprese',
     righe: ['📱 Il gestionale per chi lavora in edilizia, gratis', 'Preventivi, fatture, cantieri, operai e scadenze in un posto solo, anche dal telefono.', 'Lo hai gratis per sempre iscrivendoti a TrovaImpresa, senza carta di credito.'],
     invito: '👉 Scopri il gestionale:' },
@@ -214,7 +219,7 @@ const SEZIONI = {
     invito: '👉 Leggi le domande:' }
 };
 // indice = giorno della settimana a Roma (0 = domenica)
-const SETTIMANA = ['forum_imprese', 'sito_clienti', 'gestionale', 'forum_clienti', 'lavoro', 'sito_imprese', 'gestionale_2'];
+const SETTIMANA = ['sito_clienti_2', 'sito_clienti', 'gestionale', 'forum_clienti', 'lavoro', 'sito_imprese', 'gestionale_2'];
 const GIORNI = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 function sezioneDelGiorno(d = new Date()) {
   const g = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'Europe/Rome' }).format(d);
