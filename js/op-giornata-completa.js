@@ -42,6 +42,8 @@
     ".gc-lab{display:block;font-size:16px;font-weight:700;color:#1f2937;margin:12px 0 4px}" +
     ".gc-in{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:13px;border:1.5px solid var(--line);border-radius:12px;background:#fff}" +
     "textarea.gc-in{min-height:96px;resize:vertical}" +
+    "input.gc-in[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;text-align:left;min-height:52px}" +
+    ".gc-salva{display:block;width:100%;margin-top:10px;padding:15px;border:2px solid #1a3f7d;border-radius:14px;background:#fff;color:#1a3f7d;font:inherit;font-size:18px;font-weight:800;cursor:pointer}" +
     ".gc-foto{display:flex;flex-wrap:wrap;gap:10px}" +
     ".gc-th{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;background:#e5e9ee;border:1px solid var(--line)}" +
     ".gc-th img{width:100%;height:100%;object-fit:cover;display:block}" +
@@ -109,6 +111,7 @@
 
       + '<div class="gc-msg ' + e(GC.k) + '">' + e(GC.msg) + '</div>'
       + '<button type="button" class="rv-ok" id="gc-manda"' + (GC.invio ? " disabled" : "") + '>' + (GC.invio ? "Mando…" : "Manda al capo") + '</button>'
+      + (GC.invio ? '' : '<button type="button" class="gc-salva" id="gc-salva">💾 Salva per dopo</button>')
       + '<div class="gc-nota">Il capo la controlla e la approva. Fino ad allora non entra nei conti.</div>';
   }
 
@@ -160,9 +163,10 @@
 
   document.getElementById("rv-corpo").addEventListener("click", function (ev) {
     if (!(RV.tipo === "completa" && GC)) return;
-    var b = ev.target.closest("[data-gc]"); if (!b && !ev.target.closest("#gc-manda")) return;
+    var b = ev.target.closest("[data-gc]"); if (!b && !ev.target.closest("#gc-manda") && !ev.target.closest("#gc-salva")) return;
     leggi();
     if (ev.target.closest("#gc-manda")) { manda(); return; }
+    if (ev.target.closest("#gc-salva")) { salvaBozza(); return; }
     var a = b.dataset.gc, i = +b.dataset.i;
     if (a === "foto") {
       scegli("image/*", true, function (l) {
@@ -239,11 +243,73 @@
     if (GC.foto.length) pezzi.push(GC.foto.length + " foto");
     if (spese.length) pezzi.push(spese.length === 1 ? "1 spesa" : spese.length + " spese");
     if (GC.bolle.length) pezzi.push(GC.bolle.length === 1 ? "1 bolla" : GC.bolle.length + " bolle");
-    GC = null;
+    var bz = GC.bozzaId; GC = null;
+    if (bz) bozzaVia(bz);
     if (typeof rvChiudi === "function") rvChiudi();
     if (typeof window.tiSpunta === "function") window.tiSpunta("Mandata al capo", pezzi.length ? { sotto: "Con " + pezzi.join(", ") } : null);
     else if (typeof toast === "function") toast("Mandata al capo" + (pezzi.length ? ", con " + pezzi.join(", ") : ""));
   }
+
+  /* 28 nov 2026 — «Salva per dopo»: la giornata resta sul telefono (foto e
+     bolle comprese) finche' l'operaio non la manda. Sta in IndexedDB, che
+     tiene anche i file; nel database non va niente finche' non si manda. */
+  function bozzeDb() {
+    return new Promise(function (ok, no) {
+      var r = indexedDB.open("ti-giornate-bozze", 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore("bozze", { keyPath: "id" }); };
+      r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); };
+    });
+  }
+  function bozzeTx(modo, fn) {
+    return bozzeDb().then(function (db) {
+      return new Promise(function (ok, no) {
+        var t = db.transaction("bozze", modo), st = t.objectStore("bozze"), res = fn(st);
+        t.oncomplete = function () { ok(res && res.result !== undefined ? res.result : res); };
+        t.onerror = function () { no(t.error); };
+      });
+    });
+  }
+  function chi() { return (MIO && (MIO.uid || "")) + "|" + (MIO && MIO.impresaId || ""); }
+  async function salvaBozza() {
+    leggi();
+    var id = GC.bozzaId || ("b" + Date.now());
+    var riga = {
+      id: id, chi: chi(), salvata: Date.now(), data: GC.data, dove: GC.dove || "", cosa: GC.cosa || "",
+      lavoroId: RV.lavoro ? RV.lavoro.id : null,
+      lavoroNome: RV.lavoro && typeof rvNomeLavoro === "function" ? rvNomeLavoro(RV.lavoro) : "",
+      spese: GC.spese.map(function (x) { return { importo: x.importo, cosa: x.cosa }; }),
+      foto: GC.foto.map(function (f) { return { blob: f.file, nome: f.file && f.file.name || "foto.jpg" }; }),
+      bolle: GC.bolle.map(function (f) { return { blob: f.file, nome: f.nome || "bolla", pdf: !!f.pdf }; })
+    };
+    try { await bozzeTx("readwrite", function (st) { return st.put(riga); }); }
+    catch (err) { GC.msg = "Non salvata sul telefono: " + (err && err.message || "spazio pieno") + "."; GC.k = "err"; modulo(); return; }
+    GC = null;
+    if (typeof rvChiudi === "function") rvChiudi();
+    if (typeof window.tiSpunta === "function") window.tiSpunta("Salvata sul telefono", { sotto: "La trovi in Le mie giornate → Da mandare" });
+    else if (typeof toast === "function") toast("Salvata: la trovi in Le mie giornate → Da mandare");
+    if (window.opBozzeDisegna) window.opBozzeDisegna();
+  }
+  function bozzaVia(id) { return bozzeTx("readwrite", function (st) { return st.delete(id); }).catch(function () {}).then(function () { if (window.opBozzeDisegna) window.opBozzeDisegna(); }); }
+  function bozzeLista() {
+    return bozzeTx("readonly", function (st) { return st.getAll(); })
+      .then(function (l) { var c = chi(); return (l || []).filter(function (x) { return x.chi === c; }).sort(function (a, b) { return b.salvata - a.salvata; }); })
+      .catch(function () { return []; });
+  }
+  async function bozzaApri(id) {
+    var l = await bozzeLista(), z = l.filter(function (x) { return x.id === id; })[0]; if (!z) return;
+    if (typeof rvApri !== "function") return;
+    rvApri();
+    GC = nuovo(z.cosa); GC.bozzaId = z.id; GC.data = z.data || GC.data; GC.dove = z.dove || "";
+    GC.spese = (z.spese || []).map(function (x) { return { importo: x.importo, cosa: x.cosa }; });
+    GC.foto = (z.foto || []).filter(function (f) { return f.blob; }).map(function (f) { var file = f.blob instanceof File ? f.blob : new File([f.blob], f.nome || "foto.jpg", { type: f.blob.type || "image/jpeg" }); return { file: file, url: URL.createObjectURL(file) }; });
+    GC.bolle = (z.bolle || []).filter(function (f) { return f.blob; }).map(function (f) { var file = f.blob instanceof File ? f.blob : new File([f.blob], f.nome || "bolla", { type: f.blob.type || "" }); return { file: file, url: f.pdf ? "" : URL.createObjectURL(file), nome: f.nome, pdf: !!f.pdf }; });
+    RV.tipo = "completa";
+    var lv = (typeof LAVORI !== "undefined" ? LAVORI : []).filter(function (x) { return String(x.id) === String(z.lavoroId); })[0];
+    RV.lavoro = lv || null; RV.autoLavoro = !!lv; RV.passo = 3;
+    if (!lv && z.lavoroNome && !GC.dove) GC.dove = z.lavoroNome;
+    window.rvDisegna();
+  }
+  window.opBozze = { lista: bozzeLista, apri: bozzaApri, via: bozzaVia };
 
   /* la freccia «‹» rifà la schermata: prima si tiene quello che ha scritto */
   var ind = document.getElementById("rv-indietro");
