@@ -95,6 +95,15 @@ if(/TrovaImpresaApp/i.test(navigator.userAgent)){
     <div class="switch" id="switch"></div>
   </div>
 
+  <!-- 28 nov 2026 — la domanda del Face ID, dopo il primo accesso con la password (solo nella app iPhone) -->
+  <div id="faceid" class="card hidden" style="text-align:center;padding:28px 20px">
+    <div style="color:#0a2a4d;margin-bottom:10px"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M9 9v1"/><path d="M15 9v1"/><path d="M12 9v4h-1"/><path d="M9 16c1.7 1.3 4.3 1.3 6 0"/></svg></div>
+    <h2 style="font-size:22px;margin-bottom:8px">Entrare col Face ID?</h2>
+    <p style="color:var(--muted);font-size:16px;line-height:1.45;margin-bottom:20px">La prossima volta guardi il telefono ed entri, senza scrivere la password.</p>
+    <button class="btn" id="btn-face-si" style="background:#1e8e3e;font-size:18px;padding:15px">Sì, usa Face ID</button>
+    <button class="btn" id="btn-face-no" style="background:#fff;color:#0a2a4d;border:2px solid #d5dbe3;margin-top:10px;font-size:17px">Non ora</button>
+  </div>
+
   <!-- inserimento codice -->
   <div id="redeem" class="card hidden">
     <h2>Inserisci il codice invito</h2>
@@ -142,7 +151,7 @@ if(STUDIO){
 }
 function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");}
 
-function show(which){["auth","redeem","accetta","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
+function show(which){["auth","redeem","accetta","faceid","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
 function renderAuth(){
   $("#auth-title").textContent=mode==="register"?"Registrati":"Accedi";
   $("#auth-hint").textContent=mode==="register"?(STUDIO?"Crea il tuo accesso gratuito per entrare nel gestionale dello studio.":"Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa."):"Bentornato, accedi col tuo account.";
@@ -151,6 +160,7 @@ function renderAuth(){
   $("#sw").onclick=()=>{mode=mode==="register"?"login":"register";renderAuth();};
 }
 async function refresh(session){
+  if(session&&BIO_CHIEDI){show("faceid");BIO_SESS=session;return;}
   if(session){
     const {data:membri}=await sb.from("gest_membri").select("impresa_id").eq("membro_id",session.user.id).eq("stato","attivo");
     if(membri&&membri.length){location.href=AGENDA;return;}
@@ -172,10 +182,65 @@ $("#btn-auth").onclick=async()=>{
     const {error:e2}=await sb.auth.signInWithPassword({email,password});
     if(e2){msg("Account creato! Controlla la tua email e clicca sul link di conferma (guarda anche nella cartella SPAM), poi torna qui per accedere.",true);return;}
   }else{
+    if(bioOk&&!bioSalvato){try{if(!localStorage.getItem("ti_bio_no"))BIO_CHIEDI={email,password};}catch(_){BIO_CHIEDI={email,password};}}
     const {error}=await sb.auth.signInWithPassword({email,password});
-    if(error){msg("Accesso non riuscito: "+error.message);return;}
+    if(error){BIO_CHIEDI=null;msg("Accesso non riuscito: "+error.message);return;}
   }
 };
+
+/* ============================================================
+   28 nov 2026 — FACE ID nella app iPhone «Giornate di cantiere»
+   (plugin @capgo/capacitor-native-biometric, nel repo trovaimpresa-app/giornate).
+   La password resta nel Portachiavi del telefono, protetta dal volto:
+   non passa da noi e non sta in localStorage. Sul sito (Safari, computer)
+   BIO non c'e' e qui non succede niente.
+   ============================================================ */
+const BIO=(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeBiometric)||null;
+const BIO_SERVER="trovaimpresa.com";
+let bioOk=false, bioSalvato=false, BIO_CHIEDI=null, BIO_SESS=null;
+const FACE_IC='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M9 9v1"/><path d="M15 9v1"/><path d="M12 9v4h-1"/><path d="M9 16c1.7 1.3 4.3 1.3 6 0"/></svg>';
+function bioPulsante(){
+  let b=document.getElementById("btn-face");
+  if(!(bioOk&&bioSalvato)){ if(b){b.remove();const o=document.getElementById("face-oppure");if(o)o.remove();} return; }
+  if(b)return;
+  const card=document.getElementById("auth"), primo=card.querySelector(".field");
+  b=document.createElement("button"); b.id="btn-face"; b.className="btn";
+  b.style.cssText="background:#0a2a4d;display:flex;align-items:center;justify-content:center;gap:12px;font-size:18px;padding:16px;margin-bottom:16px";
+  b.innerHTML=FACE_IC+"Entra con Face ID"; b.onclick=bioEntra;
+  const o=document.createElement("div"); o.id="face-oppure"; o.style.cssText="text-align:center;color:var(--muted);font-size:14px;margin:-4px 0 14px"; o.textContent="oppure con email e password";
+  card.insertBefore(b,primo); card.insertBefore(o,primo);
+}
+async function bioPrepara(){
+  if(!BIO)return;
+  try{const r=await BIO.isAvailable({useFallback:false}); bioOk=!!(r&&r.isAvailable);}catch(_){bioOk=false;}
+  if(!bioOk)return;
+  try{const r=await BIO.isCredentialsSaved({server:BIO_SERVER}); bioSalvato=!!(r&&r.isSaved);}catch(_){bioSalvato=false;}
+  if(bioSalvato&&mode==="register"){mode="login";renderAuth();}
+  bioPulsante();
+}
+async function bioEntra(){
+  let c=null;
+  try{ c=await BIO.getSecureCredentials({server:BIO_SERVER,reason:"Entra in Giornate di cantiere",title:"Entra con Face ID"}); }
+  catch(e){
+    const cod=String((e&&(e.code||e.message))||"");
+    if(/21|No protected credentials/i.test(cod)){bioSalvato=false;bioPulsante();msg("Il Face ID va attivato di nuovo: entra con email e password.");}
+    return;   /* annullato dall'utente: non si dice niente */
+  }
+  if(!c||!c.username)return;
+  const {error}=await sb.auth.signInWithPassword({email:c.username,password:c.password});
+  if(error){
+    try{await BIO.deleteCredentials({server:BIO_SERVER});}catch(_){}
+    bioSalvato=false;bioPulsante();
+    msg("La password è cambiata: entra con email e password, poi riattiva il Face ID.");
+  }
+}
+$("#btn-face-si").onclick=async()=>{
+  const c=BIO_CHIEDI; BIO_CHIEDI=null;
+  if(c){ try{ await BIO.setCredentials({username:c.email,password:c.password,server:BIO_SERVER,accessControl:2}); bioSalvato=true; }catch(_){ } }
+  refresh(BIO_SESS);
+};
+$("#btn-face-no").onclick=()=>{ BIO_CHIEDI=null; try{localStorage.setItem("ti_bio_no","1");}catch(_){} refresh(BIO_SESS); };
+bioPrepara();
 
 $("#btn-redeem").onclick=async()=>{
   const codice=$("#codice").value.trim().toUpperCase();
