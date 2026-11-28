@@ -4908,3 +4908,11 @@ Deciso da Alex, foto approvate («ok e pubblica»). Allo studio si vede solo «A
 - `?v=28nov-s10` su 8 js. Banco ZERO difetti. Scene nuove in docs/foto-studio.js: pratiche, pratica, pratica-stato (SCORRI=…).
 Collaudo sul sito vero (ferramenta, faccia studio): nuova pratica Depositata → in_corso; Finita → fatto + data_fatto 28/11; Riapri → da_fare + da_preparare; riga «Da preparare»; filtro «Da preparare 1 · Finita 1». Pratica di prova cancellata (lavori 1 come prima, 0 «PROVA CONTROLLORE»).
 ⬜ Resta della sessione 10: il giro Assistente, Chat, Scadenze, Report, Tasse, Galleria, Mappa, Cestino, Dati azienda (studio). App del collaboratore con un account vero di uno studio: ancora mai provata.
+
+# 28 NOVEMBRE 2026 — ADMIN «RICHIESTE DEI CLIENTI» CON «DA CONTROLLARE» (online 191d2ba, 3106878)
+- In cima le richieste VERE: `preventivi` + `incarichi_richieste` (aggiunta alla whitelist di `admin-dati`), una tabella sola, ultime in cima. Riquadri: richieste, senza risposta, ultimi 7 giorni, da controllare. Filtro «Tutte / Senza risposta / Da controllare» (`#pr-filtro`).
+- `_prMotivi(r)` (come `_motiviControllo` delle imprese): telefono (ultime 9 cifre) o email di un'impresa iscritta, o della stessa impresa a cui scrive (con «vedi la scheda»); stesso telefono/email su più richieste; stesso telefono con nomi diversi; caratteri strani, numero straniero, cifre fuori 9-11 (il +39/0039 non conta); nome senza vocali o sotto 3 lettere; testo vuoto o sotto 15 caratteri. Solo a schermo, il database non si tocca.
+- Il vecchio «Fatti chiamare» (`richieste_clienti`) sta in fondo in un `<details>` chiuso (`#rc-archivio`).
+- Telefono: la tabella diventa schede (`.pr-tab`, sotto 700 px, etichette da `data-l`).
+- Cancellate (sì di Alex) le 2 richieste di prova di luglio in `incarichi_richieste` («Rieti», «Mario Rossi (TEST)»).
+- ⚠️ Nel file admin.html la scritta «6 settembre 2026 — RICHIESTE DEI CLIENTI» c'è DUE volte (CSS in alto e JS): chi taglia il file con `index()` deve partire dalla funzione giusta, se no duplica mezzo file.
