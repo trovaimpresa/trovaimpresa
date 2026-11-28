@@ -93,7 +93,25 @@
     + ".oh-t b{display:block;font-size:18px;line-height:1.2}.oh-t small{display:block;color:#64707c;font-size:14px;margin-top:4px}"
     + ".oh-n{display:inline-block;background:#e11d48;color:#fff;border-radius:10px;font-size:13px;padding:1px 7px;margin-left:4px;vertical-align:2px}"
     + "#oh-altro .oh-r{display:flex;align-items:center;gap:14px;width:100%;background:#fff;border:1px solid #e3e8ef;border-radius:14px;padding:14px;margin-bottom:10px;font:inherit;font-size:18px;font-weight:700;color:#0b1220;cursor:pointer;text-align:left}"
-    + "#oh-altro .oh-r .oh-ic{width:48px;height:48px;margin:0;border-radius:12px}";
+    + "#oh-altro .oh-r .oh-ic{width:48px;height:48px;margin:0;border-radius:12px}"
+    /* 28 nov 2026 — schermata di casa compatta, tutto in una pagina (ok di Alex) */
+    + "body.oh-casa header{padding-top:12px!important;padding-bottom:10px!important}"
+    + "body.oh-casa header .h-hi{display:inline;font-size:16px!important;margin-right:6px}"
+    + "body.oh-casa header .h-name{display:inline;font-size:22px!important}"
+    + "body.oh-casa header .h-imp{font-size:14px}"
+    + "body.oh-casa #view-agenda{padding-top:10px}"
+    + "body.oh-casa #tmb-card{padding:12px 14px;margin-bottom:10px;border-radius:16px}"
+    + "body.oh-casa #tmb-card .tmb-tit{margin:0 0 8px;font-size:18px!important}"
+    + "body.oh-casa #tmb-card .tmb-vuoto{display:none}"
+    + "body.oh-casa #tmb-card .tmb-btn{padding:11px 14px;font-size:19px;border-radius:14px}"
+    + "body.oh-casa #tmb-card .tmb-btn small{display:inline;font-size:14px!important;margin-left:8px;white-space:nowrap}"
+    + "body.oh-casa #btn-rapido{padding:12px 14px!important;font-size:19px;border-radius:16px!important;margin-bottom:0}"
+    + "body.oh-casa #btn-rapido .oh-sub{font-size:14px}"
+    + "body.oh-casa #oh-grid{grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 100px}"
+    + "body.oh-casa .oh-t{padding:12px 6px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:104px}"
+    + "body.oh-casa .oh-t .oh-ic{width:46px;height:46px;margin:0 auto 8px;border-radius:13px}"
+    + "body.oh-casa .oh-t b{font-size:15.5px;line-height:1.2}"
+    + "body.oh-casa .oh-t small{display:none}";
 
   var SEZ = null;   /* null = casa */
 
