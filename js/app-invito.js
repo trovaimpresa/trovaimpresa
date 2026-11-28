@@ -99,3 +99,87 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', quando); else quando();
 })();
+
+/* 28 nov 2026 — IL BOTTONE «SCARICA SU APP STORE»
+   Un solo posto per tutto il sito: questo file e' gia' caricato da tutte le
+   pagine (home, forum, subappalti, gestionale, guide, blog...), quindi il
+   bottone si mette da qui e non pagina per pagina.
+   Dove compare:
+   - in ogni elemento con data-app-store (in cima e nella fascia in mezzo della home);
+   - nella fascia della home con data-app-store-sez (resta nascosta finche' e' spento);
+   - nel piede di ogni pagina che ha un <footer> (nella home: sotto i dati di Alessio);
+   - nel gestionale: in fondo al menu a sinistra (solo sul computer).
+   Non compare dentro l'app (sarebbe assurdo: ce l'hai gia').
+   ⛔ ACCESO = false finche' Apple non finisce la verifica «operatore commerciale»
+      e l'app non si apre davvero nell'App Store. Prima porterebbe a «pagina non trovata».
+   Per vederlo da spento, per prova: aggiungere ?prova-appstore=1 all'indirizzo. */
+(function () {
+  var ACCESO = false;
+  var LINK = 'https://apps.apple.com/it/app/trovaimpresa-italia/id6839027320';
+  var prova = /[?&]prova-appstore=1/.test(location.search);
+  if (!ACCESO && !prova) return;
+  var dentroApp = (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform())
+    || !!(window.webkit && webkit.messageHandlers && webkit.messageHandlers.bridge)
+    || navigator.standalone === true
+    || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  if (dentroApp && !prova) return;
+
+  var MELA = '<svg width="34" height="40" viewBox="0 0 384 512" aria-hidden="true"><path fill="#fff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>';
+  var BADGE = '<a class="ti-appstore" href="' + LINK + '" target="_blank" rel="noopener" aria-label="Scarica TrovaImpresa su App Store">'
+    + MELA + '<span><small>Scarica su</small><b>App Store</b></span></a>';
+
+  var css = ''
+    + '.ti-appstore{display:inline-flex;align-items:center;gap:12px;background:#000;color:#fff!important;border:1px solid #a6a6a6;border-radius:12px;padding:10px 22px 10px 16px;text-decoration:none!important;line-height:1;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;box-sizing:border-box}'
+    + '.ti-appstore:hover{background:#1a1a1a}'
+    + '.ti-appstore span{display:flex;flex-direction:column;gap:4px;text-align:left}'
+    + '.ti-appstore small{font-size:14px;color:#fff}'
+    + '.ti-appstore b{font-size:28px;font-weight:600;color:#fff;letter-spacing:-.5px}'
+    + '.ti-appstore-piede{margin:22px 0 4px;text-align:center}'
+    + '.ti-appstore-piede .tit{display:block;font-weight:700;font-size:17px;margin-bottom:10px}'
+    + '.footer .footer-section .ti-appstore-piede{text-align:left}'
+    + '.ti-appstore-menu{margin:16px 2px 6px}'
+    + '.ti-appstore-menu .ti-appstore{gap:9px;padding:8px 16px 8px 12px;border-radius:10px}'
+    + '.ti-appstore-menu .ti-appstore svg{width:26px;height:31px}'
+    + '.ti-appstore-menu .ti-appstore small{font-size:13px}'
+    + '.ti-appstore-menu .ti-appstore b{font-size:21px}'
+    + '@media(max-width:900px){.ti-appstore-menu{display:none}}'
+    + '.hb-app:not(:empty){margin-top:22px}'
+    + '[data-app-store-sez]{display:none}'
+    + '.ti-appstore-on [data-app-store-sez]{display:block}';
+
+  function metti() {
+    if (document.documentElement.classList.contains('ti-appstore-on')) return;
+    var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    document.documentElement.classList.add('ti-appstore-on');
+
+    // 1. i posti segnati nella pagina
+    var posti = document.querySelectorAll('[data-app-store]');
+    for (var i = 0; i < posti.length; i++) posti[i].innerHTML = BADGE;
+
+    // 2. il piede della pagina
+    // l'ultimo <footer>: alcune pagine hanno altri footer dentro le schede
+    var tutti = document.querySelectorAll('footer');
+    var piede = tutti[tutti.length - 1];
+    if (piede) {
+      var d = document.createElement('div');
+      d.className = 'ti-appstore-piede';
+      d.innerHTML = '<span class="tit">Scarica l\'app</span>' + BADGE;
+      var colonna = piede.querySelector('.footer-section');
+      if (colonna) colonna.appendChild(d);
+      else {
+        var basso = piede.querySelector('.bot, .footer-bottom');
+        if (basso) piede.insertBefore(d, basso); else piede.appendChild(d);
+      }
+    }
+
+    // 3. il menu a sinistra del gestionale
+    var menu = document.querySelector('aside.side');
+    if (menu && !menu.querySelector('.ti-appstore-menu')) {
+      var m = document.createElement('div');
+      m.className = 'ti-appstore-menu';
+      m.innerHTML = BADGE;
+      menu.appendChild(m);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', metti); else metti();
+})();
