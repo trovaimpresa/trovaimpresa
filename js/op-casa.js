@@ -42,7 +42,8 @@
     + "body.oh-sez #tmb-card,body.oh-sez #btn-rapido,body.oh-sez #oh-grid,body.oh-sez #opi-box,body.oh-sez #op-tabs,body.oh-sez #opc-btn{display:none!important}"
     + "body.oh-sez-giornate [id^='op-p-'],body.oh-sez-altro [id^='op-p-']{display:none!important}"
     + "body.oh-sez:not(.oh-sez-giornate) #mie-giornate{display:none!important}"
-    + "body:not(.oh-sez) #oh-back{display:none}"
+    + "body:not(.oh-sez) #oh-back,body:not(.oh-sez) #oh-tit{display:none}"
+    + "#oh-tit{font-size:28px;font-weight:800;color:#0a2a4d;margin:6px 2px 10px;line-height:1.2}"
     + "#oh-back{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer}"
     + "#oh-back b{flex:1;text-align:left}"
     + "body.oh-casa #btn-rapido{background:#ff8800!important;border-color:#ff8800!important;color:#fff!important;border-radius:18px!important;padding:18px 16px!important;text-align:left;display:flex!important;align-items:center;gap:14px}"
@@ -101,6 +102,9 @@
     if (!$("#oh-back")) {
       var b = document.createElement("button"); b.type = "button"; b.id = "oh-back";
       va.insertBefore(b, va.firstChild);
+      /* 28 nov 2026 — il nome della sezione sta sopra, fuori dal riquadro;
+         dentro il riquadro solo «‹ Indietro» (deciso da Alex) */
+      var tt = document.createElement("div"); tt.id = "oh-tit"; va.insertBefore(tt, b);
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else casa(); };
     }
     var r = $("#btn-rapido");
@@ -127,7 +131,8 @@
     var b = $("#oh-back");
     if (b && sez) {
       var nomi = { giornate: "Le mie giornate", lavori: "Lavori", mezzi: "Mezzi", chat: "Chat col capo", foto: "Foto", altro: "Altro", preventivi: "Preventivi", archivio: "Lavori vecchi" };
-      b.innerHTML = '<span style="font-size:24px">‹</span><b>' + e(nomi[sez] || "Indietro") + '</b><span style="font-size:15px;color:#64707c;font-weight:600">Indietro</span>';
+      b.innerHTML = '<span style="font-size:26px;line-height:1">‹</span><b>Indietro</b>';
+      var tt = $("#oh-tit"); if (tt) tt.textContent = nomi[sez] || "";
     }
     if (!sez) disegna();
     window.scrollTo(0, 0);
@@ -175,7 +180,8 @@
       b.style.cssText = "display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer";
       b.innerHTML = '<span style="font-size:24px">‹</span>Indietro';
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else { var na = $("#nav-agenda"); if (na) na.click(); casa(); } };
-      w.insertBefore(b, w.firstChild);
+      var ti = w.querySelector(".day-title");
+      if (ti) { ti.style.cssText = "font-size:28px;font-weight:800;color:#0a2a4d;margin:6px 2px 10px"; w.insertBefore(b, ti.nextSibling); } else w.insertBefore(b, w.firstChild);
     });
   }
 
