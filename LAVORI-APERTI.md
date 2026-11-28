@@ -10,6 +10,18 @@ Ultimo aggiornamento: 17 novembre 2026 — riassunto di ottobre e inizio novembr
 
 
 
+## 🆕 28 NOVEMBRE 2026 — IL GIRO DELLE RICHIESTE (cliente → impresa → cliente)
+
+### ✅ FATTO E ONLINE (→922ba34←, collaudato dal vivo) — dettagli in CLAUDE.md, capitolo del 28 nov
+- Email «arrivata» al cliente, «Rispondi a Mario» all'impresa (pannello e gestionale senza AI), pagina della richiesta del cliente (`/richiesta?t=`), altre imprese dopo 2 giorni, modulo «Fatti chiamare» tolto, inoltro a 5 imprese spento.
+
+### 🔴 DA FARE / DA GUARDARE
+1. Fra qualche giorno contare: richieste con risposta (risposta_at o messaggio impresa in chat) su richieste totali; quante email «2 giorni» partite; quanti clienti hanno aperto la pagina (letto=true sui messaggi dell'impresa).
+2. Il riquadro «Avvisami» delle ricerche ha ancora il titolo «Sei un cliente e non hai trovato quello che cercavi?» (nell'anteprima era «Avvisami quando arriva»): chiedere ad Alex se cambiarlo (vale anche quando i risultati ci sono).
+3. Pannello negozio: niente «Rispondi a Mario» (i negozi sono quasi zero e il modello negozio è da rifare).
+4. Le richieste vecchie (prima del 28 nov) non ricevono né «arrivata» né «2 giorni»: voluto.
+5. Tetto Resend: a regime ~3-4 email per richiesta.
+
 ## 🆕 16 NOVEMBRE 2026 — L'AI DEI PREZZI NEL COMPUTO
 
 ### ✅ FATTO

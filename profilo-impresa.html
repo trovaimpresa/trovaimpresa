@@ -2277,7 +2277,7 @@ function mostraRichiestaArrivata(email){
   var b=document.createElement('div'); b.id='prev-arrivata';
   b.style.cssText='background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:30px 22px;text-align:center;max-width:640px;margin:20px auto';
   b.innerHTML='<div style="font-size:44px;line-height:1">\u2705</div>'
-    +'<div style="font-size:22px;font-weight:800;color:#0a2a4d;margin:10px 0 12px">Richiesta arrivata a '+_prevEsc(nomeImp)+'</div>'
+    +'<div style="font-size:22px;font-weight:800;color:#0a2a4d;margin:10px 0 12px">'+(nomeImp==='l\u2019impresa'?'Richiesta arrivata all\u2019impresa':'Richiesta arrivata a '+_prevEsc(nomeImp))+'</div>'
     +'<p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 14px">Ti abbiamo mandato un\u2019email a <b>'+_prevEsc(email)+'</b> con il link per seguire la risposta.</p>'
     +'<p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 14px">Se entro 2 giorni non risponde, ti mandiamo altre imprese della tua zona.</p>'
     +'<p style="font-size:14px;color:#64748b;margin:0 0 20px">Non trovi l\u2019email? Guarda nella posta indesiderata.</p>'

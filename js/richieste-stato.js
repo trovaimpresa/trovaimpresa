@@ -123,7 +123,11 @@
   function nomeCard(card) {
     var n = card.querySelector(".prev-nome");
     var t = n ? n.textContent.replace(/[^\p{L}\p{N}' .-]/gu, " ").trim() : "";
-    return (t.split(/\s+/)[0]) || "il cliente";
+    /* 28 nov 2026 (collaudo dal vivo): davanti al nome c'e' il tondino con
+       l'iniziale («P PROVA CONTROLLORE»): la lettera sola non e' il nome */
+    var w = t.split(/\s+/).filter(Boolean);
+    if (w.length > 1 && w[0].length === 1) w.shift();
+    return w[0] || "il cliente";
   }
 
   /* Apre la richiesta con la casella della risposta GIA' aperta (niente AI obbligatoria). */
