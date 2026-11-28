@@ -745,15 +745,22 @@
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v, dp=t.dataset.dp||"";
-      const {data:okSt2,error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid).select("id");
+      const _proSt=ruoloUtente==='professionista';
+      /* 28 nov 2026 (un solo stato) — allo studio «Segna fatto» mette la pratica a «Finita» */
+      const _updSt={stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null};
+      if(_proSt&&v==="fatto")_updSt.pratica_stato="archiviata";
+      let {data:okSt2,error}=await sb.from("gest_lavori").update(_updSt).eq("id",id).eq("user_id",sbUid).select("id");
+      if(error&&_updSt.pratica_stato&&/pratica_stato/i.test(error.message||"")){delete _updSt.pratica_stato;({data:okSt2,error}=await sb.from("gest_lavori").update(_updSt).eq("id",id).eq("user_id",sbUid).select("id"));}
       if(error){toast("Errore: "+error.message);return;}
       if(!okSt2||!okSt2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+      /* «Riapri»: una pratica «Finita» torna «Da preparare» */
+      if(_proSt&&v!=="fatto"){try{await sb.from("gest_lavori").update({pratica_stato:"da_preparare"}).eq("id",id).eq("user_id",sbUid).eq("pratica_stato","archiviata");}catch(_){}}
       /* 12 agosto 2026 — mancavano "agenda" e "calendario". Nell'Agenda
          premevi "✔ Segna fatto", compariva il messaggio, e la riga restava
          li' com'era: sembrava che non avesse funzionato e si ripremeva. Sul
          calendario il pallino restava del colore vecchio. */
       rinfresca("lavori","riepilogo","agenda","calendario");
-      if(v==="fatto"&&typeof window.tiSpunta==="function")window.tiSpunta("Lavoro finito"); else toast("Stato: "+(statoLabel[v]||v));
+      if(v==="fatto"&&typeof window.tiSpunta==="function")window.tiSpunta(_proSt?"Pratica finita":"Lavoro finito"); else toast(_proSt?(v==="fatto"?"Pratica finita":"Pratica riaperta: «Da preparare»"):"Stato: "+(statoLabel[v]||v));
       return;
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,

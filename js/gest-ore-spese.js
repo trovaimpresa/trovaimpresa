@@ -929,7 +929,7 @@
     const ore=oreOk?(r2.data||[]):[];
 
     if(!raps.length){
-      lista.innerHTML='<p class="fatt-empty">Nessun rapportino. '+(ruoloUtente==='professionista'?'Li scrivono i collaboratori dalla loro app':'Li scrive la squadra dal telefono')+', oppure lo scrivi tu qui sotto e lo fai firmare al cliente.</p>';
+      lista.innerHTML='<p class="fatt-empty">'+(ruoloUtente==='professionista'?'Nessun resoconto. ':'Nessun rapportino. ')+(ruoloUtente==='professionista'?'Li scrivono i collaboratori dalla loro app':'Li scrive la squadra dal telefono')+', oppure lo scrivi tu qui sotto e lo fai firmare al cliente.</p>';
       return;
     }
 

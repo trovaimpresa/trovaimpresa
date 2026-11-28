@@ -398,7 +398,7 @@
        che il cliente chiede al telefono. Solo lo studio; solo i dati scritti. */
     if(_pro){
       const _tipo=lav.pratica_tipo?(lav.pratica_tipo==="Agibilita'"?"Agibilità":lav.pratica_tipo):"";
-      const _sta=((typeof PRATICA_STATI!=="undefined"?PRATICA_STATI:[]).find(x=>x[0]===lav.pratica_stato)||[])[1]||"";
+      const _sta=(typeof praPuntoNome==="function")?praPuntoNome(lav):"";
       const _cat=[lav.catasto_foglio?"Foglio "+lav.catasto_foglio:"",lav.catasto_particella?"Particella "+lav.catasto_particella:"",lav.catasto_sub?"Sub "+lav.catasto_sub:""].filter(Boolean).join("  ·  ");
       const _dp=[["Tipo di pratica",_tipo],["A che punto sta",_sta],["Comune",lav.pratica_comune||""],
                  ["N. protocollo",lav.pratica_protocollo||""],["Depositata il",lav.pratica_data_dep?fdate(lav.pratica_data_dep):""],
@@ -649,8 +649,8 @@
     const dp=l.data_prevista||"", fatto=l.stato==="fatto";
     const v=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
     if(l.dove)v.push({lab:"🗺 Mappa",action:"map",data:{q:l.dove}});
-    if(l.stato==="da_fare")v.push({lab:ruoloUtente==='professionista'?"▶ Avvia":"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
-    if(!fatto)v.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    if(l.stato==="da_fare"&&ruoloUtente!=='professionista')v.push({lab:"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(!fatto)v.push({lab:ruoloUtente==='professionista'?"✔ Segna finita":"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
     else v.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     v.push({lab:"📷 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
     v.push({lab:"💬 Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});

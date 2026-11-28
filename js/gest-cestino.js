@@ -1726,7 +1726,7 @@
         "Stato fattura":l.fatt_stato||"none",Consuntivo:l.lavoro_svolto||"",Note:l.note||""};
       if(_pro){
         r["Tipo pratica"]=(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)||"";   /* 14 nov 2026: nel database resta com'e', si cambia solo quello che si legge */
-        r["A che punto"]=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
+        r["A che punto"]=(typeof praPuntoNome==="function")?praPuntoNome(l):"";
         r["Comune"]=l.pratica_comune||"";
         r["N. protocollo"]=l.pratica_protocollo||"";
         r["Deposito"]=l.pratica_data_dep||"";

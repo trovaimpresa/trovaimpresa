@@ -16,6 +16,11 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
    const op=D.gest_operatori[0]; Object.assign(op,{nome:"Giulia Bianchi",mansione:"Disegnatore CAD",costo_orario:20,visita_medica_scadenza:null,formazione_scadenza:null});
    D.gest_mezzi.push(Object.assign({},D.gest_mezzi[1],{id:"00000000-0000-4000-8000-000000000699",nome:"Stazione totale Leica TS07",categoria:"attrezzatura",tipo:"stazione totale",targa:"TS-123",revisione_scad:null,operatore_id:op.id,noleggiabile:false}));
    D.gest_scadenze.push(Object.assign({},D.gest_scadenze[0],{id:"00000000-0000-4000-8000-000000000698",titolo:"Taratura strumento",tipo_pratica:"Taratura strumento",data_scadenza:g(-18),mezzo_id:"00000000-0000-4000-8000-000000000699"}));
+   /* sessione 10: le pratiche con «A che punto sta» */
+   const L=D.gest_lavori;
+   Object.assign(L[0],{descrizione:"CILA bagno Rossi",pratica_tipo:"CILA",pratica_stato:"integrazioni",pratica_comune:"Rieti",pratica_protocollo:"4567/2026",pratica_data_dep:g(-40)});
+   Object.assign(L[1],{descrizione:"SCIA ampliamento Verdi",pratica_tipo:"SCIA",pratica_stato:"depositata",pratica_comune:"Rieti",pratica_data_dep:g(-10)});
+   Object.assign(L[2],{descrizione:"Accatastamento box",pratica_tipo:"Accatastamento",pratica_stato:"da_preparare"});
   }
   await B.collega(page,{rete:true,scritture:[]});
   const cors={"access-control-allow-origin":"*","access-control-allow-headers":"*","access-control-allow-methods":"*"};
@@ -53,6 +58,9 @@ const path=require("path"), B=require(path.resolve("tools/banco-gestionale.js"))
   if(scena==="giornate"){await vai("giornate");await B.aspetta(page,1200);
     await page.evaluate(()=>{const n="Giulia Bianchi";giorProp=[{data:todayStr(),chi:new Set([n]),dove:"Rilievo Rossi",cosa:"Rilievo con la stazione totale. Parcheggio 12 €.",mezza:new Set(),oreX:{[n]:6},spese:[{desc:"Parcheggio",imp:12,on:true}]}];giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});});
     await B.aspetta(page,600);await scorri("Controlla e salva");}
+  if(scena==="pratiche"){await vai("lavori");await B.aspetta(page,1500);}
+  if(scena==="pratica"){await vai("lavori");await B.aspetta(page,1200);await clic('#lavori [data-action="edit-job"]');await B.aspetta(page,2000);await scorri("Dati della pratica");}
+  if(scena==="pratica-stato"){await vai("lavori");await B.aspetta(page,1200);await clic('#lavori [data-action="edit-job"]');await B.aspetta(page,2000);await scorri(process.env.SCORRI||"Data prevista");}
   if(scena==="crediti"){await vai("crediti");await B.aspetta(page,1500);}
   await B.aspetta(page,700);
   await page.screenshot({path:file});

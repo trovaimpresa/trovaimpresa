@@ -69,7 +69,7 @@
      quindi lo si riconosce da come si chiama la voce a schermo: se
      «attrezzature» si legge «Strumenti», siamo in uno studio. */
   var AIUTI_TAB_STUDIO = {
-    lavori:       'Tutte le pratiche: da fare, in corso e finite. Da una pratica nasce il preventivo e poi la fattura.',
+    lavori:       'Tutte le pratiche: da preparare, al Comune e finite. Da una pratica nasce il preventivo e poi la fattura.',
     attrezzature: 'Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche.',
     squadra:      'I collaboratori dello studio: contatti, ruolo e documenti.',
     agenda:       'Cosa deve fare chi collabora con te, giorno per giorno. È quello che vedono sul telefono.',

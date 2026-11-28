@@ -701,14 +701,27 @@
      altri la funzione restituisce stringa vuota e il form resta identico a prima.
      Colonne DB: sql/gest-pratiche-professionisti.sql */
   const PRATICA_TIPI=["","CILA","CILAS","SCIA","SCIA alternativa al PdC","Permesso di Costruire","Autorizzazione paesaggistica","Agibilita'","Sanatoria","Accatastamento","Voltura","Altro"];
-  const PRATICA_STATI=[["da_preparare","Da preparare"],["depositata","Depositata"],["istruttoria","In istruttoria"],["integrazioni","Integrazioni richieste"],["approvata","Approvata"],["archiviata","Archiviata"]];
+  const PRATICA_STATI=[["da_preparare","Da preparare"],["depositata","Depositata"],["istruttoria","In istruttoria"],["integrazioni","Integrazioni richieste"],["approvata","Approvata"],["archiviata","Finita"]];
+  /* ⛔ 28 nov 2026 (giro nuovo, sessione 10, DECISO DA ALEX) — UN SOLO «STATO»
+     NELLA PRATICA. Prima c'erano «A che punto sta» (Comune) e «Stato» (Da fare /
+     In corso / Fatto): per un geometra un doppione. Allo studio si vede solo
+     «A che punto sta»; «archiviata» si chiama «Finita» ed e' il «fatto» del
+     lavoro. Nel database restano le due colonne, tenute d'accordo qui:
+       praPunto(l)      → cosa si legge a schermo (fatto = Finita, sempre)
+       praStatoDa(ps,s) → lo «stato» che va col punto scelto
+     Da preparare tiene «da fare» o «in corso»; Depositata…Approvata = in corso;
+     Finita = fatto. Impresa e artigiano: non cambia niente. */
+  const praPunto=l=>(l&&l.stato==="fatto")?"archiviata":((l&&l.pratica_stato)||"da_preparare");
+  const praStatoDa=(ps,prima)=>ps==="archiviata"?"fatto":(ps==="da_preparare"||!ps?(prima==="in_corso"?"in_corso":"da_fare"):"in_corso");
+  const praPuntoNome=l=>(PRATICA_STATI.find(x=>x[0]===praPunto(l))||[])[1]||"";
+  window.praPunto=praPunto; window.praStatoDa=praStatoDa;
   /* dentroBox=true: il riquadro che lo contiene ha già il suo titolo, quindi
      qui si salta l'intestazione interna (evita due titoli uno sull'altro). */
   function bloccoPratica(job,dentroBox){
     if(ruoloUtente!=='professionista')return "";
     job=job||{};
     const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${(t==="Agibilita'"?"Agibilità":t)||"— scegli —"}</option>`).join("");
-    const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===(job.pratica_stato||"da_preparare")?"selected":""}>${s[1]}</option>`).join("");
+    const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===praPunto(job)?"selected":""}>${s[1]}</option>`).join("");
     return `
       ${dentroBox?"":`<div class="sh-tit pr-tit" style="margin-top:6px">Dati della pratica</div>`}
       <div class="row2">
@@ -746,6 +759,17 @@
       d.value=todayStr();
       d.dispatchEvent(new Event("input",{bubbles:true}));
       try{toast("Data di deposito: oggi. Cambiala se serve.");}catch(_){}
+    });
+  }
+  /* 28 nov 2026 (un solo stato) — scegliendo «A che punto sta» lo «stato»
+     nascosto lo segue (anche quando lo sceglie l'AI: niente isTrusted). */
+  if(!window._praticaStatoUnico){
+    window._praticaStatoUnico=true;
+    document.addEventListener("change",function(e){
+      const t=e.target; if(!t||t.id!=="j-pr-stato")return;
+      const seg=document.getElementById("j-stato"); if(!seg)return;
+      const on=seg.querySelector("button.on"), v=praStatoDa(t.value,on?on.dataset.v:"");
+      seg.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
     });
   }
   /* Legge i campi della pratica dal form. Se non è un professionista
@@ -871,7 +895,7 @@
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
         <div class="field"><label>${ruoloUtente==='professionista'?"Collaboratore":"Chi ci va"}</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
-      <div class="field"><label>Stato</label><div class="seg" id="j-stato">
+      <div class="field"${ruoloUtente==='professionista'?' hidden':''}><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
       </div>
       <div class="sh-b" id="lav-prev-wrap" style="display:none"></div>
@@ -949,10 +973,10 @@
              rifaceva a mano. Il pulsante compare solo quando delle ore ci
              sono davvero (lo accende renderOreBlock). -->
         <button type="button" class="btn quick-add" id="ore-in-parcella" data-action="ore-parcella" style="display:none;margin-top:10px">💶 Porta le ore nella parcella</button></div>
-      <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>${ruoloUtente==='professionista'?"Rapportini di giornata":"Giornate di questo lavoro"}</label>
+      <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>${ruoloUtente==='professionista'?"Resoconti di giornata":"Giornate di questo lavoro"}</label>
         <div class="spese-list" id="rap-list"></div>
         <!-- 13 nov 2026 (lista «MANCA», n. 6) — il rapportino da far firmare al cliente -->
-        <button type="button" class="btn quick-add" data-action="rapf-nuovo" style="margin-top:8px">＋ Rapportino da far firmare</button>
+        <button type="button" class="btn quick-add" data-action="rapf-nuovo" style="margin-top:8px">＋ ${ruoloUtente==='professionista'?"Resoconto":"Rapportino"} da far firmare</button>
         <div class="campo-aiuto">${ruoloUtente==='professionista'?'Li scrivono i collaboratori dalla loro app':'Li scrive la squadra dal telefono'}, oppure tu qui: il cliente firma col dito sullo schermo. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme.</div></div>
       <div class="field campo-titolo"><label>Fattura</label>
         <div class="j-fatt-info">${
@@ -1422,6 +1446,8 @@
       const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista:data_prevista||null,operatore_id:operatore_id||null,importo,cliente_id},
         leggiCampiPratica());
+      /* 28 nov 2026 — allo studio lo stato nasce dal punto della pratica */
+      if(ruoloUtente==='professionista'&&!editing.fattura&&obj.pratica_stato){obj.stato=praStatoDa(obj.pratica_stato,"da_fare");if(obj.stato==="fatto")obj.data_fatto=todayStr();}
       /* niente scorciatoia "nasce già fatturato": la fattura si crea dalla sua sezione */
       let {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
       let avvisoPratica=false;
@@ -1461,6 +1487,8 @@
         note:$("#j-note").value.trim()||null,
         ore:_numIt("#j-ore")
       }, leggiCampiPratica());
+      /* 28 nov 2026 — allo studio lo stato e' quello del punto della pratica */
+      if(ruoloUtente==='professionista'&&mod.pratica_stato)mod.stato=praStatoDa(mod.pratica_stato,mod.stato);
       /* 9 agosto 2026 — chiudendo dal modulo (invece che col pulsante "Segna
          fatto" della scheda) la data di chiusura non veniva scritta: il Report
          filtra su data_fatto, quindi quella pratica spariva dal grafico dei 12

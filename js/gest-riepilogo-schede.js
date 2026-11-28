@@ -414,9 +414,10 @@
      voci che prima stavano sotto i «...». */
   function schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab){
     const az=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
-    if(withFoto&&l.stato==="da_fare")az.push({lab:ruoloUtente==='professionista'?"▶ Avvia":"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    /* 28 nov 2026 — allo studio niente «Avvia»: decide «A che punto sta» */
+    if(withFoto&&l.stato==="da_fare"&&ruoloUtente!=='professionista')az.push({lab:"▶ Inizio i lavori",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
     /* 7 nov 2026 — «Segna fatto» per primo nella finestra del lavoro (trovato nel collaudo dal vivo) */
-    if(withFoto&&!fatto)az.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true,prima:true});
+    if(withFoto&&!fatto)az.push({lab:ruoloUtente==='professionista'?"✔ Segna finita":"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true,prima:true});
     if(withFoto&&fatto)az.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     /* le voci che stavano nei «...»: le ha gia' preparate renderTabella */
     const extra=menuTab?((TAB_MENU[menuTab]||{})[String(l.id)]||[]):[];
@@ -450,14 +451,17 @@
        blu = «In corso», ambra = «Da fare», verde = «Fatto». */
     /* 19 nov 2026: la pratica che aspetta il Comune non e' «Da fare»: «Al Comune», pallino blu */
     const alC=!fatto&&_alComune(l.pratica_stato);
-    const lavLab=fatto?"Fatto":(late?"In ritardo":(alC?"Al Comune":(l.stato==="in_corso"?"In corso":"Da fare")));
+    /* 28 nov 2026 (un solo stato) — allo studio la pallina dice «A che punto sta» */
+    const _pro=ruoloUtente==='professionista', _pp=_pro?praPunto(l):"";
+    const lavLab=_pro?(late?"In ritardo":praPuntoNome(l)):(fatto?"Fatto":(late?"In ritardo":(alC?"Al Comune":(l.stato==="in_corso"?"In corso":"Da fare"))));
+    const _pall=fatto?'verde':(late?'ritardo':(_pro?((_pp==="da_preparare"||_pp==="integrazioni")?'rosso':'blu'):((alC||l.stato==="in_corso")?'blu':'rosso')));
     const dp=esc(l.data_prevista||"");
     const dots=menuTab?`<span class="job-menu"><button class="lav-dots" data-action="tab-menu" data-tab="${menuTab}" data-id="${esc(String(l.id))}" title="Altre azioni">&#8943;</button></span>`:"";
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div>
         ${conImp&&+l.importo?`<span class="job-imp">${eur(l.importo)}</span>`:""}</div>
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':((alC||l.stato==="in_corso")?'blu':'rosso'))}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
+        <span class="st"><i class="pall ${_pall}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
         ${cliNome?`<span>👤 ${esc(cliNome)}</span>`:""}
@@ -465,7 +469,7 @@
         ${dove?`<span>📍 ${esc(dove)}${(()=>{try{const k=typeof mpKmDi==="function"?mpKmDi(l):null;return k!=null?` · <b class="km-uff" title="Distanza dall'ufficio, in linea d'aria">${esc(mpKmTesto(k))}</b>`:"";}catch(e){return "";}})()}</span>`:""}
         <span>📅 ${l.data_prevista?fdate(l.data_prevista):"Senza data"}</span>
         ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""}
-        ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}
+        ${(_pro&&late)?`<span>🏛 ${esc(praPuntoNome(l))}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}
       </div>
       <div class="job-actions">${schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab)}</div></div>`;
@@ -656,9 +660,9 @@
   function lavVoci(l,wa){
     const dp=l.data_prevista||"", fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
     const v=[];
-    if(l.stato==="da_fare")v.push({lab:"\u25b6 Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(l.stato==="da_fare"&&ruoloUtente!=='professionista')v.push({lab:"\u25b6 Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
     /* 7 nov 2026 — «top:true» = in vista nella finestra del lavoro (gest-schede-clienti.js) */
-    if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true});
+    if(!fatto)v.push({lab:ruoloUtente==='professionista'?"\u2714 Segna finita":"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true});
     else v.push({lab:"\u21a9 Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"},top:true});
     /* il verbale di sopralluogo è roba da tecnici: nasce dalle foto della pratica */

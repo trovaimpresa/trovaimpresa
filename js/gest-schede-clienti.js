@@ -408,7 +408,7 @@
       righe:L.map(l=>{
         const q=quando(l.data_prevista,{neutro:l.stato==="fatto"||_alComune(l.pratica_stato)});
         const late=inRitardo(l.stato,l.data_prevista,l.pratica_stato);
-        const _staPra=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
+        const _staPra=_praPro?praPuntoNome(l):"";   /* 28 nov 2026: un solo stato (fatto = Finita) */
         return {
           id:l.id,
           click:{action:"edit-job",data:{id:l.id}},
@@ -441,10 +441,8 @@
   /* 27 nov 2026 (giro nuovo, sessione 7) — una pratica FATTA rimasta su «Da
      preparare» (nessuno ha cambiato «A che punto sta») non e' da preparare:
      non si conta li'. Resta in «Tutte». */
-  function _praPunto(l){
-    const k=l.pratica_stato||"da_preparare";
-    return (l.stato==="fatto"&&k==="da_preparare")?null:k;
-  }
+  /* 28 nov 2026 (un solo stato) — fatto = «Finita», sempre */
+  function _praPunto(l){ return praPunto(l); }
   function lavPstati(base){
     const viste=$("#lav-viste"); if(!viste)return;
     let box=$("#lav-pstati");
