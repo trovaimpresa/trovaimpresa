@@ -297,10 +297,37 @@ function fotoInstagram(u) {
   const m = String(u || '').match(/^(https:\/\/[^/]+\/storage\/v1)\/object\/public\/(.+?)(\?.*)?$/);
   return m ? `${m[1]}/render/image/public/${m[2]}?width=640&height=800&resize=cover&quality=85&format=origin` : u;
 }
-function immaginiInstagram(tipo, id, foto) {
-  if (tipo === 'vet' && foto && foto.length) return foto.slice(0, 10).map(fotoInstagram);
-  const file = { imp: 'imp.jpg', vet: 'imp.jpg', sub: 'sub.jpg', off: 'off.jpg', mar: `mar-${id}.jpg`, ges: `ges-${id}.jpg`, sit: `sit-${id}.jpg` }[tipo];
-  return file ? [`${IG_FISSE}/${file}`] : [];
+// 28 nov 2026 (Alex): su Instagram SOLO il sito, un pezzo alla volta.
+// Vetrine, marchi e il resto restano su Facebook: per loro niente immagine
+// Instagram, quindi Make salta il ramo di Instagram.
+function immaginiInstagram(tipo, id) {
+  return tipo === 'igs' && IG_SITO.some(x => x.id === id) ? [`${IG_FISSE}/sito/${id}.jpg`] : [];
+}
+const IG_TAG = '#trovaimpresa #edilizia #ristrutturazione #lavoriincasa #artigiani #impreseedili';
+// L'ordine e' il giro: due al giorno (mattina e sera), poi si ricomincia.
+// L'immagine di ognuno sta in /img/instagram/sito/<id>.jpg
+const IG_SITO = [
+  { id: 'cosa', righe: ['🏠 Cos\'è TrovaImpresa?', '', 'Il sito dove trovi artigiani, imprese edili e professionisti della tua città.', 'Cerchi, guardi la scheda dell\'impresa e la contatti tu. Nessun intermediario.', '', '✅ Per chi cerca è sempre gratis.'] },
+  { id: 'trova', righe: ['🔎 Ti serve un\'impresa? Bastano 3 passi:', '', '1️⃣ Scegli chi ti serve: artigiano, impresa o professionista', '2️⃣ Scegli il lavoro e la città', '3️⃣ Contatti tu l\'impresa, direttamente', '', 'Niente provvigioni, niente giri strani.'] },
+  { id: 'scheda', righe: ['📋 Ogni impresa ha la sua scheda.', '', 'Ci trovi i mestieri, la zona dove lavora, le foto dei lavori già fatti e le recensioni dei clienti.', '', 'Così scegli guardando i fatti, non solo un nome.'] },
+  { id: 'preventivo', righe: ['📝 Chiedi un preventivo gratis.', '', 'Apri la scheda dell\'impresa, scrivi cosa ti serve e la richiesta arriva direttamente a lei.', '', 'Senza impegno: decidi tu se andare avanti.'] },
+  { id: 'citta', righe: ['📍 TrovaImpresa è in tutta Italia.', '', 'Ci sono tutti i capoluoghi di provincia: da Roma a Milano, da Napoli a Torino, da Bari a Rieti.', '', 'Scegli la tua città e vedi chi lavora vicino a te.'] },
+  { id: 'mestieri', righe: ['🧰 Che lavoro ti serve?', '', 'Muratori, idraulici, elettricisti, imbianchini, piastrellisti, cartongessisti, serramentisti, geometri e tanti altri.', '', 'Scegli il mestiere e trovi chi lo fa nella tua zona.'] },
+  { id: 'vetrina', righe: ['🏗️ Hai un\'impresa o sei un artigiano?', '', 'Su TrovaImpresa hai la tua vetrina online, gratis: i clienti della tua zona ti trovano, vedono i tuoi lavori e ti scrivono direttamente.', '', 'Una vetrina in più, sempre aperta.'] },
+  { id: 'iscrizione', righe: ['✍️ Iscriversi è facile.', '', 'Nome, mestiere, città: in 2 minuti la tua impresa è online.', 'Con l\'iscrizione hai anche il gestionale e il forum.', '', '✅ Tutto gratis, senza carta di credito.'] },
+  { id: 'gestionale', righe: ['💼 Il gestionale per imprese edili e artigiani.', '', 'Preventivi, fatture, cantieri, squadra e scadenze in un posto solo. Funziona anche dal telefono.', '', '✅ Gratis per chi si iscrive a TrovaImpresa.'] },
+  { id: 'forum', righe: ['💬 Un problema in casa o un lavoro da fare?', '', 'Nel Forum Edilizia di TrovaImpresa fai la tua domanda e ti rispondono imprese e artigiani veri.', '', 'Gratis, anche senza iscriverti.'] },
+  { id: 'lavoro', righe: ['👷 Subappalti e lavoro in edilizia.', '', 'Le imprese trovano subappaltatori, squadre e operai.', 'Chi cerca lavoro trova gli annunci della sua zona.', '', '✅ Pubblicare e cercare è gratis.'] },
+  { id: 'guide', righe: ['💶 Quanto costa rifare il bagno? E imbiancare casa?', '', 'Nelle guide di TrovaImpresa trovi i prezzi veri dei lavori, con i calcolatori.', '', 'Prima di chiamare un\'impresa, sai già quanto spendi.'] }
+];
+// quale tocca: conta i giorni (ora di Roma), 2 per giorno, sera = il secondo
+function igSitoDelTurno(turno, d = new Date()) {
+  const g = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(d);
+  const n = Math.floor(Date.parse(g + 'T12:00:00Z') / 864e5) * 2 + (turno === 3 ? 1 : 0);
+  return IG_SITO[(n + 9) % IG_SITO.length]; // +9: il primo, la sera del 28 nov, e' «cosa»
+}
+function testoIgSito(x) {
+  return [...x.righe, '', '👉 trovaimpresa.com: link nella bio 👆', '', IG_TAG].join('\n');
 }
 
-module.exports = { testoInstagram, immaginiInstagram, testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale, SEZIONI, sezioneDelGiorno, testoSezione };
+module.exports = { IG_SITO, igSitoDelTurno, testoIgSito, testoInstagram, immaginiInstagram, testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale, SEZIONI, sezioneDelGiorno, testoSezione };

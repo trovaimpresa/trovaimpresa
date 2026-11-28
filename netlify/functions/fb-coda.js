@@ -13,7 +13,7 @@
 // Ogni post consegnato si scrive in fb_pubblicati: se Make richiama, quel
 // post non torna (niente doppioni sulla pagina).
 // ⛔ Il gruppo NO: Facebook non lascia pubblicare nei gruppi in automatico.
-const { testoInstagram, immaginiInstagram, SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, sezioneDelGiorno, testoSezione } = require('./lib/fb-testi');
+const { igSitoDelTurno, testoIgSito, testoInstagram, immaginiInstagram, SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, sezioneDelGiorno, testoSezione } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -94,6 +94,11 @@ exports.handler = async (event) => {
   try {
     const v = await vetrina(giorno, turno);
     if (v) post.push(v);
+    // 28 nov 2026: mattina e sera un post SOLO per Instagram sul sito
+    if (turno === 1 || turno === 3) {
+      const ig = igSitoDelTurno(turno);
+      post.push({ chiave: `igs:${giorno}:${turno}`, _t: 'igs', _id: ig.id, solo_ig: true, titolo: 'Instagram: ' + ig.id, testo: testoIgSito(ig) });
+    }
     if (turno === 1) {
       // 72 ore: se un giro salta, il mattino dopo i post ci sono ancora; i doppioni li ferma fb_pubblicati.
       const da = encodeURIComponent(new Date(Date.now() - 3 * 864e5).toISOString());
@@ -129,9 +134,10 @@ exports.handler = async (event) => {
       // 28 nov 2026: INSTAGRAM. ig_foto = la prima immagine (post a foto
       // singola); ig_carosello = tutte, solo se sono almeno 2 (post a carosello).
       ...(() => {
-        const im = immaginiInstagram(p._t, p._id, p.foto);
+        const im = immaginiInstagram(p._t, p._id);
         return {
-          ig_testo: testoInstagram(p.testo),
+          ...(p.solo_ig ? { solo_ig: true } : {}),
+          ig_testo: p.solo_ig ? p.testo : testoInstagram(p.testo),
           ig_foto: im[0] || '',
           ig_carosello: im.length > 1 ? im.map(u => ({ media_type: 'IMAGE', image_url: u })) : []
         };
@@ -143,7 +149,7 @@ exports.handler = async (event) => {
         body: JSON.stringify(nuovi.map(p => ({ chiave: p.chiave }))), signal: AbortSignal.timeout(8000)
       });
       if (!r.ok) throw new Error('segno consegnati ' + r.status);
-      await avvisaAlex(post.filter(p => !fatti.has(p.chiave)), turno);
+      await avvisaAlex(post.filter(p => !fatti.has(p.chiave) && !p.solo_ig), turno);
     }
     return risposta(200, { giorno, turno, prova, post: nuovi });
   } catch (e) {
