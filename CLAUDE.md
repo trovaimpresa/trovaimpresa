@@ -4916,3 +4916,4 @@ Collaudo sul sito vero (ferramenta, faccia studio): nuova pratica Depositata →
 - Telefono: la tabella diventa schede (`.pr-tab`, sotto 700 px, etichette da `data-l`).
 - Cancellate (sì di Alex) le 2 richieste di prova di luglio in `incarichi_richieste` («Rieti», «Mario Rossi (TEST)»).
 - ⚠️ Nel file admin.html la scritta «6 settembre 2026 — RICHIESTE DEI CLIENTI» c'è DUE volte (CSS in alto e JS): chi taglia il file con `index()` deve partire dalla funzione giusta, se no duplica mezzo file.
+- 28 nov (dopo): admin, «Offerte di lavoro», «Candidati registrati» e «Candidature» = una voce «Lavoro» con 3 linguette (`.lav-ling`, `lavLinguette(id)` chiamata da `showSection`). Le tre sezioni restano coi loro id; le due voci di menu hanno `.lav-dentro` (nascoste). Numeri delle linguette in `_LAV_N`. Candidature ha le sue carte (`#cdt-numeri`).

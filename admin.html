@@ -526,6 +526,16 @@
   #stato-sistema .ss-fare{margin-top:5px;font-size:14.5px;color:#5b6b80}
   /* Chi usa il gestionale */
   .u-numeri{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
+  /* 28 nov 2026 — voce «Lavoro»: linguette */
+  .nav-item.lav-dentro { display:none !important; }
+  .lav-ling { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 20px; }
+  .lav-ling button { font-family:inherit; font-size:1rem; font-weight:700; padding:11px 18px; border-radius:12px; border:2px solid var(--border,#e2e8f0); background:#fff; color:#0a2a4d; cursor:pointer; min-height:46px; }
+  .lav-ling button.on { background:#0a2a4d; border-color:#0a2a4d; color:#fff; }
+  .lav-ling .lav-n { display:inline-block; min-width:24px; padding:1px 8px; margin-left:6px; border-radius:999px; background:#eef1f5; color:#0a2a4d; font-size:0.85rem; }
+  .lav-ling button.on .lav-n { background:rgba(255,255,255,.2); color:#fff; }
+  @media (max-width:600px){ .lav-ling button { flex:1 1 100%; text-align:left; }
+    #sec-offerte-lavoro .u-numeri, #sec-candidati .u-numeri, #sec-candidature .u-numeri { grid-template-columns:1fr 1fr; gap:10px; }
+    #sec-offerte-lavoro .u-num, #sec-candidati .u-num, #sec-candidature .u-num { padding:14px; } }
   .u-num{background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:14px;padding:20px}
   .u-num .v{font-size:2.3rem;font-weight:800;line-height:1.1}
   .u-num .e{font-size:14.5px;color:#5b6b80;margin-top:4px;line-height:1.5}
@@ -761,10 +771,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span> Offerte di lavoro
         <span class="nav-badge" id="badge-offerte-lavoro" style="background:#15803d;display:none" title="Nuovi da quando l'hai aperta">0</span>
       </div>
-      <div class="nav-item" onclick="showSection('candidati',this)">
+      <div class="nav-item lav-dentro" onclick="showSection('candidati',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Candidati registrati
       </div>
-      <div class="nav-item" onclick="showSection('candidature',this)">
+      <div class="nav-item lav-dentro" onclick="showSection('candidature',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span> Candidature
       </div>
       <div class="nav-item" onclick="showSection('supporto',this)">
@@ -1576,7 +1586,12 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
     <!-- OFFERTE DI LAVORO -->
     <div class="section" id="sec-offerte-lavoro">
       <div class="topbar">
-        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> Offerte di lavoro</div>
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> Lavoro</div>
+      </div>
+      <div class="lav-ling" role="tablist">
+        <button type="button" data-lav="offerte-lavoro" onclick="showSection('offerte-lavoro')">Offerte di lavoro <span class="lav-n" data-n="off">–</span></button>
+        <button type="button" data-lav="candidati" onclick="showSection('candidati')">Candidati iscritti <span class="lav-n" data-n="cand">–</span></button>
+        <button type="button" data-lav="candidature" onclick="showSection('candidature')">Candidature <span class="lav-n" data-n="cdt">–</span></button>
       </div>
       <div class="u-numeri" id="offlav-numeri"></div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
@@ -1636,7 +1651,12 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 
     <div class="section" id="sec-candidati">
       <div class="topbar">
-        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Candidati registrati</div>
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Lavoro</div>
+      </div>
+      <div class="lav-ling" role="tablist">
+        <button type="button" data-lav="offerte-lavoro" onclick="showSection('offerte-lavoro')">Offerte di lavoro <span class="lav-n" data-n="off">–</span></button>
+        <button type="button" data-lav="candidati" onclick="showSection('candidati')">Candidati iscritti <span class="lav-n" data-n="cand">–</span></button>
+        <button type="button" data-lav="candidature" onclick="showSection('candidature')">Candidature <span class="lav-n" data-n="cdt">–</span></button>
       </div>
       <div class="u-numeri" id="cand-numeri"></div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
@@ -1667,10 +1687,16 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
     <!-- CANDIDATURE -->
     <div class="section" id="sec-candidature">
       <div class="topbar">
-        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Candidature</div>
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Lavoro</div>
       </div>
+      <div class="lav-ling" role="tablist">
+        <button type="button" data-lav="offerte-lavoro" onclick="showSection('offerte-lavoro')">Offerte di lavoro <span class="lav-n" data-n="off">–</span></button>
+        <button type="button" data-lav="candidati" onclick="showSection('candidati')">Candidati iscritti <span class="lav-n" data-n="cand">–</span></button>
+        <button type="button" data-lav="candidature" onclick="showSection('candidature')">Candidature <span class="lav-n" data-n="cdt">–</span></button>
+      </div>
+      <div class="u-numeri" id="cdt-numeri"></div>
       <div style="margin:0 0 14px;color:var(--mid);font-size:0.95rem">
-        Chi si è candidato a quale offerta. Questa lista non esiste da nessun'altra parte: l'impresa vede solo le proprie.
+        Chi si è candidato a quale offerta. L'impresa vede solo le proprie: la lista intera c'è solo qui.
       </div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
         <div class="table-title" id="cdt-count">–</div>
@@ -2209,6 +2235,8 @@ function showSection(id, el, fromPopstate) {
     })[0];
   }
   if (el) el.classList.add('active');
+  /* 28 nov 2026 — Offerte, Candidati e Candidature sono UNA voce «Lavoro» con 3 linguette */
+  if (['offerte-lavoro','candidati','candidature'].indexOf(id) > -1) lavLinguette(id);
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') { caricaSubappalti(); segnaVistiLavoro('subappalti'); }
@@ -5764,13 +5792,15 @@ function _numDa(lista, campo, giorni) {
   const da = Date.now() - giorni * 86400000;
   return lista.filter(r => r[campo] && new Date(r[campo]).getTime() >= da).length;
 }
-async function disegnaNumeri(boxId, chiave, carteAnnunci) {
+async function disegnaNumeri(boxId, chiave, carteAnnunci, senzaVisite) {
   const box = document.getElementById(boxId);
   if (!box) return;
   box.innerHTML = carteAnnunci;
+  if (senzaVisite) return;
   const vis = (await visiteSezioni())[chiave];
   if (!vis) return;
-  box.innerHTML = _numCarta(vis.p30, 'Persone che hanno aperto queste pagine', 'verde', 'ultimi 30 giorni')
+  const eti = { lavoro: 'Persone sulle pagine delle offerte', candidati: 'Persone sulle pagine dei candidati' }[chiave] || 'Persone che hanno aperto queste pagine';
+  box.innerHTML = _numCarta(vis.p30, eti, 'verde', 'ultimi 30 giorni')
     + _numCarta(vis.p7, 'Persone negli ultimi 7 giorni', 'verde') + carteAnnunci;
 }
 
@@ -6013,13 +6043,42 @@ function vuotoLav(tbody, cols, icona, testo) {
 
 /* ---------- 1) OFFERTE DI LAVORO ---------- */
 
+
+/* ---------- 28 nov 2026: «Lavoro» = Offerte + Candidati + Candidature ----------
+   Le tre sezioni restano (ognuna col suo id e i suoi caricamenti); nel menu c'e'
+   una voce sola, e in cima a ognuna le stesse 3 linguette col numero. */
+const _LAV_N = { off: null, cand: null, cdt: null };
+let _lavNumeriLetti = false;
+function lavNumeri() {
+  document.querySelectorAll('.lav-n').forEach(e => { const v = _LAV_N[e.dataset.n]; e.textContent = v == null ? '–' : v; });
+}
+function lavLinguette(id) {
+  document.querySelectorAll('.lav-ling button').forEach(b => b.classList.toggle('on', b.dataset.lav === id));
+  const voce = document.querySelector(".nav-item[onclick*=\"'offerte-lavoro'\"]");
+  if (voce) voce.classList.add('active');
+  lavNumeri();
+  if (_lavNumeriLetti) return;
+  _lavNumeriLetti = true;
+  Promise.all([
+    adminApi('list', 'offerte_lavoro').catch(() => null),
+    adminApi('list', 'candidati_lavoro').catch(() => null),
+    adminApi('list', 'candidature').catch(() => null)
+  ]).then(r => {
+    if (r[0] && _LAV_N.off == null) _LAV_N.off = r[0].length;
+    if (r[1] && _LAV_N.cand == null) _LAV_N.cand = r[1].length;
+    if (r[2] && _LAV_N.cdt == null) _LAV_N.cdt = r[2].length;
+    lavNumeri();
+  });
+}
+
 async function caricaOfferteLavoro() {
   const tbody = document.getElementById('table-offerte-lavoro');
   tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
   try {
     OFFLAV = await adminApi('list', 'offerte_lavoro') || [];
+    _LAV_N.off = OFFLAV.length; lavNumeri();
     const senza = OFFLAV.filter(o => !o.impresa_id).length;
-    disegnaNumeri('offlav-numeri', 'lavoro',
+    disegnaNumeri('offlav-numeri', 'lavoro', /* visite: pagine delle offerte */
         _numCarta(OFFLAV.length, 'Offerte in tutto', '', OFFLAV.filter(o => o.attiva).length + ' attive')
       + _numCarta(_numDa(OFFLAV, 'created_at', 30), 'Offerte ultimi 30 giorni', 'giallo', _numDa(OFFLAV, 'created_at', 7) + ' negli ultimi 7')
       + _numCarta(senza, 'Messe senza account', senza ? 'rosso' : ''));
@@ -6105,6 +6164,7 @@ async function caricaCandidati() {
   tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
   try {
     CANDLAV = await adminApi('list', 'candidati_lavoro') || [];
+    _LAV_N.cand = CANDLAV.length; lavNumeri();
     disegnaNumeri('cand-numeri', 'candidati',
         _numCarta(CANDLAV.length, 'Candidati registrati')
       + _numCarta(_numDa(CANDLAV, 'created_at', 30), 'Iscritti ultimi 30 giorni', 'giallo', _numDa(CANDLAV, 'created_at', 7) + ' negli ultimi 7')
@@ -6272,6 +6332,11 @@ async function caricaCandidature() {
     CDTLAV  = risultati[0] || [];
     CANDLAV = risultati[1] || [];
     OFFLAV  = risultati[2] || [];
+    _LAV_N.cdt = CDTLAV.length; lavNumeri();
+    disegnaNumeri('cdt-numeri', 'lavoro',
+        _numCarta(CDTLAV.length, 'Candidature in tutto', '', _numDa(CDTLAV, 'data_candidatura', 7) + ' negli ultimi 7 giorni')
+      + _numCarta(CDTLAV.filter(c => (c.stato || 'inviata') === 'inviata').length, 'Ancora nuove', 'giallo')
+      + _numCarta(CDTLAV.filter(c => c.stato === 'accettata').length, 'Accettate', 'verde'), true);
   } catch (e) {
     CDTLAV = [];
     vuotoLav(tbody, 6, '⚠️', 'Errore caricamento: ' + esc(e.message));
