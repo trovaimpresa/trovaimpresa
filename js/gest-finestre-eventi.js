@@ -178,12 +178,13 @@
     if(a==="pp-salva")return ppSalva();
     if(a==="pp-tutte"){ppFonteScelta="";return ppCerca();}
     if(a==="pp-solo"){const b=$("#pp-fonte-box");ppFonteScelta=(b&&b.dataset.sua)||"";return ppCerca();}
-    if(a==="comp-prev")return computoAPreventivo(id);
+    if(a==="comp-prev")return (ruoloUtente==='professionista'&&typeof computoAParcella==="function")?computoAParcella(id):computoAPreventivo(id);   /* 28 nov 2026: allo studio la parcella col decreto */
     if(a==="sal-nuovo")return salForm(null);
     if(a==="sal-el-apri")return salApriDaElenco(id);
     if(a==="sal-torna")return salTorna();
     if(a==="sal-filtro"){salFiltro=t.dataset.v||"tutti";renderSalTutti();return;}
     if(a==="sal-comp-apri")return salApriComputo(id);
+    if(a==="sal-nuovo")return salNuovo();   /* 28 nov 2026 */
     if(a==="sal-vai-computi"){const b=document.querySelector('nav.tabs button[data-tab="computi"]');if(b){b.click();window.scrollTo(0,0);}return;}
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);

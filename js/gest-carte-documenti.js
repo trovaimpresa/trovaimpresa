@@ -255,7 +255,10 @@
       if(!r||r.error||!r.data)return true;
       const saldo=+r.data.saldo||0;
       if(saldo-importo>=-0.005)return true;
-      const c=(carteCache||[]).find(x=>String(x.id)===String(cartaId));
+      let c=(carteCache||[]).find(x=>String(x.id)===String(cartaId));
+      /* 28 nov 2026 — Carte mai aperta: carteCache vuota e la domanda diceva
+         «Sulla carta» senza nome. Il nome si legge dalla tabella. */
+      if(!(c&&c.nome)){try{const _rc=await sb.from("gest_carte").select("nome").eq("id",cartaId).maybeSingle();if(_rc&&_rc.data)c=_rc.data;}catch(_){}}
       return await window.tiChiedi((c&&c.nome?"Su «"+c.nome+"» ":"Sulla carta ")+"ci sono "+eur2(saldo)+": con questa spesa di "+eur2(importo)+" andrebbe sotto zero. Se l'importo è giusto, ricordati di registrare la ricarica.",
         {titolo:"La carta va sotto zero",si:"Sì, l'importo è giusto",no:"No, lo correggo"});
     }catch(_){ return true; }
@@ -597,7 +600,7 @@
        tocco: quindi il modulo si apre lo stesso, con la tendina vuota. */
     const fops=(fornCache.length?'':'<option value="">— nessun fornitore ancora —</option>')+fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
     const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");
-    let lavOps='<option value="">— nessuno —</option>';
+    let lavOps='<option value="">'+(_pro?'— nessuna —':'— nessuno —')+'</option>';
     if(sb&&sbUid){
       const {data:lv}=await sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("data_prevista",{ascending:false}).limit(100);
       lavOps+=(lv||[]).map(l=>'<option value="'+l.id+'" '+(String(f.lavoro_id||'')===String(l.id)?'selected':'')+'>'+esc(l.descrizione||(_pro?'Pratica':'Lavoro'))+'</option>').join("");

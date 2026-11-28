@@ -389,3 +389,12 @@ body .wrap section .tab-tot.tab-tot-conta span{color:#334155 !important;font-siz
   #fornitori .sec-head>div>.btn{width:100%;justify-content:center;white-space:normal;text-align:center;min-width:0}
   #fornitori .sec-head>div>.btn.add{grid-column:1/-1;order:-1}
 }
+
+/* 28 nov 2026 (giro nuovo, sessione 8) — Fatture sul telefono: tre pulsanti uno
+   sotto l'altro e «+ Nuova fattura» per ultimo. Come Fornitori: prima la nuova
+   fattura a tutta riga, sotto «Fatture ricevute» e «Ricevuta di pagamento» affiancati. */
+@media (max-width:600px){
+  #fatture .sec-head>div{display:grid!important;grid-template-columns:1fr 1fr;width:100%}
+  #fatture .sec-head>div>.btn{width:100%;justify-content:center;white-space:normal;text-align:center;min-width:0;padding-left:6px;padding-right:6px}
+  #fatture .sec-head>div>.btn.add{grid-column:1/-1;order:-1}
+}

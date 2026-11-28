@@ -1012,7 +1012,7 @@
       body.innerHTML=tabVuoto(
         filtrando?"Nessuna fattura con questo filtro":"Ancora nessuna fattura",
         filtrando?"Prova a cambiare vista qui sopra."
-                 :"Righe con quantità, prezzo e IVA, il numero progressivo che riparte ogni anno, e il PDF pronto da mandare. Una fattura può raccogliere più lavori dello stesso cliente: uno solo, oppure tutti quelli del mese.",
+                 :"Righe con quantità, prezzo e IVA, il numero progressivo che riparte ogni anno, e il PDF pronto da mandare. "+(ruoloUtente==='professionista'?"Una fattura può raccogliere più pratiche dello stesso cliente: una sola, oppure tutte quelle del mese.":"Una fattura può raccogliere più lavori dello stesso cliente: uno solo, oppure tutti quelli del mese."),
         _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>',
         filtrando?null:{t:"+ Crea la prima fattura",a:"new-fattura"});
       return;
@@ -1422,13 +1422,16 @@
                 + (fattRegimeCorrente==="art15"
                     ? '<div class="field"><label>Spese anticipate (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0" data-euro></div>'
                     + '<div class="field"><label>Rimborso spese (trasferte, materiali)</label><input type="text" inputmode="decimal" id="fa-spese-iva" value="'+_numTesto(+f.spese_iva||"")+'" placeholder="0" data-euro></div>'
-                    + '<div class="sh-nota">Le <b>spese anticipate</b> sono quelle che hai pagato tu per il cliente con la ricevuta intestata a lui e senza guadagnarci niente: bolli, diritti, visure. Sono escluse dall\'IVA (art. 15) e non entrano né nella cassa né nella ritenuta.<br><br>Il <b>rimborso spese</b> è per trasferte, carburante e materiali: quello l\'IVA ce l\'ha, ed entra nella ritenuta.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>'
+                    + '<div class="sh-nota">Le <b>spese anticipate</b> sono quelle che hai pagato tu per il cliente con la ricevuta intestata a lui e senza guadagnarci niente: bolli, diritti, visure. Sono escluse dall\'IVA (art. 15) e non entrano né nella cassa né nella ritenuta.<br><br>'+(fattForfettario()?'Il <b>rimborso spese</b> è per trasferte, carburante e materiali: entra nel totale della fattura (in forfettario niente IVA).':'Il <b>rimborso spese</b> è per trasferte, carburante e materiali: quello l\'IVA ce l\'ha, ed entra nella ritenuta.')+'<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>'
                     : '<div class="field"><label>Spese documentate</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0" data-euro></div>'
                     + '<div class="sh-nota"><b>Questa fattura è nata prima del 13 agosto 2026</b>, quindi le spese seguono ancora il conto di allora: entrano nell\'imponibile e prendono l\'IVA. Non la cambio, perché è già stata mandata allo SDI così e deve restare uguale a quella che ha in mano il cliente.<br><br>Dalla prossima fattura nuova troverai due caselle separate: spese anticipate (escluse IVA, art. 15) e rimborso spese.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu.</div>');
               })()
             : '')
-      +   '<div class="field"><label>'+(ruoloUtente==='professionista'?'Ritenuta d\'acconto (%)':'Trattenuta (ritenuta d\'acconto) %')+'</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
-      +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €.'+(isNew?' Lo metto io da solo.':' Scrivi 2 nel campo qui sopra.')+'</div>'
+      /* 28 nov 2026 (giro nuovo, sessione 8) — in forfettario la ritenuta non
+         si applica: casella nascosta come nella parcella (#fa-rit resta nella
+         pagina, vale 0). Se una fattura vecchia ce l'ha, si vede. */
+      +   '<div class="field"'+((fattForfettario()&&!((+f.ritenuta_perc||0)>0))?' style="display:none"':'')+'><label>'+(ruoloUtente==='professionista'?'Ritenuta d\'acconto (%)':'Trattenuta (ritenuta d\'acconto) %')+'</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
+      +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €.'+(isNew?' Lo metto io da solo.':((+f.bollo||0)>0?' Su questa fattura è già messo.':' Scrivi 2 nel campo qui sopra.'))+'</div>'
           +'<div class="sh-nota" id="fa-bollo-nota" style="display:none;color:var(--ok)"><b>Bollo da 2 € messo in automatico.</b> Se non vuoi farlo pagare al cliente, scrivi 0 nella casella.</div>':'')
       + '</div>'
 

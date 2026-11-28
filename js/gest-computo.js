@@ -231,7 +231,7 @@
             /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
                finestra. Adesso che le azioni del documento stanno in alto,
                sta in fila con le altre, se no era l'unica rimasta sotto. */
-            {lab:"→ Crea il preventivo",action:"comp-prev",data:{id:c.id}},
+            {lab:(ruoloUtente==='professionista'?"→ Fai la parcella su questo computo":"→ Crea il preventivo"),action:"comp-prev",data:{id:c.id}},
             {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}}])
            /* 20 agosto 2026 — LA VARIANTE. E' una copia, ma che si RICORDA
               da dove viene: cosi' puo' dire cosa e' cambiato.
@@ -355,7 +355,7 @@
     const prev=voci.find(function(a){return a.action==="comp-prev";});
     const az=document.createElement("div");
     az.className="co-az";
-    az.innerHTML=(prev?'<button type="button" class="btn-primary co-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(c.id))+'">→ Crea il preventivo</button>':'')
+    az.innerHTML=(prev?'<button type="button" class="btn-primary co-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(c.id))+'">'+(ruoloUtente==='professionista'?'→ Fai la parcella su questo computo':'→ Crea il preventivo')+'</button>':'')
       /* 27 nov 2026 (sessione 3) — gli acconti stavano solo dentro «Altro»:
          a impresa e artigiano un pulsante in vista */
       +((ruoloUtente!=='professionista'&&c.id)?'<button type="button" class="btn co-acc" data-action="co-pag" data-p="5">💶 Acconti</button>':'')
@@ -676,7 +676,7 @@
       +'<div class="copag" data-p="3">'
       +'<div class="sh-b"><div class="sh-tit">'+_cpar('Il ribasso','Lo sconto')+'</div>'
       +  '<div class="field"><label>'+_cpar('Ribasso o sconto (%)','Sconto (%)')+'</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
-      +  '<div class="sh-nota">Lo sconto che fai sul totale. Qui sotto vedi subito com\'\u00e8 il conto.</div>'
+      +  '<div class="sh-nota">'+(ruoloUtente==='professionista'?'Il ribasso offerto dall\'impresa sul totale dei lavori.':'Lo sconto che fai sul totale.')+' Qui sotto vedi subito com\'\u00e8 il conto.</div>'
       +  '<div id="co-rib-conto"></div>'
       +'</div></div>'
 

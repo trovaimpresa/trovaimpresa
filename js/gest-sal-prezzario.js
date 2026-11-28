@@ -173,6 +173,8 @@
               +(fatturato?"Fatturato":(bozza?"Bozza":"Emesso"))+'</span>',
       meta:[
         comp.cliente_id?("👤 "+esc(salTuttiCli[comp.cliente_id]||"—")):"",
+        /* 28 nov 2026 — allo studio: quale impresa (il DL ne segue piu' d'una) */
+        (_salStudio()&&s.impresa_esecutrice)?("🏗 "+esc(s.impresa_esecutrice)):"",
         "📅 "+esc(q.testo),
         periodo,
         /* ⚠️ 20 agosto 2026 — LO STESSO NUMERO DUE VOLTE CONFONDE.
@@ -251,6 +253,13 @@
     salTuttiCache=(rs.data||[]).filter(x=>!!salTuttiComp[String(x.computo_id)]);
 
     const cnt=$("#cnt-sal");if(cnt)cnt.textContent=salTuttiCache.length?String(salTuttiCache.length):"";
+    /* 28 nov 2026 (giro nuovo, sessione 8) — nella linguetta dei SAL mancava
+       il pulsante per farne uno nuovo: bisognava sapere di passare dal computo. */
+    try{
+      const _sh=document.querySelector("#sal .sec-head");
+      if(_sh&&!_sh.querySelector('[data-action="sal-nuovo"]'))
+        _sh.insertAdjacentHTML("beforeend",'<button type="button" class="btn add" data-action="sal-nuovo">'+_sa("+ Nuovo SAL","+ Nuovo acconto")+'</button>');
+    }catch(_){}
     /* 24 nov 2026 — studio: numero della linguetta (js/gest-studio-unite.js) */
     try{if(typeof stSegnaLetto==="function")stSegnaLetto("sal");}catch(e){}
 
@@ -325,6 +334,22 @@
           +'<button type="button" class="btn btn-primary" data-action="sal-comp-apri" data-id="'+esc(String(c.id))+'">'+_sa('Fai un SAL','Chiedi un acconto')+'</button>'
         +'</div>').join("")
       +'</div></div>';
+  }
+  /* 28 nov 2026 — «+ Nuovo SAL»: un computo solo → si apre lui sulla linguetta
+     dei SAL; piu' computi → si sceglie quale; nessuno → si va ai computi. */
+  function salNuovo(){
+    const C=Object.values(salTuttiComp||{});
+    if(!C.length){toast(_sa("Il SAL si fa dentro un computo: prima fai il computo","L'acconto si fa dentro un computo: prima fai il computo"));const b=document.querySelector('nav.tabs button[data-tab="computi"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    if(C.length===1)return salApriComputo(C[0].id);
+    C.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
+    openSheet('<h3 style="margin:6px 0 4px">'+_sa("Su quale computo?","Su quale computo?")+'</h3>'
+      +'<div class="salv"><div class="salv-txt">'+_sa("Il SAL si conta sulle lavorazioni del suo computo: scegli quale.","L'acconto si conta sulle lavorazioni del suo computo: scegli quale.")+'</div>'
+      +'<div class="salv-lista">'
+      +C.map(c=>'<div class="salv-r">'
+          +'<span class="salv-nome">'+(c.numero?"N. "+esc(String(c.numero))+" — ":"")+esc(c.titolo||"Computo")+'</span>'
+          +'<button type="button" class="btn btn-primary" data-chiudi="1" data-action="sal-comp-apri" data-id="'+esc(String(c.id))+'">'+_sa('Fai un SAL','Chiedi un acconto')+'</button>'
+        +'</div>').join("")
+      +'</div></div>');
   }
   async function salApriComputo(id){
     const c=(salTuttiComp||{})[String(id)];
@@ -2056,6 +2081,34 @@
       _libera();
       toast("Non sono riuscito a creare il preventivo: "+((e&&e.message)||"riprova"));
     }
+  }
+  /* 28 nov 2026 (giro nuovo, sessione 8, «ok a tutto» di Alex) — ALLO STUDIO
+     IL COMPUTO NON DIVENTA UN PREVENTIVO COI PREZZI DEI LAVORI (quello lo fa
+     l'impresa): diventa la PARCELLA. Si apre una parcella nuova col cliente
+     del computo, il riquadro del decreto parametri gia' aperto e l'importo
+     dei lavori gia' scritto: il totale dei lavori PRIMA del ribasso (il
+     ribasso e' dell'impresa, il compenso si calcola sull'importo delle opere).
+     Categoria e prestazioni le sceglie il geometra. */
+  async function computoAParcella(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    let V=0;
+    try{
+      const r=await sb.from("gest_computo_voci_calc").select("importo").eq("user_id",sbUid).eq("computo_id",id);
+      if(r.error)throw r.error;
+      V=Math.round((r.data||[]).reduce((t,v)=>t+(+v.importo||0),0)*100)/100;
+    }catch(e){toast("Non riesco a leggere le lavorazioni: "+((e&&e.message)||"riprova"));return;}
+    if(!(V>0)){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
+    await prevForm(null,{cliente_id:c.cliente_id||null,titolo:(c.titolo||"Computo")},false);
+    const box=$("#dp-box"), apri=$("#dp-apri"), v=$("#dp-v");
+    if(!box||!v){toast("Importo dei lavori dal computo: "+eur2(V)+". Scrivilo nel calcolo col decreto parametri.");return;}
+    box.style.display=""; if(apri)apri.style.display="none";
+    v.value=_numTesto(V);
+    v.dispatchEvent(new Event("input",{bubbles:true}));
+    try{box.scrollIntoView({block:"center"});}catch(_){}
+    const cat=$("#dp-cat"); if(cat)try{cat.focus();}catch(_){}
+    toast("Importo dei lavori preso dal computo: "+eur2(V)+". Scegli la categoria e cosa fai.");
   }
   async function _computoAPreventivo(id,c,_libera){
     /* ⚠️ 19 agosto 2026 — I CAPITOLI SI LEGGONO INSIEME ALLE LAVORAZIONI.
