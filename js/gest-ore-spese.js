@@ -656,8 +656,8 @@
       const leggiTutti=(typeof sb.raw==="function")?sb.raw:sb.from.bind(sb);
       const ids=(lavori||[]).map(l=>l.id).filter(Boolean);
       const [{data:ops},rVivi,ore]=await Promise.all([
-        leggiTutti("gest_operatori").select("id,costo_orario").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_operatori").select("id,costo_orario").eq("user_id",sbUid).eq("mestiere_id",mid),
+        leggiTutti("gest_operatori").select("id,costo_orario").eq("user_id",sbUid),
+        sb.from("gest_operatori").select("id,costo_orario").eq("user_id",sbUid),
         ids.length
           ? sb.from("gest_ore").select("lavoro_id,operatore_id,ore").eq("user_id",sbUid).in("lavoro_id",ids)
           : Promise.resolve({data:[]})

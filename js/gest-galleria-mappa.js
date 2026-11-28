@@ -746,7 +746,7 @@
       let _rOp=null;
       /* 28 nov 2026 — solo le persone di QUESTO reparto, come Agenda e Calendario
          (prima in «Chi ci va» c'era anche chi lavora in un altro reparto) */
-      try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());}catch(e){}
+      try{_rOp=sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);}catch(e){}
       let _rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id,dove_lat,dove_lon,dove_km,dove_geo,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if(_rL.error&&/dove_|column/i.test(_rL.error.message||""))_rL=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       const mpOp={};

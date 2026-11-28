@@ -346,7 +346,7 @@
          anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
       sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,data_fatto,operatore_id,cliente_id,importo,fatt_stato,dove_lat,dove_lon,dove_geo").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-      sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid),
       /* 17 nov 2026 (voce Clienti) — anche i clienti nel Cestino, come fa
          l'elenco dei Preventivi: il lavoro di un cliente buttato non diceva
          piu' di chi era. */
@@ -713,7 +713,7 @@
          la giornata libera. Il banco su GitHub l'ha preso (rosso da ef907d9).
          Adesso: lavori e persone si leggono INSIEME, e se i lavori non si leggono
          il riquadro rosso esce SUBITO, senza aspettare scadenze e note. */
-      const _ro=sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).then(r=>r,()=>({data:null}));
+      const _ro=sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).then(r=>r,()=>({data:null}));
       let {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato,operatore_id,pratica_data_dep").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if(_eCal&&/column|schema cache/i.test(_eCal.message||""))({data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,pratica_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()));
       calJobs=data||[];_calKo=!!_eCal;

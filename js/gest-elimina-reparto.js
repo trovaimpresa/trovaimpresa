@@ -54,7 +54,7 @@
     ["gest_fatture_fornitori", "fattura di fornitore", "fatture di fornitori"],
     ["gest_fornitori",         "fornitore",            "fornitori"],
     ["gest_mezzi",             "mezzo o attrezzatura", "mezzi e attrezzature"],
-    ["gest_operatori",         "persona",              "persone"],
+    /* 28 nov 2026: le persone NON stanno piu' dentro un reparto (squadra di tutta l'azienda) */
     ["gest_carte",             "carta aziendale",      "carte aziendali"],
     ["gest_scadenze",          "scadenza",             "scadenze"],
     ["gest_computi",           "computo",              "computi"]
@@ -676,7 +676,7 @@
       return;
     }
     /* elenco operatori della squadra del reparto (Supabase) */
-    const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);
     const OPS=ops||[];
     const telMap=Object.fromEntries(OPS.map(o=>[o.id,o.telefono||""]));
     /* lavori del reparto (Supabase) */

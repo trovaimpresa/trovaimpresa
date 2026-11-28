@@ -264,7 +264,7 @@
            usano l'indirizzo del cliente qui risultavano senza (4 invece di 5). */
         sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,paese").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid),
         sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),

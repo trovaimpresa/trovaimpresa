@@ -231,7 +231,7 @@ $("#rv-ov").onclick=e=>{ if(e.target===$("#rv-ov"))rvChiudi(); };
 /* la gente di questo lavoro: la stessa regola del rapportino grande */
 function voceGente(){
   const mid=RV.lavoro&&RV.lavoro.mestiere_id;
-  return (SQUADRA||[]).filter(p=>!mid||!p.mestiere_id||String(p.mestiere_id)===String(mid));
+  return (SQUADRA||[]) /* 28 nov 2026: la squadra e' di tutta l'azienda */; void mid;
 }
 
 /* due nomi sono la stessa persona? Il parlato non ha accenti ne' maiuscole:

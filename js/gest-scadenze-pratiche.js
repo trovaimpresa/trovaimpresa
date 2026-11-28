@@ -1410,7 +1410,7 @@
 
   async function fillOperai(){
     const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
   }
   async function fillClienti(selId){

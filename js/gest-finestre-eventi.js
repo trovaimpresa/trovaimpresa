@@ -613,6 +613,16 @@
     if(a==="noleggio"){location.href="/gestionale-noleggio";return;}
     /* 5 set 2026 — si lascia il bigliettino del rientro, come fa il Noleggio
        quando esce: tornando indietro si rientra nel reparto dov'eri. */
+    /* 28 nov 2026 — «Squadra» dalla schermata dei reparti: la squadra e' di
+       tutta l'azienda. Si entra nell'ultimo reparto usato (o nel primo) solo
+       per avere il gestionale aperto, e si va dritti su Squadra. */
+    if(a==="squadra-azienda"){
+      const ps=state.panels||[];
+      if(!ps.length){toast("Crea prima un reparto: poi la squadra vale per tutti i reparti");return;}
+      let u=null;try{u=localStorage.getItem(GEST_ULTIMO);}catch(e){}
+      enterPanel((ps.find(x=>x.id===u)||ps[0]).id);
+      setTimeout(function(){const b=document.querySelector('nav.tabs button[data-tab="squadra"]');if(b)b.click();},60);
+      return;}
     if(a==="appoperaio"){
       try{sessionStorage.setItem("gest_rientro",String(Date.now()));}catch(e){}
       location.href="/gestionale-operatore.html";return;}

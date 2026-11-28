@@ -53,6 +53,8 @@
 <div id="landing">
   <div class="landing-top">
     <div class="lt-actions">
+      <!-- 28 nov 2026 — LA SQUADRA ESCE DAI REPARTI (Alex: «l'operaio puo' lavorare su piu' reparti, quindi la squadra deve stare fuori»). Arancione e per primo (foto approvata). -->
+      <button class="lt-btn lt-btn-squadra" data-action="squadra-azienda"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg> Squadra</button>
       <button class="lt-btn" data-action="azienda"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 7 2.6h.1A2 2 0 1 1 11 2.6V3a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Dati azienda</button>
       <!-- 24 agosto 2026 — IL NOLEGGIO ESCE DAL REPARTO.
            Il mezzo e' uno solo per tutta l'azienda: se il pulsante stesse
@@ -454,10 +456,11 @@
            dentro la finestra che si apre dalla sua scheda. Nessuno lo trovava.
            Chiesto da Alessio il 5 settembre. -->
       <div class="app-op-card">
-        <p class="app-op-tit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> L'app dei tuoi operai</p>
+        <p class="app-op-tit"><img src="/img/app/giornate-icona.png" alt="" width="34" height="34" style="vertical-align:middle;border-radius:8px;margin-right:8px">App «Giornate di cantiere»</p>
         <!-- 26 set 2026 — accorciato (Alessio: «spiegazioni lunghe»). Prima
              erano tre paragrafi; il succo sta tutto in due righe. Il QR sta
              DENTRO la scheda della persona (un pulsante solo, «Apri»). -->
+        <p class="app-op-p">Le persone sono di <b>tutta l'azienda</b>: puoi metterle sui lavori di qualsiasi reparto. Scrivi la loro <b>email</b> nella scheda: quando si registrano nell'app trovano già il tuo invito.</p>
         <p class="app-op-p">Ogni persona che aggiungi ha <b>la sua app sul telefono</b>: segna ore, materiali e foto, e tu li ritrovi qui. Per dargliela: premi <b>Mandagli l'app</b> sulla sua scheda, oppure i tre puntini <b>⋯</b> e <b>Mostra il QR</b>.</p>
         <div class="app-op-btns">
           <button class="btn" data-action="appoperaio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Guarda com'è fatta</button>
@@ -737,14 +740,14 @@
 <script src="/js/gest-computo-ai.js?v=16nov3"></script>
 <script src="/js/gest-documenti-pdf.js?v=27nov-s7"></script>
 <script src="/js/gest-capitolato.js?v=15nov7"></script>
-<script src="/js/gest-galleria-mappa.js?v=28nov-s10b"></script>
-<script src="/js/gest-report.js?v=28nov-s10b"></script>
-<script src="/js/gest-riepilogo.js?v=28nov-s11"></script>
-<script src="/js/gest-squadra.js?v=28nov-s9"></script>
+<script src="/js/gest-galleria-mappa.js?v=28nov-sq"></script>
+<script src="/js/gest-report.js?v=28nov-sq"></script>
+<script src="/js/gest-riepilogo.js?v=28nov-sq"></script>
+<script src="/js/gest-squadra.js?v=28nov-sq"></script>
 <script src="/js/gest-studio-unite.js?v=25nov-unite"></script>
 <script src="/js/gest-squadra-giornate.js?v=27nov-s6b"></script>
 <script src="/js/gest-anche-pro.js?v=10nov4"></script>
-<script src="/js/gest-altro.js?v=11nov2"></script>
+<script src="/js/gest-altro.js?v=28nov-sq"></script>
 <script src="/js/chat-squadra.js?v=15nov1"></script>
 <script src="/js/chat-gest.js?v=3"></script>
 <script src="/js/gest-prev-controllo.js?v=19nov-cest"></script>
@@ -765,7 +768,7 @@
 <script src="/js/gest-fisco-vivere.js?v=28nov-s10b"></script>
 <script src="/js/gest-fisco-ai.js?v=18nov1"></script>
 <script src="/js/gest-fornitori.js?v=27nov-s5"></script>
-<script src="/js/gest-mezzi.js?v=28nov-s9"></script>
+<script src="/js/gest-mezzi.js?v=28nov-sq"></script>
 <script src="/js/gest-ai-cantiere.js?v=26nov-sc"></script>
 <script src="/js/gest-invia-cliente.js?v=27nov-s7"></script>
 <!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
@@ -780,18 +783,18 @@
 <script src="/js/gest-ingresso.js?v=28nov-s9"></script>
 <script src="/js/gest-ai-moduli.js?v=27nov-pz"></script>
 <script src="/js/gest-riepilogo-schede.js?v=28nov-s11"></script>
-<script src="/js/gest-schede-clienti.js?v=28nov-s10b"></script>
+<script src="/js/gest-schede-clienti.js?v=28nov-sq"></script>
 <script src="/js/gest-carte-documenti.js?v=28nov-s8"></script>
 <script src="/js/gest-richieste-chat.js?v=24nov-lega"></script>
-<script src="/js/gest-scadenze-pratiche.js?v=28nov-s10b"></script>
+<script src="/js/gest-scadenze-pratiche.js?v=28nov-sq"></script>
 <script src="/js/gest-commercialista.js?v=26nov-cli"></script>
-<script src="/js/gest-elimina-reparto.js?v=28nov-s10"></script>
-<script src="/js/gest-ore-spese.js?v=28nov-s11"></script>
+<script src="/js/gest-elimina-reparto.js?v=28nov-sq"></script>
+<script src="/js/gest-ore-spese.js?v=28nov-sq"></script>
 <script src="/js/gest-rapportino-firma.js?v=15nov7"></script>
 <script src="/js/gest-preventivi.js?v=28nov-s11"></script>
-<script src="/js/gest-cestino.js?v=28nov-s10"></script>
-<script src="/js/gest-ricerca.js?v=26nov-tel"></script>
-<script src="/js/gest-finestre-eventi.js?v=28nov-s10b"></script>
+<script src="/js/gest-cestino.js?v=28nov-sq"></script>
+<script src="/js/gest-ricerca.js?v=28nov-sq"></script>
+<script src="/js/gest-finestre-eventi.js?v=28nov-sq"></script>
 <script src="/js/gest-avvio.js"></script>
 
 <!-- ===== IL CANCELLO — 23 agosto 2026 =====

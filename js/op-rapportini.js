@@ -135,7 +135,7 @@ async function renderRapportino(){
   /* solo la gente del reparto di questo lavoro: in un'impresa con piu' reparti
      un elenco con dentro tutti sarebbe lungo e pieno di gente che non c'entra */
   const mid=curLavoro&&curLavoro.mestiere_id;
-  const gente=(SQUADRA||[]).filter(p=>!mid||!p.mestiere_id||String(p.mestiere_id)===String(mid));
+  const gente=(SQUADRA||[]) /* 28 nov 2026: la squadra e' di tutta l'azienda */; void mid;
 
   const cont=$("#rap-squadra");
   if(!gente.length){

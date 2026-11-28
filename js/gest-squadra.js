@@ -108,7 +108,9 @@
     const _rD=await Promise.all([
       /* 18 nov 2026 (voce Squadra) — ordine fisso: l'ultima persona aggiunta in cima
          (prima non c'era nessun ordine e le schede si scambiavano di posto) */
-      sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
+      /* 28 nov 2026 (Alex: «l'operaio puo' lavorare su piu' reparti, la squadra deve stare fuori»):
+         la squadra e' di TUTTA l'azienda, non del reparto. mestiere_id resta solo come reparto di partenza. */
+      sb.from("gest_operatori").select("*").eq("user_id",sbUid).order("created_at",{ascending:false}),
       sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi,created_at"),
       sb.from("gest_operatore_documenti").select("*"),
       /* 11 ott 2026 — messaggi della chat generale non ancora letti, per persona */

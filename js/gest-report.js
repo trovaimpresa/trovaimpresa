@@ -67,7 +67,7 @@
          nel Cestino: le sue ore e la sua classifica restavano, ma col nome «—».
          Si leggono anche quelli nel Cestino, col nome «… (nel cestino)». */
       (sb.raw?sb.raw("gest_clienti"):sb.from("gest_clienti")).select("id,nome,eliminato_il").eq("user_id",sbUid).or(_cliOr(mid)),
-      (sb.raw?sb.raw("gest_operatori"):sb.from("gest_operatori")).select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid)
+      (sb.raw?sb.raw("gest_operatori"):sb.from("gest_operatori")).select("id,nome,eliminato_il").eq("user_id",sbUid)
     ]);
     /* 12 nov 2026 — regola 20: senza rete non si scrivono guadagni a zero */
     if(letturaKo(_rR[0])){listaNonLetta(box,"il report","report");return;}

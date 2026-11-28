@@ -105,7 +105,7 @@
       Promise.resolve(sb.from("nol_noleggi").select("mezzo_id,fase,data_uscita,data_rientro_prevista,data_rientro_effettivo").eq("user_id",sbUid).not("mezzo_id","is",null)).then(r=>r,()=>null),
       /* 20 nov 2026 — in quante pratiche/lavori e' usato, e i nomi di chi ce l'ha */
       Promise.resolve(sb.from("gest_lavoro_mezzi").select("mezzo_id").eq("user_id",sbUid)).then(r=>r,()=>null),
-      Promise.resolve(sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)).then(r=>r,()=>null),
+      Promise.resolve(sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid)).then(r=>r,()=>null),
       /* la prossima taratura ancora aperta di ogni strumento: la mostra il modulo */
       Promise.resolve(sb.from("gest_scadenze").select("id,mezzo_id,data_scadenza,ripeti_mesi,stato").eq("user_id",sbUid)
         .eq("tipo_pratica","Taratura strumento").not("mezzo_id","is",null).neq("stato","fatta").order("data_scadenza",{ascending:true})).then(r=>r,()=>null),

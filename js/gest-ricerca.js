@@ -97,7 +97,7 @@
       leggi("gest_fornitori"),leggi("gest_fatture_fornitori"),
       _conCr?sb.from("gest_crediti").select("*").eq("user_id",sbUid).limit(CT_TETTO):Promise.resolve({data:[]}),
       /* 20 nov 2026 — le persone del reparto (niente costi: si legge solo quello che si mostra) */
-      sb.from("gest_operatori").select("id,nome,mansione,telefono,email").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO),
+      sb.from("gest_operatori").select("id,nome,mansione,telefono,email").eq("user_id",sbUid).limit(CT_TETTO),
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).limit(CT_TETTO),
       (typeof dsCarica==="function")?Promise.resolve(dsCarica()).then(d=>({data:d||[]}),()=>({data:[]})):Promise.resolve({data:[]}),
       /* 25 nov 2026 — i computi del reparto e i SAL (tenuti solo se il loro

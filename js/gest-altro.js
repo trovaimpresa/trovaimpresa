@@ -11,10 +11,12 @@
    ===================================================================== */
 (function () {
   'use strict';
-  var FUORI = ['anche-pro', 'azienda', 'noleggio'];   /* 11 nov: Alex vuole «Sei anche un professionista?» fuori */
+  var FUORI = ['squadra-azienda', 'anche-pro', 'azienda', 'noleggio'];   /* 28 nov: anche «Squadra», per primo */   /* 11 nov: Alex vuole «Sei anche un professionista?» fuori */
   var stretto = window.matchMedia('(max-width:880px)');
 
   var CSS = ''
+    + '#landing .lt-btn.lt-btn-squadra{background:#ff8800 !important;border-color:#ff8800 !important;color:#fff !important}'
+    + '#landing .lt-btn.lt-btn-squadra:hover{filter:brightness(1.08)}'
     + '.lt-altro{position:relative;display:inline-block}'
     + '.lt-altro>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px}'
     + '.lt-altro>summary::-webkit-details-marker{display:none}'
@@ -65,6 +67,9 @@
       menu.appendChild(b);
     });
     if (barra.lastElementChild !== alt) barra.appendChild(alt);   /* «Altro» sempre per ultimo */
+    /* 28 nov 2026: «Squadra» sempre per primo (anche-pro arriva dopo e si metteva davanti) */
+    var sq = barra.querySelector('[data-action="squadra-azienda"]');
+    if (sq && barra.firstElementChild !== sq) barra.insertBefore(sq, barra.firstElementChild);
   }
 
   /* cliccando una voce, o fuori, il menu si chiude */

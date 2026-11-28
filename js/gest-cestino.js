@@ -197,7 +197,7 @@
     gest_preventivi       :[_REP,_CLI,_LAV],
     gest_fatture          :[_REP,_CLI],
     gest_mezzi            :[_REP],
-    gest_operatori        :[_REP],
+    gest_operatori        :[], /* 28 nov 2026: la persona e' dell'azienda, non del reparto */
     gest_carte            :[_REP],
     gest_scadenze         :[_REP,["gest_mezzi","mezzo_id","mezzo"],_LAV,["gest_operatori","operatore_id","persona"]],
     gest_computi          :[_REP],
