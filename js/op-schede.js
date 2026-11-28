@@ -121,7 +121,7 @@ async function opRender(){
   opLegaCard(box);
   try{
     const m=await opConta();
-    box.innerHTML=vivi.length?vivi.map(l=>opCard(l,m)).join(""):box.innerHTML;
+    box.innerHTML=vivi.length?vivi.map(l=>opCard(l,m)).join("")+opBtnNuovo():box.innerHTML;
     opLegaCard(box);
   }catch(_){}
   const arc=document.getElementById("op-n-arch");
