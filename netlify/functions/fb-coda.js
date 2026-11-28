@@ -44,6 +44,42 @@ async function vetrina(giorno, turno) {
   return { chiave: `vet:${giorno}:${turno}`, ...testoVetrina(i, foto) };
 }
 
+// 28 nov 2026 (Alex: «mandami una e-mail quando un post su fb viene
+// pubblicato»): a ogni giro, UNA email con i post appena dati a Make.
+// Se l'email non parte, i post escono lo stesso (si scrive solo nel log).
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+async function avvisaAlex(post, turno) {
+  const KEY = process.env.RESEND_API_KEY;
+  if (!KEY || !post.length) return;
+  const ore = { 1: '8', 2: '13', 3: '19' }[turno] || '';
+  const blocchi = post.map(p => {
+    const t = p.chiave.split(':')[0];
+    const id = t === 'vet' ? '' : p.chiave.split(':').slice(1).join(':');
+    const gruppo = ['imp', 'sub', 'off'].includes(t) ? `${SITO}/facebook-post?t=${t}&id=${encodeURIComponent(id)}` : '';
+    return `<div style="border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin:0 0 14px">
+      <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin:0 0 8px">${esc(p.titolo)}${p.foto && p.foto.length ? ` · 📷 ${p.foto.length} foto` : ''}</div>
+      <div style="font-size:15px;color:#334155;white-space:pre-line;line-height:1.5">${esc(p.testo)}</div>
+      ${gruppo ? `<a href="${gruppo}" style="display:inline-block;margin-top:10px;background:#1877f2;color:#fff;font-weight:800;font-size:15px;text-decoration:none;padding:10px 18px;border-radius:9px">Condividi nel gruppo</a>` : ''}
+    </div>`;
+  }).join('');
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
+    <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">Facebook: ${post.length} post in uscita${ore ? ' (giro delle ' + ore + ')' : ''}</h2>
+    <p style="font-size:16px;color:#475569;margin:0 0 14px">Make li sta pubblicando adesso sulla pagina «Trova impresa». Non devi fare niente.</p>
+    ${blocchi}
+    <p style="font-size:14px;color:#64748b;margin:6px 0 0">I numeri li trovi nel pannello admin, voce «Facebook».</p>
+  </div>`;
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [process.env.ADMIN_EMAIL || 'info@trovaimpresa.com'],
+        subject: `Facebook: ${post.length} post pubblicat${post.length === 1 ? 'o' : 'i'} — ${post.map(p => p.titolo.split(' — ')[0]).filter((v, i, a) => a.indexOf(v) === i).join(', ')}`, html }),
+      signal: AbortSignal.timeout(6000)
+    });
+    if (!r.ok) console.error('[fb-coda] email', r.status, await r.text());
+  } catch (e) { console.error('[fb-coda] email', e.message); }
+}
+
 exports.handler = async (event) => {
   const q = event.queryStringParameters || {};
   if (!CHIAVE || q.chiave !== CHIAVE) return risposta(401, { errore: 'Chiave sbagliata' });
@@ -97,6 +133,7 @@ exports.handler = async (event) => {
         body: JSON.stringify(nuovi.map(p => ({ chiave: p.chiave }))), signal: AbortSignal.timeout(8000)
       });
       if (!r.ok) throw new Error('segno consegnati ' + r.status);
+      await avvisaAlex(nuovi, turno);
     }
     return risposta(200, { giorno, turno, prova, post: nuovi });
   } catch (e) {
