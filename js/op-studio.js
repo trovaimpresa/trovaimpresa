@@ -47,7 +47,7 @@
     ["Da fatturare (lavori finiti)","Da fatturare (pratiche finite)"],
     ["Nessun lavoro finito da fatturare.","Nessuna pratica finita da fatturare."],
     ["Questo lavoro non risulta tra i tuoi.","Questa pratica non risulta tra le tue."],
-    ["Divise per lavoro: prima e dopo.","Divise per pratica: prima e dopo."],
+    ["Divise per lavoro: dal capo, in corso e finito.","Divise per pratica: dallo studio, in corso e finita."],
     ["Nome (cliente o lavoro)","Nome (cliente o pratica)"],
     ["Messaggi su questo lavoro","Messaggi su questa pratica"],
     ["Le voci del lavoro","Le voci della pratica"],

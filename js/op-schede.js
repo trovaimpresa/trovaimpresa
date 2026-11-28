@@ -145,7 +145,7 @@ async function opRenderFoto(){
     b.onclick=()=>{
       if(vivi.length===1){opApriFoto(vivi[0].id);return;}
       sc.classList.toggle("hidden");
-      sc.innerHTML='<div class="op-flab" style="font-size:18px;margin-bottom:8px">Per quale lavoro?</div>'+vivi.map(l=>`<button type="button" class="op-b" data-fl="${l.id}" style="width:100%;margin-bottom:8px;text-align:left;font-size:17px;padding:14px">${esc(opTitolo(l))}${opDove(l)&&opDove(l)!==opTitolo(l)?`<br><span style="font-weight:500;color:#475569">${esc(opDove(l))}</span>`:""}</button>`).join("");
+      sc.innerHTML='<div class="op-flab" style="font-size:18px;margin-bottom:8px">Per quale lavoro?</div>'+vivi.map(l=>`<button type="button" class="op-b" data-fl="${l.id}" style="width:100%;margin-bottom:8px;text-align:left;font-size:17px;padding:14px">${esc(opTitolo(l))}${(l.descrizione&&l.descrizione!==opTitolo(l)?l.descrizione.slice(0,70):(opDove(l)!==opTitolo(l)?opDove(l):""))?`<br><span style="font-weight:500;color:#475569">${esc((l.descrizione&&l.descrizione!==opTitolo(l)?l.descrizione.slice(0,70):(opDove(l)!==opTitolo(l)?opDove(l):"")))}</span>`:""}</button>`).join("");
       sc.querySelectorAll("[data-fl]").forEach(x=>x.onclick=()=>opApriFoto(x.dataset.fl));
     };
   };
