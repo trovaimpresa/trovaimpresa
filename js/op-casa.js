@@ -56,6 +56,7 @@
     + ".oh-mg-az{display:none;flex-direction:column;gap:12px;margin:14px 0 0}"
     + "body.oh-sez-giornate .oh-mg-az{display:flex}"
     + ".oh-mg-az button{width:100%;padding:16px;border:2px solid #1d4f91;border-radius:16px;background:#fff;color:#1d4f91;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
+    + ".oh-mg-az button.oh-mg-manda{background:#ff8800;border-color:#ff8800;color:#fff}"
     + ".oh-mg-seg{display:flex;background:#eceae5;border-radius:14px;padding:5px;margin-bottom:14px}"
     + ".oh-mg-seg button{flex:1;border:0;background:transparent;border-radius:11px;padding:12px 6px;font:inherit;font-size:18px;font-weight:800;color:#6b7280;cursor:pointer}"
     + ".oh-mg-seg button.on{background:#fff;color:#0a2a4d;box-shadow:0 1px 3px rgba(0,0,0,.12)}"
@@ -303,12 +304,12 @@
         new MutationObserver(metti).observe(mg, { childList: true });
         metti(); speseMese(); bozzeDisegna();
         var az = document.createElement("div"); az.className = "oh-mg-az";
-        az.innerHTML = '<button type="button" data-mgaz="riep">📋 Riepilogo del mese</button><button type="button" data-mgaz="pdf">📄 Scarica PDF del mese</button>';
+        az.innerHTML = '<button type="button" data-mgaz="riep">📋 Riepilogo del mese</button><button type="button" data-mgaz="pdf">📄 Scarica PDF del mese</button><button type="button" data-mgaz="manda" class="oh-mg-manda">📤 Manda il mese al capo</button>';
         window._ohMg.az = az; mg.insertBefore(az, bx);
         az.addEventListener("click", function (ev) {
           var a = ev.target.closest("[data-mgaz]"); if (!a) return;
           if (a.getAttribute("data-mgaz") === "riep") { var r1 = mg.querySelector(".mg-r,.mg-vuoto"); if (r1) r1.scrollIntoView({ behavior: "smooth", block: "start" }); }
-          else pdfMese(a);
+          else pdfMese(a, a.getAttribute("data-mgaz") === "manda");
         });
         bx.addEventListener("click", function (ev) {
           var v = ev.target.closest("[data-mgv]");
@@ -426,7 +427,7 @@
       sc.onload = function () { ok(!!window.jspdf); }; sc.onerror = function () { ok(false); }; document.head.appendChild(sc);
     });
   }
-  async function pdfMese(btn) {
+  async function pdfMese(btn, manda) {
     var mg = document.getElementById("mie-giornate"); if (!mg) return;
     var mese = ((mg.querySelector(".mg-mese b") || {}).textContent || "").trim();
     var tot = ((mg.querySelector(".mg-tot b") || {}).textContent || "").trim();
@@ -445,7 +446,7 @@
     doc.setFont("helvetica", "normal"); doc.setFontSize(12);
     if (nome) { doc.text(nome, M, y); y += 6; }
     doc.text("Giorni lavorati: " + (tot || "0"), M, y); y += 10;
-    if (!righe.length) { doc.text("Nessuna giornata segnata in questo mese.", M, y); }
+    if (!righe.length) { doc.text("Nessuna giornata segnata in questo mese.", M, y); y += 8; }
     righe.forEach(function (r) {
       var lin = doc.splitTextToSize(r[1] || "", W - M * 2 - 38);
       if (y + lin.length * 6 > 285) { doc.addPage(); y = 20; }
@@ -453,7 +454,40 @@
       doc.setFont("helvetica", "normal"); doc.text(lin, M + 38, y);
       y += Math.max(1, lin.length) * 6 + 3;
     });
-    doc.save("giornate-" + mese.toLowerCase().replace(/\s+/g, "-") + ".pdf");
+    /* le spese del mese, come le vede in «Spese, benzina, bolle e fatture» */
+    var sp = Array.prototype.map.call(document.querySelectorAll("#oh-sp-elenco .oh-sp-r"), function (r) {
+      var b = ((r.querySelector("b") || {}).textContent || "").trim(), sm = ((r.querySelector("small") || {}).textContent || "").trim();
+      var imp = ((r.querySelector(".imp") || {}).textContent || "").trim();
+      var att = r.querySelector(".oh-sp-att") ? " (aspetta il capo)" : "", car = r.querySelector(".oh-sp-carta") ? " · bancomat ditta" : "";
+      return [b + att, sm + car, imp];
+    });
+    if (sp.length) {
+      y += 6; if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text("Spese", M, y); y += 8; doc.setFontSize(12);
+      sp.forEach(function (r) {
+        if (y > 280) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold"); doc.text(r[0].slice(0, 60), M, y); doc.text(r[2], W - M, y, { align: "right" }); y += 5;
+        doc.setFont("helvetica", "normal"); doc.text(r[1].slice(0, 90), M, y); y += 7;
+      });
+    }
+    var file = "giornate-" + mese.toLowerCase().replace(/\s+/g, "-") + ".pdf";
+    if (!manda) { doc.save(file); return; }
+    /* 28 nov 2026 — a fine mese le giornate si mandano al capo in PDF:
+       entra nella «Chat col capo» come un messaggio con il file */
+    btn.disabled = true; btn.textContent = "Mando al capo…";
+    try {
+      var blob = doc.output("blob");
+      var path = MIO.impresaId + "/chat/" + Date.now() + "_" + Math.floor(Math.random() * 1000) + "_" + file;
+      var up = await sb.storage.from("gestionale-foto").upload(path, blob, { contentType: "application/pdf" });
+      if (up.error) throw new Error(up.error.message);
+      var ins = await sb.from("gest_messaggi").insert({ user_id: MIO.impresaId, operatore_id: MIO.operatoreId || null, lavoro_id: null, autore_nome: MIO.nome || null, testo: "Le mie giornate di " + mese + " (PDF)", allegati: [{ path: path, nome: file, tipo: "application/pdf" }] });
+      if (ins.error) { try { await sb.storage.from("gestionale-foto").remove([path]); } catch (_) {} throw new Error(ins.error.message); }
+      if (typeof window.tiSpunta === "function") window.tiSpunta("Mandato al capo", { sotto: "Le giornate di " + mese + " sono nella Chat col capo" });
+      else if (typeof toast === "function") toast("Mandato al capo: lo trovi nella Chat col capo");
+    } catch (err) {
+      if (typeof toast === "function") toast("Non mandato: " + err.message + ". Riprova.");
+    }
+    btn.disabled = false; btn.textContent = t0;
   }
 
   function parti() {
