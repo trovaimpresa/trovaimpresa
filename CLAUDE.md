@@ -4822,3 +4822,23 @@ Da sapere: la domanda «Eliminare … per sempre?» arriva dopo un attimo (aspet
 - Cantiere nato da una giornata: `giorTrovaLavoro(dove,data,nomi)` lo assegna alla prima persona della scheda (`operatore_id`); il messaggio verde dice «…, assegnato a Marco» (`giorCantChi`). «Parla» passa da `giorScrivi`, quindi vale anche lì. Spese e note di «Parla» non hanno persone: restano senza.
 Collaudo sul sito vero: fila dell'Agenda (Da fare 0 / Tutti 1 / Ore fatte), Giornate senza Acquisti, giornata di prova con persona nuova → cantiere con `operatore_id` giusto. Pulito: lavori 5, persone 1, ore 1, rapportini 1 come prima. Banco: ZERO difetti.
 ⚠️ Ancora in gest_richieste la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov: va tolta da Alex dal pannello admin.
+
+# 28 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 7: LA PRATICA (studio tecnico, online e1f2009)
+Giro da geometra di 55 anni su Pratiche, Clienti, Preventivi e parcella, Richieste, Calendario. Reparto «ferramenta», `?vedi=professionista`, «PROVA CONTROLLORE», 1440 e 375. Collaudato sul sito vero dopo il push, poi tutto cancellato (ferramenta: 1 cliente, 1 lavoro; preventivi dell'account 4; incarichi 0).
+Difetti sistemati:
+- ⛔ `tabCorrente()` (js/gest-riepilogo-schede.js) prendeva la PRIMA voce accesa del menu: nelle voci unite (Preventivi e richieste, Computo e SAL/acconti, Mezzi e attrezzature, Scadenze e promemoria, Squadra/Collaboratori e agenda) le accese sono due e la prima è quella di fuori. Su «Richieste dal sito», salvato il preventivo, la lista restava «Nuova». Ora conta la sezione a schermo (`#appview section.active[id]`). Vale per tutte le facce.
+- ⛔ Calendario 1440×900: «Parla» saliva di casella in casella (ogni giorno è cliccabile) e finiva sulla domenica 1. `liberaSotto` (js/gest-voce.js): se dopo 4 salti copre ancora qualcosa, torna in basso.
+- Parcella in forfettario: niente riga «Imponibile IVA» in 5 posti (modulo, PDF, lettera d'incarico a schermo e in PDF, pagina del cliente) con `parcImpNome(cp,forf)` in js/gest-fatture.js (null = riga da saltare); in fondo al PDF la frase del forfettario invece di «la ritenuta si applica…».
+- Pratica: «Totale, IVA esclusa» sotto le prestazioni → «Totale» in forfettario.
+- Filtro «A che punto sta»: una pratica FATTA rimasta su «Da preparare» non si conta più lì (`_praPunto` in js/gest-schede-clienti.js).
+Fatti col sì di Alex (foto prima, tutte e 7):
+- A. Spunta «Preventivo accettato» con «Apri la pratica» / «Apri il lavoro» (`prevToLavoro`).
+- B. Nella pratica «Dati della pratica» subito sotto il cliente, titolo `sh-tit` (jobForm in modifica; `bloccoPratica`).
+- C. Allo studio niente ▶ dei video (sono girati sull'impresa): `haVideo()` in js/gest-tutorial.js. Resta il ▶ dell'Assistente (guida).
+- D. Telefono, Pratiche: «A che punto sta» è una tendina (`.lav-pstati-sel`, i bottoni restano dentro `.lav-pstati-bt` e la tendina li preme).
+- E. Scheda della pratica/lavoro: «📅 Senza data» invece di «📅 —» (`jobCardSupa`, tutte le facce).
+- F. Parcella in forfettario: casella della ritenuta nascosta (resta `#pv-rit` nella pagina), IVA «Niente IVA (forfettario)».
+- G. Richieste dal sito «Da fare» vuoto con richieste fatte: «Hai risposto a tutte le richieste» + «Quelle già fatte le trovi in «Fatte»».
+Da sapere: le foto dello studio si fanno con /home/claude/foto/foto7.js (route su `/rest/v1/imprese` con `tipo:"professionista"`: l'ultima route vince; lanciarlo dalla cartella del progetto, cerca node_modules nella cartella corrente). Il «Parla» nella foto locale si vede in basso anche prima (quella sopra la domenica si vedeva solo coi dati veri).
+💡 Da decidere con Alex (non fatto): nella pratica ci sono due «stato» («A che punto sta» del Comune e «Stato» Da fare/In corso/Fatto): per un geometra è un doppione, unirli è un lavoro grosso.
+⚠️ Ancora in gest_richieste la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov: Alex la toglie dal pannello admin (ha detto «domani», 27 nov).
