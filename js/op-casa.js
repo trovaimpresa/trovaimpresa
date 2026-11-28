@@ -139,7 +139,7 @@
     var b = $("#oh-back");
     if (b && sez) {
       var nomi = { giornate: "Le mie giornate", lavori: "Lavori", mezzi: "Mezzi", chat: "Chat col capo", foto: "Foto", altro: "Altro", preventivi: "Preventivi", archivio: "Lavori vecchi" };
-      b.innerHTML = '<span style="font-size:34px;line-height:1;margin-top:-4px">‹</span>';
+      b.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
       var tt = $("#oh-tit-t"); if (tt) tt.textContent = nomi[sez] || "";
     }
     if (!sez) disegna();
@@ -186,7 +186,7 @@
       var w = document.getElementById("view-" + v); if (!w || w.querySelector(".oh-vback")) return;
       var b = document.createElement("button"); b.type = "button"; b.className = "oh-vback"; b.id = "oh-vback-" + v;
       b.style.cssText = "display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer";
-      b.innerHTML = '<span style="font-size:34px;line-height:1;margin-top:-4px">‹</span>';
+      b.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
       b.onclick = function () { if (location.hash.indexOf("#sez-") === 0) history.back(); else { var na = $("#nav-agenda"); if (na) na.click(); casa(); } };
       var ti = w.querySelector(".day-title");
       b.setAttribute("aria-label", "Indietro");
