@@ -31,7 +31,7 @@
     ["Puoi leggere le note, ma non cambiarle: il permesso «Note» ce l'ha il tuo capo.","Puoi leggere le note, ma non cambiarle: il permesso «Note» te lo dà il titolare."],
     ["Ancora nessuna foto. Le foto si aggiungono dentro il lavoro.","Ancora nessuna foto. Le foto si aggiungono dentro la pratica."],
     ["Foto, spese e bolla: la controlla il capo","Foto e spese: la controlla il titolare"],
-    ["Parla e basta: ore, materiali e spese insieme","Parla e basta: ore, cosa hai fatto e spese insieme"],
+    ["Scrivi o parla: ore, materiali e spese insieme","Scrivi o parla: ore, cosa hai fatto e spese insieme"],
     ["Vuoto: non hai parlato di materiali","Vuoto: non hai detto cosa hai fatto"],
     ["Scrivi in quale cantiere hai lavorato.","Scrivi su quale pratica o sopralluogo hai lavorato."],
     ["Questi soldi entrano nel conto di questo cantiere.","Questi soldi entrano nel conto di questa pratica."],

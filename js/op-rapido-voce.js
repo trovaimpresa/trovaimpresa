@@ -13,7 +13,7 @@ const RV={passo:0,tipo:null,lavoro:null,ore:8,testo:"",importo:"",
           detto:"",capito:null,vOre:{},vScarti:[]};
 const RV_TIPI=[
   {k:"voce",      lab:"🎙 Racconta la giornata",
-                                   sub:"Parla e basta: ore, materiali e spese insieme", perm:"rapportini"},
+                                   sub:"Scrivi o parla: ore, materiali e spese insieme", perm:"rapportini"},
   {k:"ore",       lab:"Ore",       sub:null,                                       perm:"rapportini"},
   /* ⚠️ 5 set 2026: le sub di «Materiale» e «Spesa» le decide il mestiere, e si
      leggono al momento di disegnare (il ruolo si sa solo dopo il database). */
@@ -124,7 +124,7 @@ function rvDisegna(){
       /* il testo si ritrova tornando indietro: chi ha appena dettato tre righe
          in piedi su un ponteggio non le ridetta perche' ha premuto la freccia */
       +'<textarea class="rv-in" id="rv-detto" rows="5" placeholder="'+esc(_p('esDettato'))+'">'+esc(RV.detto||"")+'</textarea>'
-      +'<div class="rv-mic">🎙 <b>Non scrivere: parla.</b> Tocca qui sopra, poi sulla tastiera del telefono tieni premuto il tasto del <b>microfono</b> e racconta com’è andata. Le parole compaiono da sole.</div>'
+      +'<div class="rv-mic">✍️ <b>Scrivi qui sopra come ti viene</b>, oppure tocca il <b>microfono</b> e racconta a voce: le parole compaiono da sole.</div>'
       +'<button type="button" class="rv-ok" id="rv-pensa">Fammi vedere cosa hai capito</button>'
       +'<div class="rv-nota">Costa 1 credito AI dell’impresa. Dopo puoi correggere tutto: niente viene salvato finché non confermi tu.</div>';
     return;
