@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { avvisaTelefoni } = require('./lib/push-avvisi');
+const giro = require('./lib/giro-richieste');
 // Ogni tipo di iscritto ha il suo pannello: il pulsante dell'email deve
 // portarlo dove sta davvero la richiesta.
 const PANNELLI = {
@@ -60,6 +61,7 @@ exports.handler = async function(event) {
   }
   impresa_id = Number(impresa_id);
   let trovata = false;   /* fuori dal blocco: serve anche sotto (studio) */
+  let rigaTrovata = null; /* 28 nov 2026: la riga vera, per l'email «arrivata» al cliente e il link alla richiesta */
   {
     const soglia = encodeURIComponent(new Date(Date.now() - 60 * 60 * 1000).toISOString());
     const pulito = v => String(v || '').trim().toLowerCase();
@@ -68,9 +70,10 @@ exports.handler = async function(event) {
                        || (telefono && soloCifre(r.telefono).length >= 6 && soloCifre(telefono).length >= 6
                            && soloCifre(r.telefono).slice(-6) === soloCifre(telefono).slice(-6));
     for (const [tab, col] of [['preventivi', 'impresa_id'], ['incarichi_richieste', 'professionista_id']]) {
-      const rr = await fetch(`${SUPABASE_URL}/rest/v1/${tab}?${col}=eq.${impresa_id}&created_at=gte.${soglia}&select=email,telefono&limit=30`, { headers: sbHeaders });
+      const rr = await fetch(`${SUPABASE_URL}/rest/v1/${tab}?${col}=eq.${impresa_id}&created_at=gte.${soglia}&select=*&order=created_at.desc&limit=30`, { headers: sbHeaders });
       const righe = rr.ok ? await rr.json() : [];
-      if (Array.isArray(righe) && righe.some(combacia)) { trovata = tab; break; }
+      const r0 = Array.isArray(righe) ? righe.find(combacia) : null;
+      if (r0) { trovata = tab; rigaTrovata = giro.campi(tab, r0); break; }
     }
     if (!trovata) {
       return { statusCode: 403, body: 'Nessuna richiesta appena arrivata per questa impresa' };
@@ -106,6 +109,9 @@ exports.handler = async function(event) {
     /* e' un incarico anche quando la riga trovata sta in incarichi_richieste (conto misto) */
     const studio = !!(impresa && impresa.tipo === 'professionista') || trovata === 'incarichi_richieste';
     const titoloAvviso = studio ? 'Nuova richiesta di incarico' : 'Nuova richiesta di preventivo';
+    /* 28 nov 2026 — «Rispondi a Mario»: il nome, e il pulsante che apre PROPRIO quella richiesta */
+    const chiNome = giro.esc(giro.primoNome(nomeTesto));
+    const linkRich = giro.linkPannello(impresa, rigaTrovata || { id: '', tab: trovata });
 
     /* 8 nov 2026 — SUBITO SUL TELEFONO, se l'impresa l'ha acceso (Dati azienda →
        «Gli avvisi sul telefono»). Prima dell'email e indipendente da lei:
@@ -118,7 +124,7 @@ exports.handler = async function(event) {
         await avvisaTelefoni(sbc, impresa.user_id, 'richieste', {
           titolo: titoloAvviso,
           testo: chi + (dove ? ' · ' + dove : '') + ' — tocca per rispondere',
-          url: '/' + (PANNELLI[impresa.tipo] || 'pannello-artigiano.html')
+          url: linkRich.replace(giro.SITO, '')
         });
       } catch (e) { console.error('push richiesta:', e.message); }
     }
@@ -136,7 +142,7 @@ exports.handler = async function(event) {
           </a>
         </div>
         <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-          <h1 style="color:white;margin:0;font-size:22px">📋 ${titoloAvviso}</h1>
+          <h1 style="color:white;margin:0;font-size:22px">${chiNome} ti ha chiesto ${studio ? 'un incarico' : 'un sopralluogo'}</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
           <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${escH(impresa.nome_attivita || impresa.nome)}</strong>!</p>
@@ -197,11 +203,12 @@ exports.handler = async function(event) {
             <p style="font-size:13px;color:#666;margin:0">Apri la richiesta dal pannello per vedere telefono ed email e rispondere subito.</p>
           </div>
           <div style="text-align:center;margin-bottom:28px">
-            <a href="https://trovaimpresa.com/${PANNELLI[impresa.tipo] || 'pannello-artigiano.html'}"
-               style="display:inline-block;background:#0066ff;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
-              📂 Apri il pannello e rispondi →
+            <a href="${linkRich}"
+               style="display:inline-block;background:#ff8800;color:white;padding:14px 26px;border-radius:10px;text-decoration:none;font-size:17px;font-weight:700">
+              Rispondi a ${chiNome}
             </a>
           </div>
+          <p style="font-size:15px;line-height:1.6;color:#5b6574;margin:0 0 20px">Chi risponde presto di solito prende il lavoro. Se non rispondi entro 2 giorni, a ${chiNome} proponiamo anche altre imprese della zona.</p>
           ${require('./lib/avviso-sicurezza')('impresa')}
           <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
             Ricevi questa email perché sei registrato ${studio ? 'come professionista' : 'come impresa'} su TrovaImpresa.
@@ -243,7 +250,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: fromAddr,
         to: [toAddr],
-        subject: `🔔 ${studio ? 'Richiesta di incarico' : 'Richiesta sopralluogo'} da ${nomeTesto} – ${String(categoria_lavoro || '').replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`,
+        subject: `🔔 Rispondi a ${giro.primoNome(nomeTesto)} — ${studio ? 'richiesta di incarico' : 'richiesta di sopralluogo'}${cittaTesto ? ' a ' + cittaTesto : ''}`,
         html
       })
     });
@@ -251,11 +258,38 @@ exports.handler = async function(event) {
     const respText = await res.text();
     console.log('[DEBUG] Resend post-fetch — status:', res.status, '| body:', respText);
 
+    /* 28 nov 2026 — L'EMAIL AL CLIENTE «LA TUA RICHIESTA E' ARRIVATA».
+       Parte anche se quella all'impresa non e' partita (la richiesta e' comunque
+       nel pannello), una volta sola per richiesta (arrivata_inviata_at), e solo
+       se il cliente ha lasciato l'email. Mai un errore verso il modulo. */
+    let cliente = 'no';
+    try {
+      if (rigaTrovata && rigaTrovata.email && !rigaTrovata.arrivata && rigaTrovata.token) {
+        const sbc = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { data: preso } = await sbc.from(trovata).update({ arrivata_inviata_at: new Date().toISOString() })
+          .eq('id', rigaTrovata.id).is('arrivata_inviata_at', null).select('id');
+        if (preso && preso.length) {
+          const c = rigaTrovata, nImp = giro.nomeImpresa(impresa);
+          const htmlCli = giro.emailPagina('La tua richiesta è arrivata',
+            '<p>Ciao <b>' + giro.esc(giro.primoNome(c.nome)) + '</b>,</p><p>la tua richiesta è arrivata a <b>' + giro.esc(nImp)
+            + '</b>. Le abbiamo mandato un\'email e la trova nel suo pannello.</p>'
+            + giro.tabella([['Lavoro', c.lavoro], ['Dove', c.dove], ['Cosa hai scritto', c.testo]])
+            + '<p>Quando ti risponde ti arriva un\'email. Puoi seguire tutto dalla pagina della tua richiesta.</p>',
+            'Vedi la tua richiesta', giro.linkRichiesta(c.token),
+            'Se entro 2 giorni non ti risponde, ti mandiamo altre imprese della tua zona. Scegli tu a chi scrivere: i tuoi dati non li giriamo a nessuno.',
+            'cliente');
+          const ok = await giro.mandaEmail(c.email, '✅ La tua richiesta è arrivata a ' + String(nImp).replace(/[<>]/g, ''), htmlCli);
+          cliente = ok ? 'mandata' : 'non-partita';
+          if (!ok) await sbc.from(trovata).update({ arrivata_inviata_at: null }).eq('id', c.id);
+        }
+      }
+    } catch (e) { console.error('[notifica-preventivo] email cliente:', e.message); }
+
     if (!res.ok) {
       return { statusCode: 500, body: 'Errore Resend: ' + respText };
     }
 
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+    return { statusCode: 200, body: JSON.stringify({ ok: true, cliente }) };
   } catch (err) {
     console.error('[DEBUG] Errore notifica-preventivo:', err.message);
     console.error('[DEBUG] Stack:', err.stack);

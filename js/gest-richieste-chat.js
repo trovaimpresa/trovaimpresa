@@ -137,6 +137,15 @@
         ${r.foto?`<div class="field"><label>Foto</label><a href="${esc(r.foto)}" target="_blank" rel="noopener">Apri la foto</a></div>`:""}
         ${r._inc&&r.documenti&&r.documenti.length?`<div class="field"><label>Documenti del cliente</label><div style="display:flex;flex-wrap:wrap;gap:8px">${r.documenti.map((d,i)=>`<button class="btn" type="button" data-ds-doc="${esc(String(d))}">Documento ${i+1}</button>`).join("")}</div></div>`:""}
         </div>
+        <div class="sh-b" style="border:2px solid #ff8800;background:#fff8ef">
+        <div class="sh-tit">Rispondi a ${esc(String(r.nome||"il cliente").trim().split(/\s+/)[0])}</div>
+        <div id="ds-scrivi-box">
+          <p style="margin:0 0 8px;font-size:16px">${r.risposta_at?"Hai già risposto: se scrivi ancora, gli arriva un altro messaggio.":"Gli arriva un'email e legge la risposta sulla pagina della sua richiesta. Gratis, niente crediti."}</p>
+          <textarea id="ds-scrivi-txt" maxlength="3000" placeholder="Es. Buongiorno, possiamo passare giovedì mattina per vedere il lavoro. Le va bene?" style="width:100%;min-height:110px;font:18px/1.45 system-ui;padding:12px;border:1px solid #cfd6df;border-radius:10px;box-sizing:border-box"></textarea>
+          <button class="btn-primary" type="button" id="ds-scrivi-go" style="margin-top:8px;background:#ff8800;border-color:#ff8800">Manda la risposta</button>
+          <div id="ds-scrivi-esito" style="margin-top:8px;font-size:16px"></div>
+        </div>
+        </div>
         <div class="sh-b" style="border:2px solid #7c5cff;background:#f6f3ff">
         <div class="sh-tit">\u2728 Risposta pronta</div>
         <div id="ds-risp-box">
@@ -151,6 +160,7 @@
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`,
       dsVoci(r).filter(v=>!v||v.action!=="ds-apri"));   /* «Vedi i contatti» qui dentro c'e' gia' */
     const _go=$("#ds-risp-go"); if(_go)_go.onclick=function(){dsRisposta(r);};
+    const _sc=$("#ds-scrivi-go"); if(_sc)_sc.onclick=function(){dsScrivi(r);};
     document.querySelectorAll("[data-ds-doc]").forEach(b=>b.onclick=async function(){
       const w=window.open("","_blank");
       const {data,error}=await sb.storage.from("documenti-incarichi").createSignedUrl(b.dataset.dsDoc,3600);
@@ -226,6 +236,36 @@
       if(rc.ok)return await rc.json();
     }catch(e){}
     return {email:"",telefono:""};
+  }
+
+  /* 28 nov 2026 — IL GIRO NUOVO: rispondere al cliente dal gestionale, senza AI.
+     Prima dal gestionale si rispondeva solo con «Scrivi la risposta» (AI, crediti)
+     e poi WhatsApp/email a mano: al cliente non arrivava niente da TrovaImpresa e
+     sul sito la richiesta restava «senza risposta». Adesso la risposta si salva
+     nella richiesta (come «Invia» del pannello) e notifica-risposta-* manda al
+     cliente l'email con il link alla sua pagina (richiesta.html). */
+  async function dsScrivi(r){
+    const ta=$("#ds-scrivi-txt"), bt=$("#ds-scrivi-go"), es=$("#ds-scrivi-esito");
+    const testo=(ta&&ta.value||"").trim();
+    if(!testo){es.innerHTML='<span style="color:var(--err)">Scrivi la risposta prima di mandarla.</span>';ta.focus();return;}
+    if(typeof tiHaLinkGest==="function"&&tiHaLinkGest(testo)){es.innerHTML='<span style="color:var(--err)">Niente link: scrivi a parole.</span>';return;}
+    bt.disabled=true;bt.textContent="Invio…";es.textContent="";
+    try{
+      const inc=(typeof dsEInc==="function"&&dsEInc(r.id))||!!r._inc;
+      const ora=new Date().toISOString();
+      const agg=inc?{risposta:testo,risposta_at:ora,stato:"risposta_inviata"}:{risposta:testo,risposta_at:ora,stato:"risposto"};
+      if(!r.visto_il)agg.visto_il=ora;
+      const {data,error}=await sb.from(inc?"incarichi_richieste":"preventivi").update(agg).eq("id",inc?String(r.id):Number(r.id)).select("id");
+      if(error||!data||!data.length)throw new Error("Non sono riuscito a salvare la risposta. Riprova.");
+      const res=await fetch(inc?"/.netlify/functions/notifica-risposta-incarico":"/.netlify/functions/notifica-risposta-preventivo",
+        {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(inc?{incarico_id:String(r.id)}:{preventivo_id:Number(r.id)})});
+      r.risposta=testo;r.risposta_at=ora;if(r._stato==="nuova"||r._stato==="vista")r._stato="risposto";
+      try{renderDalSito();}catch(_){}try{contaDalSito();}catch(_){}
+      ta.value="";bt.disabled=false;bt.textContent="Manda la risposta";
+      es.innerHTML=res.ok?'<span style="color:#166534;font-weight:700">\u2714 Mandata: al cliente è arrivata l\u2019email.</span>'
+        :(res.status===400?'<span style="color:#9a3412;font-weight:700">Salvata, ma il cliente non ha lasciato l\u2019email: chiamalo o scrivigli su WhatsApp.</span>'
+        :'<span style="color:#9a3412;font-weight:700">Salvata, ma l\u2019email al cliente non è partita. Riprova tra poco.</span>');
+    }catch(e){bt.disabled=false;bt.textContent="Manda la risposta";es.innerHTML='<span style="color:var(--err)">'+esc(e.message||"Errore, riprova")+'</span>';}
   }
 
   async function dsRisposta(r){

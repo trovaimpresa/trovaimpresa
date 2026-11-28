@@ -4845,6 +4845,24 @@ else iconizza();
 <script src="/js/app-invito.js" defer></script>
 <script src="/js/volto-pannello.js" defer></script>
 <script src="/js/visti-facebook.js?v=2" defer></script>
+<script>
+/* 28 nov 2026 — il link dell'email «Rispondi a Mario»: ?richiesta=<id incarico>
+   apre la sezione delle richieste con la casella della risposta gia' aperta. */
+(function(){
+  var id=null; try{ id=new URLSearchParams(location.search).get('richiesta'); }catch(e){}
+  if(!id || !/^[0-9a-f-]{36}$/i.test(id)) return;
+  var n=0, t=setInterval(function(){
+    n++; var box=document.getElementById('risp-'+id);
+    if(box){
+      clearInterval(t);
+      try{ if(typeof showSectionById==='function') showSectionById('preventivi'); }catch(e){}
+      box.style.display='block';
+      try{ history.replaceState(history.state,'',location.pathname+location.hash); }catch(e){}
+      setTimeout(function(){ try{ box.scrollIntoView({behavior:'smooth',block:'center'}); document.getElementById('risp-testo-'+id).focus({preventScroll:true}); }catch(e){} },300);
+    } else if(n>40) clearInterval(t);
+  },500);
+})();
+</script>
 </body>
 <script>
 function toggleSidebar() {

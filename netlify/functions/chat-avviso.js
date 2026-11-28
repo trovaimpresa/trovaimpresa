@@ -138,7 +138,10 @@ exports.handler = async (event) => {
       const dalCliente = msgs.find(x => x.mittente === 'cliente' && x.cliente_email);
       a = dalCliente && dalCliente.cliente_email;
       if (!a) return risposta(200, { ok: true, avviso: 'senza-email' });
-      const link = 'https://trovaimpresa.com/profilo-impresa.html?id=' + encodeURIComponent(imp.id) + '&chat=' + encodeURIComponent(conv);
+      let link = 'https://trovaimpresa.com/profilo-impresa.html?id=' + encodeURIComponent(imp.id) + '&chat=' + encodeURIComponent(conv);
+      /* 28 nov 2026 — se la chat e' quella di una richiesta di preventivo/incarico,
+         il cliente torna sulla pagina della SUA richiesta (richiesta.html) */
+      try { const ric = await require('./lib/giro-richieste').daConv(sb, conv); if (ric && ric.token) link = require('./lib/giro-richieste').linkRichiesta(ric.token); } catch (e) {}
       oggetto = '💬 ' + nomeImpresa + ' ti ha risposto';
       html = pagina(esc(nomeImpresa) + ' ti ha risposto',
         '<p>Ciao' + (dalCliente.cliente_nome ? ' <b>' + esc(dalCliente.cliente_nome) + '</b>' : '') + ',</p>'

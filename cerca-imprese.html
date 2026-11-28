@@ -371,56 +371,31 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     if(cosa)chips+='<span style="display:inline-block;background:#eaf1ff;color:#0049b8;border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px;margin:4px 4px 0">&#128295; '+esc(cosa)+'</span>';
     if(dove)chips+='<span style="display:inline-block;background:#eaf1ff;color:#0049b8;border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px;margin:4px 4px 0">&#128205; '+esc(dove)+'</span>';
     return '<h3 style="font-size:24px;line-height:1.25">'+titolo+'</h3>'
-      +'<p style="font-size:17px;margin:8px 0 0">Lascia il numero: <b>appena ne arriva una in zona ti chiama lei.</b> Gratis, nessun impegno.</p>'
+      +'<p style="font-size:17px;margin:8px 0 0">Puoi chiedere nel <b>Forum Edilizia</b>, oppure lasciare la tua email qui sotto: <b>ti avvisiamo quando arriva.</b></p>'
       +(chips?'<div style="margin-top:6px">'+chips+'</div>':'');
   }
 
   function rcChip(el){ var on=el.classList.contains('on'); document.querySelectorAll('#rc-chips .rc-chip').forEach(function(b){b.classList.remove('on');}); if(!on) el.classList.add('on'); }
   (function(){ var st=document.createElement('style'); st.textContent='.rc-chip{display:inline-block;border:1.5px solid #cfdcf3;background:#fff;color:#0a2a4d;border-radius:99px;padding:9px 15px;font-size:15px;font-weight:600;margin:0 6px 8px 0;cursor:pointer;font-family:inherit}.rc-chip.on{background:#0066ff;border-color:#0066ff;color:#fff}'; document.head.appendChild(st); })();
   let rcInvioInCorso = false;
+  /* ⛔ 28 nov 2026 — IL MODULO «FATTI CHIAMARE» NON C'E' PIU' (decisione di Alessio).
+     Su 7 richieste in 30 giorni, 6 erano artigiani che si facevano pubblicita' e
+     la richiesta finiva a imprese concorrenti; nessuna e' mai stata presa.
+     La ricerca cerca gia' nel raggio di 100 km (js/ricerca-mai-vuota.js): qui
+     si arriva solo se intorno non c'e' nessuno. Al cliente restano due strade
+     vere — il Forum Edilizia (rispondono le imprese di tutta Italia) e
+     «Avvisami quando arriva» (il riquadro blu di js/avvisi-clienti.js, sotto) —
+     e chi offre il servizio va alla registrazione gratuita.
+     Il nome della funzione resta quello di prima: la chiamano gia' le pagine. */
   function formRichiestaClienteHTML() {
     rcInvioInCorso = false;
-    return '<div id="richiesta-cliente-box" style="margin-top:22px;padding-top:18px;border-top:1px solid #eee;max-width:420px;margin-left:auto;margin-right:auto">'
-      
-      /* ===== 6 settembre 2026 — IL BIVIO =====
-         Su 14 richieste arrivate da questo modulo, 8 erano artigiani che si
-         proponevano: «Eseguo tutti i lavori», «sono J D Costruzioni», «muratore
-         con partita IVA». Il cartello giallo che diceva «questo form non serve a
-         iscriversi» stava li' e nessuno lo leggeva.
-         Adesso non c'e' piu' niente da leggere: si sceglie, e chi si propone
-         finisce sulla registrazione gratuita invece che in un cassetto. */
-      + '<div id="rc-modulo">'
-      + '<div style="text-align:left">'
-      /* 3 nov 2026 — PRIMA IL LAVORO. La casella «Vuoi aggiungere qualcosa?
-         (facoltativo)» la lasciavano vuota quasi tutti, e a chi riceveva la
-         richiesta arrivava solo «Cerco un'impresa». Resta facoltativo (il
-         modulo corto del 10 ott non si allunga), ma ora basta un tocco. */
-      + '<div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-bottom:10px">Che lavoro devi fare?</div>'
-      + '<div id="rc-chips"><button type="button" class="rc-chip" onclick="rcChip(this)">Bagno</button><button type="button" class="rc-chip" onclick="rcChip(this)">Ristrutturazione</button><button type="button" class="rc-chip" onclick="rcChip(this)">Tetto</button><button type="button" class="rc-chip" onclick="rcChip(this)">Imbiancatura</button><button type="button" class="rc-chip" onclick="rcChip(this)">Impianti</button><button type="button" class="rc-chip" onclick="rcChip(this)">Pavimenti</button><button type="button" class="rc-chip" onclick="rcChip(this)">Altro</button></div>'
-      + '<textarea id="rc-cerca" placeholder="Due parole in più (es. rifare il bagno di 6 mq)" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin:4px 0 16px;min-height:60px;resize:vertical;font-family:inherit"></textarea>'
-      + '</div>'
-      + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:8px">'
-      + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:10px">'
-      /* ===== 16 agosto 2026 — IL CONSENSO, SCRITTO E SPUNTATO =====
-         Prima qui c'era una riga a 11 px in grigio chiaro, sotto il pulsante,
-         che diceva solo "puo' essere inoltrata alle imprese della tua zona":
-         non diceva che parte anche il TELEFONO, non diceva a quante, e non
-         c'era niente da spuntare. Il modulo Contatti, che non manda niente a
-         nessuno, la spunta ce l'aveva. Questo, che manda il telefono a cinque
-         estranei, no.
-         Adesso: testo a 13 px, cosa parte scritto per esteso, link alla privacy,
-         e senza la spunta il pulsante NON manda. */
-      + '<label id="rc-cons-riga" for="rc-consenso" style="display:flex;gap:10px;align-items:flex-start;background:#f7f9fa;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;margin-bottom:12px;cursor:pointer">'
-      +   '<input type="checkbox" id="rc-consenso" style="width:20px;height:20px;min-width:20px;margin:1px 0 0;accent-color:#0066ff;cursor:pointer">'
-      +   '<span id="rc-cons-testo" style="font-size:13px;line-height:1.55;color:#42546b">Ho letto la <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color:#0066ff;font-weight:700">privacy policy</a> e accetto che la mia richiesta venga mandata a un massimo di 5 attivit&agrave; iscritte della mia zona, e che il mio nome, il mio telefono e la mia email vengano dati solo a quelle che chiederanno di contattarmi.</span>'
-      + '</label>'
-      + '<p id="rc-cons-err" style="display:none;font-size:13px;color:#c0392b;font-weight:700;margin:0 0 10px">Metti la spunta qui sopra per poter mandare la richiesta.</p>'
-      + '<button id="rc-btn" onclick="inviaRichiestaCliente()" style="width:100%;background:#0066ff;color:white;border:none;border-radius:12px;padding:17px 24px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer">Fatti chiamare</button>'
-      + '<p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.5">Le attività che ricevono la tua richiesta ti chiamano direttamente. Se cambi idea scrivi a <a href="mailto:info@trovaimpresa.com" style="color:#0066ff">info@trovaimpresa.com</a> e cancelliamo i tuoi dati.</p>'
-      + '</div>'
-      + '<p style="text-align:center;margin:16px 0 0;font-size:15px;color:#667">Offri tu questo servizio? <a href="registrazione-artigiano.html" style="color:#c45e28;font-weight:700">Iscriviti gratis</a></p>'
+    return '<div id="richiesta-cliente-box" style="margin-top:22px;max-width:640px;margin-left:auto;margin-right:auto">'
+      + '<a href="/forum" style="display:block;background:#0066ff;color:#fff;border-radius:12px;padding:16px 20px;font-size:18px;font-weight:800;text-decoration:none;text-align:center">Chiedi nel Forum Edilizia'
+      + '<span style="display:block;font-weight:400;font-size:15px;margin-top:2px">rispondono le imprese di tutta Italia, gratis</span></a>'
+      + '<p style="margin:18px 0 0;font-size:17px;background:#fff7ed;border-radius:10px;padding:14px 16px;text-align:center;color:#0a2a4d">Sei tu un\u2019impresa? <a href="registrazione-impresa.html" style="color:#c45e28;font-weight:800">Iscriviti gratis e fatti trovare qui \u2192</a></p>'
       + '</div>';
   }
+
   /* apre il modulo vero e chiude il bivio: chi ha scelto «cerco» non deve
      rivedere la domanda mentre scrive */
   function rcMostraModulo() {

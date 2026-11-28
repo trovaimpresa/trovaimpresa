@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>La tua richiesta | TrovaImpresa</title>
+<link rel="icon" href="/favicon.ico">
+<!-- 28 nov 2026 — LA PAGINA DELLA RICHIESTA DEL CLIENTE (giro nuovo delle richieste).
+     Ci si arriva dalle email «La tua richiesta è arrivata» e «X ti ha risposto».
+     Il codice nel link (?t=) è l'unica chiave: niente login. I dati li dà
+     netlify/functions/richiesta-pagina.js. Stessa forma della pagina
+     prendi-richiesta (scatola bianca, testata blu). -->
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f5f8fc;color:#0a2a4d;padding:24px 16px}
+  .logo{display:block;margin:0 auto 18px;width:220px;max-width:60%}
+  .scatola{max-width:640px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden}
+  .cima{background:linear-gradient(135deg,#0066ff,#0a2a4d);color:#fff;padding:24px}
+  .cima h1{margin:0;font-size:22px;line-height:1.3}
+  .cima .sub{font-size:16px;opacity:.92;margin-top:6px}
+  .corpo{padding:24px}
+  p{font-size:16px;line-height:1.6;margin:0 0 16px;color:#334155}
+  .stato{display:inline-block;border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px;margin-bottom:16px;background:#fff7ed;color:#9a3412}
+  .stato.ok{background:#e8f5ee;color:#166534}
+  .riga{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid #eef2f7;font-size:16px}
+  .riga .k{color:#64748b;min-width:120px}
+  .riga .v{font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere}
+  .tit{font-size:18px;font-weight:800;margin:22px 0 10px}
+  .msg{max-width:82%;padding:12px 14px;border-radius:14px;font-size:16px;line-height:1.5;margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+  .msg small{display:block;font-size:13px;color:#64748b;margin-top:4px;white-space:normal}
+  .mio{background:#e8f0ff;margin-left:auto;border-bottom-right-radius:4px}
+  .suo{background:#f1f5f9;border-bottom-left-radius:4px}
+  .vuoto{font-size:16px;color:#64748b;background:#f8fafc;border-radius:10px;padding:14px}
+  textarea{width:100%;min-height:78px;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit;font-size:16px;resize:vertical}
+  .btn{display:block;width:100%;text-align:center;padding:16px;border:0;border-radius:10px;background:#ff8800;color:#fff;font-size:17px;font-weight:700;margin-top:10px;cursor:pointer;font-family:inherit;text-decoration:none}
+  .btn:disabled{opacity:.6;cursor:default}
+  .btn.blu{background:#0066ff;display:inline-block;width:auto;padding:10px 16px;font-size:15px;margin:0}
+  .err{display:none;margin-top:10px;padding:12px 14px;border-radius:8px;background:#fdecea;color:#a61b1b;font-size:15px;font-weight:700}
+  .altra{border:1px solid #e6ebf1;border-radius:10px;padding:14px 16px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .altra b{display:block;font-size:16px}
+  .altra span{font-size:15px;color:#5b6574}
+  .nota{font-size:14px;color:#64748b;line-height:1.5;margin-top:14px}
+  @media(max-width:480px){.riga{flex-direction:column;gap:2px}.riga .k{min-width:0;font-size:14px}.msg{max-width:92%}}
+</style>
+</head>
+<body>
+<a href="/"><img class="logo" src="/img/logo-email.png" alt="TrovaImpresa"></a>
+<div class="scatola">
+  <div class="cima"><h1 id="titolo">La tua richiesta</h1><div class="sub" id="sotto">Caricamento…</div></div>
+  <div class="corpo" id="corpo"><p>Caricamento…</p></div>
+</div>
+<script>
+(function(){
+  var t = new URLSearchParams(location.search).get('t') || '';
+  var API = '/.netlify/functions/richiesta-pagina';
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function quando(d){
+    if(!d) return '';
+    var x=new Date(d), oggi=new Date();
+    var ora=x.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    if(x.toDateString()===oggi.toDateString()) return 'oggi '+ora;
+    return x.toLocaleDateString('it-IT',{day:'numeric',month:'long'})+' '+ora;
+  }
+  function ko(msg){
+    document.getElementById('titolo').textContent='Questo link non funziona';
+    document.getElementById('sotto').textContent='';
+    document.getElementById('corpo').innerHTML='<p>'+esc(msg)+'</p><p class="nota">Se pensi che sia un errore, scrivici a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</p><a class="btn" style="background:#0066ff" href="/">Vai a TrovaImpresa</a>';
+  }
+  function disegna(d){
+    var imp=d.impresa.nome, r=d.richiesta;
+    document.title='La tua richiesta a '+imp+' | TrovaImpresa';
+    document.getElementById('titolo').textContent='La tua richiesta a '+imp;
+    document.getElementById('sotto').textContent=[r.lavoro, r.dove, r.quando ? new Date(r.quando).toLocaleDateString('it-IT',{day:'numeric',month:'long'}) : ''].filter(Boolean).join(' · ');
+    var h='';
+    h+= d.risposto ? '<span class="stato ok">✅ '+esc(imp)+' ti ha risposto</span>' : '<span class="stato">⏳ Arrivata: in attesa di risposta</span>';
+    if(r.lavoro) h+='<div class="riga"><span class="k">Lavoro</span><span class="v">'+esc(r.lavoro)+'</span></div>';
+    if(r.dove) h+='<div class="riga"><span class="k">Dove</span><span class="v">'+esc(r.dove)+'</span></div>';
+    if(r.testo) h+='<div class="riga"><span class="k">Hai scritto</span><span class="v" style="font-weight:400">'+esc(r.testo)+'</span></div>';
+    h+='<div class="tit">I messaggi</div>';
+    if(d.messaggi.length){
+      d.messaggi.forEach(function(m){
+        var suo=m.mittente==='impresa';
+        h+='<div class="msg '+(suo?'suo':'mio')+'">'+(suo?'<b>'+esc(imp)+'</b>\n':'')+esc(m.testo)+'<small>'+(suo?'':'Tu · ')+esc(quando(m.created_at))+'</small></div>';
+      });
+    } else {
+      h+='<div class="vuoto">Ancora nessuna risposta. Quando '+esc(imp)+' ti risponde, ti arriva un’email.</div>';
+    }
+    if(d.puoScrivere){
+      h+='<div class="tit">Scrivi a '+esc(imp)+'</div><textarea id="testo" maxlength="3000" placeholder="Scrivi qui"></textarea>'
+        +'<button class="btn" id="manda" type="button">Manda</button><div class="err" id="err" role="alert"></div>';
+    }
+    if(d.altre && d.altre.length){
+      h+='<div class="tit">Altre imprese vicino a te</div><p style="margin:0 0 6px">'+esc(imp)+' non ha ancora risposto. Scegli tu a chi scrivere: non abbiamo dato i tuoi dati a nessuno.</p>';
+      d.altre.forEach(function(a){
+        h+='<div class="altra"><div><b>'+esc(a.nome)+'</b><span>'+esc(a.mestiere)+(a.citta?' · '+esc(a.citta):'')+'</span></div><a class="btn blu" href="'+esc(a.link)+'">Guarda e scrivi</a></div>';
+      });
+    }
+    h+='<p class="nota">'+(d.puoScrivere?esc(imp)+' riceve un’email quando scrivi. ':'')+'Per la tua sicurezza: TrovaImpresa non ti chiede mai soldi, password o codici. Il link di questa pagina è solo tuo.</p>';
+    document.getElementById('corpo').innerHTML=h;
+    var b=document.getElementById('manda');
+    if(b) b.onclick=manda;
+  }
+  function carica(){
+    if(!/^[0-9a-f-]{36}$/i.test(t)) return ko('Il collegamento non è completo. Riaprilo dall’email che ti abbiamo mandato.');
+    fetch(API+'?t='+encodeURIComponent(t),{cache:'no-store'}).then(function(r){
+      return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||'errore'); return j; });
+    }).then(disegna).catch(function(){ ko('Il collegamento non è valido, oppure la richiesta è stata cancellata.'); });
+  }
+  function manda(){
+    var ta=document.getElementById('testo'), b=document.getElementById('manda'), e=document.getElementById('err');
+    var testo=(ta.value||'').trim();
+    e.style.display='none';
+    if(!testo){ e.textContent='Scrivi il messaggio prima di mandarlo.'; e.style.display='block'; ta.focus(); return; }
+    b.disabled=true; b.textContent='Invio…';
+    fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t,testo:testo})})
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||'Non è partito. Riprova.'); return j; }); })
+      .then(function(){ carica(); })
+      .catch(function(err){ b.disabled=false; b.textContent='Manda'; e.textContent=err.message||'Non è partito. Riprova.'; e.style.display='block'; });
+  }
+  carica();
+})();
+</script>
+</body>
+</html>

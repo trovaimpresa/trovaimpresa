@@ -167,7 +167,15 @@ exports.handler = async function (event) {
     const zonaSafe = zona.replace(/[,()%]/g, '').trim();
     const normZona = normalizzaComune(zona);
 
-    if (tipo && zonaSafe) {
+    /* ⛔ 28 nov 2026 — INOLTRO SPENTO (decisione di Alessio).
+       Su 7 richieste in 30 giorni, 6 erano artigiani che si facevano pubblicita'
+       e finivano a imprese concorrenti; nessuna impresa ha mai premuto
+       «Voglio contattarlo». Il modulo e' stato tolto dalle pagine cerca-*:
+       adesso il cliente scrive all'impresa che sceglie dalla sua scheda
+       (giro nuovo: lib/giro-richieste.js). Questa funzione resta solo per le
+       pagine vecchie rimaste nella memoria dei browser: salva e avvisa Alessio. */
+    const INOLTRO_SPENTO = true;
+    if (tipo && zonaSafe && !INOLTRO_SPENTO) {
       const ors = [`citta.ilike.%${zonaSafe}%`, `provincia.ilike.%${zonaSafe}%`, `regione.ilike.%${zonaSafe}%`];
       if (normZona) ors.splice(1, 0, `comuni_competenza.cs.{"${normZona}"}`);
 
@@ -316,7 +324,7 @@ exports.handler = async function (event) {
     : `<span style="white-space:pre-wrap">${esc(ricerca)}</span>`;
   const rigaMandata = inviateA.length
     ? inviateA.map(n => esc(n)).join('<br>')
-    : rosso('Nessuna impresa della zona: chiamalo tu');
+    : rosso('Nessuna (dal 28 nov il modulo non gira piu\' le richieste): chiamalo tu');
 
   const storico = [];
   try {
