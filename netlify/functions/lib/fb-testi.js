@@ -267,4 +267,40 @@ function testoVetrina(i, foto) {
   return { titolo: `Vetrina — ${nome || 'senza nome'}`, testo: righe.filter(r => r !== null).join('\n'), link, foto: foto || [] };
 }
 
-module.exports = { testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale, SEZIONI, sezioneDelGiorno, testoSezione };
+// 28 nov 2026 — INSTAGRAM (Alex: «facciamo la stessa cosa lì»).
+// Su Instagram i link nel testo non si cliccano: si toglie ogni indirizzo e
+// resta UNA sola riga d'invito («… link nella bio»), quella dell'ultimo link
+// (il link vero, vedi la nota del 23 nov). Le altre righe-invito si tolgono.
+// Ogni post deve avere un'immagine: le Vetrine usano le foto dei lavori
+// ritagliate 4:5 da Supabase; gli altri le immagini fisse di img/instagram/.
+const IG_URL = /^https?:\/\/\S+$/;
+function testoInstagram(testo) {
+  const r = String(testo || '').split('\n');
+  const inviti = [];
+  r.forEach((x, i) => { if (IG_URL.test(x.trim()) && i > 0) inviti.push(i - 1); });
+  const ultimo = inviti.length ? inviti[inviti.length - 1] : -1;
+  const out = [];
+  r.forEach((x, i) => {
+    if (IG_URL.test(x.trim())) return;
+    if (inviti.includes(i)) {
+      if (i !== ultimo) return;
+      out.push(x.replace(/[:\s]+$/, '') + ': link nella bio 👆');
+      return;
+    }
+    out.push(x);
+  });
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, 2200);
+}
+const IG_FISSE = `${SITO}/img/instagram`;
+// le foto delle Vetrine ritagliate 4:5 (Instagram rifiuta foto piu' alte di 4:5)
+function fotoInstagram(u) {
+  const m = String(u || '').match(/^(https:\/\/[^/]+\/storage\/v1)\/object\/public\/(.+?)(\?.*)?$/);
+  return m ? `${m[1]}/render/image/public/${m[2]}?width=640&height=800&resize=cover&quality=85&format=origin` : u;
+}
+function immaginiInstagram(tipo, id, foto) {
+  if (tipo === 'vet' && foto && foto.length) return foto.slice(0, 10).map(fotoInstagram);
+  const file = { imp: 'imp.jpg', vet: 'imp.jpg', sub: 'sub.jpg', off: 'off.jpg', mar: `mar-${id}.jpg`, ges: `ges-${id}.jpg`, sit: `sit-${id}.jpg` }[tipo];
+  return file ? [`${IG_FISSE}/${file}`] : [];
+}
+
+module.exports = { testoInstagram, immaginiInstagram, testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale, SEZIONI, sezioneDelGiorno, testoSezione };

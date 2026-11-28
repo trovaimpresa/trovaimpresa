@@ -13,7 +13,7 @@
 // Ogni post consegnato si scrive in fb_pubblicati: se Make richiama, quel
 // post non torna (niente doppioni sulla pagina).
 // ⛔ Il gruppo NO: Facebook non lascia pubblicare nei gruppi in automatico.
-const { SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, sezioneDelGiorno, testoSezione } = require('./lib/fb-testi');
+const { testoInstagram, immaginiInstagram, SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, sezioneDelGiorno, testoSezione } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -125,7 +125,17 @@ exports.handler = async (event) => {
       // 25 nov: «non trovo il sito»). La didascalia la mettiamo qui e non nel
       // modulo di Make: salvare quel modulo dall'editor riscrive gli indirizzi
       // delle foto e Facebook li rifiuta (vetrine perse il 25-26 nov).
-      foto: (p.foto || []).map(url => ({ type: 'url', url, caption: p.link ? `👉 Scheda e preventivo gratis: ${p.link}` : '' }))
+      foto: (p.foto || []).map(url => ({ type: 'url', url, caption: p.link ? `👉 Scheda e preventivo gratis: ${p.link}` : '' })),
+      // 28 nov 2026: INSTAGRAM. ig_foto = la prima immagine (post a foto
+      // singola); ig_carosello = tutte, solo se sono almeno 2 (post a carosello).
+      ...(() => {
+        const im = immaginiInstagram(p._t, p._id, p.foto);
+        return {
+          ig_testo: testoInstagram(p.testo),
+          ig_foto: im[0] || '',
+          ig_carosello: im.length > 1 ? im.map(u => ({ media_type: 'IMAGE', image_url: u })) : []
+        };
+      })()
     }));
     if (!prova && nuovi.length) {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/fb_pubblicati`, {
