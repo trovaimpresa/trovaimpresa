@@ -58,7 +58,10 @@
       if (!el) { var fc = document.body.firstElementChild; if (fc && /(^|\s)(logo|logobar|barra)(\s|$)/.test(fc.className || '')) el = fc; }
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
-      var logo = /^\/gestionale/.test(path) ? '/img/trovaimpresa-gestionale-logo.svg' : (/^\/forum/.test(path) ? '/img/trovaimpresa-forum-edilizia-logo.svg' : (/^\/lavoro-edilizia/.test(path) ? '/img/trovaimpresa-lavoro-edilizia-logo.svg' : '/img/trovaimpresa-logo.svg'));
+      /* 28 nov 2026: anche la pagina di accesso aperta dal gestionale (login-impresa?redirect=gestionale,
+         la usa l'app iPhone «Gestionale Edilizia») mostra il logo del gestionale. */
+      var accessoGest = /^\/login-impresa/.test(path) && /[?&]redirect=gestionale(&|$)/.test(location.search);
+      var logo = (/^\/gestionale/.test(path) || accessoGest) ? '/img/trovaimpresa-gestionale-logo.svg' : (/^\/forum/.test(path) ? '/img/trovaimpresa-forum-edilizia-logo.svg' : (/^\/lavoro-edilizia/.test(path) ? '/img/trovaimpresa-lavoro-edilizia-logo.svg' : '/img/trovaimpresa-logo.svg'));
       var home = /^\/gestionale/.test(path) ? '/gestionale' : (/^\/forum/.test(path) ? '/forum' : (/^\/lavoro-edilizia/.test(path) ? '/lavoro-edilizia' : '/'));
       var h = '<div class="tbm-top"><a class="tbm-logo" href="' + home + '"><img src="' + logo + '" alt="TrovaImpresa"></a><button type="button" class="tbm-mn" aria-expanded="false">&#9776; Menu</button></div><div class="tbm-panel">' +
         '<a class="tbm-btn" href="' + (path === '/' || path === '/index' ? '/login-impresa' : '/') + '">Accedi al sito TrovaImpresa</a>' +
@@ -142,7 +145,8 @@
       var el = pagina() || extra() || paginaServizio(path);
       if (!el) return;
       if (el.getAttribute('data-tb-nuovo')) el.setAttribute('data-abs', '1');
-      var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
+      var accessoGestPc = /^\/login-impresa/.test(path) && /[?&]redirect=gestionale(&|$)/.test(location.search);
+      var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="' + (accessoGestPc ? '/img/trovaimpresa-gestionale-logo.svg' : '/img/trovaimpresa-logo.svg') + '" alt="TrovaImpresa"></a>' +
         '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/gestionale">Accedi al gestionale</a><a class="tb-btn" href="/forum">Accedi al forum</a><a class="tb-btn" href="/lavoro-edilizia">Accedi a Lavoro Edilizia</a></div><div class="tb-links">';
       LINKS.forEach(function (l) {
         h += '<a href="' + l[0] + '"' + (voceAccesa(path) === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
