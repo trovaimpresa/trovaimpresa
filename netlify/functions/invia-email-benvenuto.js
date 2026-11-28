@@ -328,6 +328,16 @@ exports.handler = async function(event) {
      Le 4 icone stanno in img/email/ (PNG: le email non leggono gli SVG).
      Il nome non c'e' piu' nel piede: solo «TrovaImpresa · Rieti (RI)». */
   const IMG = 'https://trovaimpresa.com/img/email/';
+  // 28 nov 2026 — RIQUADRO «TROVAIMPRESA SUL TUO IPHONE» (ok di Alessio sull'anteprima).
+  // ⛔ Spento finche' l'app non si apre davvero nell'App Store: si accende INSIEME
+  //    a ACCESO in js/app-invito.js (il bottone sul sito). Prima il link porterebbe
+  //    a «pagina non trovata». Il bottone e' un'immagine (img/email/scarica-app-store.png):
+  //    molti programmi di posta non mostrano gli SVG.
+  const APP_STORE_ACCESO = false;
+  const appStore = APP_STORE_ACCESO
+    ? `<tr><td class="pad" style="padding:12px 20px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="background:#0a2a4d;border-radius:16px;padding:18px 16px"><div style="font-size:19px;font-weight:800;color:#ffffff;line-height:1.2">TrovaImpresa sul tuo iPhone</div><div style="font-size:15px;line-height:1.45;color:#cfe0f7;margin:6px 0 14px">Il tuo pannello e il gestionale sempre in tasca. Gratis.</div><a href="https://apps.apple.com/it/app/trovaimpresa-italia/id6839027320"><img src="${IMG}scarica-app-store.png" width="216" height="68" alt="Scarica su App Store" style="display:block;border:0;margin:0 auto;width:216px;height:68px"></a></td></tr></table></td></tr>
+`
+    : '';
   const FORUM_URL = 'https://trovaimpresa.com/forum';
   const ctaUrl = daGestionale ? 'https://trovaimpresa.com/gestionale-app.html' : linkPannello;
   const titoloNome = nome ? ', ' + nome : '';
@@ -395,7 +405,7 @@ exports.handler = async function(event) {
   <a href="https://www.facebook.com/profile.php?id=61575390415610" style="display:inline-block;margin-top:10px;background:#1877f2;color:#ffffff;font-size:15px;font-weight:800;text-decoration:none;padding:11px 20px;border-radius:9px">Segui la pagina &rarr;</a>
 </td></tr></table></td></tr>
 
-<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
+${appStore}<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
   ${pillole}
 </td></tr>
 <tr><td style="padding:12px 20px 0">${require('./lib/avviso-sicurezza')('impresa')}</td></tr>
@@ -413,7 +423,7 @@ exports.handler = async function(event) {
   </tr></table>
 </td></tr></table></td></tr>
 
-<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
+${appStore}<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
   ${pillole}
 </td></tr>
 <tr><td style="padding:12px 20px 0">${require('./lib/avviso-sicurezza')('impresa')}</td></tr>
