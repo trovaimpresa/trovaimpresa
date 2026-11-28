@@ -280,6 +280,28 @@
   .btn-tel  { background:var(--verde3); color:var(--verde2); text-decoration:none; display:inline-block; }
   .btn-mail { background:#eef1f5; color:#5b6b80; text-decoration:none; display:inline-block; }
   .rc-sotto { margin-top:32px; }
+  /* 28 nov 2026 — richieste alle imprese con «Da controllare» */
+  .rc-spiega { margin:-4px 0 12px; color:var(--mid); font-size:0.95rem; }
+  .pr-ctrl { background:#fdecea; color:#c0392b; font-size:0.72rem; margin-left:6px; }
+  .pr-motivi { color:#c0392b; font-weight:700; font-size:0.85rem; margin-top:4px; line-height:1.4; }
+  .pr-vedi { color:#c0392b; text-decoration:underline; font-weight:600; margin-left:4px; }
+  .pr-riga-ctrl td { background:#fffafa; }
+  .pr-st { display:inline-block; font-weight:800; font-size:0.85rem; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .pr-st.ok { background:#e6f4ea; color:#1e8e3e; }
+  .pr-st.no { background:#fff3e0; color:#b45309; }
+  .rc-archivio { margin-top:34px; background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:14px 18px; }
+  .rc-archivio summary { cursor:pointer; font-weight:700; font-size:1rem; }
+  @media (max-width:700px){
+    .pr-tab table { min-width:0 !important; }
+    .pr-tab thead { display:none; }
+    .pr-tab tr { display:block; border-bottom:1.5px solid var(--border); padding:12px 4px; position:relative; }
+    .pr-tab td { display:block; border:none !important; padding:4px 10px !important; max-width:none; }
+    .pr-tab td[data-l]::before { content:attr(data-l); display:block; font-size:0.78rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:.04em; }
+    .pr-tab td.rc-data { display:flex; gap:8px; align-items:baseline; }
+    .pr-tab td.rc-data::before { display:none; }
+    .pr-tab td.rc-azioni { position:absolute; top:8px; right:4px; }
+  }
+  .rc-arch-tit { color:var(--dark,#0a2a4d); margin-right:6px; }
   .rc-azioni { white-space:nowrap; }
   #table-richieste-clienti .badge { text-transform:capitalize; }
 
@@ -1128,28 +1150,53 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div class="topbar-right"><span class="admin-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Admin</span></div>
       </div>
 
+      <!-- 28 nov 2026 — prima le richieste VERE (mandate a un'impresa dalla
+           sua scheda), con «Da controllare» come le imprese; il vecchio
+           «Fatti chiamare» (tolto dal sito il 28 nov) va in archivio, chiuso. -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon g"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></div>
-          <div><div class="stat-num" id="rc-tot">–</div><div class="stat-lbl">Richieste vere</div></div>
+          <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
+          <div><div class="stat-num" id="rc-prev">–</div><div class="stat-lbl">Richieste alle imprese</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></div>
-          <div><div class="stat-num" id="rc-30">–</div><div class="stat-lbl">Ultimi 30 giorni</div></div>
+          <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#e67e00"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div><div class="stat-num" id="rc-senza">–</div><div class="stat-lbl">Ancora senza risposta</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon b">🆕</div>
+          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0066ff"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg></div>
           <div><div class="stat-num" id="rc-7">–</div><div class="stat-lbl">Ultimi 7 giorni</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
-          <div><div class="stat-num" id="rc-prev">–</div><div class="stat-lbl">Preventivi dal sito</div></div>
+          <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#c0392b"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+          <div><div class="stat-num" id="rc-ctrl">–</div><div class="stat-lbl">Da controllare</div></div>
         </div>
       </div>
 
       <div class="table-header">
-        <div class="table-title">Chi ha lasciato il numero</div>
+        <div class="table-title">Richieste mandate a un'impresa</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="pr-filtro" onchange="renderPreventiviAdmin()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.85rem">
+            <option value="">Tutte</option>
+            <option value="senza">Ancora senza risposta</option>
+            <option value="controllo">⚠ Da controllare</option>
+          </select>
+        </div>
+      </div>
+      <p class="rc-spiega">Il cliente apre la scheda di un'impresa e le scrive. «⚠ Da controllare» vuol dire che probabilmente non è un cliente vero: leggi il motivo sotto il nome.</p>
+      <div class="table-wrap"><div class="rc-scorri pr-tab">
+        <table>
+          <thead>
+            <tr><th>Quando</th><th>Cliente</th><th>Mandata a</th><th>Lavoro</th><th>Stato</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="table-preventivi"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div></div>
+
+      <details class="rc-archivio" id="rc-archivio">
+        <summary><span class="rc-arch-tit">Archivio «Fatti chiamare»</span> <span class="rc-piccolo" id="rc-arch-sotto">il riquadro delle ricerche senza risultati, tolto dal sito il 28 nov</span></summary>
+        <div class="table-header" style="margin-top:14px">
+          <div class="table-title" style="font-size:1rem">Chi ha lasciato il numero</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <input id="rc-cerca" class="search-input" placeholder="🔍 Cerca nome, zona, telefono..." oninput="renderRichiesteClienti()">
           <select id="rc-cat" onchange="renderRichiesteClienti()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.85rem">
             <option value="">Tutte le categorie</option>
@@ -1164,39 +1211,16 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
             <option value="30">Ultimi 30 giorni</option>
           </select>
         </div>
-      </div>
-
-      <div class="table-wrap"><div class="rc-scorri">
-        <table>
-          <thead>
-            <tr><th>Quando</th><th>Chi</th><th>Cosa cerca</th><th>Dove</th><th>Categoria</th><th>Azioni</th></tr>
-          </thead>
-          <tbody id="table-richieste-clienti"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
-        </table>
-      </div></div>
-
-      <div class="rc-sotto">
-        <div class="table-header">
-          <div class="table-title">Preventivi arrivati dal modulo lungo</div>
         </div>
         <div class="table-wrap"><div class="rc-scorri">
           <table>
             <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Mandata a</th>
-                <th>Email</th>
-                <th>Telefono</th>
-                <th>Tipo lavoro</th>
-                <th>Descrizione</th>
-                <th>Data</th>
-                <th>Azioni</th>
-              </tr>
+              <tr><th>Quando</th><th>Chi</th><th>Cosa cerca</th><th>Dove</th><th>Categoria</th><th>Azioni</th></tr>
             </thead>
-            <tbody id="table-preventivi"><tr><td colspan="8" class="loading">Caricamento...</td></tr></tbody>
+            <tbody id="table-richieste-clienti"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
           </table>
         </div></div>
-      </div>
+      </details>
     </div>
 
     <!-- RECENSIONI -->
@@ -5108,51 +5132,127 @@ function apriMestieriCitta(){
 }
 
 // CARICA PREVENTIVI
+/* 28 nov 2026 — RICHIESTE MANDATE A UN'IMPRESA (preventivi + incarichi ai
+   professionisti), con «⚠ Da controllare» come le imprese (_motiviControllo).
+   Un cliente vero non ha il telefono o l'email di un'impresa iscritta, non
+   scrive a se stesso, non manda la stessa richiesta a raffica. Il database
+   non viene toccato: i motivi si calcolano solo a schermo. */
+let PRA = [];
+function _prChiavi(r) {
+  const em = String(r.email || '').toLowerCase().trim();
+  const [u, d] = em.split('@');
+  let tel = String(r.telefono || '').replace(/\D/g, '');
+  if (tel.length > 10 && tel.startsWith('39')) tel = tel.slice(2);
+  if (tel.length > 10 && tel.startsWith('0039')) tel = tel.slice(4);
+  return { email: d ? (u || '').replace(/\+.*$/, '') + '@' + d : '', tel: tel.length >= 6 ? tel : '' };
+}
+function _prMotivi(r, imprese, conta) {
+  const mot = [];
+  const k = _prChiavi(r);
+  const telVero = String(r.telefono || '').replace(/[\s.\-\/()+]/g, '');
+  /* il telefono o l'email sono di un'impresa iscritta */
+  let cosa = '';
+  const sua = imprese.find(i => { const c = _ctrlChiavi(i);
+    if (k.tel && c.tel && c.tel.slice(-9) === k.tel.slice(-9)) { cosa = 'il telefono'; return true; }
+    if (k.email && c.email === k.email) { cosa = 'l\'email'; return true; } return false; });
+  if (sua) {
+    if (r._imp && String(sua.id) === String(r._imp.id)) mot.push('ha ' + cosa + ' della stessa impresa a cui scrive');
+    else mot.push('ha ' + cosa + ' di un\'impresa iscritta: ' + (sua.nome_attivita || sua.nome || ('n. ' + sua.id)));
+    r._sua = sua;
+  }
+  if (k.tel && conta.tel[k.tel] > 1) mot.push('stesso telefono su ' + conta.tel[k.tel] + ' richieste');
+  else if (k.email && conta.email[k.email] > 1) mot.push('stessa email su ' + conta.email[k.email] + ' richieste');
+  if (k.tel && conta.nomi[k.tel] && conta.nomi[k.tel].size > 1) mot.push('lo stesso telefono con nomi diversi');
+  if (r.telefono && /[^\d\s.\-\/()+]/.test(String(r.telefono))) mot.push('nel telefono ci sono caratteri strani');
+  else if (r.telefono) {
+    const cif = telVero.replace(/^(\+39|0039)/, '').replace(/\D/g, '');
+    if (/^\+/.test(telVero) && !/^\+39/.test(telVero)) mot.push('numero straniero');
+    else if (cif.length < 9 || cif.length > 11) mot.push('telefono di ' + cif.length + ' cifre');
+  }
+  const nome = String(r._nome || '').trim();
+  if (nome && (nome.length < 3 || !/[aeiouàèéìòù]/i.test(nome))) mot.push('nome strano («' + nome + '»)');
+  const txt = String(r._desc || '').trim();
+  if (!txt) mot.push('non ha scritto cosa gli serve');
+  else if (txt.length < 15) mot.push('ha scritto pochissimo');
+  return mot;
+}
+function _prGiorni(t) { return Math.floor((Date.now() - new Date(t).getTime()) / 86400000); }
+
 async function caricaPreventivi() {
-  /* 8 nov 2026 — prima leggeva `preventivi_safe` col permesso del browser:
-     email e telefono restavano vuoti e non si sapeva A CHI era arrivata la
-     richiesta. Adesso passa da admin-dati (come le imprese) e dice per chi e'
-     e se l'impresa ha risposto. Nel gestionale del fondatore queste richieste
-     non compaiono piu' (js/gest-carte-documenti.js, dsCarica): stanno qui. */
-  let data;
+  let pr, inc = [], im;
   try {
-    const [pr, im] = await Promise.all([
+    [pr, im, inc] = await Promise.all([
       adminLista('preventivi'),
-      (tutteImprese && tutteImprese.length) ? Promise.resolve(tutteImprese) : adminLista('imprese')
+      (tutteImprese && tutteImprese.length) ? Promise.resolve(tutteImprese) : adminLista('imprese'),
+      adminLista('incarichi_richieste').catch(() => [])
     ]);
-    data = pr;
-    var nomi = {};
-    (im || []).forEach(function (i) { nomi[String(i.id)] = i; });
-    data.forEach(function (p) { p._imp = nomi[String(p.impresa_id)] || null; });
   } catch (e) {
     console.error(e);
-    _erroreTabella('table-preventivi', 8, 'Non riesco a leggere le richieste: ' + (e.message || 'errore sconosciuto'));
+    _erroreTabella('table-preventivi', 6, 'Non riesco a leggere le richieste: ' + (e.message || 'errore sconosciuto'));
     return;
   }
-  document.getElementById('stat-preventivi').textContent = data?.length || 0;
-  _set('rc-prev', data?.length || 0);
-  _crePrevLista = data || [];
+  const nomi = {};
+  (im || []).forEach(i => { nomi[String(i.id)] = i; });
+  const righe = [];
+  (pr || []).forEach(p => righe.push(Object.assign({}, p, { _tipo: 'prev', _imp: nomi[String(p.impresa_id)] || null,
+    _nome: [p.nome, p.cognome].filter(Boolean).join(' '), _desc: p.descrizione,
+    _lavoro: p.categoria_lavoro || p.tipo_lavoro, _dove: p.citta })));
+  (inc || []).forEach(p => righe.push(Object.assign({}, p, { _tipo: 'inc', _imp: nomi[String(p.professionista_id)] || null,
+    _nome: p.nome, _desc: p.note, _lavoro: p.prestazione, _dove: p.comune })));
+  righe.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
+  /* conti per i doppioni */
+  const conta = { tel: {}, email: {}, nomi: {} };
+  righe.forEach(r => { const k = _prChiavi(r);
+    if (k.tel) { conta.tel[k.tel] = (conta.tel[k.tel] || 0) + 1; (conta.nomi[k.tel] = conta.nomi[k.tel] || new Set()).add(String(r._nome || '').toLowerCase().trim()); }
+    if (k.email) conta.email[k.email] = (conta.email[k.email] || 0) + 1; });
+  const imprese = (im || []).filter(i => !i.is_test);
+  righe.forEach(r => { r._mot = _prMotivi(r, imprese, conta); });
+  PRA = righe;
+  document.getElementById('stat-preventivi').textContent = (pr || []).length;
+  const sett = Date.now() - 7 * 86400000;
+  _set('rc-prev', righe.length);
+  _set('rc-senza', righe.filter(r => !r.risposta_at).length);
+  _set('rc-7', righe.filter(r => new Date(r.created_at).getTime() >= sett).length);
+  _set('rc-ctrl', righe.filter(r => r._mot.length).length);
+  _crePrevLista = pr || [];
   renderCrescita();   /* la seconda linea del grafico si aggiorna da sola */
+  renderPreventiviAdmin();
+}
+
+function renderPreventiviAdmin() {
   const tbody = document.getElementById('table-preventivi');
-  if (!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
+  if (!tbody) return;
+  const f = (document.getElementById('pr-filtro') || {}).value || '';
+  const lista = PRA.filter(r => f === 'senza' ? !r.risposta_at : f === 'controllo' ? r._mot.length : true);
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table">' + (PRA.length ? 'Nessuna richiesta con questo filtro' : 'Nessuna richiesta ancora') + '</div></td></tr>';
     return;
   }
-  tbody.innerHTML = data.map(p => {
-    const imp = p._imp;
+  tbody.innerHTML = lista.map(r => {
+    const imp = r._imp;
     const perChi = imp
-      ? `<a href="/profilo-impresa?id=${encodeURIComponent(imp.id)}" target="_blank" rel="noopener"><strong>${esc(imp.nome_attivita || imp.nome || ('Impresa ' + imp.id))}</strong></a><div style="font-size:0.78rem;color:var(--light)">${esc(imp.citta || '')}</div>`
-      : '–';
+      ? `<a href="/profilo-impresa?id=${encodeURIComponent(imp.id)}" target="_blank" rel="noopener"><strong>${esc(imp.nome_attivita || imp.nome || ('Impresa ' + imp.id))}</strong></a><div class="rc-piccolo">${esc(imp.citta || '')}${r._tipo === 'inc' ? ' · incarico' : ''}</div>`
+      : '<span class="rc-piccolo">impresa non più iscritta</span>';
+    const mot = r._mot;
+    const ctrl = mot.length ? ' <span class="badge pr-ctrl">⚠ Da controllare</span>' : '';
+    const suaLink = r._sua ? ` <a class="pr-vedi" href="/profilo-impresa?id=${encodeURIComponent(r._sua.id)}" target="_blank" rel="noopener">vedi la scheda</a>` : '';
+    const g = _prGiorni(r.created_at);
+    let stato;
+    if (r.risposta_at) stato = `<span class="pr-st ok">Ha risposto</span><div class="rc-piccolo">il ${_data(r.risposta_at)}</div>`;
+    else stato = `<span class="pr-st no">Senza risposta</span><div class="rc-piccolo">da ${g <= 0 ? 'oggi' : g === 1 ? '1 giorno' : g + ' giorni'}</div>`;
+    if (r.alternative_inviate_at) stato += '<div class="rc-piccolo">mandate altre imprese al cliente</div>';
+    const contatti = [
+      r.telefono ? `<a class="rc-tel" href="tel:${esc(String(r.telefono).replace(/[^\d+]/g, ''))}">${esc(r.telefono)}</a>` : '',
+      r.email ? `<a class="rc-piccolo" href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ''
+    ].filter(Boolean).join('<br>');
     return `
-    <tr>
-      <td><strong>${esc([p.nome, p.cognome].filter(Boolean).join(' '))}</strong><div style="font-size:0.78rem;color:var(--light)">${esc(p.citta || '')}</div></td>
-      <td>${perChi}</td>
-      <td>${p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : '–'}</td>
-      <td>${p.telefono ? `<a href="tel:${esc(p.telefono)}">${esc(p.telefono)}</a>` : '–'}</td>
-      <td>${esc(p.categoria_lavoro || p.tipo_lavoro) || '–'}</td>
-      <td style="max-width:260px;white-space:normal">${esc(p.descrizione) || '–'}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${_data(p.created_at)}<div style="margin-top:4px;font-weight:700;color:${p.risposta_at ? '#1e8e3e' : '#b45309'}">${p.risposta_at ? "L'impresa ha risposto" : 'Ancora senza risposta'}</div></td>
-      <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo('${p.id}')">🗑️</button></td>
+    <tr${mot.length ? ' class="pr-riga-ctrl"' : ''}>
+      <td class="rc-data" data-l="Quando">${_rcGiorno(new Date(r.created_at).getTime())}<div class="rc-piccolo">${_rcDaQuanto(new Date(r.created_at).getTime())}</div></td>
+      <td><span class="rc-nome">${esc(r._nome) || '–'}</span>${ctrl}<div>${contatti}</div>${mot.length ? `<div class="pr-motivi">${esc(mot.join(' · '))}${suaLink}</div>` : ''}</td>
+      <td data-l="Mandata a">${perChi}</td>
+      <td class="rc-cerca" data-l="Lavoro"><strong>${esc(r._lavoro) || '–'}</strong>${r._dove ? ' · ' + esc(r._dove) : ''}<div class="rc-piccolo">${esc(r._desc) || 'non ha scritto niente'}</div></td>
+      <td data-l="Stato">${stato}</td>
+      <td class="rc-azioni"><button class="action-btn btn-elimina" onclick="eliminaPreventivo('${r.id}','${r._tipo}')" title="Elimina">🗑️</button></td>
     </tr>`;
   }).join('');
 }
@@ -5216,9 +5316,7 @@ async function caricaRichiesteClienti(){
   RCL = Array.from(mappa.values()).sort(function(a,b){ return b._t - a._t; });
 
   const ora = Date.now();
-  _set('rc-tot', RCL.length);
-  _set('rc-30', RCL.filter(function(r){ return ora - r._t < 30*86400000; }).length);
-  _set('rc-7',  RCL.filter(function(r){ return ora - r._t <  7*86400000; }).length);
+  _set('rc-arch-sotto', RCL.length + ' persone, dal riquadro delle ricerche senza risultati (tolto dal sito il 28 nov)');
   renderRichiesteClienti();
 }
 
@@ -5477,9 +5575,9 @@ async function eliminaRecensione(id) {
 }
 
 // ELIMINA PREVENTIVO
-async function eliminaPreventivo(id) {
-  if (!confirm('Eliminare questo preventivo?')) return;
-  if (!await adminWrite('delete', 'preventivi', id)) return;
+async function eliminaPreventivo(id, tipo) {
+  if (!confirm('Eliminare questa richiesta?')) return;
+  if (!await adminWrite('delete', tipo === 'inc' ? 'incarichi_richieste' : 'preventivi', id)) return;
   await caricaPreventivi();
 }
 

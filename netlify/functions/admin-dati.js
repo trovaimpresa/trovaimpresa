@@ -33,7 +33,9 @@ const TABELLE_CONSENTITE = [
   /* 27 ottobre 2026 — i clienti iscritti agli avvisi «Avvisami gratis» e le mail mandate. */
   'avvisi_clienti', 'avvisi_inviati',
   /* 1 novembre 2026 — le stelle «Come ti trovi col gestionale?» (js/invito-g2.js) */
-  'gest_voti'
+  'gest_voti',
+  /* 28 nov 2026 — le richieste di incarico ai professionisti, accanto ai preventivi */
+  'incarichi_richieste'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
