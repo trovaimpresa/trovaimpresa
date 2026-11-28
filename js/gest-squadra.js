@@ -588,6 +588,7 @@
     if(dipSonoIo(o))return "Tu";
     if(o&&o.acc==="scaduto")return "Invito scaduto";
     if(o&&o.acc==="tolto")return "Accesso tolto";
+    if(o&&o.acc==="rifiutato")return "Ha rifiutato l'invito";
     /* 27 nov 2026: «Invitato» lo diceva anche a chi non aveva ancora ricevuto niente (il codice nasce con la persona): adesso dice la cosa vera */
     return o&&o.attivo?"Attivo":(o&&o.codice?"Non è entrato":"Senza invito");
   }
@@ -602,6 +603,7 @@
     if(!inv||!inv.codice)return "senza";
     if(inv.stato==="attivo")return "attivo";
     if(inv.stato==="revocato")return "tolto";
+    if(inv.stato==="rifiutato")return "rifiutato"; /* 28 nov 2026: l'operaio ha premuto Rifiuta */
     const t=Date.parse(inv.created_at||"");
     if(!isNaN(t)&&Date.now()-t>INVITO_GIORNI*86400000)return "scaduto";
     return "invitato";
@@ -864,7 +866,7 @@ ${vecchi?`
 
       <div class="sh-b"${dipSonoIo(op)?' style="display:none"':''}>
         <div class="sh-tit">Cosa vede sul telefono</div>
-        ${(!isNew&&op.acc&&op.acc!=="attivo"&&op.acc!=="invitato")?`<p class="sh-nota" style="margin:0 0 10px;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px">${op.acc==="senza"?"Non ha ancora l'app: ruolo e permessi valgono dopo che premi <b>Nuovo invito</b> sulla sua scheda.":(op.acc==="tolto"?"Le hai tolto l'accesso: dal telefono non entra. Per ridarglielo premi <b>Nuovo invito</b> sulla sua scheda.":"L'invito è scaduto (vale 14 giorni): premi <b>Nuovo invito</b> sulla sua scheda.")}</p>`:""}
+        ${(!isNew&&op.acc&&op.acc!=="attivo"&&op.acc!=="invitato")?`<p class="sh-nota" style="margin:0 0 10px;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px">${op.acc==="senza"?"Non ha ancora l'app: ruolo e permessi valgono dopo che premi <b>Nuovo invito</b> sulla sua scheda.":(op.acc==="rifiutato"?"Ha rifiutato l'invito. Se è stato un errore premi <b>Nuovo invito</b> sulla sua scheda.":op.acc==="tolto"?"Le hai tolto l'accesso: dal telefono non entra. Per ridarglielo premi <b>Nuovo invito</b> sulla sua scheda.":"L'invito è scaduto (vale 14 giorni): premi <b>Nuovo invito</b> sulla sua scheda.")}</p>`:""}
         <div class="field"><label>Ruolo nell'app</label><select id="d-ruolo">
           <option value="operaio">${sqRuoloNome("operaio")}</option>
           <option value="preposto">${sqRuoloNome("preposto")}</option>

@@ -53,6 +53,17 @@
    dove la scheda e' arancione. */
 .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+/* 28 nov 2026 — schermata Accetta / Rifiuta l'invito */
+.acc-chi{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.acc-av{width:52px;height:52px;border-radius:12px;background:#ff8800;color:#0a2a4d;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.acc-chi b{display:block;font-size:19px;line-height:1.25}.acc-chi span{font-size:14px;color:var(--muted)}
+.acc-tit{font-size:15px;font-weight:700;margin:6px 0 10px}
+.acc-p{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:16px}
+.acc-p i{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-style:normal;flex:none;background:#1e8e3e;color:#fff}
+.acc-p.off{color:#8a96a3}.acc-p.off i{background:#e5e9ee;color:#8a96a3}
+.btn.acc-ok{background:#1e8e3e;margin-top:16px;padding:15px;font-size:17px}
+.btn.acc-ko{background:#fff;color:#c0392b;border:2px solid #f0c9c4;margin-top:10px;padding:13px;font-size:17px}
+.acc-nota{font-size:13px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.45}
 </style>
 <!-- App sul telefono (15 nov 2026): da qui si installa il Gestionale (icona coi petali) -->
 <link rel="manifest" href="/manifest.json">
@@ -85,6 +96,16 @@
     <button class="btn" id="btn-redeem">Collegami all'impresa</button>
   </div>
 
+  <!-- 28 nov 2026: chi ti invita e cosa potrai fare, prima di entrare -->
+  <div id="accetta" class="card hidden">
+    <div class="acc-chi"><div class="acc-av" id="acc-av"></div><div><b id="acc-nome"></b><span id="acc-sotto">ti invita nella sua squadra</span></div></div>
+    <div class="acc-tit">Cosa potrai fare:</div>
+    <div id="acc-perm"></div>
+    <button class="btn acc-ok" id="btn-accetta">Accetta</button>
+    <button class="btn acc-ko" id="btn-rifiuta">Rifiuta</button>
+    <div class="acc-nota">I permessi li decide il tuo capo, e li può cambiare quando serve.</div>
+  </div>
+
   <!-- successo -->
   <div id="done" class="card hidden"><div class="big-ok"><div class="e"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px;margin-bottom:16px"><span id="done-txt">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</span></p><a class="btn" href="gestionale-operatore.html" style="display:inline-block;text-decoration:none;text-align:center">Apri la tua agenda →</a></div></div>
 </div>
@@ -114,7 +135,7 @@ if(STUDIO){
 }
 function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");}
 
-function show(which){["auth","redeem","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
+function show(which){["auth","redeem","accetta","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
 function renderAuth(){
   $("#auth-title").textContent=mode==="register"?"Registrati":"Accedi";
   $("#auth-hint").textContent=mode==="register"?(STUDIO?"Crea il tuo accesso gratuito per entrare nel gestionale dello studio.":"Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa."):"Bentornato, accedi col tuo account.";
@@ -126,7 +147,9 @@ async function refresh(session){
   if(session){
     const {data:membri}=await sb.from("gest_membri").select("impresa_id").eq("membro_id",session.user.id).eq("stato","attivo");
     if(membri&&membri.length){location.href=AGENDA;return;}
-    $("#codice").value=(params.get("codice")||"").toUpperCase(); show("redeem");
+    $("#codice").value=(params.get("codice")||"").toUpperCase();
+    if(await cercaInviti($("#codice").value))return;
+    show("redeem");
   }
   else { renderAuth(); show("auth"); }
 }
@@ -150,10 +173,64 @@ $("#btn-auth").onclick=async()=>{
 $("#btn-redeem").onclick=async()=>{
   const codice=$("#codice").value.trim().toUpperCase();
   if(!codice){msg("Inserisci il codice");return;}
-  const {data,error}=await sb.rpc("gest_redeem_invito",{_codice:codice});
+  if(await cercaInviti(codice)){msg("",true);$("#msg").className="msg";return;}
+  msg("Codice non valido, già usato o scaduto (vale 14 giorni). Chiedi "+(STUDIO?"allo studio":"all'impresa")+" di mandartene uno nuovo.");
+};
+
+/* 28 nov 2026 — ACCETTA / RIFIUTA
+   Prima il codice ti collegava subito, senza dirti a chi. Adesso vedi il nome
+   dell'impresa e i permessi che ti ha dato, e scegli.
+   L'invito si trova da solo se il capo ha scritto la tua email nella tua
+   scheda (Squadra); se no serve il codice. Funzioni: gest_inviti_per_me,
+   gest_accetta_invito, gest_rifiuta_invito. */
+const PERM_PARTENZA={calendario:true,lavori:true,foto:true,note:true,mezzi:true}; /* = js/op-base.js */
+const PERM_VOCI=[
+  ["lavori",STUDIO?"Vedere le pratiche e l'agenda":"Vedere i lavori e l'agenda"],
+  ["calendario","Girare fra i giorni del calendario"],
+  ["foto","Mandare foto e video"],
+  ["note","Scrivere cosa hai fatto"],
+  ["rapportini",STUDIO?"Scrivere il resoconto della giornata":"Scrivere il rapportino di fine giornata"],
+  ["mezzi","Prendere e riportare i mezzi"],
+  ["clienti","Vedere i clienti"],
+  ["fatture","Vedere le fatture"],
+  ["pagamenti","Carta aziendale e spese"]
+];
+let INVITI=[], INV_COD="";
+const escH=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function cercaInviti(codice){
+  INV_COD=(codice||"").trim().toUpperCase();
+  const {data,error}=await sb.rpc("gest_inviti_per_me",{_codice:INV_COD||null});
+  if(error||!Array.isArray(data)||!data.length)return false;
+  INVITI=data; mostraInvito(); return true;
+}
+function mostraInvito(){
+  const inv=INVITI[0]; if(!inv){show("redeem");return;}
+  const nome=inv.impresa||"La tua impresa";
+  $("#acc-nome").textContent=nome;
+  $("#acc-av").textContent=nome.split(/\s+/).filter(w=>/[A-Za-zÀ-ú0-9]/.test(w)).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"?";
+  $("#acc-sotto").textContent=STUDIO?"ti invita nel suo studio":"ti invita nella sua squadra";
+  const P=(inv.permessi&&Object.keys(inv.permessi).length)?inv.permessi:PERM_PARTENZA;
+  const voci=PERM_VOCI.filter(v=>!(STUDIO&&(v[0]==="mezzi"||v[0]==="pagamenti")));
+  const si=voci.filter(v=>P[v[0]]===true), no=voci.filter(v=>P[v[0]]!==true);
+  $("#acc-perm").innerHTML=si.map(v=>'<div class="acc-p"><i>✓</i>'+escH(v[1])+'</div>').join("")+
+                           no.map(v=>'<div class="acc-p off"><i>✕</i>'+escH(v[1])+'</div>').join("");
+  show("accetta");
+}
+$("#btn-accetta").onclick=async()=>{
+  const inv=INVITI[0]; if(!inv)return;
+  $("#btn-accetta").disabled=true;
+  const {data,error}=await sb.rpc("gest_accetta_invito",{_id:inv.id,_codice:INV_COD||null});
+  $("#btn-accetta").disabled=false;
   if(error){msg("Errore: "+error.message);return;}
-  if(data&&data.ok){show("done");}
-  else{msg((data&&data.err)||"Codice non valido o già usato. Chiedi "+(STUDIO?"allo studio":"all'impresa")+" di mandartene uno nuovo.");}
+  if(data&&data.ok){$("#msg").className="msg";show("done");}
+  else{msg((data&&data.err)||"Invito non valido o scaduto: chiedi un invito nuovo.");}
+};
+$("#btn-rifiuta").onclick=async()=>{
+  const inv=INVITI[0]; if(!inv)return;
+  if(!confirm("Rifiuti l'invito di "+(inv.impresa||"questa impresa")+"?"))return;
+  await sb.rpc("gest_rifiuta_invito",{_id:inv.id,_codice:INV_COD||null});
+  INVITI.shift(); $("#codice").value="";
+  if(INVITI.length)mostraInvito(); else{show("redeem");msg("Invito rifiutato.",true);}
 };
 </script>
 <script src="/js/freccia-indietro.js"></script>
