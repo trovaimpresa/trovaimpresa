@@ -1,3 +1,6 @@
+/* 28 nov 2026 — dentro le app iPhone di TrovaImpresa tutto piu' piccolo del 12%
+   (ok di Alex). Da Safari e dal computer il sito resta com'e'. */
+try { if (/TrovaImpresaApp/i.test(navigator.userAgent)) document.documentElement.style.zoom = "0.88"; } catch (e) {}
 /* 15 nov 2026 — L'INVITO A METTERE L'APP SUL TELEFONO
    Una striscia in basso, SOLO sul telefono:
    - sul sito: «Metti TrovaImpresa sul telefono» (icona con la i)
