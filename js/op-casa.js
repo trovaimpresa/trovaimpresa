@@ -62,7 +62,15 @@
     + "#oh-mg-testo{width:100%;box-sizing:border-box;min-height:120px;border:2px solid #dcdad5;border-radius:16px;padding:14px;font:inherit;font-size:19px;resize:vertical;background:#f7f6f3}"
     + "#oh-mg-vai{width:100%;margin-top:12px;padding:16px;border:0;border-radius:16px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
     + ".oh-mg-nota{font-size:15px;color:#64707c;margin-top:8px}"
-    + "body.oh-sez-giornate:not(.oh-mg-corr) #mie-giornate .mg-r,body.oh-sez-giornate:not(.oh-mg-corr) #mie-giornate .mg-vuoto{display:none}"
+    + "#oh-mg-ai{width:100%;margin-top:12px;padding:16px;border:0;border-radius:16px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
+    + "#oh-mg-mano{display:block;margin:14px auto 0;background:none;border:0;color:#64707c;font:inherit;font-size:17px;text-decoration:underline;cursor:pointer}"
+    + "#oh-sp-card{background:#fff;border-radius:20px;padding:16px;margin:0 0 18px;box-shadow:0 1px 3px rgba(10,42,77,.08)}"
+    + "#oh-sp-card h3{margin:2px 0 12px;font-size:21px;color:#0a2a4d}"
+    + ".oh-sp-add{display:block;width:100%;text-align:left;margin-bottom:10px;padding:16px;border:0;border-radius:14px;background:#eceae5;color:#0a2a4d;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
+    + ".oh-sp-tot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 12px}"
+    + ".oh-sp-tot div{background:#f4f3f0;border-radius:14px;padding:12px}.oh-sp-tot span{display:block;font-size:15px;color:#64707c}.oh-sp-tot b{font-size:22px;color:#0a2a4d}"
+    + ".oh-sp-r{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #eceae5}.oh-sp-r b{font-size:17px;color:#0a2a4d}.oh-sp-r small{display:block;font-size:14px;color:#64707c;margin-top:2px}.oh-sp-r .imp{font-weight:800;white-space:nowrap}"
+    + ".oh-sp-carta{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:8px;background:#e8f5ec;color:#1e7a3c;font-size:13px;font-weight:700}"
     + "body.oh-sez-giornate.oh-mg-corr #oh-mg-nuova{display:none}"
     + ".oh-vrow{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;margin:6px 0 14px;padding:0 64px;text-align:center}"
     + "#oh-back{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1.5px solid #d5dbe3;border-radius:14px;padding:14px 16px;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;margin:4px 0 16px;cursor:pointer}"
@@ -134,16 +142,44 @@
         var bx = document.createElement("div"); bx.id = "oh-mg-box";
         bx.innerHTML = '<div class="oh-mg-seg"><button type="button" class="on" data-mgv="nuova">Nuova giornata</button><button type="button" data-mgv="corr">Correggi</button></div>'
           + '<div id="oh-mg-nuova"><textarea id="oh-mg-testo" placeholder="🎤 «Oggi a Campoloniano, rifatto il tetto»"></textarea>'
-          + '<button type="button" id="oh-mg-vai">Avanti: foto, spese e manda al capo</button>'
-          + '<div class="oh-mg-nota">Scrivi come ti viene, oppure detta col microfono della tastiera.</div></div>'
+          + '<button type="button" id="oh-mg-ai">Compila la giornata</button>'
+          + '<button type="button" id="oh-mg-mano">Oppure scrivila a mano</button></div>'
           + '<div id="oh-mg-corrnota" class="oh-mg-nota" style="display:none">Qui sotto le tue giornate del mese. Per correggerne una, scrivi al capo nella Chat.</div>';
         mg.parentNode.insertBefore(bx, mg.nextSibling);
+        var sp = document.createElement("div"); sp.id = "oh-sp-card";
+        sp.innerHTML = '<h3>Spese, benzina, bolle e fatture</h3>'
+          + '<button type="button" class="oh-sp-add" data-spa="spesa">+ Spesa</button>'
+          + '<button type="button" class="oh-sp-add" data-spa="benzina">+ Benzina e km</button>'
+          + '<button type="button" class="oh-sp-add" data-spa="bolla">+ Foto bolla o fattura</button>'
+          + '<div id="oh-sp-elenco"></div>';
+        sp.addEventListener("click", function (ev) {
+          var a = ev.target.closest("[data-spa]"); if (!a) return;
+          var k = a.getAttribute("data-spa");
+          if (k === "benzina" && document.querySelector('#oh-grid [data-oh="mezzi"]')) { apri("mezzi"); return; }
+          if (k === "spesa" && typeof puo === "function" && puo("pagamenti") && typeof rvApri === "function") {
+            rvApri(); setTimeout(function () { var v = document.querySelector('#rv-corpo [data-tipo="spesa"]'); if (v) v.click(); else window.opGiornataCompleta(""); }, 60); return;
+          }
+          if (typeof window.opGiornataCompleta === "function") window.opGiornataCompleta(k === "benzina" ? "Benzina: " : "");
+        });
+        window._ohMg = { bx: bx, sp: sp };
+        /* «Le mie giornate» si ridisegna da sola: dopo ogni giro riquadro e spese
+           tornano subito sotto il totale, e le righe dei giorni restano in fondo */
+        var metti = function () {
+          var tot = mg.querySelector(".mg-tot"); if (!tot) return;
+          var az = window._ohMg && window._ohMg.az;
+          var primo = az || bx;
+          if (primo.previousElementSibling !== tot || primo.parentNode !== mg) mg.insertBefore(primo, tot.nextSibling);
+          if (az && bx.previousElementSibling !== az) mg.insertBefore(bx, az.nextSibling);
+          if (sp.previousElementSibling !== bx) mg.insertBefore(sp, bx.nextSibling);
+        };
+        new MutationObserver(metti).observe(mg, { childList: true });
+        metti(); speseMese();
         var az = document.createElement("div"); az.className = "oh-mg-az";
         az.innerHTML = '<button type="button" data-mgaz="riep">📋 Riepilogo del mese</button><button type="button" data-mgaz="pdf">📄 Scarica PDF del mese</button>';
-        mg.parentNode.insertBefore(az, bx);
+        window._ohMg.az = az; mg.insertBefore(az, bx);
         az.addEventListener("click", function (ev) {
           var a = ev.target.closest("[data-mgaz]"); if (!a) return;
-          if (a.getAttribute("data-mgaz") === "riep") { var c = bx.querySelector('[data-mgv="corr"]'); if (c) c.click(); mg.scrollIntoView({ behavior: "smooth", block: "start" }); }
+          if (a.getAttribute("data-mgaz") === "riep") { var r1 = mg.querySelector(".mg-r,.mg-vuoto"); if (r1) r1.scrollIntoView({ behavior: "smooth", block: "start" }); }
           else pdfMese(a);
         });
         bx.addEventListener("click", function (ev) {
@@ -153,12 +189,21 @@
             var corr = v.getAttribute("data-mgv") === "corr";
             document.body.classList.toggle("oh-mg-corr", corr);
             document.getElementById("oh-mg-corrnota").style.display = corr ? "" : "none";
-            if (corr) bx.parentNode.insertBefore(bx, mg); else bx.parentNode.insertBefore(bx, mg.nextSibling);
+            if (corr) { var r1 = mg.querySelector(".mg-r,.mg-vuoto"); if (r1) r1.scrollIntoView({ behavior: "smooth", block: "center" }); }
             return;
           }
-          if (ev.target.closest("#oh-mg-vai")) {
-            var t = document.getElementById("oh-mg-testo");
+          var t = document.getElementById("oh-mg-testo");
+          if (ev.target.closest("#oh-mg-mano")) {
             if (typeof window.opGiornataCompleta === "function") { window.opGiornataCompleta(t.value.trim()); t.value = ""; }
+            return;
+          }
+          if (ev.target.closest("#oh-mg-ai")) {
+            var testo = t.value.trim();
+            if (!testo) { if (typeof toast === "function") toast("Scrivi o detta prima com'è andata la giornata"); t.focus(); return; }
+            var conAI = typeof puo === "function" && puo("rapportini") && typeof rvApri === "function";
+            if (!conAI) { window.opGiornataCompleta(testo); t.value = ""; return; }
+            rvApri();
+            setTimeout(function () { var v = document.querySelector('#rv-corpo [data-tipo="voce"]'); if (v) { v.click(); RV.detto = testo; } else window.opGiornataCompleta(testo); t.value = ""; }, 60);
           }
         });
       }
@@ -192,6 +237,7 @@
       var tt = $("#oh-tit-t"); if (tt) tt.textContent = nomi[sez] || "";
     }
     if (!sez) disegna();
+    if (sez === "giornate") speseMese();
     window.scrollTo(0, 0);
   }
   function casa() { modo(null); }
@@ -267,6 +313,36 @@
     }
     posto(); setInterval(posto, 700); window.addEventListener("resize", posto);
   }
+
+  /* 28 nov 2026 — le spese del mese che ha segnato lui: quelle sui lavori
+     (gest_spese, solo le sue: lo dice il database) e quelle col bancomat
+     della ditta (la sua carta). In cima le ultime. */
+  async function speseMese() {
+    var box = document.getElementById("oh-sp-elenco"); if (!box || typeof sb === "undefined" || !MIO || !MIO.impresaId) return;
+    var d = new Date(), a = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-01";
+    var n = new Date(d.getFullYear(), d.getMonth() + 1, 1), b = n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-01";
+    var righe = [], totS = 0, totC = 0;
+    var lav = {}; (typeof LAVORI !== "undefined" ? LAVORI : []).forEach(function (l) { lav[l.id] = l.descrizione || ""; });
+    try {
+      if (MIO.operatoreId && typeof puo === "function" && puo("pagamenti")) {
+        var r = await sb.from("gest_spese").select("descrizione,importo,data,lavoro_id,created_at").eq("user_id", MIO.impresaId).eq("creato_da", MIO.operatoreId).is("eliminato_il", null).gte("data", a).lt("data", b);
+        (r.data || []).forEach(function (x) { totS += +x.importo || 0; righe.push({ t: x.descrizione || "Spesa", imp: +x.importo || 0, data: x.data, lav: lav[x.lavoro_id] || "", quando: x.created_at || x.data, carta: false }); });
+      }
+      if (typeof MIA_CARTA !== "undefined" && MIA_CARTA) {
+        var c = await sb.from("gest_carte_movimenti").select("causale,importo,data,lavoro_id,created_at").eq("carta_id", MIA_CARTA.carta_id).eq("tipo", "spesa").gte("data", a).lt("data", b);
+        (c.data || []).forEach(function (x) { totC += +x.importo || 0; righe.push({ t: x.causale || "Spesa", imp: +x.importo || 0, data: x.data, lav: lav[x.lavoro_id] || "", quando: x.created_at || x.data, carta: true }); });
+      }
+    } catch (_) {}
+    righe.sort(function (x, y) { return String(y.quando || "").localeCompare(String(x.quando || "")); });
+    var eu = function (v) { return (v || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"; };
+    var GG = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"], MM = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+    var gg = function (s) { var x = new Date(String(s).slice(0, 10) + "T12:00:00"); return isNaN(x) ? "" : GG[x.getDay()] + " " + x.getDate() + " " + MM[x.getMonth()]; };
+    box.innerHTML = (righe.length ? '<div class="oh-sp-tot"><div><span>Spese</span><b>' + eu(totS + totC) + '</b></div><div><span>Bancomat ditta</span><b>' + eu(totC) + '</b></div></div>' : '<div class="oh-mg-nota">Nessuna spesa questo mese.</div>')
+      + righe.map(function (x) {
+        return '<div class="oh-sp-r"><div><b>' + e(x.t) + '</b><small>' + e(gg(x.data)) + (x.lav ? " · " + e(x.lav) : "") + '</small>' + (x.carta ? '<span class="oh-sp-carta">💳 Bancomat ditta</span>' : '') + '</div><div class="imp">' + eu(x.imp) + '</div></div>';
+      }).join("");
+  }
+  window.opSpeseMese = speseMese;
 
   /* 28 nov 2026 — il PDF delle MIE giornate del mese, preso da quello che
      «Le mie giornate» ha gia' scritto a schermo (stesse righe, stesso mese) */
