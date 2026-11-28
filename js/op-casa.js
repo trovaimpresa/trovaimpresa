@@ -64,7 +64,7 @@
     + ".oh-mg-nota{font-size:15px;color:#64707c;margin-top:8px}"
     + "#oh-mg-ai{width:100%;margin-top:12px;padding:16px;border:0;border-radius:16px;background:#ff8800;color:#fff;font:inherit;font-size:19px;font-weight:800;cursor:pointer}"
     + "#oh-mg-mano{display:block;margin:14px auto 0;background:none;border:0;color:#64707c;font:inherit;font-size:17px;text-decoration:underline;cursor:pointer}"
-    + "body.oh-sez #op-p-foto>.op-h:first-child,body.oh-sez #op-p-chat>.op-h:first-child,body.oh-sez #op-p-lavori>.op-h,body.oh-sez #op-p-archivio>.op-h:first-child{display:none}"
+    + "body.oh-sez #op-p-foto>.op-h:first-child,body.oh-sez #op-p-chat>.op-h:first-child,body.oh-sez #op-p-lavori>.op-h,body.oh-sez #op-p-archivio>.op-h:first-child,body.oh-sez #op-p-mezzi>.op-h:first-child{display:none}"
     + ".oh-sp-att{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:8px;background:#fff1e0;color:#a85a00;font-size:13px;font-weight:700}"
     + "#oh-bz-lav{background:#fff7ed;border:2px solid #ff8800;border-radius:20px;padding:16px;margin:0 0 18px}#oh-bz-lav h3{margin:2px 0 10px;font-size:21px;color:#0a2a4d}"
     + "#oh-bz-card{background:#fff7ed;border:2px solid #ff8800;border-radius:20px;padding:16px;margin:0 0 18px}"
