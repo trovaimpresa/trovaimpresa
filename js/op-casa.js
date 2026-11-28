@@ -357,9 +357,9 @@
       }
       /* le spese dentro le giornate mandate e non ancora approvate dal capo */
       if (MIO.uid) {
-        var p = await sb.from("gest_giornate_proposte").select("data,dove,extra,created_at,stato").eq("user_id", MIO.impresaId).eq("membro_id", MIO.uid).eq("stato", "da_vedere").gte("data", a).lt("data", b);
+        var p = await sb.from("gest_giornate_proposte").select("data,dove,extra,stato").eq("user_id", MIO.impresaId).eq("membro_id", MIO.uid).eq("stato", "da_vedere").gte("data", a).lt("data", b);
         (p.data || []).forEach(function (g) {
-          ((g.extra && g.extra.spese) || []).forEach(function (x) { totS += +x.importo || 0; righe.push({ t: x.cosa || "Spesa", imp: +x.importo || 0, data: g.data, lav: g.dove || "", quando: g.created_at || g.data, carta: false, att: true }); });
+          ((g.extra && g.extra.spese) || []).forEach(function (x) { totS += +x.importo || 0; righe.push({ t: x.cosa || "Spesa", imp: +x.importo || 0, data: g.data, lav: g.dove || "", quando: g.data, carta: false, att: true }); });
         });
       }
     } catch (_) {}
