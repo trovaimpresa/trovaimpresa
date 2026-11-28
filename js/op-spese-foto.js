@@ -128,26 +128,31 @@ document.querySelectorAll(".lv-fbtn").forEach(b=>b.onclick=()=>{
   OP_FOTO_TIPO=b.dataset.ftipo||"lavoro";OP_FOTO_BTN=b;$("#lv-file").click();
 });
 $("#lv-file").onchange=async e=>{
-  const file=e.target.files[0];if(!file||!curLavoro)return;
+  /* 28 nov 2026 — si scelgono dalla galleria del telefono o si scattano,
+     anche piu' foto insieme */
+  const files=[...(e.target.files||[])];if(!files.length||!curLavoro)return;
   const btn=OP_FOTO_BTN||$("#btn-foto"), testo=btn.textContent, tipo=OP_FOTO_TIPO;
-  btn.disabled=true;btn.textContent="Carico…";
-  /* ridimensiona a 1600px/JPEG 0.75 e blocca oltre 15 MB (js/foto-upload.js).
-     Qui conta doppio: si carica dal cantiere, spesso con poco campo. */
-  const p=await preparaFileUpload(file);
-  if(p.errore){
-    toast(p.errore);
-    btn.disabled=false;btn.textContent=testo;
-    e.target.value="";return;
-  }
-  const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
-  const path=MIO.impresaId+"/"+curLavoro.id+"/"+Date.now()+"_"+safe;
-  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
-  if(up){toast("Foto non caricata: "+up.message);}
-  else{
+  btn.disabled=true;
+  let ok=0, ko=0, ultimoErr="";
+  for(let i=0;i<files.length;i++){
+    btn.textContent=files.length>1?("Carico "+(i+1)+" di "+files.length+"…"):"Carico…";
+    /* ridimensiona a 1600px/JPEG 0.75 e blocca oltre 15 MB (js/foto-upload.js).
+       Qui conta doppio: si carica dal cantiere, spesso con poco campo. */
+    const p=await preparaFileUpload(files[i]);
+    if(p.errore){ko++;ultimoErr=p.errore;continue;}
+    const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path=MIO.impresaId+"/"+curLavoro.id+"/"+Date.now()+"_"+i+"_"+safe;
+    const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
+    if(up){ko++;ultimoErr="Foto non caricata: "+up.message;continue;}
     const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo,operatore:MIO.nome,storage_path:path});
-    if(ins){await _fileOrfano("gestionale-foto",path);toast("Foto non salvata: "+ins.message+" — riprova");}
-    else{toast(tipo==="fatto"?"Foto del lavoro finito aggiunta ✔":"Foto dei lavori in corso aggiunta ✔");await caricaFoto(curLavoro.id);}
+    if(ins){await _fileOrfano("gestionale-foto",path);ko++;ultimoErr="Foto non salvata: "+ins.message;continue;}
+    ok++;
   }
+  const cosa=tipo==="fatto"?"del lavoro finito":"dei lavori in corso";
+  if(ok&&!ko)toast((ok===1?"Foto ":ok+" foto ")+cosa+(ok===1?" aggiunta ✔":" aggiunte ✔"));
+  else if(ok&&ko)toast(ok+" foto aggiunte, "+ko+" no: "+ultimoErr);
+  else toast(ultimoErr+" — riprova");
+  if(ok)await caricaFoto(curLavoro.id);
   btn.disabled=false;btn.textContent=testo;
   e.target.value="";
 };
