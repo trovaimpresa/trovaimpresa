@@ -217,6 +217,8 @@
       return;
     }
     const mid=curMestiere();
+    /* 28 nov 2026 (controllo finale) — senza reparto scelto (schermata dei reparti) non si chiede niente: prima partivano richieste con mestiere_id=null che rispondevano 400 */
+    if(mid==null)return;
 
     /* Tutto in una volta sola. I computi si leggono con sb (che salta quelli
        nel cestino): un SAL il cui computo e' nel cestino non compare qui. */

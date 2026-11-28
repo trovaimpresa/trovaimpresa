@@ -33,7 +33,14 @@
      guardando; le altre si segnano "da rifare" per la prossima apertura. */
   function rinfresca(){
     const t=tabCorrente();
-    for(const tb of arguments){
+    /* 28 nov 2026 (controllo finale) — Report e Tasse contano lavori, fatture
+       e preventivi: dopo «Accettato → lavoro» o «✔ Fatto» restavano vecchi
+       fino al ricaricare. Si segnano da rifare insieme a loro. */
+    const _tabs=[...arguments];
+    if(_tabs.some(x=>x==="lavori"||x==="fatture"||x==="preventivi")){
+      ["report","fisco"].forEach(x=>{if(!_tabs.includes(x))_tabs.push(x);});
+    }
+    for(const tb of _tabs){
       if(tb===t){_tabSporchi.delete(tb);const fn=RENDER_TAB[tb];if(fn)fn();}
       else _tabSporchi.add(tb);
     }
@@ -467,7 +474,7 @@
         ${cliNome?`<span>👤 ${esc(cliNome)}</span>`:""}
         ${opNome?`<span>👷 ${esc(opNome)}</span>`:""}
         ${dove?`<span>📍 ${esc(dove)}${(()=>{try{const k=typeof mpKmDi==="function"?mpKmDi(l):null;return k!=null?` · <b class="km-uff" title="Distanza dall'ufficio, in linea d'aria">${esc(mpKmTesto(k))}</b>`:"";}catch(e){return "";}})()}</span>`:""}
-        <span>📅 ${l.data_prevista?fdate(l.data_prevista):"Senza data"}</span>
+        <span>📅 ${l.data_prevista?fdate(l.data_prevista):((l.stato==="fatto"&&l.data_fatto)?(ruoloUtente==='professionista'?"Finita il ":"Fatto il ")+fdate(l.data_fatto):"Senza data")}</span>
         ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""}
         ${(_pro&&late)?`<span>🏛 ${esc(praPuntoNome(l))}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}

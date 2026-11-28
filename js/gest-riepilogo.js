@@ -610,7 +610,7 @@
         d:"Da pagare: "+eur(_ffScad.reduce((t,f)=>t+(+f.importo||0),0)),go:"fornitori"});
     }catch(e){}
     if(daFatt.length)    DA.push({g:2,male:1,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
-                                  d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
+                                  d:(daFatt.length===1?"Vale ":"Valgono ")+eur(totDaFatt)+(daFatt.length===1?" e non è ancora in nessuna fattura":" e non sono ancora in nessuna fattura"),go:"fatture"});
     /* 7 nov 2026 — LE FATTURE IN BOZZA DIMENTICATE. Una bozza non e' «da
        incassare» (non e' emessa) e non e' «da fatturare» (il lavoro e' gia'
        dentro una fattura): quei soldi non comparivano da nessuna parte.

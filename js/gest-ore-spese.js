@@ -1309,7 +1309,11 @@
     filoMetti("preventivi","preventivi");
     const box=$("#prev-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
+    if(typeof curMestiere==="function"&&curMestiere()==null)return;
+    /* (sopra) 28 nov 2026 (controllo finale) — senza reparto scelto (schermata dei reparti) non si chiede niente: prima partivano richieste con mestiere_id=null che rispondevano 400 */
     listaCarica(box,"i preventivi");   /* 17 nov 2026 — la scritta mentre si legge (gest-schede-clienti.js) */
+    /* 28 nov 2026 (controllo finale) — in forfettario niente «IVA esclusa»: si legge il regime prima */
+    if(typeof fattAziendaPronta==="function"){ try{ await fattAziendaPronta(); }catch(_){ } }
     let _rPv,_rCl;
     try{ [_rPv,_rCl]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
@@ -1376,7 +1380,7 @@
     const somma=ruoloUtente==='professionista'
       ? L.reduce((s,p)=>s+(totCli[p.id]||0),0)
       : L.reduce((s,p)=>s+(impNetto[p.id]||0),0);
-    const sommaEt=ruoloUtente==='professionista'?'':' <small class="prev-iva-tot">IVA esclusa</small>';
+    const sommaEt=(ruoloUtente==='professionista'||_prevForf())?'':' <small class="prev-iva-tot">IVA esclusa</small>';
     renderTabella({
       id:"prev", box:"#prev-list",
       viste:"#prev-viste", visteDef:PREV_VISTE, vista:prevFilter, conta:conta, azioneVista:"prev-filtro",
@@ -1402,7 +1406,7 @@
                piccolo «con IVA …» (la cifra del PDF). Prima si mischiavano. */
             (ruoloUtente==='professionista'
               ? eur(totCli[p.id]||0)+'<small class="prev-iva">da incassare</small>'
-              : eur(impNetto[p.id]||0)+'<small class="prev-iva">IVA esclusa</small>'
+              : eur(impNetto[p.id]||0)+'<small class="prev-iva">'+_prevIvaEt()+'</small>'
                 +(_conIva(p)?'<small class="prev-iva prev-coniva">con IVA '+eur2(totCli[p.id]||0)+'</small>':''))
           ],
           menu:prevVoci(p)
@@ -1453,18 +1457,21 @@
         sotto:acc+" su "+esiti.length+" negli ultimi 12 mesi"}):null
     ]);
   }
+  /* 28 nov 2026 (controllo finale) — in forfettario l'IVA non c'e': «senza IVA», non «IVA esclusa» */
+  function _prevForf(){ try{ return typeof fattForfettario==="function"&&fattForfettario(); }catch(_){ return false; } }
+  function _prevIvaEt(){ return _prevForf()?'senza IVA':'IVA esclusa'; }
   /* sotto 880px: la card di prima, con le stesse azioni del menu */
   function prevCard(p,cliMap,tot,conIva,imp){
     /* 7 nov 2026 — sotto l'importo si dice SEMPRE se l'IVA c'e' o no: nella
        stessa lista stavano 982,10 con l'IVA e 2.800 senza, uguali a vedersi */
-    const et=ruoloUtente==='professionista'?'da incassare':(conIva?'IVA inclusa':'IVA esclusa');
+    const et=ruoloUtente==='professionista'?'da incassare':(conIva?'IVA inclusa':_prevIvaEt());
     return `<div class="job">
       <div class="job-top"><div class="job-cli">N. ${esc(String(p.numero||"—"))} — ${esc(p.titolo||"")}</div><span class="stato ${p.stato}">${PREV_LAB[p.stato]||p.stato}</span></div>
       <div class="job-meta">
         ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
         <span>📅 ${fdate(p.data)}</span>
         ${(ruoloUtente!=='professionista'&&imp)
-          ? `<span class="prev-tot">${eur2(imp[p.id]||0)}</span><span class="prev-iva-card">IVA esclusa${conIva?` · con IVA ${eur2(tot[p.id]||0)}`:""}</span>`
+          ? `<span class="prev-tot">${eur2(imp[p.id]||0)}</span><span class="prev-iva-card">${_prevIvaEt()}${conIva?` · con IVA ${eur2(tot[p.id]||0)}`:""}</span>`
           : `<span class="prev-tot">${eur2(tot[p.id]||0)}</span><span class="prev-iva-card">${et}</span>`}</div>
       ${/* 16 agosto 2026 — la nota non si mostra piu' in anteprima: era un
             muro di testo giallo che faceva la scheda alta il doppio delle

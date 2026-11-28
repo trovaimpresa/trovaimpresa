@@ -153,7 +153,8 @@ const avHtml=`
     /* Modulo lungo -> finestra grande a due colonne, come persona, lavoro e
        preventivo. A sinistra chi sei e dove sei, a destra fisco e cantiere.
        Sotto i 900px torna una colonna sola. */
-    openSheetGrande("Dati azienda",
+    /* 28 nov 2026 (controllo finale) — allo studio il pulsante dice «Dati dello studio»: anche il titolo */
+    openSheetGrande(((typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista")||(typeof window._tiTipoVero!=="undefined"&&window._tiTipoVero==="professionista"))?"Dati dello studio":"Dati azienda",
       `<div class="sh-cols"><div class="sh-col">
 
       <div class="sh-b">

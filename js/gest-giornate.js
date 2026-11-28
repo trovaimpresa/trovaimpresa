@@ -702,7 +702,7 @@ function giorDisegnaProp(){
         ${giorAggiungi===i?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-nuovo" placeholder="Nome"><button type="button" class="btn" data-gior="piu-ok" data-i="${i}" style="flex:0 0 auto">Aggiungi</button></div>`:""}
         ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}
         ${giorMezzeHTML(c,i,nomi,io)}</div>
-      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" data-cg-gia="${esc(c.daAI||"")}" placeholder="${_gP("Spese e note qui","Cosa avete fatto, note")}">${esc(c.cosa)}</textarea></div>
+      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" data-cg-gia="${esc(c.daAI||"")}" placeholder="Cosa avete fatto, note">${esc(c.cosa)}</textarea></div>
       ${giorModK?"":giorSpeseHTML(c,i)}
       ${giorProp.length>1?`<button type="button" class="glink rosso" data-gior="togli" data-i="${i}" style="align-self:flex-start">Togli questa</button>`:""}
     </div>`;
@@ -846,6 +846,10 @@ async function giorTrovaLavoro(dove,data,nomi){
 /* 27 nov 2026 — il cantiere nato da una giornata lo si dice nel messaggio verde (prima nasceva zitto in Lavori) */
 let giorCantNuovi=[], giorCantChi=[];
 async function giorScrivi(schede){
+  /* 28 nov 2026 (controllo finale) — Squadra e Lavori si rileggono qui: un
+     lavoro nato dopo l'apertura di Giornate (da un preventivo) non c'era in
+     giorLav e la giornata ne creava un DOPPIONE. */
+  await giorAssicura();
   const mest=_gMest();
   let fatte=0;
   /* 1. i nomi nuovi entrano in Squadra */

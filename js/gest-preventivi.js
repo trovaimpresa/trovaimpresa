@@ -666,7 +666,7 @@
     }
     h+='<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +'<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>'
-      +(conIva?'Totale per il cliente':(sconto?'Totale scontato (IVA esclusa)':'Totale (IVA esclusa)'))+'</strong></span><strong>'+eur2(_pc.totale)+'</strong></div>';
+      +(conIva?'Totale per il cliente':((typeof fattForfettario==="function"&&fattForfettario())?(sconto?'Totale scontato':'Totale'):(sconto?'Totale scontato (IVA esclusa)':'Totale (IVA esclusa)')))+'</strong></span><strong>'+eur2(_pc.totale)+'</strong></div>';
     const acR=prevAccontoRighe(_pc.totale,acDati);
     if(acR.length){
       h+='<div style="margin-top:10px">'+acR.map(function(r){return riga(esc(r[0]),eur2(r[1]));}).join("")+'</div>';
@@ -1158,7 +1158,7 @@
       +'</select></div>'
       +'<p class="sh-nota" style="margin-bottom:0">'+(pro
           ?'Il compenso del preventivo ('+eur2(tot)+') — senza cassa, spese e IVA — diventa l\'importo della pratica.'
-          :'Il totale delle voci del preventivo'+(_scLav?' meno lo sconto':'')+' ('+eur2(tot)+'), IVA esclusa, diventa l\'importo del lavoro.')+'</p>'
+          :'Il totale delle voci del preventivo'+(_scLav?' meno lo sconto':'')+' ('+eur2(tot)+')'+((typeof fattForfettario==="function"&&fattForfettario())?'':', IVA esclusa,')+' diventa l\'importo del lavoro.')+'</p>'
       +'</div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="ptl-conferma" data-id="'+esc(String(id))+'" data-tot="'+tot+'">Collega</button>');

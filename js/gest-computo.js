@@ -117,6 +117,8 @@
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun computo","Accedi per creare i computi metrici.",
       _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');return;}
     const mid=curMestiere();
+    /* 28 nov 2026 (controllo finale) — senza reparto scelto (schermata dei reparti) non si chiede niente: prima partivano richieste con mestiere_id=null che rispondevano 400 */
+    if(mid==null)return;
 
     const [rc,rt,rl] = await Promise.all([
       sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid)

@@ -200,6 +200,10 @@
     return String(t == null ? '' : t)
       .replace(/^[ \t]*(?:-{3,}|\*{3,}|_{3,})[ \t]*$/gm, '')
       .replace(/^[ \t]*#{1,4}[ \t]+(.+?)[ \t]*$/gm, '**$1**')
+      /* 28 nov 2026 (controllo finale) — un link scritto alla markdown,
+         «[Parla](#)», restava a schermo con parentesi e cancelletto: resta
+         solo il nome del pulsante fra «». */
+      .replace(/\[([^\]\n:]{1,60})\]\([^)\s]{0,300}\)/g, '«$1»')
       .replace(/\n{3,}/g, '\n\n');
   }
   function testoRisposta(t) {
