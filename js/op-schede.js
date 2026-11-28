@@ -135,18 +135,28 @@ async function opRender(){
 async function opRenderFoto(){
   const box=document.getElementById("op-foto-lista");if(!box)return;
   const vivi=(LAVORI||[]).filter(l=>!opVecchio(l));
-  if(!vivi.length){box.innerHTML='<div class="empty-state">'+etic("Il capo non ti ha ancora dato lavori: le foto si fanno dentro un lavoro.")+'</div>'+opBtnNuovo();return;}
+  if(!vivi.length&&!(window.opBozze&&(await window.opBozze.lista()).length)){box.innerHTML='<div class="empty-state">'+etic("Il capo non ti ha ancora dato lavori: le foto si fanno dentro un lavoro.")+'</div>'+opBtnNuovo();return;}
   /* 28 nov 2026 — una foto va sempre su un lavoro: prima si sceglie quale */
   const testa='<button type="button" class="op-b p" id="op-foto-nuova" style="width:100%;font-size:18px;padding:14px;margin-bottom:14px">📷 Fai una foto</button><div id="op-foto-scegli" class="hidden"></div>';
   box.innerHTML=testa+'<div class="empty-state">Carico le foto…</div>';
   const legaTesta=()=>{
     const b=document.getElementById("op-foto-nuova"), sc=document.getElementById("op-foto-scegli");
     if(!b||!sc)return;
-    b.onclick=()=>{
-      if(vivi.length===1){opApriFoto(vivi[0].id);return;}
+    b.onclick=async()=>{
+      /* 28 nov 2026 — dove la salvo? i lavori, le giornate salvate sul
+         telefono e un posto nuovo: la foto non resta mai senza casa */
+      const bz=window.opBozze?await window.opBozze.lista():[];
+      if(vivi.length===1&&!bz.length){opApriFoto(vivi[0].id);return;}
       sc.classList.toggle("hidden");
-      sc.innerHTML='<div class="op-flab" style="font-size:18px;margin-bottom:8px">Per quale lavoro?</div>'+vivi.map(l=>`<button type="button" class="op-b" data-fl="${l.id}" style="width:100%;margin-bottom:8px;text-align:left;font-size:17px;padding:14px">${esc(opTitolo(l))}${(l.descrizione&&l.descrizione!==opTitolo(l)?l.descrizione.slice(0,70):(opDove(l)!==opTitolo(l)?opDove(l):""))?`<br><span style="font-weight:500;color:#475569">${esc((l.descrizione&&l.descrizione!==opTitolo(l)?l.descrizione.slice(0,70):(opDove(l)!==opTitolo(l)?opDove(l):"")))}</span>`:""}</button>`).join("");
+      const sub=l=>(l.descrizione&&l.descrizione!==opTitolo(l)?l.descrizione.slice(0,70):(opDove(l)!==opTitolo(l)?opDove(l):""));
+      const btn=(attr,t,s2)=>`<button type="button" class="op-b" ${attr} style="width:100%;margin-bottom:8px;text-align:left;font-size:17px;padding:14px">${esc(t)}${s2?`<br><span style="font-weight:500;color:#475569">${esc(s2)}</span>`:""}</button>`;
+      sc.innerHTML='<div class="op-flab" style="font-size:18px;margin-bottom:8px">Dove la salvo?</div>'
+        +(vivi.length?'<div class="op-flab" style="margin:6px 0">'+etic("I tuoi lavori")+'</div>'+vivi.map(l=>btn(`data-fl="${l.id}"`,opTitolo(l),sub(l))).join(""):"")
+        +(bz.length?'<div class="op-flab" style="margin:10px 0 6px">Giornate salvate, da mandare</div>'+bz.map(z=>btn(`data-fz="${esc(z.id)}"`,(z.lavoroNome||z.dove||"Cantiere da scrivere"),(z.cosa||"").slice(0,70))).join(""):"")
+        +btn('data-fn="1"',"📍 Un posto nuovo","Te l'ha detto il capo a voce");
       sc.querySelectorAll("[data-fl]").forEach(x=>x.onclick=()=>opApriFoto(x.dataset.fl));
+      sc.querySelectorAll("[data-fz]").forEach(x=>x.onclick=()=>window.opBozze.apri(x.dataset.fz));
+      sc.querySelectorAll("[data-fn]").forEach(x=>x.onclick=()=>window.opGiornataCompleta&&window.opGiornataCompleta(""));
     };
   };
   const ids=vivi.map(l=>l.id);
