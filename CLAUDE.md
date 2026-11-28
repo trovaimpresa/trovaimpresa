@@ -4865,3 +4865,21 @@ Da sapere: foto dello studio con `node docs/foto-studio.js <scena> <larghezza> <
 ✔ 28 nov: cancellata (sì di Alex) la richiesta «PROVA CONTROLLORE stato senza risposta» del 19 nov (gest_richieste id 4). Nessuna riga di prova rimasta.
 💡 Da decidere con Alex (dalla sessione 7, non fatto): due «stato» nella pratica («A che punto sta» del Comune e «Stato» Da fare/In corso/Fatto).
 ⚠️ Visto e non toccato: in forfettario «Il conto» chiama «Totale imponibile» la somma con le spese art. 15 (scelta del 13 ago); nel prezzario regionale ci sono voci con unità strane (es. S01.01.002.16 «costo mensile» in m²): testo della tariffa, non si tocca.
+
+# 28 NOVEMBRE 2026 — GIRO NUOVO — SESSIONE 9: PERSONE E STRUMENTI (studio tecnico, online cea7aca)
+Giro da geometra su Collaboratori e agenda, Giornate, Strumenti, Crediti formativi, app del collaboratore. Reparto «ferramenta», `?vedi=professionista`, «PROVA CONTROLLORE», 1440 e 375. Collaudato sul sito vero dopo il push, poi tutto cancellato con `sb.raw` (0 righe «PROVA CONTROLLORE» in operatori, mezzi, lavori, crediti, clienti, scadenze, fatture, preventivi; ore, spese, rapportini e invito della prova tolti).
+⚠️ Faccia dello studio col conto di Alex: `_tiTipoVero='professionista'` da solo NON basta — `logRuoloUtente` lo rimette ad «artigiano» e ricompaiono i Mezzi. Usare `Object.defineProperty(window,'_tiTipoVero',{configurable:true,get(){return 'professionista'},set(v){}}); adattaMenuProfessionista();`.
+Difetti sistemati:
+- Menu: il traduttore cambiava i titoletti («Lavoro» → «Pratica», «Squadra e mezzi» → «Collaboratori e mezzi», che poi gest-menu-corto non riconosceva). `.side-group,.ma-gruppo` in `_SKIP_UTENTE` (js/gest-ingresso.js). Ora «Lavoro» e «Collaboratori e strumenti».
+- Collaboratori: dopo aver salvato una pratica o uno strumento la scheda non diceva «Pratiche (N)» né «🔧 Ha: …» fino al ricaricare. «squadra» in SEMPRE (js/gest-finestre-eventi.js) e la linguetta «Agenda (N)» si rilegge con lei. Tutte le facce.
+- Giornate: «ha pagato 12 euro di parcheggio» → l'AI scriveva «Parcheggio 12 €» e la spesa si perdeva. Con una scheda sola `giorSpeseDa` legge anche il racconto vero.
+- Ore fatte: «Giorni 0» per chi ha solo ore scritte. Ora un giorno conta con una timbratura o un'ora scritta; Excel «Giorni».
+Fatti col sì di Alex (foto prima, tutte e 4):
+- Giornate «Altre ore» (tutte le facce): terzo bottone con la casella (`c.oreX`, `_gOreX`, `_gOreNum`, input `.gore` 84×44). «6 ore» detto nel racconto (un numero solo, una scheda) lo accende da solo. Vale anche in «modifica» (ore diverse da 8/4 senza un altro cantiere quel giorno). Provato dal vivo: 6 h → 120 €, modifica 3,5 h → 70 €, Ore fatte 2 giorni 9h 30m.
+- Strumenti: «Da tarare» se è scaduta solo la taratura (sennò «Da rinnovare»), «scaduta il» (era «scadeva il», tutte le facce), elenco vuoto senza la frase doppia.
+- Crediti: senza Ordine scelto (`cfp_ordine` vuoto) il pulsante diventa «Scegli il tuo Ordine» (btn-primary) con la frase «geometri e architetti 60 in tre anni, ingegneri 30 l'anno».
+- Scheda del collaboratore allo studio: «📄 Documenti e scadenze» (era «🦺 Documenti e sicurezza»), permesso «Resoconti» (`permNome`, era «Rapportini»), riquadro dell'app «ore, spese e foto» (era «materiali», in adattaMenuProfessionista).
+Scene nuove per le foto in docs/foto-studio.js: collaboratori, persona, persona-perm, strumenti, giornate, crediti (aggiungono una collaboratrice, uno strumento con taratura scaduta).
+App del collaboratore: vista simulando `MIO.tipoStudio='professionista'` sul conto di Alex (david): «Pratiche di adesso», «Scrivi al titolare», «Segna la giornata» con le ore esatte. ⬜ Ancora non provata con un account vero di uno studio.
+⛔ DECISO DA ALEX (28 nov): UNIRE i due «stato» della pratica («A che punto sta» del Comune e «Stato» Da fare/In corso/Fatto). Non fatto in questa sessione (lavoro grosso): primo lavoro della prossima, prima le foto.
+Da sapere: «Non è entrato» resta al maschile anche per una collaboratrice (scelta del 27 nov, non toccata).
