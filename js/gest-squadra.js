@@ -831,6 +831,8 @@ ${vecchi?`
         <div class="sh-tit">Chi \u00e8</div>
         <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
         <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567"></div>
+        <!-- 28 nov 2026 (foto approvata): l'email sale sotto Telefono, serve per l'invito (gest_inviti_per_me) -->
+        <div class="field"><label>Email</label><input id="d-email" type="email" value="${esc(op.email||"")}" placeholder="nome@email.it" autocomplete="off"><div style="font-size:14px;color:var(--muted);margin-top:5px">Serve per l'invito: quando si registra nella app trova già il tuo invito.</div></div>
         <div class="row2">
           <div class="field"><label>Mansione in cantiere</label>
             <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
@@ -886,7 +888,6 @@ ${vecchi?`
             <div class="field"><label>Data di nascita</label><input id="d-nascita" type="date" value="${esc(op.data_nascita||"")}"></div>
             <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="Es. RSSMRA80A01H501U"></div>
           </div>
-          <div class="field"><label>Email</label><input id="d-email" type="email" value="${esc(op.email||"")}" placeholder="nome@email.it"></div>
           <div class="row2">
             <div class="field"><label>Data di assunzione</label><input id="d-assunzione" type="date" value="${esc(op.data_assunzione||"")}"></div>
             <div class="field"><label>Tipo di contratto</label>
