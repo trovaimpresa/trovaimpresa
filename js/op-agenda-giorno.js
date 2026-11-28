@@ -7,8 +7,16 @@ async function boot(session){
     .select("impresa_id,operatore_id,ruolo,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");
   if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
   if(!membri||!membri.length){
+    /* 28 nov 2026 — c'e' un invito che ti aspetta (il capo ha scritto la tua
+       email nella tua scheda)? Si va alla schermata Accetta / Rifiuta, anche
+       se sei titolare di un'impresa tua: si puo' essere capo e operaio. */
+    try{
+      const {data:inv}=await sb.rpc("gest_inviti_per_me",{_codice:null});
+      if(Array.isArray(inv)&&inv.length){location.href="gestionale-invito.html"+(location.search||"");return;}
+    }catch(_){}
     if(await forseSonoIlCapo()){gateCapo();return;}
-    gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;
+    /* chi non e' ne' capo ne' in squadra: va dove si mette il codice */
+    location.href="gestionale-invito.html"+(location.search||"");return;
   }
   MIO.impresaId=membri[0].impresa_id;
   /* ⛔ 5 SETTEMBRE 2026 — QUI SI LEGGEVA LA TABELLA, E DA OGGI NON SI PUO'.
