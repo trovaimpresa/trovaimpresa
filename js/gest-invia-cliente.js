@@ -76,7 +76,7 @@
       out.totali.push(["Compenso",eur2(cp.compenso)]);
       if(cp.cassa) out.totali.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",eur2(cp.cassa)]);
       if(cp.spese) out.totali.push(["Spese (bolli, diritti)",eur2(cp.spese)]);
-      out.totali.push([cp.spese?"Totale imponibile":"Imponibile IVA",eur2(cp.imponibile)]);
+      if(parcImpNome(cp,(typeof fattForfettario==="function")&&fattForfettario()))out.totali.push([parcImpNome(cp,fattForfettario()),eur2(cp.imponibile)]);
       if(cp.iva) out.totali.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eur2(cp.baseIva):""),eur2(cp.iva)]);
       /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
       if(cp.ritenuta) out.totali.push(["Totale documento",eur2(cp.documento)]);

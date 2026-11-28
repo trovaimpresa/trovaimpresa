@@ -129,6 +129,17 @@
      «Crea fattura» copiava l'IVA 22% di un preventivo vecchio e il bollo da
      2 € non si metteva, anche in forfettario. Chi decide IVA o bollo chiama
      prima questa. */
+  /* 27 nov 2026 (giro nuovo, sessione 7) — LA RIGA DELL'IMPONIBILE NELLA PARCELLA.
+     In forfettario «Imponibile IVA» non vuol dire niente (l'IVA non c'e') e
+     ripeteva lo stesso numero del netto: la riga non si scrive. Una regola,
+     cinque posti (modulo, PDF, lettera d'incarico a schermo e in PDF, pagina
+     del cliente): tutti chiedono qui. null = riga da saltare. */
+  function parcImpNome(cp,forf){
+    if(forf===undefined)forf=fattForfettario();
+    if(forf&&!(cp&&cp.iva))return null;
+    return (cp&&cp.spese)?"Totale imponibile":"Imponibile IVA";
+  }
+  window.parcImpNome=parcImpNome;
   async function fattAziendaPronta(){
     if(fattAzienda||!sb||!sbUid)return;
     try{

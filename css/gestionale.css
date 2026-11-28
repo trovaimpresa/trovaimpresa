@@ -6578,3 +6578,14 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
      e batteva la riga sopra: qui due id per vincere. */
   #appview #report .sec-head>div .btn.add{font-size:15px!important;padding:0 6px!important;min-width:0!important}
 }
+
+/* 28 nov 2026 (giro nuovo, sessione 7) — Pratiche, «A che punto sta»: bottoni
+   sul computer, una tendina sola sul telefono. */
+.lav-pstati-bt{display:contents}
+.lav-pstati-sel{display:none}
+@media(max-width:600px){
+  .lav-pstati{flex-wrap:nowrap!important;align-items:center;gap:10px}
+  .lav-pstati-bt{display:none}
+  .lav-pstati-sel{display:block;flex:1;min-width:0;min-height:44px;font-size:16px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a}
+  .lav-pstati .lav-pstati-t{white-space:nowrap;width:auto;margin-right:0}
+}

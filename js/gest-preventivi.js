@@ -482,7 +482,7 @@
     const forf=fattForfettario();
     const ivaVera=forf?0:iva;
     const opzIva=(forf
-        ? [[0,"0% — sei in regime forfettario, l'IVA non si applica"]]
+        ? [[0,"Niente IVA (forfettario)"]]
         : [[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]])
       .map(o=>`<option value="${o[0]}" ${(+ivaVera===o[0])?"selected":""}>${o[1]}</option>`).join("");
     return `
@@ -494,7 +494,10 @@
         <div class="field"><label>IVA</label><select id="pv-iva">${opzIva}</select></div>
       </div>
       <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0" data-euro></div>
-      <div class="field">
+      <!-- 28 nov 2026 (giro nuovo, sessione 7): in forfettario la casella della
+           ritenuta non serve (non si applica) e si vedeva storta: resta nella
+           pagina, nascosta, e il perche' lo dice il riquadro qui sotto. -->
+      <div class="field"${forf?' style="display:none"':''}>
         <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
           <input type="checkbox" id="pv-rit" ${(!forf&&rit)?"checked":""} ${forf?"disabled":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
           <span>Applica la ritenuta d'acconto del 20%</span>
@@ -530,7 +533,7 @@
       /* 13 agosto 2026 — non e' piu' "Imponibile IVA": le spese anticipate
          stanno dentro questo numero ma l'IVA non ce l'hanno (art. 15), quindi
          chi provasse a farci sopra il 22% non tornerebbe. */
-      riga(c.spese?"Totale imponibile":"Imponibile IVA", c.imponibile) +
+      (parcImpNome(c)?riga(parcImpNome(c), c.imponibile):"") +
       /* 13 nov 2026 (quarto giro) — sopra c'e' «Totale imponibile 1.056,00» e
          l'IVA e' contata su 1.040 (le spese sono fuori IVA): sembrava un
          errore. Con le spese la riga dice su quanto e' contata. */
@@ -1204,7 +1207,9 @@
     rinfresca("preventivi","lavori","riepilogo");
     if(eAcc||!okAcc||!okAcc.length){toast("Creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
     const _msgL=ruoloUtente==='professionista'?"Pratica creata dal preventivo":"Lavoro creato dal preventivo";
-    if(typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato",{sotto:_msgL});else toast(_msgL+" ✔");
+    /* 28 nov 2026 (giro nuovo, sessione 7) — la spunta porta dentro la pratica
+       appena nata: prima si restava nei Preventivi senza sapere dov'era finita. */
+    if(typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato",{sotto:_msgL,bott:_pro?"Apri la pratica":"Apri il lavoro",vai:()=>{try{window.apriCosa?window.apriCosa("lav",lav.id):null;}catch(_){}}});else toast(_msgL+" ✔");
   }
 
   /* ===== 9 agosto 2026 — CREDITI FORMATIVI (CFP) =====

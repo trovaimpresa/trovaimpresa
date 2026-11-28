@@ -710,9 +710,7 @@
     const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${(t==="Agibilita'"?"Agibilità":t)||"— scegli —"}</option>`).join("");
     const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===(job.pratica_stato||"da_preparare")?"selected":""}>${s[1]}</option>`).join("");
     return `
-      ${dentroBox?"":`<div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:4px">
-        <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">📄 Dati della pratica</label>
-      </div>`}
+      ${dentroBox?"":`<div class="sh-tit pr-tit" style="margin-top:6px">Dati della pratica</div>`}
       <div class="row2">
         <div class="field"><label>Tipo di pratica</label><select id="j-pr-tipo">${tipi}</select></div>
         <div class="field"><label>A che punto sta</label><select id="j-pr-stato">${stati}</select></div>
@@ -867,9 +865,9 @@
       <div class="field"><label>Cliente / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
+      ${bloccoPratica(job)}
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
       <div class="field"><label>Dove (vuoto = indirizzo del cliente)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Es. Via Roma 12, scala B, piano 3"></div>
-      ${bloccoPratica(job)}
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
         <div class="field"><label>${ruoloUtente==='professionista'?"Collaboratore":"Chi ci va"}</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
@@ -1002,6 +1000,9 @@
       const {data:rr}=await sb.from("gest_preventivo_righe").select("*")
         .in("preventivo_id",pp.map(p=>p.id)).order("ordine");
       const pro=ruoloUtente==='professionista';
+      /* 27 nov 2026 (giro nuovo, sessione 7) — in forfettario niente «IVA esclusa» */
+      if(typeof fattAziendaPronta==="function"){ try{ await fattAziendaPronta(); }catch(_){ } }
+      const _forf=(typeof fattForfettario==="function")&&fattForfettario();
       const num=n=>String(+(+n||0).toFixed(3)).replace(".",",");
       let h="";
       pp.forEach(function(p){
@@ -1020,7 +1021,7 @@
                 +'<div class="lpv-t">'+eur2(impRiga(r.qta,r.prezzo))+'</div></div>';
             }).join("")
           +(sc?'<div class="lpv-riga"><div class="lpv-d">Sconto</div><div class="lpv-t">− '+eur2(sc)+'</div></div>':'')
-          +'<div class="lpv-riga lpv-tot"><div class="lpv-d">Totale, IVA esclusa</div><div class="lpv-t">'+eur2(_cent2(somma-sc))+'</div></div>'
+          +'<div class="lpv-riga lpv-tot"><div class="lpv-d">'+(_forf?'Totale':'Totale, IVA esclusa')+'</div><div class="lpv-t">'+eur2(_cent2(somma-sc))+'</div></div>'
           +'</div>'
           +'<button type="button" class="btn quick-add" data-action="lav-prev-apri" data-id="'+esc(String(p.id))+'">Apri il preventivo</button>';
       });

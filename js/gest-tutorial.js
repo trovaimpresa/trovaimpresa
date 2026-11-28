@@ -144,13 +144,20 @@
   }
 
   /* ---------- i puntini ---------- */
+  /* 28 nov 2026 (giro nuovo, sessione 7) — i video sono girati sul gestionale
+     dell'IMPRESA («Ristrutturazioni», «lavori»): allo studio tecnico non si
+     fanno vedere finche' non ci sono quelli dello studio. La guida resta. */
+  function haVideo(t) {
+    if (typeof ruoloUtente !== "undefined" && ruoloUtente === "professionista") return false;
+    return !!videoCi[t];
+  }
   function mettiPuntini() {
     var m = menu(); if (!m) return;
     var bt = m.querySelectorAll("button[data-tab]");
     Array.prototype.forEach.call(bt, function (b) {
       var t = b.dataset.tab, c = b.querySelector(".tut-dot");
       var guida = t === VOCE_GUIDA;
-      if (!videoCi[t] && !guida) { if (c) c.remove(); return; }
+      if (!haVideo(t) && !guida) { if (c) c.remove(); return; }
       if (c) return;
       c = document.createElement("span");
       c.className = "tut-dot"; c.setAttribute("role", "button");
@@ -255,7 +262,7 @@
       + (qui > 0 ? '<button class="tf-in" type="button">← Indietro</button>' : '')
       + '<button class="tf-av" type="button">' + (ultimo ? 'Finito ✓' : 'Avanti →') + '</button>'
       + '<button class="tf-esci" type="button">Esci</button></div>'
-      + (p.tab && videoCi[p.tab] ? '<button class="tf-vid" type="button">' + PLAY + ' Guarda il video</button>' : '');
+      + (p.tab && haVideo(p.tab) ? '<button class="tf-vid" type="button">' + PLAY + ' Guarda il video</button>' : '');
     f.querySelector(".tf-av").onclick = function () { vai(1); };
     var ind = f.querySelector(".tf-in"); if (ind) ind.onclick = function () { vai(-1); };
     f.querySelector(".tf-esci").onclick = fermaGuida;

@@ -9,7 +9,17 @@
      usano da qualsiasi sezione.
      ============================================================ */
   const _tabSporchi=new Set();
-  function tabCorrente(){const b=document.querySelector("nav.tabs button.active");return (b&&b.dataset.tab)||"riepilogo";}
+  /* 27 nov 2026 (giro nuovo, sessione 7) — conta la SEZIONE a schermo, non la
+     prima voce accesa: nelle voci unite (Preventivi e richieste, Computo e SAL,
+     Mezzi e attrezzature, Scadenze e promemoria, Squadra e agenda) le voci accese
+     sono due e la prima e' quella di fuori. Su «Richieste dal sito», salvato il
+     preventivo, la lista restava vecchia («Nuova») perche' rinfresca credeva di
+     stare su Preventivi. */
+  function tabCorrente(){
+    const s=document.querySelector("#appview section.active[id]");
+    if(s&&s.id&&document.querySelector('nav.tabs button[data-tab="'+s.id+'"]'))return s.id;
+    const b=document.querySelector("nav.tabs button.active");return (b&&b.dataset.tab)||"riepilogo";
+  }
   function renderAll(){
     if(!cur)return;
     Object.keys(RENDER_TAB).forEach(x=>_tabSporchi.add(x));
@@ -453,7 +463,7 @@
         ${cliNome?`<span>👤 ${esc(cliNome)}</span>`:""}
         ${opNome?`<span>👷 ${esc(opNome)}</span>`:""}
         ${dove?`<span>📍 ${esc(dove)}${(()=>{try{const k=typeof mpKmDi==="function"?mpKmDi(l):null;return k!=null?` · <b class="km-uff" title="Distanza dall'ufficio, in linea d'aria">${esc(mpKmTesto(k))}</b>`:"";}catch(e){return "";}})()}</span>`:""}
-        <span>📅 ${fdate(l.data_prevista)}</span>
+        <span>📅 ${l.data_prevista?fdate(l.data_prevista):"Senza data"}</span>
         ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}

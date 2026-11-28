@@ -163,7 +163,7 @@
       const righeTot=[["Compenso",cp.compenso,false]];
       if(cp.cassa)   righeTot.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
       if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
-      righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
+      { const _in=parcImpNome(cp,(azLetta||{}).regime_fiscale==="RF19"); if(_in)righeTot.push([_in,cp.imponibile,false]); }
       if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
       /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
       if(cp.ritenuta)righeTot.push(["Totale documento",cp.documento,false,true]);
@@ -249,7 +249,9 @@
     doc.setFontSize(7.5);doc.setTextColor(140);
     const ivaIndicata=(!isParcella&&p.iva_perc!=null&&p.iva_perc!=="");
     doc.text(isParcella
-      ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente è sostituto d'imposta."
+      ? (((azLetta||{}).regime_fiscale==="RF19")
+        ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. Compenso senza IVA e senza ritenuta d'acconto: regime forfettario (art. 1, commi 54-89, L. 190/2014)."
+        : "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente è sostituto d'imposta.")
       : (ivaIndicata
         ? "Preventivo non vincolante, salvo diversa indicazione nelle note. I prezzi delle singole voci sono al netto dell'IVA; il totale sopra riportato è comprensivo di IVA al "+(+p.iva_perc||0)+"%."
         : (((azLetta||{}).regime_fiscale==="RF19")
@@ -411,7 +413,7 @@
       +  (cp.cassa?riga("Cassa previdenziale",cp.cassa):"")
       +  (cp.spese?riga("Spese (bolli, diritti)",cp.spese):"")
       +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
-      +  riga(cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile)
+      +  (parcImpNome(cp,az.regime_fiscale==="RF19")?riga(parcImpNome(cp,az.regime_fiscale==="RF19"),cp.imponibile):"")
       +  (cp.iva?riga(cp.spese?("IVA (su "+eur2(cp.baseIva)+")"):"IVA",cp.iva):"")
       +  (cp.ritenuta?riga("<strong>Totale documento</strong>",cp.documento):"")
       +  (cp.ritenuta?riga("Ritenuta d\'acconto",cp.ritenuta,true):"")
@@ -560,7 +562,7 @@
     const vociC=[["Compenso",cp.compenso,false]];
     if(cp.cassa)   vociC.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
     if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
-    vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
+    { const _in=parcImpNome(cp,(az||{}).regime_fiscale==="RF19"); if(_in)vociC.push([_in,cp.imponibile,false]); }
     if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
     /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
     if(cp.ritenuta)vociC.push(["Totale documento",cp.documento,false,true]);

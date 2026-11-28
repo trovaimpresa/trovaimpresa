@@ -904,8 +904,11 @@
       id:"ds", box:"#ds-list",
       viste:"#ds-viste", visteDef:DS_VISTE, vista:dsFilter, conta:conta, azioneVista:"ds-filtro",
       vuoto:tabVuoto(
-        dsCache.length?"Nessuna richiesta con questo filtro":"Ancora nessuna richiesta dal sito",
-        dsCache.length?"Prova a cambiare vista qui sopra."
+        /* 28 nov 2026 (giro nuovo, sessione 7): «Da fare» vuoto con richieste
+           gia' fatte vuol dire che hai risposto a tutte, non «filtro sbagliato». */
+        (dsCache.length&&dsFilter==="da_fare")?"Hai risposto a tutte le richieste":(dsCache.length?"Nessuna richiesta con questo filtro":"Ancora nessuna richiesta dal sito"),
+        (dsCache.length&&dsFilter==="da_fare")?"Quelle già fatte le trovi in «Fatte»."
+        :dsCache.length?"Prova a cambiare vista qui sopra."
           :"Quando un cliente ti scrive dalla tua pagina su TrovaImpresa, la richiesta compare qui dentro: chi ha scritto, cosa gli serve e i suoi contatti. Da qui gli fai il preventivo con un clic.",
         _SVGV+'<path d="M3 12h4l2 5 4-13 2 8h6"/></svg>',
         (!dsCache.length&&dsMieIds.length)?{t:"Guarda la tua pagina",a:"ds-mia-pagina"}:null),

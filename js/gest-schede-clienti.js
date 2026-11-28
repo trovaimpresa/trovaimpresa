@@ -370,7 +370,7 @@
     let L=lavFiltra(TUTTI,filter.vista,oggi);
     /* 19 nov 2026 (sì di Alex) — studio tecnico: filtro per «A che punto sta» */
     if(ruoloUtente==='professionista'&&filter.pstato){
-      L=L.filter(l=>(l.pratica_stato||"da_preparare")===filter.pstato);
+      L=L.filter(l=>_praPunto(l)===filter.pstato);
     }
     if(filter.q){
       const q=filter.q.toLowerCase();
@@ -438,16 +438,36 @@
      Pratiche: Da preparare · Depositata · In istruttoria · Integrazioni… col
      numero. Conta le pratiche del filtro di sopra (Tutte, Prossime…). Esce
      solo allo studio e solo se c'e' almeno una pratica. */
+  /* 27 nov 2026 (giro nuovo, sessione 7) — una pratica FATTA rimasta su «Da
+     preparare» (nessuno ha cambiato «A che punto sta») non e' da preparare:
+     non si conta li'. Resta in «Tutte». */
+  function _praPunto(l){
+    const k=l.pratica_stato||"da_preparare";
+    return (l.stato==="fatto"&&k==="da_preparare")?null:k;
+  }
   function lavPstati(base){
     const viste=$("#lav-viste"); if(!viste)return;
     let box=$("#lav-pstati");
     if(!base||!base.length&&!filter.pstato){ if(box)box.remove(); return; }
     if(!box){ box=document.createElement("div"); box.id="lav-pstati"; box.className="lav-pstati"; viste.insertAdjacentElement("afterend",box); }
-    const conta={}; base.forEach(l=>{const k=l.pratica_stato||"da_preparare";conta[k]=(conta[k]||0)+1;});
+    const conta={}; base.forEach(l=>{const k=_praPunto(l);if(k)conta[k]=(conta[k]||0)+1;});
     const btn=(k,lab,n)=>`<button class="vista${(filter.pstato||"")===k?" on":""}" data-action="lav-pstato" data-v="${k}">${esc(lab)}${n?`<span class="v-cnt${k==="integrazioni"?" err":""}">${n}</span>`:""}</button>`;
+    const _st=PRATICA_STATI.filter(st=>conta[st[0]]||filter.pstato===st[0]);
+    /* 28 nov 2026 (giro nuovo, sessione 7) — sul telefono i bottoni andavano su
+       due righe e le pratiche cominciavano dopo una schermata intera di filtri:
+       li' c'e' una tendina sola (le classi decidono quale si vede). */
+    const _tot=Object.values(conta).reduce((a,b)=>a+b,0);
+    const sel='<select class="lav-pstati-sel" aria-label="A che punto sta">'
+      +'<option value="">Tutte'+(_tot?" ("+_tot+")":"")+'</option>'
+      +_st.map(st=>`<option value="${st[0]}"${(filter.pstato||"")===st[0]?" selected":""}>${esc(st[1])}${conta[st[0]]?" ("+conta[st[0]]+")":""}</option>`).join("")
+      +'</select>';
     box.innerHTML='<span class="lav-pstati-t">A che punto sta</span>'
-      +btn("","Tutte",0)
-      +PRATICA_STATI.filter(st=>conta[st[0]]||filter.pstato===st[0]).map(st=>btn(st[0],st[1],conta[st[0]]||0)).join("");
+      +'<span class="lav-pstati-bt">'+btn("","Tutte",0)
+      +_st.map(st=>btn(st[0],st[1],conta[st[0]]||0)).join("")+'</span>'+sel;
+    const _s=box.querySelector(".lav-pstati-sel");
+    if(_s)_s.addEventListener("change",function(){
+      const b=box.querySelector('.lav-pstati-bt [data-v="'+this.value+'"]'); if(b)b.click();
+    });
   }
 
   /* ⚠️ i due conti qui sotto NON sono riscritti: chiamano lavFiltra, la

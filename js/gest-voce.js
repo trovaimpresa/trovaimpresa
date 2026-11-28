@@ -232,7 +232,10 @@
       if (nuovo + h > H * 0.75) return basso;   /* non c'e' posto sopra: resta dov'era */
       b = nuovo;
     }
-    return b;
+    /* 27 nov 2026 (giro nuovo, sessione 7) — se dopo 4 salti copre ancora
+       qualcosa (Calendario: ogni giorno e' cliccabile) si torna giu': prima
+       saliva di casella in casella e finiva sopra la domenica 1. */
+    return copreQualcosa(H - b - h - 4, H - b + 4, sx, dx) ? basso : b;
   }
   function posiziona() {
     var av = el(PAG === 'op' ? 'app' : 'appview');
