@@ -1,6 +1,6 @@
 /* ============================================================
    js/avvisi-clienti.js — 27 ottobre 2026
-   Il riquadro blu «Sei un cliente e non hai trovato quello che cercavi?»
+   Il riquadro blu «Avvisami quando arriva» (prima: «Sei un cliente e non hai trovato…»)
    sotto i risultati di cerca-imprese / cerca-artigiani / cerca-professionisti.
 
    Si mette con:  <script src="/js/avvisi-clienti.js" data-tipo="artigiano" defer></script>
@@ -86,7 +86,7 @@
     box.innerHTML =
       '<div class="avvisi-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>' +
       '<div class="avvisi-testo">' +
-        '<h3>Sei un cliente e non hai trovato quello che cercavi?</h3>' +
+        '<h3>Avvisami quando arriva</h3>' +
         (MESTIERE
           ? '<p>Iscriviti gratis: ogni volta che arriva una nuova impresa o professionista per <b style="color:#ffb35c">' + esc(MESTIERE.etichetta) + '</b> nella tua città, ti avvisiamo noi.</p>'
           : '<p>Iscriviti gratis: scegli città e lavoro, e quando arriva una nuova impresa o professionista ti avvisiamo noi.</p>') +
