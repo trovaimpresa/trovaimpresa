@@ -5,14 +5,15 @@
 // indirizzo OGNI ORA: /.netlify/functions/fb-coda?chiave=...
 // Sono le ore a decidere il turno, e ogni post esce una volta sola:
 //   dalle 8 alle 12  → Vetrina 1 + nuovi iscritti, subappalti, offerte
-//   dalle 13 alle 18 → Vetrina 2 + il marchio del giorno
+//   dalle 13 alle 18 → Vetrina 2 + il marchio del giorno + una parte del sito
+//                      (forum, subappalti, offerte, candidature… — 28 nov 2026)
 //   dalle 19 alle 21 → Vetrina 3 + il post del gestionale del giorno
 //   di notte (22-7)  → niente
 //
 // Ogni post consegnato si scrive in fb_pubblicati: se Make richiama, quel
 // post non torna (niente doppioni sulla pagina).
 // ⛔ Il gruppo NO: Facebook non lascia pubblicare nei gruppi in automatico.
-const { SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale } = require('./lib/fb-testi');
+const { SITO, marchioDelGiorno, gestionaleDelGiorno, testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, sezioneDelGiorno, testoSezione } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -69,6 +70,8 @@ exports.handler = async (event) => {
     } else if (turno === 2) {
       const m = testoMarchio(marchioDelGiorno());
       if (m) post.push({ chiave: `mar:${giorno}`, ...m });
+      const s = testoSezione(sezioneDelGiorno());
+      if (s) post.push({ chiave: `sit:${giorno}`, ...s });
     } else {
       const g = testoGestionale(gestionaleDelGiorno());
       if (g) post.push({ chiave: `ges:${giorno}`, ...g });

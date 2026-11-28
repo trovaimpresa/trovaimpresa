@@ -4,7 +4,7 @@
 // Legge solo cose GIA' pubbliche: subappalti attivi, offerte attive, imprese
 // della vista imprese_pubbliche (che esclude prove, email non confermate e
 // vetrine spente). Non scrive niente.
-const { testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale } = require('./lib/fb-testi');
+const { testoVetrina, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, testoGestionale, testoSezione } = require('./lib/fb-testi');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -32,6 +32,10 @@ exports.handler = async (event) => {
   if (t === 'mar') {
     const post = testoMarchio(id);
     return post ? risposta(200, post) : risposta(404, { errore: 'Marchio non trovato.' });
+  }
+  if (t === 'sit') {
+    const post = testoSezione(id);
+    return post ? risposta(200, post) : risposta(404, { errore: 'Post del sito non trovato.' });
   }
   if (t === 'ges') {
     const post = testoGestionale(id);

@@ -180,6 +180,62 @@ function testoGestionale(chiave) {
   return { titolo: `Gestionale — ${x.titolo}`, testo: righe.join('\n'), link };
 }
 
+// 28 nov 2026 (Alex: «da oggi pubblichiamo anche qualcosa che riguarda il mio
+// sito, il gestionale, il forum, il subappalto, lavori offerte e candidature»).
+// Un post IN PIU' alle 13, deciso dal GIORNO DELLA SETTIMANA (Alex: «giovedì
+// unisci sub offerte e candidature così venerdì e sabato continuo con sito e
+// gestionale»):
+//   lun sito (per chi cerca)   mar gestionale        mer forum (chiedi)
+//   gio lavoro: subappalti + offerte + candidature, in un post solo
+//   ven sito (per chi lavora)  sab gestionale (2ª)   dom forum (rispondi)
+// Il post «gestionale del giorno» delle 19 resta com'e' (una funzione a giro).
+// ⛔ Scrivere solo cose che il sito fa DAVVERO oggi.
+const SEZIONI = {
+  sito_clienti: { titolo: 'Il sito — per chi cerca', pagina: '/', tag: '#ristrutturazione #casa',
+    righe: ['🏠 Devi fare dei lavori in casa?', 'Su TrovaImpresa trovi imprese, artigiani e professionisti della tua città.', 'Guardi le foto dei loro lavori e li contatti direttamente: nessun intermediario.', 'Gratis, senza registrarti.'],
+    invito: '👉 Cerca nella tua città:' },
+  gestionale: { titolo: 'Il gestionale gratis', pagina: '/gestionale', tag: '#gestionale #imprese',
+    righe: ['📱 Il gestionale per chi lavora in edilizia, gratis', 'Preventivi, fatture, cantieri, operai e scadenze in un posto solo, anche dal telefono.', 'Lo hai gratis per sempre iscrivendoti a TrovaImpresa, senza carta di credito.'],
+    invito: '👉 Scopri il gestionale:' },
+  forum_clienti: { titolo: 'Il forum — chiedi', pagina: '/forum', tag: '#forum #casa',
+    righe: ['💬 Hai un dubbio sui lavori di casa?', 'Scrivilo nel Forum Edilizia, anche con una foto.', 'Ti rispondono le imprese e gli artigiani della tua zona.', 'Gratis, senza registrarti.'],
+    invito: '👉 Fai la tua domanda:' },
+  lavoro: { titolo: 'Subappalti, offerte e candidature', pagina: '/lavoro-edilizia', tag: '#subappalti #lavoro #offertedilavoro',
+    righe: ['👷 Lavoro in edilizia, tutto in un posto:', '🏗️ Subappalti: imprese che cercano una squadra, e squadre libere.', '💼 Offerte di lavoro: muratori, manovali, elettricisti, tecnici.', '🙋 Candidature: chi cerca lavoro carica il CV e le imprese lo trovano.', 'Pubblichi e guardi gratis, contatti diretti senza intermediari.'],
+    invito: '👉 Subappalti e offerte di lavoro:' },
+  sito_imprese: { titolo: 'Il sito — per chi lavora', pagina: '/iscriviti', tag: '#artigiani #imprese',
+    righe: ['🏗️ Hai un\'impresa o sei un artigiano?', 'Su TrovaImpresa hai la tua vetrina con le foto dei tuoi lavori: i clienti della tua zona ti trovano e ti scrivono.', 'In più il gestionale e il forum.', 'Tutto gratis, senza carta di credito.'],
+    invito: '👉 Iscriviti gratis:' },
+  gestionale_2: { titolo: 'Il gestionale — dal cantiere', pagina: '/prova-il-gestionale', tag: '#gestionale #cantiere',
+    righe: ['🏗️ Basta fogli e quaderni in furgone', 'Con il gestionale di TrovaImpresa il preventivo lo fai dal telefono, in cantiere.', 'Il cliente lo firma da un link, e dal preventivo nasce la fattura.', 'Gratis per chi si iscrive.'],
+    invito: '👉 Provalo:' },
+  forum_imprese: { titolo: 'Il forum — rispondi', pagina: '/forum', tag: '#forum #artigiani',
+    righe: ['💬 Nel Forum Edilizia ci sono persone che chiedono un consiglio sui lavori di casa.', 'Rispondi tu: chi legge vede chi sei e cosa sai fare.', 'È un modo gratis per farti conoscere da nuovi clienti.'],
+    invito: '👉 Leggi le domande:' }
+};
+// indice = giorno della settimana a Roma (0 = domenica)
+const SETTIMANA = ['forum_imprese', 'sito_clienti', 'gestionale', 'forum_clienti', 'lavoro', 'sito_imprese', 'gestionale_2'];
+const GIORNI = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+function sezioneDelGiorno(d = new Date()) {
+  const g = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'Europe/Rome' }).format(d);
+  return SETTIMANA[GIORNI[g]];
+}
+function testoSezione(chiave) {
+  const x = SEZIONI[chiave];
+  if (!x) return null;
+  const link = x.pagina === '/' ? SITO : SITO + x.pagina;
+  const righe = [
+    ...x.righe,
+    '',
+    // il link vero in fondo, prima degli hashtag (vedi la nota del 23 nov)
+    x.invito,
+    link,
+    '',
+    `#edilizia ${x.tag} #trovaimpresa`
+  ];
+  return { titolo: `TrovaImpresa — ${x.titolo}`, testo: righe.join('\n'), link };
+}
+
 // 23 nov 2026 (Alex): la VETRINA — ogni giorno un'impresa con le foto dei suoi
 // lavori, scelta a turno da fb_vetrina_del_giorno() su Supabase. Regalo a
 // tutti fino al 31/12/2026, poi solo a chi ha uno spazio pagato.
@@ -206,4 +262,4 @@ function testoVetrina(i, foto) {
   return { titolo: `Vetrina — ${nome || 'senza nome'}`, testo: righe.filter(r => r !== null).join('\n'), link, foto: foto || [] };
 }
 
-module.exports = { testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale };
+module.exports = { testoVetrina, SITO, MARCHI, GIRO, marchioDelGiorno, testoSubappalto, testoOfferta, testoIscritto, testoMarchio, GESTIONALE, gestionaleDelGiorno, testoGestionale, SEZIONI, sezioneDelGiorno, testoSezione };
